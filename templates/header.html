@@ -1,0 +1,47 @@
+{% load static %}
+<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
+</button>
+<a class="c-header-brand d-lg-none c-header-brand-sm-up-center" href="#">
+  <i class="c-icon c-icon-lg cil-menu"></i>
+</a>
+<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar" data-class="c-sidebar-lg-show" responsive="true">
+  <i class="c-icon c-icon-xl mt-2 cil-menu"></i>
+</button>
+<ul class="c-header-nav d-md-down-none">
+  <div id="MyClockDisplay" onload="showTime()"></div>
+</ul>
+<ul class="c-header-nav mfs-auto">
+  <li class="c-header-nav-item px-3 c-d-legacy-none">
+    <button class="c-class-toggler c-header-nav-btn" type="button" id="header-tooltip" data-target="body" data-class="c-dark-theme" data-toggle="c-tooltip" data-placement="bottom" title="Toggle Light/Dark Mode">
+      <svg class="c-icon c-d-dark-none">
+        <use xlink:href="{% static "vendors/@coreui/icons/svg/free.svg#cil-moon" %}"></use>
+      </svg>
+      <svg class="c-icon c-d-default-none">
+        <use xlink:href="{% static "vendors/@coreui/icons/svg/free.svg#cil-sun" %}"></use>
+      </svg>
+    </button>
+  </li>
+</ul>
+<ul class="c-header-nav">
+  <button class="c-class-toggler c-header-nav-btn" type="button" id="header-tooltip" data-target="body" data-class="c-dark-theme" data-toggle="c-tooltip" data-placement="bottom" title="Toggle Light/Dark Mode">
+    <i class="c-icon c-d-dark-none cil-moon"></i>
+    <i class="c-icon c-d-default-none cil-sun"></i>
+  </button>
+  <div>5731 | Yashawantatul Mangalmurti (MIS)</div>
+  <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+      <div class="c-avatar"><i class="c-icon c-icon-lg cil-cog"></i></div>
+    </a>
+    <div class="dropdown-menu dropdown-menu-right pt-0">
+      <div class="dropdown-header bg-light py-2">Settings</div>
+      <a class="dropdown-item" href="#"><i class="c-icon c-icon-lg cil-user mfe-2"></i> Profile</a>
+      <a class="dropdown-item" href="#"><i class="c-icon c-icon-lg cil-list mfe-2"></i> Tasks</a>
+      <a class="dropdown-item" href="#"><i class="c-icon c-icon-lg cil-history mfe-2"></i> History</a>
+      <a class="dropdown-item text-danger" href="#"><i class="c-icon c-icon-lg cil-power-standby mfe-2"></i> Logout</a>
+    </div>
+  </li>
+  <!-- <button class="c-header-toggler c-class-toggler mfe-md-3" type="button" data-target="#aside" data-class="c-sidebar-show">
+    <svg class="c-icon c-icon-lg">
+      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-applications-settings"></use>
+    </svg>
+  </button> -->
+</ul>
