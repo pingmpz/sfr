@@ -1093,8 +1093,8 @@
       }
 
       function validate_new_operation(order_no, new_operation_no, _callback){
-        var current_opration_no = $("#operation_no").val();
-        if(new_operation_no.length != 4 || new_operation_no <= current_opration_no) { //-- NEED FIX
+        var current_operation_no = $("#operation_no").val();
+        if(new_operation_no.length != 4 || new_operation_no <= current_operation_no) { //-- NEED FIX
           _callback(false);
           return;
         } else {
@@ -1102,7 +1102,7 @@
             url: '/validate_new_operation/',
             data: {
               'order_no': order_no,
-              'current_opration_no': current_opration_no,
+              'current_operation_no': current_operation_no,
               'new_operation_no': new_operation_no,
             },
             dataType: 'json',
