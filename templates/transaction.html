@@ -65,9 +65,9 @@
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
-            &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" value="{{orderNo}}"></div>
+            &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
-            <div style="width:15%"><input type="text" class="form-control form-control-sm" maxlength="4" id="sc_operation_no" value="{{operationNo}}"></div>
+            <div style="width:15%"><input type="text" class="form-control form-control-sm" maxlength="4" id="sc_operation_no" autocomplete="off" value="{{operationNo}}"></div>
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm bg-info text-white" onclick="shortcut_search()">GO!</button></div>
           </div>
         </div>
@@ -84,6 +84,8 @@
                   <div class="col-sm-12 col-md-4">
                     <div class="card border-secondary">
                       <div class="card-body">
+                        <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" disabled hidden>
+                        <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" disabled hidden>
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
@@ -243,7 +245,7 @@
                     <div class="row">
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
-                        <button type="button" class="btn btn-lg btn-success small" style="width: 80px" disabled><i class="c-icon c-icon-xl cil-plus"></i><br>Operation</button>
+                        <button type="button" class="btn btn-lg btn-success small" style="width: 80px" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Operation</button>
                         <button type="button" class="btn btn-lg btn-warning text-white small" style="width: 80px" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
                         <button type="button" class="btn btn-lg btn-danger small" style="width: 80px" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
                         <p></p>
@@ -280,7 +282,7 @@
                             <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
                             <br>
                             <h3><strong>THIS OPERATION IS JOINING WITH..</strong></h3>
-                            <h5><a href="/transaction/12345678901234" id="join_order_operation">1234567890-1234</a></h5>
+                            <h5><a href="/transaction/12345678901234">1234567890-1234</a></h5>
                           </div>
                         </div>
                       </div>
@@ -294,24 +296,24 @@
                             <div class="form-group row">
                               <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
                               <div class="col-md-2">
-                                <input class="form-control" type="text" id="mc_no" value="">
+                                <input class="form-control" type="text" id="machine_no" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
-                                <input class="form-control" type="text" id="mc_name" value="" disabled>
+                                <input class="form-control" type="text" id="machine_name" value="" disabled>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='mc_add_button' onclick="add('machine')" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_mo('machine')" disabled>Add</button></div>
                             </div>
                             <div class="form-group row">
                               <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
                               <div class="col-md-2">
-                                <input class="form-control" type="text" id="opr_id" value="">
+                                <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
-                                <input class="form-control" type="text" id="opr_name" value="" disabled>
+                                <input class="form-control" type="text" id="operator_name" value="" disabled>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='opr_add_button' onclick="add('operator')" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='operator_add_button' onclick="add_mo('operator')" disabled>Add</button></div>
                             </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="mc_opr_table">
+                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="mo_table">
                               <thead class="bg-darkslategray">
                                 <tr>
                                   <th>Type</th>
@@ -320,7 +322,7 @@
                                   <th></th>
                                 </tr>
                               </thead>
-                              <tbody id="mc_opr_table_body">
+                              <tbody id="mo_table_body">
                                 <tr id="empty_row">
                                   <td colspan="4">Please add Machine/Operator above.</td>
                                 </tr>
@@ -386,7 +388,7 @@
                                   <div class="form-group row">
                                     <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
                                     <div class="col-md-8">
-                                      <input class="form-control" type="number" id="good_qty" value="0">
+                                      <input class="form-control" type="number" id="good_qty" autocomplete="off" value="0">
                                     </div>
                                   </div>
                                 </div>
@@ -394,7 +396,7 @@
                                   <div class="form-group row">
                                     <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
                                     <div class="col-md-8">
-                                      <input class="form-control" type="number" id="reject_qty" value="0">
+                                      <input class="form-control" type="number" id="reject_qty" autocomplete="off" value="0">
                                     </div>
                                   </div>
                                 </div>
@@ -416,7 +418,7 @@
                                   <div class="form-group row">
                                     <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                                     <div class="col-md-8">
-                                      <input class="form-control" type="text" id="other_reason" disabled>
+                                      <input class="form-control" type="text" id="other_reason" autocomplete="off" disabled>
                                     </div>
                                   </div>
                                 </div>
@@ -479,11 +481,52 @@
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
       <!-- *** MODAL *** -->
+      <div class="modal fade" id="add_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-success" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-plus"></i> Add Operation</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to add new operation ?</h3><br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="add_emp_id" autocomplete="off" value="">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Add Reason</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="add_reason" autocomplete="off" value="">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Operation No</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="add_operation_no" autocomplete="off" maxlength="4" value="">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="add_work_center" autocomplete="off" value="">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-success text-white" type="button" onclick="add()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal fade" id="change_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-warning" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title"><i class="c-icon cil-transfer"></i> Change</h4>
+              <h4 class="modal-title"><i class="c-icon cil-transfer"></i> Change Operation</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -491,24 +534,24 @@
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_emp_id" value="">
+                  <input class="form-control form-control-sm" type="text" id="change_emp_id" autocomplete="off" value="">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Change Reason</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_reason" value="">
+                  <input class="form-control form-control-sm" type="text" id="change_reason" autocomplete="off" value="">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_work_center" value="">
+                  <input class="form-control form-control-sm" type="text" id="change_work_center" autocomplete="off" value="">
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-warning text-white" type="button">Confirm</button>
+              <button class="btn btn-warning text-white" type="button" onclick="change()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -518,7 +561,7 @@
         <div class="modal-dialog modal-danger" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title"><i class="c-icon cil-trash"></i> Delete</h4>
+              <h4 class="modal-title"><i class="c-icon cil-trash"></i> Delete Operation</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -526,18 +569,18 @@
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="delete_emp_id" value="">
+                  <input class="form-control form-control-sm" type="text" id="delete_emp_id" autocomplete="off" value="">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Delete Reason</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="delete_reason" value="">
+                  <input class="form-control form-control-sm" type="text" id="delete_reason" autocomplete="off" value="">
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-danger" type="button">Confirm</button>
+              <button class="btn btn-danger" type="button" onclick="trash()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -673,27 +716,26 @@
       });
 
       //-- MAIN SCRIPT
-      $("#mc_no").on("change", function() {
-        console.log('SEARCHING MACHINE..');
-        $('#mc_name').val('');
-        $('#mc_add_button').prop('disabled', true);
-        var mc_no = $('#mc_no').val();
-        if(isSearchingMachine == false ||mc_no.length >= 4){
+      $("#machine_no").on("change", function() {
+        $('#machine_name').val('');
+        $('#machine_add_button').prop('disabled', true);
+        var machine_no = $('#machine_no').val();
+        if(isSearchingMachine == false ||machine_no.length >= 4){
           isSearchingMachine = true;
           $.ajax({
             url: '/get_machine_data/',
             data: {
-              'mc_no': mc_no,
+              'machine_no': machine_no,
             },
             dataType: 'json',
             success: function (data) {
               if (data.isExist) {
                 currentMachineNo = data.MachineNumber;
                 currentMachineName = data.MachineName;
-                $('#mc_name').val(data.MachineNumber + " | " + data.MachineName);
-                $('#mc_add_button').prop('disabled', false);
+                $('#machine_name').val(data.MachineNumber + " | " + data.MachineName);
+                $('#machine_add_button').prop('disabled', false);
               } else {
-                $('#mc_name').val('');
+                $('#machine_name').val('');
               }
               isSearchingMachine = false;
             }
@@ -701,27 +743,26 @@
         }
       });
 
-      $("#opr_id").on("change", function() {
-        console.log('SEARCHING OPERATOR..');
-        $('#opr_name').val('');
-        $('#opr_add_button').prop('disabled', true);
-        var opr_id = $('#opr_id').val();
-        if(isSearchingOperator == false || opr_id.length >= 4){
+      $("#operator_id").on("change", function() {
+        $('#operator_name').val('');
+        $('#operator_add_button').prop('disabled', true);
+        var operator_id = $('#operator_id').val();
+        if(isSearchingOperator == false || operator_id.length >= 4){
           isSearchingOperator = true;
           $.ajax({
             url: '/get_operator_data/',
             data: {
-              'opr_id': opr_id,
+              'operator_id': operator_id,
             },
             dataType: 'json',
             success: function (data) {
               if (data.isExist) {
                 currentOperatorId = data.EmpID;
                 currentOperatorName = data.EmpName;
-                $('#opr_name').val(data.EmpID + " | " + data.EmpName + " (" + data.Department + ")");
-                $('#opr_add_button').prop('disabled', false);
+                $('#operator_name').val(data.EmpID + " | " + data.EmpName + " (" + data.Department + ")");
+                $('#operator_add_button').prop('disabled', false);
               } else {
-                $('#opr_name').val('');
+                $('#operator_name').val('');
               }
               isSearchingOperator = false;
             }
@@ -729,19 +770,19 @@
         }
       });
 
-      function add(type){
+      function add_mo(type){
         if(type == 'machine'){
           //-- DO SOMETHING
           buildRow(type, currentMachineNo, currentMachineName);
-          $('#mc_no').val('');
-          $('#mc_name').val('');
-          $('#mc_add_button').prop('disabled', true);
+          $('#machine_no').val('');
+          $('#machine_name').val('');
+          $('#machine_add_button').prop('disabled', true);
         } else if (type == 'operator'){
           //-- DO SOMETHING
           buildRow(type, currentOperatorId, currentOperatorName);
-          $('#opr_id').val('');
-          $('#opr_name').val('');
-          $('#opr_add_button').prop('disabled', true);
+          $('#operator_id').val('');
+          $('#operator_name').val('');
+          $('#operator_add_button').prop('disabled', true);
         }
       }
 
@@ -759,12 +800,12 @@
         row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' onclick=operate('delete'," + rowCount + ")>Delete</button> ";
         row += "</td>";
         row += "</tr>";
-        $("#mc_opr_table_body").append(row);
+        $("#mo_table_body").append(row);
         tableRow(1);
       }
 
       function removeRow(row_no){
-        $("table#mc_opr_table tr#row_no_" + row_no).remove();
+        $("table#mo_table tr#row_no_" + row_no).remove();
         tableRow(-1);
       }
 
@@ -803,6 +844,155 @@
           $("#confirm_invalid_text").text("");
           //-- DO SOMETHING
         }
+      }
+
+      //-- ADD OPERATION
+      function add(){
+        var order_no = $("#order_no").val();
+        var emp_id = $("#add_emp_id").val();
+        var reason = $("#add_reason").val();
+        var operation_no = $("#add_operation_no").val();
+        var work_center = $("#add_work_center").val();
+        remove_valid("add_emp_id");
+        remove_valid("add_reason");
+        remove_valid("add_operation_no");
+        remove_valid("add_work_center");
+        validate_operator(emp_id, function(result){
+          if(!result){
+            invalid("add_emp_id");
+          } else if (reason.length == 0){
+            valid("add_emp_id");
+            invalid("add_reason");
+          } else {
+            valid("add_emp_id");
+            valid("add_reason");
+            validate_new_operation(order_no, operation_no, function(result){
+              if(!result){
+                invalid("add_operation_no");
+              } else if (work_center.length == 0){
+                valid("add_operation_no");
+                invalid("add_work_center");
+              } else {
+                valid("add_operation_no");
+                valid("add_work_center");
+                //-- DO SOMETHING
+              }
+           });
+          }
+        });
+      }
+
+      //-- CHANGE OPERATION
+      function change(){
+        var emp_id = $("#change_emp_id").val();
+        var reason = $("#change_reason").val();
+        var work_center = $("#change_work_center").val();
+        remove_valid("change_emp_id");
+        remove_valid("change_reason");
+        remove_valid("change_work_center");
+        validate_operator(emp_id, function(result){
+          if(!result){
+            invalid("change_emp_id");
+          } else if (reason.length == 0){
+            valid("change_emp_id");
+            invalid("change_reason");
+          } else if (work_center.length == 0){
+            valid("change_emp_id");
+            valid("change_reason");
+            invalid("change_work_center");
+          } else {
+            valid("change_emp_id");
+            valid("change_reason");
+            valid("change_work_center");
+            //-- DO SOMETHING
+          }
+        });
+      }
+
+      //-- DELETE OPERATION
+      function trash(){
+        var emp_id = $("#delete_emp_id").val();
+        var reason = $("#delete_reason").val();
+        remove_valid("change_emp_id");
+        remove_valid("delete_reason");
+        validate_operator(emp_id, function(result){
+          if(!result){
+            invalid("delete_emp_id");
+          } else if (reason.length == 0){
+            valid("delete_emp_id");
+            invalid("delete_reason");
+          } else {
+            valid("delete_emp_id");
+            valid("delete_reason");
+            //-- DO SOMETHING
+          }
+        });
+      }
+
+      //-- VALIDATION
+      function validate_operator(emp_id, _callback){
+        if(emp_id.length == 0) {
+          _callback(false);
+          return;
+        }
+        $.ajax({
+          url: '/validate_operator/',
+          data: {
+            'emp_id': emp_id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data.isExist) {
+              _callback(true);
+              return;
+            } else {
+              _callback(false);
+              return;
+            }
+          }
+        });
+      }
+
+      function validate_new_operation(order_no, new_operation_no, _callback){
+        var current_opration_no = $("#operation_no").val();
+        if(new_operation_no.length != 4 || new_operation_no <= current_opration_no) {
+          _callback(false);
+          return;
+        }
+        $.ajax({
+          url: '/validate_new_operation/',
+          data: {
+            'order_no': order_no,
+            'current_opration_no': current_opration_no,
+            'new_operation_no': new_operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data.canAdd) {
+              _callback(true);
+              return;
+            } else {
+              _callback(false);
+              return;
+            }
+          }
+        });
+      }
+
+      //-- VALIDATE CONTROL
+      function remove_valid(input_id){
+        $("#" + input_id).removeClass("is-invalid");
+        $("#" + input_id).removeClass("is-valid");
+      }
+
+      function valid(input_id){
+        $("#" + input_id).addClass("is-valid");
+        $("#" + input_id).removeClass("is-invalid");
+      }
+
+      function invalid(input_id){
+        $("#" + input_id).addClass("is-invalid");
+        $("#" + input_id).removeClass("is-valid");
       }
 
       //-- SHORTCUT SEARCH
@@ -848,19 +1038,33 @@
         });
 
         //-- KET RESTRICT
+        $("#add_operation_no").on("keypress keyup blur",function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+             if ((event.which < 48 || event.which > 57)) {
+                 event.preventDefault();
+             }
+        });
+
+        $("#operator_id").on("keypress keyup blur",function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+             if ((event.which < 48 || event.which > 57)) {
+                 event.preventDefault();
+             }
+        });
+
         $("#good_qty").on("keypress keyup blur",function (event) {
             $(this).val($(this).val().replace(/[^\d].+/, ""));
              if ((event.which < 48 || event.which > 57)) {
                  event.preventDefault();
              }
-         });
+        });
 
-         $("#reject_qty").on("keypress keyup blur",function (event) {
-             $(this).val($(this).val().replace(/[^\d].+/, ""));
-              if ((event.which < 48 || event.which > 57)) {
-                  event.preventDefault();
-              }
-          });
+        $("#reject_qty").on("keypress keyup blur",function (event) {
+           $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
 
         $("#sc_order_no").on("keypress keyup blur",function (event) {
             $(this).val($(this).val().replace(/[^\d].+/, ""));

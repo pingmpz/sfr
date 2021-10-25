@@ -89,12 +89,33 @@ def user_master(request):
 #################################### REQUEST ###################################
 ################################################################################
 
+def validate_operator(request):
+    emp_id = request.GET.get('emp_id')
+    isExist = isExistOperator(emp_id)
+    data = {
+        'isExist': isExist,
+    }
+    return JsonResponse(data)
+
+def validate_new_operation(request):
+    order_no = request.GET.get('order_no')
+    current_opration_no = request.GET.get('current_opration_no')
+    new_operation_no = request.GET.get('new_operation_no')
+    canAdd = False
+    isExist = isExistOperation(order_no, new_operation_no)
+    if isExist == False:
+        canAdd = True
+    data = {
+        'canAdd': canAdd,
+    }
+    return JsonResponse(data)
+
 def get_machine_data(request):
-    mc_no = request.GET.get('mc_no')
+    machine_no = request.GET.get('machine_no')
     isExist = False
     MachineNumber = None
     MachineName = None
-    machine = get_machine(mc_no)
+    machine = get_machine(machine_no)
     if machine != None:
         isExist = True
         MachineNumber = machine.MachineNumber
@@ -107,12 +128,12 @@ def get_machine_data(request):
     return JsonResponse(data)
 
 def get_operator_data(request):
-    opr_id = request.GET.get('opr_id')
+    operator_id = request.GET.get('operator_id')
     isExist = False
     EmpID = None
     EmpName = None
     Department = None
-    operator = get_operator(opr_id)
+    operator = get_operator(operator_id)
     if operator != None:
         isExist = True
         EmpID = operator.EmpID
@@ -154,20 +175,26 @@ def get_operationList(orderNo):
 
 def isExistOrder(orderNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT 1 FROM [SE80_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
+    cursor.execute("SELECT * FROM [SE80_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
     isExist = False
     if len(cursor.fetchall()) > 0:
         isExist = True
-    isExistOrder = len(cursor.fetchall())
     return isExist
 
 def isExistOperation(orderNo, operationNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT 1 FROM [SE80_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
+    cursor.execute("SELECT * FROM [SE80_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
     isExist = False
     if len(cursor.fetchall()) > 0:
         isExist = True
-    isExistOrder = len(cursor.fetchall())
+    return isExist
+
+def isExistOperator(EmpID):
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [User] WHERE EmpID = '" + EmpID + "'")
+    isExist = False
+    if len(cursor.fetchall()) > 0:
+        isExist = True
     return isExist
 
 def get_order(orderNo):
@@ -182,9 +209,9 @@ def get_operation(orderNo, operationNo):
     operation = cursor.fetchall()[0]
     return operation
 
-def get_machine(mc_no):
+def get_machine(machine_no):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [MachineList] WHERE MachineNumber = '" + mc_no + "'")
+    cursor.execute("SELECT * FROM [MachineList] WHERE MachineNumber = '" + machine_no + "'")
     result = cursor.fetchall()
     if(len(result) == 0):
         machine = None
@@ -192,9 +219,9 @@ def get_machine(mc_no):
         machine = result[0]
     return machine
 
-def get_operator(opr_id):
+def get_operator(operator_id):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [User] WHERE EmpID = '" + opr_id + "'")
+    cursor.execute("SELECT * FROM [User] WHERE EmpID = '" + operator_id + "'")
     result = cursor.fetchall()
     if(len(result) == 0):
         operator = None
