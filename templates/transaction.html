@@ -87,8 +87,8 @@
                   <div class="col-sm-12 col-md-4">
                     <div class="card border-secondary">
                       <div class="card-body">
-                        <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" disabled hidden>
-                        <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" disabled hidden>
+                        <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly hidden>
+                        <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" readonly hidden>
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
@@ -102,62 +102,62 @@
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenter}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Plan Start</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|date:'d-m-Y'}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|date:'d-m-Y'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Plan Finish</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|date:'d-m-Y'}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|date:'d-m-Y'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="est_set_time" value="{{operation.EstimateSetTime}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="est_set_time" value="{{operation.EstimateSetTime}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime}}" readonly>
                                 </div>
                               </div>
                               <hr>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-info small"><strong>Process Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="process_qty" value="0" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="process_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-warning small"><strong>Remain Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="remain_qty" value="0" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="remain_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-success small"><strong>Accepted Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="accepted_qty" value="0" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="accepted_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-danger small"><strong>Rejected Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="rejected_qty" value="0" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="rejected_qty" value="0" readonly>
                                 </div>
                               </div>
                               <!-- <div class="form-group row text-center">
@@ -172,43 +172,43 @@
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Customer PO No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Part No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Part Name</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Material Code</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="material_code" value="{{order.FG_MaterialCode}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="material_code" value="{{order.FG_MaterialCode}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Drawing No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Prod. Order Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right small"><strong>Request Date</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date}}" disabled>
+                                  <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date}}" readonly>
                                 </div>
                               </div>
                             </div>
@@ -302,7 +302,7 @@
                                 <input class="form-control" type="text" id="machine_no" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
-                                <input class="form-control" type="text" id="machine_name" value="" disabled>
+                                <input class="form-control" type="text" id="machine_name" value="" readonly>
                               </div>
                               <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_mo('machine')" disabled>Add</button></div>
                             </div>
@@ -312,7 +312,7 @@
                                 <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
-                                <input class="form-control" type="text" id="operator_name" value="" disabled>
+                                <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
                               <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='operator_add_button' onclick="add_mo('operator')" disabled>Add</button></div>
                             </div>
@@ -421,7 +421,7 @@
                                   <div class="form-group row">
                                     <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                                     <div class="col-md-8">
-                                      <input class="form-control" type="text" id="other_reason" autocomplete="off" disabled>
+                                      <input class="form-control" type="text" id="other_reason" autocomplete="off" readonly>
                                     </div>
                                   </div>
                                 </div>
@@ -521,36 +521,48 @@
                 <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
                 <div class="col-md-8">
                   <select class="form-control form-control-sm" id="add_control_key" name="">
-                    <option value="PP01" selected>PP01</option>
-                    <option value="PP02">PP02</option>
+                    <option value="PP01" selected>PP01 (Internal Process)</option>
+                    <option value="PP02">PP02 (External Process)</option>
                   </select>
                 </div>
               </div>
-              <div id="add_more" hidden>
+              <div id="add_pp01">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="add_est_set_time" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="add_est_operation_time" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off" value="">
+                  </div>
+                </div>
+              </div>
+              <div id="add_pp02" hidden>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_pdt" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="text" id="add_pdt" autocomplete="off" value="7" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="add_purchasing_org" name="">
-                      <option value="1000">1000</option>
-                      <option value="2000">2000</option>
-                      <option value="3000" selected>3000</option>
-                      <option value="4000">4000</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="add_purchasing_org" autocomplete="off" value="3000" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="add_cost_element" name="">
-                      <option value="0" selected>12345678</option>
-                      <option value="1">11111111</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="add_cost_element" autocomplete="off" value="51201102" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -558,17 +570,14 @@
                   <div class="col-md-8">
                     <select class="form-control form-control-sm" id="add_mat_group" name="">
                       <option value="0" selected>ZSERVICE</option>
-                      <option value="1">Z</option>
+                      <option value="1">Z????</option>
                     </select>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="add_purchasing_group" name="">
-                      <option value="0" selected>345</option>
-                      <option value="1">123</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="add_purchasing_group" autocomplete="off" value="345" readonly>
                   </div>
                 </div>
               </div>
@@ -611,36 +620,48 @@
                 <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
                 <div class="col-md-8">
                   <select class="form-control form-control-sm" id="change_control_key" name="">
-                    <option value="PP01" selected>PP01</option>
-                    <option value="PP02">PP02</option>
+                    <option value="PP01" selected>PP01 (Internal Process)</option>
+                    <option value="PP02">PP02 (External Process)</option>
                   </select>
                 </div>
               </div>
-              <div id="change_more" hidden>
+              <div id="change_pp01">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="change_est_set_time" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="change_est_operation_time" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off" value="">
+                  </div>
+                </div>
+              </div>
+              <div id="change_pp02" hidden>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_pdt" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="text" id="change_pdt" autocomplete="off" value="7" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="change_purchasing_org" name="">
-                      <option value="1000">1000</option>
-                      <option value="2000">2000</option>
-                      <option value="3000" selected>3000</option>
-                      <option value="4000">4000</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="change_purchasing_org" autocomplete="off" value="3000" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="change_cost_element" name="">
-                      <option value="0" selected>12345678</option>
-                      <option value="1">11111111</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="change_cost_element" autocomplete="off" value="51201102" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -648,17 +669,14 @@
                   <div class="col-md-8">
                     <select class="form-control form-control-sm" id="change_mat_group" name="">
                       <option value="0" selected>ZSERVICE</option>
-                      <option value="1">Z</option>
+                      <option value="1">Z????</option>
                     </select>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
                   <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="change_purchasing_group" name="">
-                      <option value="0" selected>345</option>
-                      <option value="1">123</option>
-                    </select>
+                    <input class="form-control form-control-sm" type="text" id="change_purchasing_group" autocomplete="off" value="345" readonly>
                   </div>
                 </div>
               </div>
@@ -1118,15 +1136,17 @@
 
       //-- DYNAMIC INPUT
       $('#reason').on("change", function() {
-        ($('#reason').val() == 0)? $("#other_reason").prop("disabled", false): $("#other_reason").prop("disabled", true);
+        ($('#reason').val() == 0)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
       });
 
       $('#add_control_key').on("change", function() {
-        ($('#add_control_key').val() == "PP01")? $("#add_more").prop("hidden", true): $("#add_more").prop("hidden", false);
+        ($('#add_control_key').val() == "PP01")? $("#add_pp01").prop("hidden", false): $("#add_pp01").prop("hidden", true);
+        ($('#add_control_key').val() == "PP01")? $("#add_pp02").prop("hidden", true): $("#add_pp02").prop("hidden", false);
       });
 
       $('#change_control_key').on("change", function() {
-        ($('#change_control_key').val() == "PP01")? $("#change_more").prop("hidden", true): $("#change_more").prop("hidden", false);
+        ($('#change_control_key').val() == "PP01")? $("#change_pp01").prop("hidden", false): $("#change_pp01").prop("hidden", true);
+        ($('#change_control_key').val() == "PP01")? $("#change_pp02").prop("hidden", true): $("#change_pp02").prop("hidden", false);
       });
 
       //-- KET RESTRICT
