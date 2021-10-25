@@ -40,6 +40,9 @@
           background-color:#dbf2f2;
           color:black;
       }
+      .my-btn {
+        width: 90px;
+      }
     </style>
   </head>
   <body class="c-app c-no-layout-transition">
@@ -245,17 +248,17 @@
                     <div class="row">
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
-                        <button type="button" class="btn btn-lg btn-success small" style="width: 80px" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Operation</button>
-                        <button type="button" class="btn btn-lg btn-warning text-white small" style="width: 80px" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
-                        <button type="button" class="btn btn-lg btn-danger small" style="width: 80px" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
+                        <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        <button type="button" class="btn btn-lg btn-primary small" style="width: 80px" disabled><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</button>
-                        <button type="button" class="btn btn-lg btn-danger small" style="width: 80px" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break</button>
-                        <button type="button" class="btn btn-lg btn-primary text-white small" style="width: 80px" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
-                        <button type="button" class="btn btn-lg btn-info text-white small" style="width: 80px" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
-                        <a href="/transaction/0" class="btn btn-lg btn-dark small" style="width: 80px"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
+                        <button type="button" class="btn btn-lg btn-primary my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</button>
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
+                        <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
+                        <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
+                        <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
                       {% if hasNoProcess == True %}
@@ -514,6 +517,61 @@
                   <input class="form-control form-control-sm" type="text" id="add_work_center" autocomplete="off" value="">
                 </div>
               </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="add_control_key" name="">
+                    <option value="PP01" selected>PP01</option>
+                    <option value="PP02">PP02</option>
+                  </select>
+                </div>
+              </div>
+              <div id="add_more" hidden>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="text" id="add_pdt" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="add_purchasing_org" name="">
+                      <option value="1000">1000</option>
+                      <option value="2000">2000</option>
+                      <option value="3000" selected>3000</option>
+                      <option value="4000">4000</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="add_cost_element" name="">
+                      <option value="0" selected>12345678</option>
+                      <option value="1">11111111</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="add_mat_group" name="">
+                      <option value="0" selected>ZSERVICE</option>
+                      <option value="1">Z</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="add_purchasing_group" name="">
+                      <option value="0" selected>345</option>
+                      <option value="1">123</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <button class="btn btn-success text-white" type="button" onclick="add()">Confirm</button>
@@ -547,6 +605,61 @@
                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                 <div class="col-md-8">
                   <input class="form-control form-control-sm" type="text" id="change_work_center" autocomplete="off" value="">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="change_control_key" name="">
+                    <option value="PP01" selected>PP01</option>
+                    <option value="PP02">PP02</option>
+                  </select>
+                </div>
+              </div>
+              <div id="change_more" hidden>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="text" id="change_pdt" autocomplete="off" value="">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="change_purchasing_org" name="">
+                      <option value="1000">1000</option>
+                      <option value="2000">2000</option>
+                      <option value="3000" selected>3000</option>
+                      <option value="4000">4000</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="change_cost_element" name="">
+                      <option value="0" selected>12345678</option>
+                      <option value="1">11111111</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="change_mat_group" name="">
+                      <option value="0" selected>ZSERVICE</option>
+                      <option value="1">Z</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
+                  <div class="col-md-8">
+                    <select class="form-control form-control-sm" id="change_purchasing_group" name="">
+                      <option value="0" selected>345</option>
+                      <option value="1">123</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -704,7 +817,7 @@
         }, 2000);
       });
 
-      //-- INITAILIZE
+      //-- INITIALIZE
       var isSearchingMachine = false;
       var isSearchingOperator = false;
       var currentMachineNo = null;
@@ -720,7 +833,7 @@
         $('#machine_name').val('');
         $('#machine_add_button').prop('disabled', true);
         var machine_no = $('#machine_no').val();
-        if(isSearchingMachine == false ||machine_no.length >= 4){
+        if(isSearchingMachine == false || machine_no.length >= 4){
           isSearchingMachine = true;
           $.ajax({
             url: '/get_machine_data/',
@@ -811,8 +924,7 @@
 
       function tableRow(count){
         rowCount += count;
-        if(rowCount == 0) $('#empty_row').prop('hidden', false);
-        else $('#empty_row').prop('hidden', true);
+        (rowCount == 0)? $('#empty_row').prop('hidden', false): $('#empty_row').prop('hidden', true);
       }
 
       function operate(type, row_no){
@@ -832,15 +944,11 @@
         var confirm_machine = $('#confirm_machine').val();
         var reason = $('#reason').val();
         var other_reason = $('#other_reason').val();
-        if(confirm_operator == "-1") {
-          $("#confirm_invalid_text").text("Please select operator");
-        } else if(good_qty <= 0 && reject_qty <= 0){
-          $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
-        } else if(remain_qty < good_qty + reject_qty){
-          $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
-        } else if(reason == 0 && other_reason == "") {
-          $("#confirm_invalid_text").text("Please fill reason in other reason box");
-        } else {
+        if(confirm_operator == "-1") $("#confirm_invalid_text").text("Please select operator");
+        else if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
+        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
+        else if(reason == 0 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
+        else {
           $("#confirm_invalid_text").text("");
           //-- DO SOMETHING
         }
@@ -853,10 +961,7 @@
         var reason = $("#add_reason").val();
         var operation_no = $("#add_operation_no").val();
         var work_center = $("#add_work_center").val();
-        remove_valid("add_emp_id");
-        remove_valid("add_reason");
-        remove_valid("add_operation_no");
-        remove_valid("add_work_center");
+        remove_valid_many(["add_emp_id","add_reason","add_operation_no","add_work_center"]);
         validate_operator(emp_id, function(result){
           if(!result){
             invalid("add_emp_id");
@@ -864,8 +969,7 @@
             valid("add_emp_id");
             invalid("add_reason");
           } else {
-            valid("add_emp_id");
-            valid("add_reason");
+            valid_many(["add_emp_id","add_reason"]);
             validate_new_operation(order_no, operation_no, function(result){
               if(!result){
                 invalid("add_operation_no");
@@ -873,8 +977,7 @@
                 valid("add_operation_no");
                 invalid("add_work_center");
               } else {
-                valid("add_operation_no");
-                valid("add_work_center");
+                valid_many(["add_operation_no","add_work_center"]);
                 //-- DO SOMETHING
               }
            });
@@ -887,9 +990,7 @@
         var emp_id = $("#change_emp_id").val();
         var reason = $("#change_reason").val();
         var work_center = $("#change_work_center").val();
-        remove_valid("change_emp_id");
-        remove_valid("change_reason");
-        remove_valid("change_work_center");
+        remove_valid_many(["change_emp_id","change_reason","change_work_center"]);
         validate_operator(emp_id, function(result){
           if(!result){
             invalid("change_emp_id");
@@ -897,13 +998,10 @@
             valid("change_emp_id");
             invalid("change_reason");
           } else if (work_center.length == 0){
-            valid("change_emp_id");
-            valid("change_reason");
+            valid_many(["change_emp_id","change_reason"]);
             invalid("change_work_center");
           } else {
-            valid("change_emp_id");
-            valid("change_reason");
-            valid("change_work_center");
+            valid_many(["change_emp_id","change_reason","change_work_center"]);
             //-- DO SOMETHING
           }
         });
@@ -913,8 +1011,7 @@
       function trash(){
         var emp_id = $("#delete_emp_id").val();
         var reason = $("#delete_reason").val();
-        remove_valid("change_emp_id");
-        remove_valid("delete_reason");
+        remove_valid_many(["change_emp_id", "delete_reason"]);
         validate_operator(emp_id, function(result){
           if(!result){
             invalid("delete_emp_id");
@@ -922,8 +1019,7 @@
             valid("delete_emp_id");
             invalid("delete_reason");
           } else {
-            valid("delete_emp_id");
-            valid("delete_reason");
+            valid_many(["delete_emp_id","delete_reason"]);
             //-- DO SOMETHING
           }
         });
@@ -934,52 +1030,77 @@
         if(emp_id.length == 0) {
           _callback(false);
           return;
-        }
-        $.ajax({
-          url: '/validate_operator/',
-          data: {
-            'emp_id': emp_id,
-          },
-          dataType: 'json',
-          success: function (data) {
-            if (data.isExist) {
-              _callback(true);
-              return;
-            } else {
-              _callback(false);
-              return;
+        } else {
+          $.ajax({
+            url: '/validate_operator/',
+            data: {
+              'emp_id': emp_id,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.isExist) {
+                _callback(true);
+                return;
+              } else {
+                _callback(false);
+                return;
+              }
             }
-          }
-        });
+          });
+        }
       }
 
       function validate_new_operation(order_no, new_operation_no, _callback){
         var current_opration_no = $("#operation_no").val();
-        if(new_operation_no.length != 4 || new_operation_no <= current_opration_no) {
+        if(new_operation_no.length != 4 || new_operation_no <= current_opration_no) { //-- NEED FIX
           _callback(false);
           return;
-        }
-        $.ajax({
-          url: '/validate_new_operation/',
-          data: {
-            'order_no': order_no,
-            'current_opration_no': current_opration_no,
-            'new_operation_no': new_operation_no,
-          },
-          dataType: 'json',
-          success: function (data) {
-            if (data.canAdd) {
-              _callback(true);
-              return;
-            } else {
-              _callback(false);
-              return;
+        } else {
+          $.ajax({
+            url: '/validate_new_operation/',
+            data: {
+              'order_no': order_no,
+              'current_opration_no': current_opration_no,
+              'new_operation_no': new_operation_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.canAdd) {
+                _callback(true);
+                return;
+              } else {
+                _callback(false);
+                return;
+              }
             }
-          }
-        });
+          });
+        }
       }
 
+      //-- SHORTCUT SEARCH
+        document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
+            if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+        });
+
+        document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
+            if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+        });
+
+        function shortcut_search(){
+          var order_no =  $("#sc_order_no").val();
+          var operation_no =  $("#sc_operation_no").val();
+          (order_no.length != 10)? invalid("sc_order_no"): valid("sc_order_no");
+          (operation_no.length != 4)? invalid("sc_operation_no"): valid("sc_operation_no");
+          if(order_no.length == 10 && operation_no.length == 4){
+            remove_valid_many(["sc_order_no","sc_operation_no"]);
+            window.open('/transaction/' + order_no + operation_no, '_self');
+          }
+        }
+
       //-- VALIDATE CONTROL
+      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
+      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
+
       function remove_valid(input_id){
         $("#" + input_id).removeClass("is-invalid");
         $("#" + input_id).removeClass("is-valid");
@@ -995,95 +1116,64 @@
         $("#" + input_id).removeClass("is-valid");
       }
 
-      //-- SHORTCUT SEARCH
-        document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
-            if (e.code === "Enter") shortcut_search();
-            else if (e.code == "NumpadEnter") shortcut_search();
-        });
+      //-- DYNAMIC INPUT
+      $('#reason').on("change", function() {
+        ($('#reason').val() == 0)? $("#other_reason").prop("disabled", false): $("#other_reason").prop("disabled", true);
+      });
 
-        document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
-            if (e.code == "Enter") shortcut_search();
-            else if (e.code == "NumpadEnter") shortcut_search();
-        });
+      $('#add_control_key').on("change", function() {
+        ($('#add_control_key').val() == "PP01")? $("#add_more").prop("hidden", true): $("#add_more").prop("hidden", false);
+      });
 
-        function shortcut_search(){
-          var order_no =  $("#sc_order_no").val();
-          var operation_no =  $("#sc_operation_no").val();
-          if(order_no.length != 10){
-            $("#sc_order_no").addClass("is-invalid");
-            $("#sc_order_no").removeClass("is-valid");
-          } else {
-            $("#sc_order_no").addClass("is-valid");
-            $("#sc_order_no").removeClass("is-invalid");
-          }
-          if(operation_no.length != 4){
-            $("#sc_operation_no").addClass("is-invalid");
-            $("#sc_operation_no").removeClass("is-valid");
-          } else {
-            $("#sc_operation_no").addClass("is-valid");
-            $("#sc_operation_no").removeClass("is-invalid");
-          }
-          if(order_no.length == 10 && operation_no.length == 4){
-            $("#sc_order_no").removeClass("is-valid");
-            $("#sc_operation_no").removeClass("is-valid");
-            window.open('/transaction/' + order_no + operation_no, '_self');
-          }
-        }
+      $('#change_control_key').on("change", function() {
+        ($('#change_control_key').val() == "PP01")? $("#change_more").prop("hidden", true): $("#change_more").prop("hidden", false);
+      });
 
-        //-- DYNAMIC INPUT
-        $('#reason').on("change", function() {
-          var reason = $('#reason').val();
-          if(reason == 0) $("#other_reason").prop("disabled", false);
-          else $("#other_reason").prop("disabled", true);
-        });
+      //-- KET RESTRICT
+      $("#add_operation_no").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
-        //-- KET RESTRICT
-        $("#add_operation_no").on("keypress keyup blur",function (event) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-             if ((event.which < 48 || event.which > 57)) {
-                 event.preventDefault();
-             }
-        });
+      $("#add_pdt").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
-        $("#operator_id").on("keypress keyup blur",function (event) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-             if ((event.which < 48 || event.which > 57)) {
-                 event.preventDefault();
-             }
-        });
+      $("#change_pdt").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
-        $("#good_qty").on("keypress keyup blur",function (event) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-             if ((event.which < 48 || event.which > 57)) {
-                 event.preventDefault();
-             }
-        });
+      $("#operator_id").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
-        $("#reject_qty").on("keypress keyup blur",function (event) {
+      $("#good_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#reject_qty").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#sc_order_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+       });
+
+       $("#sc_operation_no").on("keypress keyup blur",function (event) {
            $(this).val($(this).val().replace(/[^\d].+/, ""));
-            if ((event.which < 48 || event.which > 57)) {
-                event.preventDefault();
-            }
+           if((event.which < 48 || event.which > 57)) event.preventDefault();
         });
 
-        $("#sc_order_no").on("keypress keyup blur",function (event) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-             if ((event.which < 48 || event.which > 57)) {
-                 event.preventDefault();
-             }
-         });
-
-         $("#sc_operation_no").on("keypress keyup blur",function (event) {
-             $(this).val($(this).val().replace(/[^\d].+/, ""));
-              if ((event.which < 48 || event.which > 57)) {
-                  event.preventDefault();
-              }
-          });
-
-          //-- ETC
-          function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-          }
+        //-- ETC
+        function capitalizeFirstLetter(string) {
+           return string.charAt(0).toUpperCase() + string.slice(1);
+        }
     </script>
   </body>
 </html>
