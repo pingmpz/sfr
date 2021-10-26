@@ -245,8 +245,8 @@
 
                   <!-- Right Content -->
                   <div class="col-sm-12 col-md-8">
+                    <!-- Button Group -->
                     <div class="row">
-                      <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
                         <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
@@ -407,12 +407,32 @@
                                   <div class="form-group row">
                                     <label class="col-md-4 col-form-label text-right"><strong>Reason</strong></label>
                                     <div class="col-md-8">
-                                      <select class="form-control" id="reason">
+                                      <select class="form-control" id="reject_reason">
                                         <option value="-1">-</option>
-                                        <option value="0">Other</option>
-                                        <option value="1">Reason #1</option>
-                                        <option value="2">Reason #2</option>
-                                        <option value="3">Reason #3</option>
+                                        <option value="999">OTHER</option>
+                                        <option value="1">BENT</option>
+                                        <option value="2">BROKEN</option>
+                                        <option value="3">CIRCULAR NOT ROUND</option>
+                                        <option value="4">CRACKS</option>
+                                        <option value="5">DEPTH OUT OF SPEC</option>
+                                        <option value="6">DIMENSION OUT OF SPEC</option>
+                                        <option value="7">DIRTY</option>
+                                        <option value="8">HOLE DEFORM</option>
+                                        <option value="9">RUST</option>
+                                        <option value="10">SETUP PROGRAM WRONG POSITION</option>
+                                        <option value="11">SURFACE FINISH NOT GOOD</option>
+                                        <option value="12">SURFACE NOT FLAT</option>
+                                        <option value="13">TAP BROKEN IN HOLE</option>
+                                        <option value="14">WIRE LEFTOVER IN HOLE</option>
+                                        <option value="15">WRONG POSITION</option>
+                                        <option value="16">SPLIT ORDER</option>
+                                        <option value="17">WRONG PROCESS SEQUENCE</option>
+                                        <option value="18">RAW MATERIAL OUT OF SPECIFICATION</option>
+                                        <option value="19">CUSTOMER GIVE WRONG DRAWING</option>
+                                        <option value="20">REVISED CYCLE TIME</option>
+                                        <option value="21">NO SHAPE</option>
+                                        <option value="22">CUTTING INCOMPLETE</option>
+                                        <option value="23">MATERIAL DEFECT</option>
                                       </select>
                                     </div>
                                   </div>
@@ -595,7 +615,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-success text-white" type="button" onclick="add()">Confirm</button>
+              <button class="btn btn-success text-white" type="button" id="add_confirm_button" onclick="add()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -706,7 +726,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-warning text-white" type="button" onclick="change()">Confirm</button>
+              <button class="btn btn-warning text-white" type="button" id="change_confirm_button" onclick="change()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -735,7 +755,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-danger" type="button" onclick="trash()">Confirm</button>
+              <button class="btn btn-danger" type="button" id="trash_confirm_button" onclick="trash()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -951,7 +971,6 @@
         if(type == 'machine') row += "<button type='button' class='btn btn-sm btn-pill bg-green small' onclick=operate('setup'," + rowCount + ") disabled>Setup</button> ";
         row += "<button type='button' class='btn btn-sm btn-pill btn-success small' onclick=operate('start'," + rowCount + ") disabled>Start</button> ";
         row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' onclick=operate('stop'," + rowCount + ") disabled>Stop</button> ";
-        row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' onclick=operate('back'," + rowCount + ") disabled>Back</button> ";
         row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' onclick=operate('delete'," + rowCount + ")>Delete</button> ";
         row += "</td>";
         row += "</tr>";
@@ -977,6 +996,7 @@
       }
 
       function confirm(){
+        $("#confirm_invalid_text").text("");
         if($('#good_qty').val() == "") $('#good_qty').val("0");
         if($('#reject_qty').val() == "") $('#reject_qty').val("0");
         var remain_qty = parseFloat($('#remain_qty').val());
@@ -984,25 +1004,26 @@
         var reject_qty = parseFloat($('#reject_qty').val());
         var confirm_operator = $('#confirm_operator').val();
         var confirm_machine = $('#confirm_machine').val();
-        var reason = $('#reason').val();
+        var reject_reason = $('#reject_reason').val();
         var other_reason = $('#other_reason').val();
         if(confirm_operator == "-1") $("#confirm_invalid_text").text("Please select operator");
         else if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
         else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
-        else if(reason == 0 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
+        else if(reject_reason == 999 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
         else {
-          $("#confirm_invalid_text").text("");
           //-- DO SOMETHING
         }
       }
 
       //-- ADD OPERATION
       function add(){
+        $('#add_confirm_button').prop('disabled', true);
         var order_no = $("#order_no").val();
         var emp_id = $("#add_emp_id").val();
         var reason = $("#add_reason").val();
         var operation_no = $("#add_operation_no").val();
         var work_center = $("#add_work_center").val();
+        var control = $("#add_control_key").val();
         remove_valid_many(["add_emp_id","add_reason","add_operation_no","add_work_center"]);
         validate_operator(emp_id, function(result){
           if(!result){
@@ -1025,10 +1046,12 @@
            });
           }
         });
+        $('#add_confirm_button').prop('disabled', false);
       }
 
       //-- CHANGE OPERATION
       function change(){
+        $('#change_confirm_button').prop('disabled', true);
         var emp_id = $("#change_emp_id").val();
         var reason = $("#change_reason").val();
         var work_center = $("#change_work_center").val();
@@ -1047,10 +1070,12 @@
             //-- DO SOMETHING
           }
         });
+        $('#change_confirm_button').prop('disabled', false);
       }
 
       //-- DELETE OPERATION
       function trash(){
+        $('#trash_confirm_button').prop('disabled', true);
         var emp_id = $("#delete_emp_id").val();
         var reason = $("#delete_reason").val();
         remove_valid_many(["change_emp_id", "delete_reason"]);
@@ -1065,6 +1090,7 @@
             //-- DO SOMETHING
           }
         });
+        $('#trash_confirm_button').prop('disabled', false);
       }
 
       //-- VALIDATION
@@ -1159,8 +1185,8 @@
       }
 
       //-- DYNAMIC INPUT
-      $('#reason').on("change", function() {
-        ($('#reason').val() == 0)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
+      $('#reject_reason').on("change", function() {
+        ($('#reject_reason').val() == 0)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
       });
 
       $('#add_control_key').on("change", function() {
