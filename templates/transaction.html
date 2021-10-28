@@ -310,7 +310,17 @@
                       <!-- Machine/Operator -->
                       <div class="col-md-12">
                         <div class="card border-secondary">
-                          <div class="card-header"><strong>Machine/Operator</strong></div>
+                          <div class="card-header">
+                            <strong>Machine/Operator</strong>
+                            <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                            data-content="
+                            - <strong class='text-success'>Start Working</strong> while machine is waiting will automactically start machine.<br>
+                            - <strong class='text-info'>Add</strong> operator while machine is working, operator will automatically working.<br>
+                            - <strong class='text-danger'>Stop Working</strong> on manual machine will automactically stop machine.<br>
+                            - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
+                            ">?
+                            </a>
+                          </div>
                           <div class="card-body">
                             <div class="form-group row">
                               <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
@@ -376,6 +386,9 @@
                                 </tr>
                               </tbody>
                             </table>
+                            <div class="col-md-12 text-center">
+                              <label class="form-label"><h5 class="text-warning">PLEASE ADD MACHINE ABOVE FIRST</h5></label>
+                            </div>
                             <div class="form-group row">
                               <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
                               <div class="col-md-2">
@@ -974,6 +987,8 @@
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <!-- SELECT JS -->
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Popover JS -->
+    <script src="{% static "js/popovers.js" %}"></script>
     <!-- Custom JS -->
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>
