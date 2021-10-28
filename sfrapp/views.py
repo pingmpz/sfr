@@ -136,8 +136,8 @@ def get_operator_data(request):
     operator = get_operator(operator_id)
     if operator != None:
         isExist = True
-        EmpID = operator.EmpID
-        EmpName = operator.EmpName
+        EmpID = (operator.EmpID).strip()
+        EmpName = operator.EmpNameLastName
         Department = operator.Department
     data = {
         'isExist': isExist,
@@ -169,13 +169,13 @@ def get_operatorList():
 
 def get_operationList(orderNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [SE80_Routing] WHERE ProductionOrderNo = '" + orderNo + "'")
+    cursor.execute("SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + orderNo + "'")
     operationList = cursor.fetchall()
     return operationList
 
 def isExistOrder(orderNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [SE80_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
+    cursor.execute("SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
     isExist = False
     if len(cursor.fetchall()) > 0:
         isExist = True
@@ -183,7 +183,7 @@ def isExistOrder(orderNo):
 
 def isExistOperation(orderNo, operationNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [SE80_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
+    cursor.execute("SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
     isExist = False
     if len(cursor.fetchall()) > 0:
         isExist = True
@@ -199,13 +199,13 @@ def isExistOperator(EmpID):
 
 def get_order(orderNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [SE80_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
+    cursor.execute("SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + orderNo + "'")
     order = cursor.fetchall()[0]
     return order
 
 def get_operation(orderNo, operationNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [SE80_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
+    cursor.execute("SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'")
     operation = cursor.fetchall()[0]
     return operation
 
@@ -231,3 +231,8 @@ def get_operator(operator_id):
 ########################################################################################
 ########################################################################################
 ########################################################################################
+def FourDigitOperationNo(operationNo):
+    result = str(operationNo)
+    while len(result) < 4:
+        result = "0" + result
+    return result

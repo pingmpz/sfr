@@ -43,19 +43,6 @@
       .my-btn {
         width: 90px;
       }
-      .my-radio {
-        width: 18px;
-        height: 18px;
-      }
-      .blink {
-        animation: blinker 1s step-start infinite;
-      }
-
-      @keyframes blinker {
-        50% {
-          opacity: 0;
-        }
-      }
     </style>
   </head>
   <body class="c-app c-no-layout-transition">
@@ -100,19 +87,8 @@
                   <div class="col-sm-12 col-md-4">
                     <div class="card border-secondary">
                       <div class="card-body">
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Production Order No</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control" type="text" id="order_no" value="{{orderNo}}" readonly>
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Operation No</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" readonly>
-                          </div>
-                        </div>
-                        <br>
+                        <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly hidden>
+                        <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" readonly hidden>
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
@@ -124,64 +100,64 @@
                             <!-- Operation Tab -->
                             <div class="tab-pane active" id="operation-tab" role="tabpanel">
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Plan Start</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Plan Start</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="plan_start" value="{{operation.PlanStartDate|date:'d-m-Y'}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|date:'d-m-Y'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Plan Finish</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Plan Finish</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="plan_finish" value="{{operation.PlanFinishDate|date:'d-m-Y'}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|date:'d-m-Y'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Est. Setup Time</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="est_set_time" value="{{operation.EstimateSetTime}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_set_time" value="{{operation.EstimateSetTime}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Est. Operation Time</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Est. Labor Time</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime}}" readonly>
                                 </div>
                               </div>
                               <hr>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right text-info"><strong>Process Qty</strong></label>
+                                <label class="col-md-4 col-form-label text-right text-info small"><strong>Process Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="process_qty" value="0" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="process_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
+                                <label class="col-md-4 col-form-label text-right text-warning small"><strong>Remain Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="remain_qty" value="0" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="remain_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
+                                <label class="col-md-4 col-form-label text-right text-success small"><strong>Accepted Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="accepted_qty" value="0" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="accepted_qty" value="0" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
+                                <label class="col-md-4 col-form-label text-right text-danger small"><strong>Rejected Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="rejected_qty" value="0" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="rejected_qty" value="0" readonly>
                                 </div>
                               </div>
                               <!-- <div class="form-group row text-center">
@@ -194,45 +170,45 @@
                             <!-- Production Order Tab -->
                             <div class="tab-pane" id="order-tab" role="tabpanel">
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Customer PO No</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Customer PO No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="customer_po_no" value="{{order.CustomerPONo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Part No</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Part No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="part_no" value="{{order.PartNo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Part Name</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Part Name</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="part_name" value="{{order.PartName}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Material Code</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Material Code</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="material_code" value="{{order.FG_MaterialCode}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="material_code" value="{{order.FG_MaterialCode}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Drawing No</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Drawing No</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="drawing_no" value="{{order.DrawingNo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Prod. Order Qty</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Prod. Order Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
-                                <label class="col-md-4 col-form-label text-right"><strong>Request Date</strong></label>
+                                <label class="col-md-4 col-form-label text-right small"><strong>Request Date</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="request_date" value="{{order.request_date}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date}}" readonly>
                                 </div>
                               </div>
                             </div>
@@ -328,76 +304,8 @@
                               <div class="col-md-5">
                                 <input class="form-control" type="text" id="machine_name" value="" readonly>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_machine()" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_mo('machine')" disabled>Add</button></div>
                             </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="machine_table">
-                              <thead class="bg-darkslategray">
-                                <tr>
-                                  <th></th>
-                                  <th>No</th>
-                                  <th>Name</th>
-                                  <th>Status</th>
-                                  <th></th>
-                                </tr>
-                              </thead>
-                              <tbody id="machine_table_body">
-                                <tr id="machine_empty_row">
-                                  <td colspan="5">Please add machine above.</td>
-                                </tr>
-                                <tr id="machine_row_1">
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>WAITING FOR OPERATOR</td>
-                                  <td><button type='button' class='btn btn-sm btn-pill btn-dark small'>Delete</button></td>
-                                  <td hidden>
-                                    <input type="text" id="machine_pk_row_1" value="4234">
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>WAITING FOR SETUP</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>SETUP</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>READY</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>WORKING</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td><span class="blink text-danger">WORKING (NO OPERATOR)</span></td>
-                                  <td><button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Machine</button></td>
-                                </tr>
-                                <tr class="text-success">
-                                  <td></td>
-                                  <td>BTA-01</td>
-                                  <td>Miyano BNF16</td>
-                                  <td>COMPLETED</td>
-                                  <td></td>
-                                </tr>
-                              </tbody>
-                            </table>
                             <div class="form-group row">
                               <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
                               <div class="col-md-2">
@@ -406,72 +314,44 @@
                               <div class="col-md-5">
                                 <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='operator_add_button' onclick="add_operator()" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='operator_add_button' onclick="add_mo('operator')" disabled>Add</button></div>
                             </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
+                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="mo_table">
                               <thead class="bg-darkslategray">
                                 <tr>
-                                  <th>Machine</th>
-                                  <th>ID</th>
+                                  <th>Type</th>
+                                  <th>No</th>
                                   <th>Name</th>
-                                  <th>Status</th>
                                   <th></th>
                                 </tr>
                               </thead>
-                              <tbody id="operator_table_body">
-                                <tr id="operator_empty_row">
-                                  <td colspan="5">Please add operator above.</td>
+                              <tbody id="mo_table_body">
+                                <tr id="empty_row">
+                                  <td colspan="4">Please add Machine/Operator above.</td>
                                 </tr>
-                                <tr id="operator_row_1">
-                                  <td>BTA-01</td>
-                                  <td>5731</td>
-                                  <td>Yashawantatul Mangalmurti</td>
-                                  <td>WAITING FOR SETUP</td>
+                                <!-- <tr id="operate_row_0">
+                                  <td>Machine</td>
+                                  <td>MC-001</td>
+                                  <td>Machine #1</td>
                                   <td>
-                                    <button type='button' class='btn btn-sm btn-pill bg-green text-white small'>Start Setup</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-dark small'>Delete</button>
-                                  </td>
-                                  <td hidden>
-                                    <input type="text" id="operator_pk_row_1" value="9684">
+                                    <button type="button" class="btn btn-sm btn-pill bg-green small" id="setup_btn_0" onclick="operate('setup')">Setup</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-success small" id="start_btn_0" onclick="operate('start')">Start</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-danger small" id="stop_btn_0" onclick="operate('stop')">Stop</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="back_btn_0" onclick="operate('back')">Back</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="delete_btn_0" onclick="operate('delete')">Delete</button>
                                   </td>
                                 </tr>
-                                <tr>
-                                  <td>BTA-01</td>
+                                <tr id="operate_row_1">
+                                  <td>Operator</td>
                                   <td>5731</td>
                                   <td>Yashawantatul Mangalmurti</td>
-                                  <td>SETUP</td>
                                   <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-warning text-white small'>Stop Setup</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-dark small'>Reverse</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-success small" id="start_btn_1" onclick="operate('start')">Start</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-danger small" id="stop_btn_1" onclick="operate('stop')">Stop</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="back_btn_1" onclick="operate('back')">Back</button>
+                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="delete_btn_1" onclick="operate('delete')">Delete</button>
                                   </td>
-                                </tr>
-                                <tr>
-                                  <td>BTA-01</td>
-                                  <td>5731</td>
-                                  <td>Yashawantatul Mangalmurti</td>
-                                  <td>READY</td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-success small'>Start Working</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-dark small'>Delete</button>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>BTA-01</td>
-                                  <td>5731</td>
-                                  <td>Yashawantatul Mangalmurti</td>
-                                  <td>WORKING</td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Working</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-dark small'>Reverse</button>
-                                  </td>
-                                </tr>
-                                <tr class="text-success">
-                                  <td>BTA-01</td>
-                                  <td>5731</td>
-                                  <td>Yashawantatul Mangalmurti</td>
-                                  <td>COMPLETED</td>
-                                  <td></td>
-                                </tr>
+                                </tr> -->
                               </tbody>
                             </table>
                           </div>
@@ -922,6 +802,58 @@
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
+              <!-- <span class="text-info"><strong>Machine/Operator</strong></span>
+              <table class="table table-sm table-responsive-sm table-outline text-center small">
+                <thead class="bg-darkslategray">
+                  <tr>
+                    <th>Type</th>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Setup</th>
+                    <th>Start</th>
+                    <th>Stop</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Machine</td>
+                    <td>MC-001</td>
+                    <td>Machine #1</td>
+                    <td>11/11/2021<br>19:05</td>
+                    <td>11/11/2021<br>19:20</td>
+                    <td>11/11/2021<br>20:47</td>
+                  </tr>
+                  <tr>
+                    <td>Operator</td>
+                    <td>5731</td>
+                    <td>Yashawantatul Mangalmurti</td>
+                    <td>-</td>
+                    <td>11/11/2021<br>19:20</td>
+                    <td>11/11/2021<br>20:47</td>
+                  </tr>
+                </tbody>
+              </table>
+              <span class="text-info"><strong>Confirmation/Reporting</strong></span>
+              <table class="table table-sm table-responsive-sm table-outline text-center small">
+                <thead class="bg-darkslategray">
+                  <tr>
+                    <th>Operator</th>
+                    <th>Good Qty</th>
+                    <th>Reject Qty</th>
+                    <th>Reason</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>5731</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>-</td>
+                    <td>11/11/2021<br>19:05</td>
+                  </tr>
+                </tbody>
+              </table> -->
             </div>
             <div class="modal-footer">
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
@@ -952,8 +884,7 @@
       var isSearchingOperator = false;
       var currentMachineNo = null;
       var currentOperatorId = null;
-      var rowCountMachine = 0;
-      var rowCountOperator = 0;
+      var rowCount = 0;
 
       $(document).ready(function() {
         showTime();
@@ -1013,6 +944,56 @@
           });
         }
       });
+
+      function add_mo(type){
+        if(type == 'machine'){
+          //-- DO SOMETHING
+          buildRow(type, currentMachineNo, currentMachineName);
+          $('#machine_no').val('');
+          $('#machine_name').val('');
+          $('#machine_add_button').prop('disabled', true);
+        } else if (type == 'operator'){
+          //-- DO SOMETHING
+          buildRow(type, currentOperatorId, currentOperatorName);
+          $('#operator_id').val('');
+          $('#operator_name').val('');
+          $('#operator_add_button').prop('disabled', true);
+        }
+      }
+
+      function buildRow(type, no, name){
+        row = "";
+        row += "<tr id=row_no_" + rowCount + ">";
+        row += "<td>" + capitalizeFirstLetter(type) + "</td>";
+        row += "<td>" + no + "</td>";
+        row += "<td>" + name + "</td>";
+        row += "<td>";
+        if(type == 'machine') row += "<button type='button' class='btn btn-sm btn-pill bg-green small' onclick=operate('setup'," + rowCount + ") disabled>Setup</button> ";
+        row += "<button type='button' class='btn btn-sm btn-pill btn-success small' onclick=operate('start'," + rowCount + ") disabled>Start</button> ";
+        row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' onclick=operate('stop'," + rowCount + ") disabled>Stop</button> ";
+        row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' onclick=operate('delete'," + rowCount + ")>Delete</button> ";
+        row += "</td>";
+        row += "</tr>";
+        $("#mo_table_body").append(row);
+        tableRow(1);
+      }
+
+      function removeRow(row_no){
+        $("table#mo_table tr#row_no_" + row_no).remove();
+        tableRow(-1);
+      }
+
+      function tableRow(count){
+        rowCount += count;
+        (rowCount == 0)? $('#empty_row').prop('hidden', false): $('#empty_row').prop('hidden', true);
+      }
+
+      function operate(type, row_no){
+        //-- DO SOMETHING
+        if(type == 'delete'){
+          removeRow(row_no);
+        }
+      }
 
       function confirm(){
         $("#confirm_invalid_text").text("");
@@ -1205,7 +1186,7 @@
 
       //-- DYNAMIC INPUT
       $('#reject_reason').on("change", function() {
-        ($('#reject_reason').val() == 999)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
+        ($('#reject_reason').val() == 0)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
       });
 
       $('#add_control_key').on("change", function() {
@@ -1219,42 +1200,12 @@
       });
 
       //-- KET RESTRICT
-      $("#add_est_set_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#add_est_operation_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#add_est_labor_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
       $("#add_operation_no").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
       $("#add_pdt").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#change_est_set_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#change_est_operation_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#change_est_labor_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
