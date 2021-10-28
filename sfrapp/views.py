@@ -136,8 +136,8 @@ def get_operator_data(request):
     operator = get_operator(operator_id)
     if operator != None:
         isExist = True
-        EmpID = (operator.EmpID).strip()
-        EmpName = operator.EmpNameLastName
+        EmpID = (operator.EmployeeID).strip()
+        EmpName = operator.NameLastName
         Department = operator.Department
     data = {
         'isExist': isExist,
@@ -191,7 +191,7 @@ def isExistOperation(orderNo, operationNo):
 
 def isExistOperator(EmpID):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [User] WHERE EmpID = '" + EmpID + "'")
+    cursor.execute("SELECT * FROM [User] WHERE EmployeeID = '" + EmpID + "'")
     isExist = False
     if len(cursor.fetchall()) > 0:
         isExist = True
@@ -221,7 +221,7 @@ def get_machine(machine_no):
 
 def get_operator(operator_id):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [User] WHERE EmpID = '" + operator_id + "'")
+    cursor.execute("SELECT * FROM [User] WHERE EmployeeID = '" + operator_id + "'")
     result = cursor.fetchall()
     if(len(result) == 0):
         operator = None
