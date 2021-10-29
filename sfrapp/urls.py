@@ -7,7 +7,9 @@ urlpatterns = [
     path('index/', views.index, name='index'),
     path('transaction/<str:orderoprno>', views.transaction, name='transaction'),
     #-- MASTER
-    path('machine_master/', views.machine_master, name='machine_master'),
+    path('wcg_master/', views.wcg_master, name='wcg_master'),
+    path('wc_master/', views.wc_master, name='wc_master'),
+    path('mc_master/', views.mc_master, name='mc_master'),
     path('user_master/', views.user_master, name='user_master'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST

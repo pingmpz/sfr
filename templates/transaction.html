@@ -52,9 +52,16 @@
       }
 
       @keyframes blinker {
-        50% {
-          opacity: 0;
-        }
+        /* 10% { opacity: 0.1; } */
+        20% { opacity: 0.2; }
+        /* 30% { opacity: 0.3; } */
+        40% { opacity: 0.4; }
+        /* 50% { opacity: 0.5; } */
+        60% { opacity: 0.6; }
+        /* 70% { opacity: 0.7; } */
+        80% { opacity: 0.8; }
+        /* 90% { opacity: 0.9; } */
+        100% { opacity: 1; }
       }
     </style>
   </head>
@@ -323,7 +330,7 @@
                           </div>
                           <div class="card-body">
                             <div class="form-group row">
-                              <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
+                              <label class="col-md-3 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Machine</strong></label>
                               <div class="col-md-2">
                                 <input class="form-control" type="text" id="machine_no" autocomplete="off" value="">
                               </div>
@@ -347,7 +354,7 @@
                                   <td colspan="5">Please add machine above.</td>
                                 </tr>
                                 <tr id="machine_row_1">
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
+                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios" checked></td>
                                   <td>BTA-01 | Miyano BNF16</td>
                                   <td>WAITING FOR OPERATOR</td>
                                   <td></td>
@@ -366,21 +373,21 @@
                                 <tr>
                                   <td></td>
                                   <td>BTA-01 | Miyano BNF16</td>
-                                  <td>SETUP</td>
+                                  <td><span class="blink">SETUP</span></td>
                                   <td>28-10-2021 13:20</td>
                                   <td></td>
                                 </tr>
                                 <tr>
                                   <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
                                   <td>BTA-01 | Miyano BNF16</td>
-                                  <td>WORKING</td>
+                                  <td><span class="blink">WORKING</span></td>
                                   <td>28-10-2021 13:20</td>
                                   <td></td>
                                 </tr>
                                 <tr>
                                   <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
                                   <td>BTA-01 | Miyano BNF16</td>
-                                  <td>WORKING</td>
+                                  <td><span class="blink">WORKING</span></td>
                                   <td>28-10-2021 13:20</td>
                                   <td><button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Machine</button> </td>
                                 </tr>
@@ -390,7 +397,7 @@
                               <label class="form-label"><h5 class="text-warning">PLEASE ADD MACHINE ABOVE FIRST</h5></label>
                             </div>
                             <div class="form-group row">
-                              <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
+                              <label class="col-md-3 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Operator</strong></label>
                               <div class="col-md-2">
                                 <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
                               </div>
@@ -430,7 +437,7 @@
                                 <tr>
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td>SETUP</td>
+                                  <td><span class="blink">SETUP</span></td>
                                   <td>28-10-2021 13:20</td>
                                   <td>
                                     <button type='button' class='btn btn-sm btn-pill btn-success small'>Start Working</button>
@@ -440,7 +447,7 @@
                                 <tr>
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td>WORKING</td>
+                                  <td><span class="blink">WORKING</span></td>
                                   <td>28-10-2021 13:20</td>
                                   <td>
                                     <button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Working</button>

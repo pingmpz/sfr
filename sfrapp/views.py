@@ -71,12 +71,26 @@ def transaction(request, orderoprno):
 
 #------------------------------------------------------------------------------- MASTER
 
-def machine_master(request):
+def wcg_master(request):
+    workCenterGroupList = get_workCenterGroupList()
+    context = {
+        'workCenterGroupList' : workCenterGroupList,
+    }
+    return render(request, 'wcg_master.html', context)
+
+def wc_master(request):
+    workCenterList = get_workCenterList()
+    context = {
+        'workCenterList' : workCenterList,
+    }
+    return render(request, 'wc_master.html', context)
+
+def mc_master(request):
     machineList = get_machineList()
     context = {
         'machineList' : machineList,
     }
-    return render(request, 'machine_master.html', context)
+    return render(request, 'mc_master.html', context)
 
 def user_master(request):
     operatorList = get_operatorList()
@@ -155,9 +169,21 @@ def get_connection():
     conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
     return conn
 
+def get_workCenterGroupList():
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [WorkCenterGroup]")
+    workCenterGroupList = cursor.fetchall()
+    return workCenterGroupList
+
+def get_workCenterList():
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [WorkCenter] INNER JOIN [WorkCenterGroup] ON [WorkCenter].WorkCenterGroupID = [WorkCenterGroup].WorkCenterGroupID")
+    workCenterList = cursor.fetchall()
+    return workCenterList
+
 def get_machineList():
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [MachineList]")
+    cursor.execute("SELECT * FROM [Machine]")
     machineList = cursor.fetchall()
     return machineList
 
@@ -211,7 +237,7 @@ def get_operation(orderNo, operationNo):
 
 def get_machine(machine_no):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [MachineList] WHERE MachineNumber = '" + machine_no + "'")
+    cursor.execute("SELECT * FROM [Machine] WHERE MachineNumber = '" + machine_no + "'")
     result = cursor.fetchall()
     if(len(result) == 0):
         machine = None
