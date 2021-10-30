@@ -139,13 +139,13 @@
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right"><strong>Plan Start</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="plan_start" value="{{operation.PlanStartDate|date:'d-m-Y'}}" readonly>
+                                  <input class="form-control" type="text" id="plan_start" value="{{operation.PlanStartDate}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right"><strong>Plan Finish</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="plan_finish" value="{{operation.PlanFinishDate|date:'d-m-Y'}}" readonly>
+                                  <input class="form-control" type="text" id="plan_finish" value="{{operation.PlanFinishDate}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
@@ -322,22 +322,26 @@
                             <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                             data-content="
                             - <strong class='text-success'>Start Working</strong> while machine is waiting will automactically start machine.<br>
-                            - <strong class='text-info'>Add</strong> operator while machine is working, operator will automatically working.<br>
                             - <strong class='text-danger'>Stop Working</strong> on manual machine will automactically stop machine.<br>
                             - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
                             ">?
                             </a>
                           </div>
                           <div class="card-body">
+                            <div hidden>
+                              <input class="my-radio" type="radio" name="machine_radio" value="-1" {% if operation.MachineType == 'Machine' %}checked{% endif %}>
+                              <input class="my-radio" type="radio" name="machine_radio" value="0" {% if operation.MachineType == 'Labor' %}checked{% endif %}>
+                            </div>
+                            {% if operation.MachineType == 'Machine' %}
                             <div class="form-group row">
-                              <label class="col-md-3 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Machine</strong></label>
+                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Machine</strong></label>
                               <div class="col-md-2">
                                 <input class="form-control" type="text" id="machine_no" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
                                 <input class="form-control" type="text" id="machine_name" value="" readonly>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_machine()" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_tmc()" disabled>Add</button></div>
                             </div>
                             <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="machine_table">
                               <thead class="bg-darkslategray">
@@ -350,66 +354,44 @@
                                 </tr>
                               </thead>
                               <tbody id="machine_table_body">
-                                <tr id="machine_empty_row">
+                                {% if tmcList|length == 0 %}
+                                <tr>
                                   <td colspan="5">Please add machine above.</td>
                                 </tr>
-                                <tr id="machine_row_1">
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios" checked></td>
-                                  <td>BTA-01 | Miyano BNF16</td>
-                                  <td>WAITING FOR OPERATOR</td>
+                                {% endif %}
+                                {% for tmc in tmcList %}
+                                <tr>
+                                  <td><input class="my-radio" type="radio" name="machine_radio" value="{{tmc.ID}}" checked></td>
+                                  <td>{{tmc.MachineNumber}} | {{tmc.MachineName}}</td>
                                   <td></td>
-                                  <td><button type='button' class='btn btn-sm btn-pill btn-dark small'>Delete</button></td>
-                                  <td hidden>
-                                    <input type="text" id="machine_pk_row_1" value="4234">
+                                  <td>{% if tmc.StartDateTime == NULL %}-{% else %}{{tmc.StartDateTime}}{% endif %}</td>
+                                  <td>
+                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="delete_tmc_{{tmc.ID}}" onclick="delete_tmc({{tmc.ID}})">Delete</button>
                                   </td>
                                 </tr>
-                                <tr>
-                                  <td></td>
-                                  <td>BTA-01 | Miyano BNF16</td>
-                                  <td>WAITING</td>
-                                  <td></td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td></td>
-                                  <td>BTA-01 | Miyano BNF16</td>
-                                  <td><span class="blink">SETUP</span></td>
-                                  <td>28-10-2021 13:20</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01 | Miyano BNF16</td>
-                                  <td><span class="blink">WORKING</span></td>
-                                  <td>28-10-2021 13:20</td>
-                                  <td></td>
-                                </tr>
-                                <tr>
-                                  <td><input class="my-radio" id="radio3" type="radio" value="radio2" name="radios"></td>
-                                  <td>BTA-01 | Miyano BNF16</td>
-                                  <td><span class="blink">WORKING</span></td>
-                                  <td>28-10-2021 13:20</td>
-                                  <td><button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Machine</button> </td>
-                                </tr>
+                                {% endfor %}
                               </tbody>
                             </table>
-                            <div class="col-md-12 text-center">
-                              <label class="form-label"><h5 class="text-warning">PLEASE ADD MACHINE ABOVE FIRST</h5></label>
-                            </div>
+                            {% endif %}
                             <div class="form-group row">
-                              <label class="col-md-3 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Operator</strong></label>
+                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Operator</strong></label>
                               <div class="col-md-2">
                                 <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
                                 <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='operator_add_button' onclick="add_operator()" disabled>Add</button></div>
+                              <div class="col-md-3">
+                                <button type="button" class="btn btn-pill btn-success" id='operator_work_button' onclick="add_topr('WORK')" disabled>Start Work</button>
+                                {% if operation.MachineType == 'Machine' %}
+                                <button type="button" class="btn btn-pill bg-green" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
+                                {% endif %}
+                              </div>
                             </div>
                             <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
                               <thead class="bg-darkslategray">
                                 <tr>
-                                  <th>Machine</th>
+                                  {% if operation.MachineType == 'Machine' %}<th>Machine</th>{% endif %}
                                   <th>Operator</th>
                                   <th>Status</th>
                                   <th>Start Time</th>
@@ -417,34 +399,31 @@
                                 </tr>
                               </thead>
                               <tbody id="operator_table_body">
-                                <tr id="operator_empty_row">
-                                  <td colspan="5">Please add operator above.</td>
+                                {% if toprList|length == 0 %}
+                                <tr>
+                                  <td colspan="{% if operation.MachineType == 'Machine' %}5{% else %}4{% endif %}">Please add operator above.</td>
                                 </tr>
+                                {% endif %}
+                                {% for topr in toprList %}
+                                <tr>
+                                  {% if operation.MachineType == 'Machine' %}<td></td>{% endif %}
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                </tr>
+                                {% endfor %}
                                 <tr id="operator_row_1">
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td>WAITING</td>
-                                  <td></td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-success small'>Start Working</button>
-                                    <button type='button' class='btn btn-sm btn-pill bg-green text-white small'>Start Setup</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-dark small'>Delete</button>
-                                  </td>
-                                  <td hidden>
-                                    <input type="text" id="operator_pk_row_1" value="9684">
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>BTA-01</td>
-                                  <td>5731 | Yashawantatul Mangalmurti</td>
                                   <td><span class="blink">SETUP</span></td>
-                                  <td>28-10-2021 13:20</td>
+                                  <td></td>
                                   <td>
                                     <button type='button' class='btn btn-sm btn-pill btn-success small'>Start Working</button>
                                     <button type='button' class='btn btn-sm btn-pill btn-warning text-white small'>Stop Setup & Exit</button>
                                   </td>
                                 </tr>
-                                <tr>
+                                <tr id="operator_row_2">
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
                                   <td><span class="blink">WORKING</span></td>
@@ -453,7 +432,7 @@
                                     <button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Working</button>
                                   </td>
                                 </tr>
-                                <tr class="text-success">
+                                <tr class="text-success" id="operator_row_3">
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
                                   <td>COMPLETED</td>
@@ -909,12 +888,14 @@
                     <input class="form-control" type="text" id="confirm_operator" value="5731 | Yashawantatul Mangalmurti (MIS)" readonly>
                   </div>
                 </div>
+                {% if operation.MachineType == 'Machine' %}
                 <div class="form-group row">
                   <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
                   <div class="col-md-7">
                     <input class="form-control" type="text" id="confirm_machine" value="BTA-01 | Miyano BNF16" readonly>
                   </div>
                 </div>
+                {% endif %}
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group row">
@@ -1015,14 +996,17 @@
 
       $(document).ready(function() {
         showTime();
+        dynamic_operator_id();
       });
 
       //-- MAIN SCRIPT
-      $("#machine_no").on("change", function() {
+      $("#machine_no").on("change keyup", function() {
         $('#machine_name').val('');
         $('#machine_add_button').prop('disabled', true);
+        remove_valid('machine_name');
+        $('#machine_name').removeClass('text-danger');
         var machine_no = $('#machine_no').val();
-        if(isSearchingMachine == false || machine_no.length >= 4){
+        if(isSearchingMachine == false && machine_no.length >= 4){
           isSearchingMachine = true;
           $.ajax({
             url: '/get_machine_data/',
@@ -1031,13 +1015,17 @@
             },
             dataType: 'json',
             success: function (data) {
-              if (data.isExist) {
+              if (data.canAdd) {
                 currentMachineNo = data.MachineNumber;
                 currentMachineName = data.MachineName;
                 $('#machine_name').val(data.MachineNumber + " | " + data.MachineName);
                 $('#machine_add_button').prop('disabled', false);
+                valid('machine_name');
+                $('#machine_name').addClass('text-success');
               } else {
-                $('#machine_name').val('');
+                $('#machine_name').val(data.invalid_text);
+                invalid('machine_name');
+                $('#machine_name').addClass('text-danger');
               }
               isSearchingMachine = false;
             }
@@ -1045,11 +1033,14 @@
         }
       });
 
-      $("#operator_id").on("change", function() {
+      $("#operator_id").on("change keyup", function() {
         $('#operator_name').val('');
-        $('#operator_add_button').prop('disabled', true);
+        $('#operator_work_button').prop('disabled', true);
+        $('#operator_setup_button').prop('disabled', true);
+        remove_valid('operator_name');
+        $('#operator_name').removeClass('text-danger');
         var operator_id = $('#operator_id').val();
-        if(isSearchingOperator == false || operator_id.length >= 4){
+        if(isSearchingOperator == false && operator_id.length >= 4){
           isSearchingOperator = true;
           $.ajax({
             url: '/get_operator_data/',
@@ -1058,13 +1049,22 @@
             },
             dataType: 'json',
             success: function (data) {
-              if (data.isExist) {
+              if (data.canAdd) {
+                if(data.canWork){
+                  $('#operator_work_button').prop('disabled', false);
+                }
+                if (data.canSetup){
+                  $('#operator_setup_button').prop('disabled', false);
+                }
                 currentOperatorId = data.EmpID;
                 currentOperatorName = data.EmpName;
                 $('#operator_name').val(data.EmpID + " | " + data.EmpName + " (" + data.Department + ")");
-                $('#operator_add_button').prop('disabled', false);
+                valid('operator_name');
+                $('#operator_name').addClass('text-success');
               } else {
-                $('#operator_name').val('');
+                $('#operator_name').val(data.invalid_text);
+                invalid('operator_name');
+                $('#operator_name').addClass('text-danger');
               }
               isSearchingOperator = false;
             }
@@ -1072,23 +1072,61 @@
         }
       });
 
-      function confirm(){
-        $("#confirm_invalid_text").text("");
-        if($('#good_qty').val() == "") $('#good_qty').val("0");
-        if($('#reject_qty').val() == "") $('#reject_qty').val("0");
-        var remain_qty = parseFloat($('#remain_qty').val());
-        var good_qty = parseFloat($('#good_qty').val());
-        var reject_qty = parseFloat($('#reject_qty').val());
-        var reject_reason = $('#reject_reason').val();
-        var other_reason = $('#other_reason').val();
-        if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
-        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
-        else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason");
-        else if(reject_reason == 999 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
-        else {
-          //-- DO SOMETHING
-        }
+      //---------------------------------------------------------------------------------------------------- MACHINE
+      function add_tmc(){
+        $('#machine_add_button').prop('disabled', true);
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        $.ajax({
+          url: '/add_tmc/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+            'machine_no': currentMachineNo,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
       }
+
+      function delete_tmc(id){
+        $('#delete_tmc_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/delete_tmc/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+      //----------------------------------------------------------------------------------------------------
+      //---------------------------------------------------------------------------------------------------- OPERATOR
+      function add_topr(status){
+        $('#machine_add_button').prop('disabled', true);
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        var tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
+        $.ajax({
+          url: '/add_topr/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+            'operator_id': currentOperatorId,
+            'tmc_id': tmc_id,
+            'status': status,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+      //----------------------------------------------------------------------------------------------------
 
       //-- ADD OPERATION
       function add(){
@@ -1168,6 +1206,25 @@
         $('#trash_confirm_button').prop('disabled', false);
       }
 
+      // CONFIRM
+      function confirm(){
+        $("#confirm_invalid_text").text("");
+        if($('#good_qty').val() == "") $('#good_qty').val("0");
+        if($('#reject_qty').val() == "") $('#reject_qty').val("0");
+        var remain_qty = parseFloat($('#remain_qty').val());
+        var good_qty = parseFloat($('#good_qty').val());
+        var reject_qty = parseFloat($('#reject_qty').val());
+        var reject_reason = $('#reject_reason').val();
+        var other_reason = $('#other_reason').val();
+        if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
+        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
+        else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason");
+        else if(reject_reason == 999 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
+        else {
+          //-- DO SOMETHING
+        }
+      }
+
       //-- VALIDATION
       function validate_operator(emp_id, _callback){
         if(emp_id.length == 0) {
@@ -1225,6 +1282,10 @@
             if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
         });
 
+        document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
+            if ($("#sc_order_no").val().length == 10) $("#sc_operation_no").focus();
+        });
+
         document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
             if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
         });
@@ -1260,6 +1321,18 @@
       }
 
       //-- DYNAMIC INPUT
+      $('input[type=radio][name=machine_radio]').on("change", function() {
+        dynamic_operator_id();
+      });
+
+      function dynamic_operator_id(){
+        if (document.querySelector('input[name="machine_radio"]:checked').value == "-1"){
+          $("#operator_id").prop('readonly', true);
+        } else {
+          $("#operator_id").prop('readonly', false);
+        }
+      }
+
       $('#reject_reason').on("change", function() {
         ($('#reject_reason').val() == 999)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
       });

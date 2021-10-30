@@ -17,4 +17,7 @@ urlpatterns = [
     path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
     path('get_machine_data/', views.get_machine_data, name='get_machine_data'),
     path('get_operator_data/', views.get_operator_data, name='get_operator_data'),
+    path('add_tmc/', views.add_tmc, name='add_tmc'),
+    path('delete_tmc/', views.delete_tmc, name='delete_tmc'),
+    path('add_topr/', views.add_topr, name='add_topr'),
 ]

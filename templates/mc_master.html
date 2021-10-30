@@ -74,8 +74,8 @@
                           <tr class="{% if machine.IsActive != 1 %}text-danger{% endif %}">
                             <td>{{machine.MachineNumber}}</td>
                             <td>{{machine.MachineName}}</td>
-                            <td></td>
-                            <td></td>
+                            <td>{{machine.WorkCenterName}}</td>
+                            <td>{{machine.WorkCenterGroupName}}</td>
                             <td>{{machine.Auto_Manual}}</td>
                             <td>{{machine.HourlyRate}}</td>
                             <td>{{machine.Noted}}</td>
