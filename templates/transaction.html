@@ -100,6 +100,7 @@
         <main class="c-main">
           <div class="container-fluid">
             <div class="fade-in">
+              <input type="text" id="has_data" value="{% if isFirstPage == False and order != None and operation != None %}true{% else %}false{% endif %}" hidden>
               <!-- Main Body -->
               {% if isFirstPage == False and order != None and operation != None %}
               <div class="row" id="main_body">
@@ -917,8 +918,10 @@
 
       $(document).ready(function() {
         showTime();
-        reload_machine_table();
-        reload_operator_table();
+        if($("#has_data").val() == true){
+          reload_machine_table();
+          reload_operator_table();
+        }
       });
 
       //-- MAIN SCRIPT
