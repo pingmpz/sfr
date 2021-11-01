@@ -248,7 +248,7 @@
                                 </thead>
                                 <tbody>
                                   {% for operation in operationList %}
-                                  <tr {% if operation.OperationNumber == operationNo %}class="bg-lavender"{% endif %}>
+                                  <tr {% if operation.OperationNumber.strip == operationNo.strip %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if operation.OperationNumber != operationNo %}
                                       <a href="/transaction/{{orderNo}}{{operation.OperationNumber}}">{{operation.OperationNumber}}</a>
@@ -276,6 +276,7 @@
                         <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
                         <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
                         <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-lg btn-primary my-btn small" data-toggle="modal" data-target="#confirm_modal"><i class="c-icon c-icon-xl cil-thumb-up"></i><br>Confirm</button>
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
@@ -368,7 +369,7 @@
                               <div class="col-md-3">
                                 <button type="button" class="btn btn-pill btn-success" id='operator_work_button' onclick="add_topr('WORKING')" disabled>Start Work</button>
                                 {% if operation.MachineType == 'Machine' %}
-                                <button type="button" class="btn btn-pill bg-green" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
+                                <button type="button" class="btn btn-pill bg-green text-white" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
                                 {% endif %}
                               </div>
                             </div>
@@ -384,34 +385,6 @@
                               </thead>
                               <tbody id="operator_table_body">
 
-                                <tr id="operator_row_1">
-                                  <td>BTA-01</td>
-                                  <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td><span class="blink">SETUP</span></td>
-                                  <td></td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-success small'>Start Working</button>
-                                    <button type='button' class='btn btn-sm btn-pill btn-warning text-white small'>Stop Setup & Exit</button>
-                                  </td>
-                                </tr>
-                                <tr id="operator_row_2">
-                                  <td>BTA-01</td>
-                                  <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td><span class="blink">WORKING</span></td>
-                                  <td>28-10-2021 13:20</td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-danger small'>Stop Working</button>
-                                  </td>
-                                </tr>
-                                <tr class="text-success" id="operator_row_3">
-                                  <td>BTA-01</td>
-                                  <td>5731 | Yashawantatul Mangalmurti</td>
-                                  <td>COMPLETED</td>
-                                  <td></td>
-                                  <td>
-                                    <button type='button' class='btn btn-sm btn-pill btn-primary small' data-toggle="modal" data-target="#confirm_modal">Confirm</button>
-                                  </td>
-                                </tr>
                               </tbody>
                             </table>
                           </div>
@@ -889,31 +862,10 @@
                       <label class="col-md-4 col-form-label text-right"><strong>Reason</strong></label>
                       <div class="col-md-8">
                         <select class="form-control" id="reject_reason">
-                          <option value="-1">-</option>
-                          <option value="999">OTHER</option>
-                          <option value="1">BENT</option>
-                          <option value="2">BROKEN</option>
-                          <option value="3">CIRCULAR NOT ROUND</option>
-                          <option value="4">CRACKS</option>
-                          <option value="5">DEPTH OUT OF SPEC</option>
-                          <option value="6">DIMENSION OUT OF SPEC</option>
-                          <option value="7">DIRTY</option>
-                          <option value="8">HOLE DEFORM</option>
-                          <option value="9">RUST</option>
-                          <option value="10">SETUP PROGRAM WRONG POSITION</option>
-                          <option value="11">SURFACE FINISH NOT GOOD</option>
-                          <option value="12">SURFACE NOT FLAT</option>
-                          <option value="13">TAP BROKEN IN HOLE</option>
-                          <option value="14">WIRE LEFTOVER IN HOLE</option>
-                          <option value="15">WRONG POSITION</option>
-                          <option value="16">SPLIT ORDER</option>
-                          <option value="17">WRONG PROCESS SEQUENCE</option>
-                          <option value="18">RAW MATERIAL OUT OF SPECIFICATION</option>
-                          <option value="19">CUSTOMER GIVE WRONG DRAWING</option>
-                          <option value="20">REVISED CYCLE TIME</option>
-                          <option value="21">NO SHAPE</option>
-                          <option value="22">CUTTING INCOMPLETE</option>
-                          <option value="23">MATERIAL DEFECT</option>
+                          <option value="-1" selected>-</option>
+                          {% for rejectReason in rejectReasonList %}
+                          <option value="{{rejectReason.ID}}">{{rejectReason.Name}}</option>
+                          {% endfor %}
                         </select>
                       </div>
                     </div>
@@ -1071,7 +1023,7 @@
                   }
                   row += "</td>";
                   row += "<td class='small'>" + tmc_machine_name + "</td>";
-                  row += (tmc_status == "WAITING")?"<td>":"<td class='blink'>";
+                  row += (tmc_status == "WAITING")?"<td class='font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += tmc_status;
                   row += "<input type='text' id='machine_status_" + tmc_id + "' value='" + tmc_status + "' hidden>";
                   row += "</td>";
@@ -1091,7 +1043,6 @@
           }
         });
       }
-
 
       function create_operator_table(){
         var order_no = $("#order_no").val();
@@ -1119,15 +1070,21 @@
                   var topr_operator_name = topr[1] + " | " + topr[9];
                   var topr_startdatetime = topr[3];
                   var start_time = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
-                  var topr_status = topr[5];
+                  var topr_status = $.trim(topr[5]);
                   row = "";
                   row += "<tr id='operator_row_" + topr_id + "'>";
                   row += (topr_machine_name == null)? "":"<td class='small'>" + topr_machine_name + "</td>";
                   row += "<td class='small'>" + topr_operator_name + "</td>";
-                  row += (topr_status == 'COMPLETED')?"<td class='text-success'>":"<td class='blink'>";
+                  row += (topr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += topr_status + "</td>";
                   row += "<td>" + start_time + "</td>";
                   row += "<td>";
+                  if(topr_status == "WORKING"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_" + topr_id + "' onclick='stop_work_topr(" + topr_id + ")'>Stop Working</button>";
+                  } else if (topr_status == "SETUP"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_" + topr_id + "' onclick='start_work_topr(" + topr_id + ")'>Start Working</button> ";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_topr_" + topr_id + "' onclick='stop_setup_topr(" + topr_id + ")'>Stop Setup & Exit</button>";
+                  }
                   row += "</td>";
                   row += "</tr>";
                 }
@@ -1137,7 +1094,6 @@
           }
         });
       }
-
 
       function reload_machine_table(){
         $("#machine_table > tbody").empty();
@@ -1208,6 +1164,36 @@
             $('#operator_id').val("");
             $('#operator_name').val("");
             remove_valid('operator_name');
+            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            reload_operator_table();
+          }
+        });
+      }
+
+      function start_work_topr(id){
+        $('#start_work_topr_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/start_work_topr/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            reload_operator_table();
+          }
+        });
+      }
+
+      function stop_setup_topr(id){
+        $('#stop_setup_topr_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/stop_setup_topr/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
             if($("#machine_type").val() == 'Machine') reload_machine_table();
             reload_operator_table();
           }
@@ -1306,7 +1292,8 @@
         if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
         else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
         else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason");
-        else if(reject_reason == 999 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason box");
+        else if(reject_reason == 0 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field");
+        else if(other_reason.includes("|")) $("#confirm_invalid_text").text("character | is not allow to use.");
         else {
           //-- DO SOMETHING
         }
@@ -1435,7 +1422,12 @@
       }
 
       $('#reject_reason').on("change", function() {
-        ($('#reject_reason').val() == 999)? $("#other_reason").prop("readonly", false): $("#other_reason").prop("readonly", true);
+        if($('#reject_reason').val() != 0){
+          $("#other_reason").prop("readonly", true);
+          $("#other_reason").val("");
+        } else {
+          $("#other_reason").prop("readonly", false)
+        }
       });
 
       $('#add_control_key').on("change", function() {

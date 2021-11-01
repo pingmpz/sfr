@@ -68,9 +68,9 @@
                         <tbody>
                           {% for operator in operatorList %}
                           <tr>
-                            <td data-order="{{operator.EmpID}}">{{operator.EmployeeID}}</td>
-                            <td>{{operator.NameLastName}}</td>
-                            <td>{{operator.Department}}</td>
+                            <td data-order="{{operator.EmpID}}">{{operator.EmpID}}</td>
+                            <td>{{operator.EmpName}}</td>
+                            <td>{{operator.Remarks}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -107,7 +107,7 @@
 
       $(document).ready(function() {
         $('#user_master_table').DataTable( {
-            "order": [[ 0, "desc" ]],
+            "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });
       });

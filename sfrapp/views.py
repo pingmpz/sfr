@@ -26,9 +26,8 @@ def transaction(request, orderoprno):
     isFirstPage = False
     hasNoProcess = False # For Testing
     isJoined = False # For Testing
-    machineList = []
-    operatorList = []
     operationList = []
+    rejectReasonList = []
     lastestOperation = -1 # For Order !Operation
     operationBefore = -1
     operationAfter = -1
@@ -45,12 +44,13 @@ def transaction(request, orderoprno):
                 operation = get_operation(orderNo, operationNo)
                 #-- GET PREV & NEXT OPERATION
                 for i in range(len(operationList)):
-                    if operationNo == operationList[i].OperationNumber:
+                    if operationNo.strip() == operationList[i].OperationNumber.strip():
                         if i != 0:
                             operationBefore = operationList[i-1].OperationNumber
                         if i != len(operationList) - 1:
                             operationAfter = operationList[i+1].OperationNumber
-                #--
+                #-- GET REJECT REASON LIST
+                rejectReasonList = get_rejectReasonList()
             #-- GET LAST OPERATION
             else:
                 if len(operationList) != 0:
@@ -64,9 +64,8 @@ def transaction(request, orderoprno):
         'operation' : operation,
         'isJoined' : isJoined,
         'hasNoProcess' : hasNoProcess,
-        'machineList' : machineList,
-        'operatorList' : operatorList,
         'operationList' : operationList,
+        'rejectReasonList' : rejectReasonList,
         'lastestOperation' : lastestOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -228,6 +227,20 @@ def add_topr(request):
     }
     return JsonResponse(data)
 
+def start_work_topr(request):
+    id = request.GET.get('id')
+    startWorkTOPR(id)
+    data = {
+    }
+    return JsonResponse(data)
+
+def stop_setup_topr(request):
+    id = request.GET.get('id')
+    stopSetupTOPR(id)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -259,6 +272,12 @@ def get_operatorList():
     cursor.execute("SELECT * FROM [User]")
     operatorList = cursor.fetchall()
     return operatorList
+
+def get_rejectReasonList():
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [RejectReason]")
+    rejectReasonList = cursor.fetchall()
+    return rejectReasonList
 
 def get_operationList(orderNo):
     cursor = get_connection().cursor()
@@ -412,6 +431,22 @@ def getTMCbyID(id):
     else:
         tmc = result[0]
     return tmc
+
+#-- NEED FIX !!
+def startWorkTOPR(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("")
+    conn.commit()
+    return
+
+#-- NEED FIX !!
+def stopSetupTOPR(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("")
+    conn.commit()
+    return
 
 ########################################################################################
 ########################################################################################
