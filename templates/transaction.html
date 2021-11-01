@@ -329,8 +329,7 @@
                           </div>
                           <div class="card-body">
                             <div hidden>
-                              <input class="my-radio" type="radio" name="machine_radio" value="-1" {% if operation.MachineType == 'Machine' %}checked{% endif %}>
-                              <input class="my-radio" type="radio" name="machine_radio" value="0" {% if operation.MachineType == 'Labor' %}checked{% endif %}>
+                              <input type="text" id="machine_type" value="{{operation.MachineType}}">
                             </div>
                             {% if operation.MachineType == 'Machine' %}
                             <div class="form-group row">
@@ -354,22 +353,7 @@
                                 </tr>
                               </thead>
                               <tbody id="machine_table_body">
-                                {% if tmcList|length == 0 %}
-                                <tr>
-                                  <td colspan="5">Please add machine above.</td>
-                                </tr>
-                                {% endif %}
-                                {% for tmc in tmcList %}
-                                <tr>
-                                  <td><input class="my-radio" type="radio" name="machine_radio" value="{{tmc.ID}}" checked></td>
-                                  <td>{{tmc.MachineNumber}} | {{tmc.MachineName}}</td>
-                                  <td></td>
-                                  <td>{% if tmc.StartDateTime == NULL %}-{% else %}{{tmc.StartDateTime}}{% endif %}</td>
-                                  <td>
-                                    <button type="button" class="btn btn-sm btn-pill btn-dark small" id="delete_tmc_{{tmc.ID}}" onclick="delete_tmc({{tmc.ID}})">Delete</button>
-                                  </td>
-                                </tr>
-                                {% endfor %}
+
                               </tbody>
                             </table>
                             {% endif %}
@@ -382,7 +366,7 @@
                                 <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
                               <div class="col-md-3">
-                                <button type="button" class="btn btn-pill btn-success" id='operator_work_button' onclick="add_topr('WORK')" disabled>Start Work</button>
+                                <button type="button" class="btn btn-pill btn-success" id='operator_work_button' onclick="add_topr('WORKING')" disabled>Start Work</button>
                                 {% if operation.MachineType == 'Machine' %}
                                 <button type="button" class="btn btn-pill bg-green" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
                                 {% endif %}
@@ -399,20 +383,7 @@
                                 </tr>
                               </thead>
                               <tbody id="operator_table_body">
-                                {% if toprList|length == 0 %}
-                                <tr>
-                                  <td colspan="{% if operation.MachineType == 'Machine' %}5{% else %}4{% endif %}">Please add operator above.</td>
-                                </tr>
-                                {% endif %}
-                                {% for topr in toprList %}
-                                <tr>
-                                  {% if operation.MachineType == 'Machine' %}<td></td>{% endif %}
-                                  <td></td>
-                                  <td></td>
-                                  <td></td>
-                                  <td></td>
-                                </tr>
-                                {% endfor %}
+
                                 <tr id="operator_row_1">
                                   <td>BTA-01</td>
                                   <td>5731 | Yashawantatul Mangalmurti</td>
@@ -991,12 +962,11 @@
       var isSearchingOperator = false;
       var currentMachineNo = null;
       var currentOperatorId = null;
-      var rowCountMachine = 0;
-      var rowCountOperator = 0;
 
       $(document).ready(function() {
         showTime();
-        dynamic_operator_id();
+        reload_machine_table();
+        reload_operator_table();
       });
 
       //-- MAIN SCRIPT
@@ -1050,12 +1020,8 @@
             dataType: 'json',
             success: function (data) {
               if (data.canAdd) {
-                if(data.canWork){
-                  $('#operator_work_button').prop('disabled', false);
-                }
-                if (data.canSetup){
-                  $('#operator_setup_button').prop('disabled', false);
-                }
+                $('#operator_work_button').prop('disabled', false);
+                $('#operator_setup_button').prop('disabled', false);
                 currentOperatorId = data.EmpID;
                 currentOperatorName = data.EmpName;
                 $('#operator_name').val(data.EmpID + " | " + data.EmpName + " (" + data.Department + ")");
@@ -1071,6 +1037,117 @@
           });
         }
       });
+      //---------------------------------------------------------------------------------------------------- TABLES
+      function create_machine_table(){
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        $.ajax({
+          url: '/get_all_tmc/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data.tmcList.length == 0){
+              var row = "<tr><td colspan='5'>Please add machine above.</td></tr>";
+              $("#machine_table_body").append(row);
+            } else {
+              for(var i = 0;i < data.tmcList.length;i++){
+                var tmc = data.tmcList[i];
+                var row = "";
+                // console.log(tmc);
+                for(var j = 0;j < tmc.length;j++){
+                  var tmc_id = tmc[0];
+                  var tmc_machine_name = tmc[8] + " | " + tmc[9];
+                  var tmc_startdatetime = tmc[4];
+                  var startdatetime = (tmc_startdatetime == null)?"-":getFullDateTime(tmc_startdatetime);
+                  var tmc_status = $.trim(tmc[6]);
+                  row = "";
+                  row += "<tr id='machine_row_" + tmc_id + "'>";
+                  row += "<td>";
+                  if(tmc_status != "SETUP"){
+                    row += "<input type='radio' class='my-radio' name='machine_radio' value='" + tmc_id + "' checked>";
+                  }
+                  row += "</td>";
+                  row += "<td class='small'>" + tmc_machine_name + "</td>";
+                  row += (tmc_status == "WAITING")?"<td>":"<td class='blink'>";
+                  row += tmc_status;
+                  row += "<input type='text' id='machine_status_" + tmc_id + "' value='" + tmc_status + "' hidden>";
+                  row += "</td>";
+                  row += "<td>" + startdatetime + "</td>";
+                  row += "<td>";
+                  if(tmc_status == "WAITING"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_tmc_" + tmc_id + "' onclick='delete_tmc(" + tmc_id + ")'>Delete</button>";
+                  }
+                  row += "</td>";
+                  row += "</tr>";
+                }
+                $("#machine_table_body").append(row);
+                dynamic_operator_setup();
+              }
+            }
+            dynamic_operator_id();
+          }
+        });
+      }
+
+
+      function create_operator_table(){
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        var machine_type = $("#machine_type").val();
+        $.ajax({
+          url: '/get_all_topr/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data.toprList.length == 0){
+              var row = "<tr><td colspan='" + ((machine_type == 'Machine')?5:4) + "'>Please add operator above.</td></tr>";
+              $("#operator_table_body").append(row);
+            } else {
+              for(var i = 0;i < data.toprList.length;i++){
+                var topr = data.toprList[i];
+                var row = "";
+                console.log(topr);
+                for(var j = 0;j < topr.length;j++){
+                  var topr_id = topr[0];
+                  var topr_machine_name = (topr[19] == null)?null:topr[19] + " | " + topr[20];
+                  var topr_operator_name = topr[1] + " | " + topr[9];
+                  var topr_startdatetime = topr[3];
+                  var start_time = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
+                  var topr_status = topr[5];
+                  row = "";
+                  row += "<tr id='operator_row_" + topr_id + "'>";
+                  row += (topr_machine_name == null)? "":"<td class='small'>" + topr_machine_name + "</td>";
+                  row += "<td class='small'>" + topr_operator_name + "</td>";
+                  row += (topr_status == 'COMPLETED')?"<td class='text-success'>":"<td class='blink'>";
+                  row += topr_status + "</td>";
+                  row += "<td>" + start_time + "</td>";
+                  row += "<td>";
+                  row += "</td>";
+                  row += "</tr>";
+                }
+                $("#operator_table_body").append(row);
+              }
+            }
+          }
+        });
+      }
+
+
+      function reload_machine_table(){
+        $("#machine_table > tbody").empty();
+        create_machine_table();
+      }
+
+      function reload_operator_table(){
+        $("#operator_table > tbody").empty();
+        create_operator_table();
+      }
 
       //---------------------------------------------------------------------------------------------------- MACHINE
       function add_tmc(){
@@ -1086,7 +1163,10 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            $('#machine_no').val("");
+            $('#machine_name').val("");
+            remove_valid('machine_name');
+            reload_machine_table();
           }
         });
       }
@@ -1100,17 +1180,20 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            reload_machine_table();
           }
         });
       }
-      //----------------------------------------------------------------------------------------------------
       //---------------------------------------------------------------------------------------------------- OPERATOR
       function add_topr(status){
-        $('#machine_add_button').prop('disabled', true);
+        $('#operator_work_button').prop('disabled', true);
+        $('#operator_setup_button').prop('disabled', true);
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
-        var tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
+        var tmc_id = "NULL";
+        if ($('input[name="machine_radio"]').length > 0){
+          tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
+        }
         $.ajax({
           url: '/add_topr/',
           data: {
@@ -1122,7 +1205,11 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            $('#operator_id').val("");
+            $('#operator_name').val("");
+            remove_valid('operator_name');
+            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            reload_operator_table();
           }
         });
       }
@@ -1321,15 +1408,29 @@
       }
 
       //-- DYNAMIC INPUT
-      $('input[type=radio][name=machine_radio]').on("change", function() {
-        dynamic_operator_id();
+      $(document).on('change', 'input[type=radio][name=machine_radio]', function (event) {
+          dynamic_operator_setup();
       });
 
+      function dynamic_operator_setup(){
+        if ($('input[name="machine_radio"]').length > 0){
+          tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
+          var tmc_status = $('#machine_status_' + tmc_id).val();
+          if(tmc_status == "WORKING"){
+            $("#operator_setup_button").prop('hidden', true);
+          } else {
+            $("#operator_setup_button").prop('hidden', false);
+          }
+        }
+      }
+
       function dynamic_operator_id(){
-        if (document.querySelector('input[name="machine_radio"]:checked').value == "-1"){
-          $("#operator_id").prop('readonly', true);
-        } else {
+        if($('#machine_type').val() == 'Labor'){
           $("#operator_id").prop('readonly', false);
+        } else if($('#machine_type').val() == 'Machine' && $('input[name="machine_radio"]').length > 0){
+          $("#operator_id").prop('readonly', false);
+        } else {
+          $("#operator_id").prop('readonly', true);
         }
       }
 
@@ -1419,8 +1520,24 @@
         });
 
         //-- ETC
-        function capitalizeFirstLetter(string) {
-           return string.charAt(0).toUpperCase() + string.slice(1);
+        function capitalizeFirstLetter(str) {
+           return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function getFullDateTime(str) {
+           var result = "";
+           var year = new Date(str).getFullYear();
+           var month = frontZero((new Date(str).getMonth() + 1).toString());
+           var date = frontZero(new Date(str).getDate().toString());
+           var hour = frontZero(new Date(str).getHours().toString());
+           var minute = frontZero(new Date(str).getMinutes().toString());
+           var second = frontZero(new Date(str).getSeconds().toString());
+           result = date + "-" + month + "-" + year + ", " + hour + ":" + minute + ":" + second;
+           return result
+        }
+
+        function frontZero(str){
+          return (str.length != 2)?"0" + str:str;
         }
     </script>
   </body>

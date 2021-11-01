@@ -23,8 +23,6 @@ def transaction(request, orderoprno):
     operationNo = ""
     order = None
     operation = None
-    tmcList = []
-    toprList = []
     isFirstPage = False
     hasNoProcess = False # For Testing
     isJoined = False # For Testing
@@ -45,9 +43,6 @@ def transaction(request, orderoprno):
             operationList = get_operationList(orderNo)
             if isExistOperation(orderNo, operationNo):
                 operation = get_operation(orderNo, operationNo)
-                if operation.MachineType == 'Machine':
-                    tmcList = getTMCList(orderNo, operationNo)
-                toprList = getTOPRList(orderNo, operationNo)
                 #-- GET PREV & NEXT OPERATION
                 for i in range(len(operationList)):
                     if operationNo == operationList[i].OperationNumber:
@@ -67,8 +62,6 @@ def transaction(request, orderoprno):
         'isFirstPage' : isFirstPage,
         'order' : order,
         'operation' : operation,
-        'tmcList' : tmcList,
-        'toprList' : toprList,
         'isJoined' : isJoined,
         'hasNoProcess' : hasNoProcess,
         'machineList' : machineList,
@@ -164,8 +157,6 @@ def get_machine_data(request):
 def get_operator_data(request):
     operator_id = request.GET.get('operator_id')
     canAdd = False
-    canWork = True
-    canSetup = True
     invalid_text = ''
     EmpID = None
     EmpName = None
@@ -185,12 +176,28 @@ def get_operator_data(request):
         invalid_text = 'Operator Not Found'
     data = {
         'canAdd': canAdd,
-        'canWork': canWork,
-        'canSetup': canSetup,
         'invalid_text' : invalid_text,
         'EmpID': EmpID,
         'EmpName': EmpName,
         'Department': Department,
+    }
+    return JsonResponse(data)
+
+def get_all_tmc(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    tmcList = [list(i) for i in getTMCList(order_no, operation_no)]
+    data = {
+        'tmcList': tmcList,
+    }
+    return JsonResponse(data)
+
+def get_all_topr(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    toprList = [list(i) for i in getTOPRList(order_no, operation_no)]
+    data = {
+        'toprList': toprList,
     }
     return JsonResponse(data)
 
@@ -213,10 +220,10 @@ def delete_tmc(request):
 def add_topr(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
-    operator_no = request.GET.get('operator_no')
+    operator_id = request.GET.get('operator_id')
     tmc_id = request.GET.get('tmc_id')
     status = request.GET.get('status')
-    insertTOPR(order_no, operation_no, operator_no, tmc_id, status)
+    insertTOPR(order_no, operation_no, operator_id, tmc_id, status)
     data = {
     }
     return JsonResponse(data)
@@ -262,14 +269,15 @@ def get_operationList(orderNo):
 def getTMCList(orderNo, operationNo):
     cursor = get_connection().cursor()
     cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNo = '" + operationNo + "'")
-    TMCList = cursor.fetchall()
-    return TMCList
+    tmcList = cursor.fetchall()
+    return tmcList
 
 def getTOPRList(orderNo, operationNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_OPR] as TOPR LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ProductionOrderNo = '" + orderNo + "' AND TOPR.OperationNo = '" + operationNo + "'")
-    TMCList = cursor.fetchall()
-    return TMCList
+    sql = "SELECT * FROM [T_OPR] as TOPR INNER JOIN [User] as U ON TOPR.EmpID = U.EmpID LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ProductionOrderNo = '" + orderNo + "' AND TOPR.OperationNo = '" + operationNo + "'"
+    cursor.execute(sql)
+    toprList = cursor.fetchall()
+    return toprList
 
 def isExistOrder(orderNo):
     cursor = get_connection().cursor()
@@ -339,52 +347,13 @@ def isMachineWorking(machine_no):
     return isWorking
 
 #-- NEED FIX WHERE STATUS != COMPLETED
-def isOperatorWorking(operator_no):
+def isOperatorWorking(operator_id):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_no + "'")
+    cursor.execute("SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_id + "'")
     isWorking = False
     if len(cursor.fetchall()) > 0:
         isWorking = True
     return isWorking
-
-def insertTMC(order_no, operation_no, machine_no):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[T_MC] ([ProductionOrderNo],[OperationNo],[MachineNumber]) VALUES ('" + order_no + "','" + operation_no + "','" + machine_no + "');"
-    print(sql)
-    cursor.execute(sql)
-    conn.commit()
-    return
-
-def insertTOPR(order_no, operation_no, operator_no, tmc_id, status):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[T_OPR] ([ProductionOrderNo],[OperationNo],[EmpID],[T_MC_ID],[StartDateTime]) VALUES ('" + order_no + "','" + operation_no + "','" + operation_no + "'," + tmc_id + ",CURRENT_TIMESTAMP);"
-    print(sql)
-    cursor.execute(sql)
-    conn.commit()
-    if tmc_id != 0:
-        sql = "UPDATE [dbo].[T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP WHERE ID = " + tmc_id
-        cursor.execute(sql)
-        conn.commit()
-    return
-
-def deleteTMC(id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM [T_MC] WHERE ID = " + str(id))
-    conn.commit()
-    return
-
-def getTMCbyID(id):
-    cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TMC.ID = " + str(id))
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
 
 def getTMCbyMachineNo(machine_no):
     cursor = get_connection().cursor()
@@ -406,6 +375,43 @@ def getTOPRbyEmpId(operator_id):
     else:
         topr = result[0]
     return topr
+
+def insertTMC(order_no, operation_no, machine_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[T_MC] ([ProductionOrderNo],[OperationNo],[MachineNumber],[Status]) VALUES ('" + order_no + "','" + operation_no + "','" + machine_no + "','WAITING');"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertTOPR(order_no, operation_no, operator_id, tmc_id, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[T_OPR] ([ProductionOrderNo],[OperationNo],[EmpID],[T_MC_ID],[StartDateTime],[Status]) VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "'," + str(tmc_id) + ",CURRENT_TIMESTAMP,'" + status + "');"
+    cursor.execute(sql)
+    conn.commit()
+    if tmc_id != "NULL":
+        sql = "UPDATE [dbo].[T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [Status] = '" + status + "' WHERE ID = " + tmc_id
+        cursor.execute(sql)
+        conn.commit()
+    return
+
+def deleteTMC(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM [T_MC] WHERE ID = " + str(id))
+    conn.commit()
+    return
+
+def getTMCbyID(id):
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TMC.ID = " + str(id))
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        tmc = None
+    else:
+        tmc = result[0]
+    return tmc
 
 ########################################################################################
 ########################################################################################
