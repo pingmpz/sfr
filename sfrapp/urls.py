@@ -11,6 +11,7 @@ urlpatterns = [
     path('wc_master/', views.wc_master, name='wc_master'),
     path('mc_master/', views.mc_master, name='mc_master'),
     path('user_master/', views.user_master, name='user_master'),
+    path('rej_master/', views.rej_master, name='rej_master'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
     path('validate_operator/', views.validate_operator, name='validate_operator'),
