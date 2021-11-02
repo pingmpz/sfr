@@ -22,7 +22,9 @@ urlpatterns = [
     path('get_all_topr/', views.get_all_topr, name='get_all_topr'),
     path('add_tmc/', views.add_tmc, name='add_tmc'),
     path('delete_tmc/', views.delete_tmc, name='delete_tmc'),
+    path('stop_mc_tmc/', views.stop_mc_tmc, name='stop_mc_tmc'),
     path('add_topr/', views.add_topr, name='add_topr'),
     path('start_work_topr/', views.start_work_topr, name='start_work_topr'),
     path('stop_setup_topr/', views.stop_setup_topr, name='stop_setup_topr'),
+    path('stop_work_topr/', views.stop_work_topr, name='stop_work_topr'),
 ]

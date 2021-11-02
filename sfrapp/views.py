@@ -193,8 +193,12 @@ def get_all_tmc(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
     tmcList = [list(i) for i in getTMCList(order_no, operation_no)]
+    hasOperatorWorkingList = []
+    for tmc in tmcList:
+        hasOperatorWorkingList.append(hasOperatorWorking(tmc[0]))
     data = {
         'tmcList': tmcList,
+        'hasOperatorWorkingList': hasOperatorWorkingList,
     }
     return JsonResponse(data)
 
@@ -248,6 +252,20 @@ def stop_setup_topr(request):
     }
     return JsonResponse(data)
 
+def stop_work_topr(request):
+    id = request.GET.get('id')
+    stopWorkTOPR(id)
+    data = {
+    }
+    return JsonResponse(data)
+
+def stop_mc_tmc(request):
+    id = request.GET.get('id')
+    stopMachineTMC(id)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -294,13 +312,13 @@ def get_operationList(orderNo):
 
 def getTMCList(orderNo, operationNo):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNo = '" + operationNo + "'")
+    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNo = '" + operationNo + "' ORDER BY TMC.ID ASC")
     tmcList = cursor.fetchall()
     return tmcList
 
 def getTOPRList(orderNo, operationNo):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] as TOPR INNER JOIN [User] as U ON TOPR.EmpID = U.EmpID LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ProductionOrderNo = '" + orderNo + "' AND TOPR.OperationNo = '" + operationNo + "'"
+    sql = "SELECT * FROM [T_OPR] as TOPR INNER JOIN [User] as U ON TOPR.EmpID = U.EmpID LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ProductionOrderNo = '" + orderNo + "' AND TOPR.OperationNo = '" + operationNo + "' ORDER BY TOPR.ID ASC"
     cursor.execute(sql)
     toprList = cursor.fetchall()
     return toprList
@@ -366,7 +384,7 @@ def get_operator(operator_id):
 
 def isMachineWorking(machine_no):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_MC] WHERE MachineNumber = '" + machine_no + "'")
+    cursor.execute("SELECT * FROM [T_MC] WHERE MachineNumber = '" + machine_no + "' AND Status <> 'COMPLETED'")
     isWorking = False
     if len(cursor.fetchall()) > 0:
         isWorking = True
@@ -379,6 +397,34 @@ def isOperatorWorking(operator_id):
     if len(cursor.fetchall()) > 0:
         isWorking = True
     return isWorking
+
+def hasOperatorWorking(tmc_id):
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [T_OPR] WHERE T_MC_ID = " + str(tmc_id) + " AND Status <> 'COMPLETED'")
+    isWorking = False
+    if len(cursor.fetchall()) > 0:
+        isWorking = True
+    return isWorking
+
+def getTMCbyID(id):
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TMC.ID = " + str(id))
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        tmc = None
+    else:
+        tmc = result[0]
+    return tmc
+
+def getTOPRbyID(id):
+    cursor = get_connection().cursor()
+    cursor.execute("SELECT TMC.Status as TMCStatus,* FROM [T_OPR] as TOPR INNER JOIN [SAP_Routing] as RT ON TOPR.OperationNo = RT.OperationNumber LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ID = " + str(id))
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        tmc = None
+    else:
+        tmc = result[0]
+    return tmc
 
 def getTMCbyMachineNo(machine_no):
     cursor = get_connection().cursor()
@@ -403,6 +449,7 @@ def getTOPRbyEmpId(operator_id):
 def insertTMC(order_no, operation_no, machine_no):
     conn = get_connection()
     cursor = conn.cursor()
+    #-- MACHINE : ADD
     sql = "INSERT INTO [T_MC] ([ProductionOrderNo],[OperationNo],[MachineNumber],[Status]) VALUES ('" + order_no + "','" + operation_no + "','" + machine_no + "','WAITING');"
     cursor.execute(sql)
     conn.commit()
@@ -411,10 +458,13 @@ def insertTMC(order_no, operation_no, machine_no):
 def insertTOPR(order_no, operation_no, operator_id, tmc_id, status):
     conn = get_connection()
     cursor = conn.cursor()
+    #-- OPERATOR : WORKING/SETUP
     sql = "INSERT INTO [T_OPR] ([ProductionOrderNo],[OperationNo],[EmpID],[T_MC_ID],[StartDateTime],[Status]) VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "'," + str(tmc_id) + ",CURRENT_TIMESTAMP,'" + status + "');"
     cursor.execute(sql)
     conn.commit()
+    #-- IF OPERATION IS NOT LABOR TYPE
     if tmc_id != "NULL":
+        #-- MACHINE : WORKING/SETUP
         sql = "UPDATE [T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [Status] = '" + status + "' WHERE ID = " + tmc_id
         cursor.execute(sql)
         conn.commit()
@@ -423,29 +473,19 @@ def insertTOPR(order_no, operation_no, operator_id, tmc_id, status):
 def deleteTMC(id):
     conn = get_connection()
     cursor = conn.cursor()
+    #-- MACHINE : DELETE
     cursor.execute("DELETE FROM [T_MC] WHERE ID = " + str(id))
     conn.commit()
     return
 
-def getTMCbyID(id):
-    cursor = get_connection().cursor()
-    cursor.execute("SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TMC.ID = " + str(id))
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
-
-def getTOPRbyID(id):
-    cursor = get_connection().cursor()
-    cursor.execute("SELECT TMC.Status as TMCStatus,* FROM [T_OPR] as TOPR LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID WHERE TOPR.ID = " + str(id))
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
+def stopMachineTMC(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    #-- MACHINE : STOP WORKING
+    sql = "UPDATE [T_MC] SET [StopDateTime]  = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    return
 
 #-- NEED FIX !!
 def startWorkTOPR(id):
@@ -453,15 +493,31 @@ def startWorkTOPR(id):
     cursor = conn.cursor()
     topr = getTOPRbyID(id)
     if topr.TMCStatus.strip() == "SETUP":
-        a = 1
-        #-- *** POST SETUP DATA OF OPERATOR
-        #-- *** POST SETUP DATA OF MACHINE
-        sql = "UPDATE [T_MC] SET [StartDateTime]  = CURRENT_TIMESTAMP, [Status] = 'WORKING' WHERE ID = " + str(topr.T_MC_ID)
+        #-- OPERATOR : SAVE SETUP TIME
+        sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP WHERE ID = " + str(id)
         cursor.execute(sql)
         conn.commit()
-    sql = "UPDATE [T_OPR] SET [StartDateTime]  = CURRENT_TIMESTAMP, [Status] = 'WORKING' WHERE ID = " + str(id)
+        #-- MACHINE : SAVE SETUP TIME
+        sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP WHERE ID = " + str(topr.T_MC_ID)
+        cursor.execute(sql)
+        conn.commit()
+        #-- POST SETUP DATA OF OPERATOR #-- NEED FIX !!!
+        sql = """INSERT INTO [dbo].[SFR2SAP]
+           ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID],[MachineNo])
+           VALUES """
+        sql += "(CURRENT_TIMESTAMP,'"+topr.WorkCenter+"','"+topr.ProductionOrderNo+"','"+topr.OperationNumber+"',0,0,0,0,0,NULL,NULL,NULL,NULL,"+topr.EmpID+",'"+topr.MachineNumber+"')"
+        print(sql)
+        cursor.execute(sql)
+        conn.commit()
+        #-- POST SETUP DATA OF MACHINE #-- NEED FIX !!!
+
+        #-- MACHINE : WORKING
+        sql = "UPDATE [T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE ID = " + str(topr.T_MC_ID)
+        cursor.execute(sql)
+        conn.commit()
+    #-- OPERATOR : WORKING
+    sql = "UPDATE [T_OPR] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE ID = " + str(id)
     cursor.execute(sql)
-    conn.commit()
     conn.commit()
     return
 
@@ -470,14 +526,45 @@ def stopSetupTOPR(id):
     conn = get_connection()
     cursor = conn.cursor()
     topr = getTOPRbyID(id)
-    #-- *** POST SETUP DATA OF OPERATOR
-    #-- *** POST SETUP DATA OF MACHINE
-    sql = "UPDATE [T_MC] SET [StartDateTime]  = NULL, [Status] = 'WAITING' WHERE ID = " + str(topr.T_MC_ID)
+    #-- OPERATOR : SAVE SETUP TIME
+    sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
     cursor.execute(sql)
     conn.commit()
-    sql = "UPDATE [T_OPR] SET [StartDateTime]  = NULL, [Status] = 'COMPLETED' WHERE ID = " + str(id)
+    #-- MACHINE : SAVE SETUP TIME
+    sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(topr.T_MC_ID)
     cursor.execute(sql)
     conn.commit()
+    #-- POST SETUP DATA OF OPERATOR #-- NEED FIX !!!
+
+    #-- POST SETUP DATA OF MACHINE #-- NEED FIX !!!
+
+    #-- MACHINE : GO BACK TO WAITING
+    sql = "UPDATE [T_MC] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING' WHERE ID = " + str(topr.T_MC_ID)
+    cursor.execute(sql)
+    conn.commit()
+    #-- OPERATOR : EXIT
+    sql = "DELETE FROM [T_OPR] WHERE ID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+#-- NEED FIX !!
+def stopWorkTOPR(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    topr = getTOPRbyID(id)
+    #-- OPERATOR : SAVE WORKING TIME
+    sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    #-- POST WORKING DATA OF OPERATOR #-- NEED FIX !!!
+
+    #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & MACHINE IS MANUAL
+    if(topr.T_MC_ID != None and hasOperatorWorking(topr.T_MC_ID) == False and topr.Auto_Manual.strip() == 'Manual'):
+        #-- MACHINE : STOP WORKING
+        sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(topr.T_MC_ID)
+        cursor.execute(sql)
+        conn.commit()
     return
 
 ########################################################################################

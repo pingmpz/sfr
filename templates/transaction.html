@@ -277,7 +277,6 @@
                         <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
                         <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
                         <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
-                        <button type="button" class="btn btn-lg btn-primary my-btn small" data-toggle="modal" data-target="#confirm_modal"><i class="c-icon c-icon-xl cil-thumb-up"></i><br>Confirm</button>
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
@@ -380,7 +379,7 @@
                                   {% if operation.MachineType == 'Machine' %}<th>Machine</th>{% endif %}
                                   <th>Operator</th>
                                   <th>Status</th>
-                                  <th>Start Time</th>
+                                  <th>Start-Stop Time</th>
                                   <th></th>
                                 </tr>
                               </thead>
@@ -918,7 +917,7 @@
 
       $(document).ready(function() {
         showTime();
-        if($("#has_data").val() == true){
+        if($("#has_data").val() == "true"){
           reload_machine_table();
           reload_operator_table();
         }
@@ -1004,6 +1003,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            var completed_count = 0;
             if(data.tmcList.length == 0){
               var row = "<tr><td colspan='5'>Please add machine above.</td></tr>";
               $("#machine_table_body").append(row);
@@ -1017,7 +1017,14 @@
                   var tmc_machine_name = tmc[8] + " | " + tmc[9];
                   var tmc_startdatetime = tmc[4];
                   var startdatetime = (tmc_startdatetime == null)?"-":getFullDateTime(tmc_startdatetime);
+                  var tmc_stopdatetime = tmc[5];
+                  var stopdatetime = (tmc_stopdatetime == null)?"-":getFullDateTime(tmc_stopdatetime);
                   var tmc_status = $.trim(tmc[6]);
+                  var mc_type = $.trim(tmc[11]);
+                  if(tmc_status == "COMPLETED") {
+                    completed_count++;
+                    break;
+                  }
                   row = "";
                   row += "<tr id='machine_row_" + tmc_id + "'>";
                   row += "<td>";
@@ -1030,16 +1037,24 @@
                   row += tmc_status;
                   row += "<input type='text' id='machine_status_" + tmc_id + "' value='" + tmc_status + "' hidden>";
                   row += "</td>";
-                  row += "<td>" + startdatetime + "</td>";
+                  row += "<td class='small'>";
+                  row += "<div>" + startdatetime + "</div>";
+                  row += "</td>";
                   row += "<td>";
                   if(tmc_status == "WAITING"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_tmc_" + tmc_id + "' onclick='delete_tmc(" + tmc_id + ")'>Delete</button>";
+                  } else if (tmc_status == "WORKING" && mc_type == "Auto" && data.hasOperatorWorkingList[i] == false){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_mc_tmc_" + tmc_id + "' onclick='stop_mc_tmc(" + tmc_id + ")'>Stop Machine</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
                 }
                 $("#machine_table_body").append(row);
                 dynamic_operator_setup();
+              }
+              if(completed_count == data.tmcList.length){
+                var row = "<tr><td colspan='5'>Please add machine above.</td></tr>";
+                $("#machine_table_body").append(row);
               }
             }
             dynamic_operator_id();
@@ -1066,13 +1081,15 @@
               for(var i = 0;i < data.toprList.length;i++){
                 var topr = data.toprList[i];
                 var row = "";
-                console.log(topr);
+                // console.log(topr);
                 for(var j = 0;j < topr.length;j++){
                   var topr_id = topr[0];
                   var topr_machine_name = (topr[19] == null)?null:topr[19] + " | " + topr[20];
                   var topr_operator_name = topr[1] + " | " + topr[9];
                   var topr_startdatetime = topr[3];
-                  var start_time = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
+                  var startdatetime = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
+                  var topr_stopdatetime = topr[4];
+                  var stopdatetime = (topr_stopdatetime == null)?"-":getFullDateTime(topr_stopdatetime);
                   var topr_status = $.trim(topr[5]);
                   row = "";
                   row += "<tr id='operator_row_" + topr_id + "'>";
@@ -1080,13 +1097,18 @@
                   row += "<td class='small'>" + topr_operator_name + "</td>";
                   row += (topr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += topr_status + "</td>";
-                  row += "<td>" + start_time + "</td>";
+                  row += "<td class='small'>";
+                  row += "<div> <strong>START</strong> " + startdatetime + "</div>";
+                  row += "<div> <strong>STOP</strong> " + stopdatetime + "</div>";
+                  row += "</td>";
                   row += "<td>";
                   if(topr_status == "WORKING"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_" + topr_id + "' onclick='stop_work_topr(" + topr_id + ")'>Stop Working</button>";
                   } else if (topr_status == "SETUP"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_" + topr_id + "' onclick='start_work_topr(" + topr_id + ")'>Start Working</button> ";
                     row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_topr_" + topr_id + "' onclick='stop_setup_topr(" + topr_id + ")'>Stop Setup & Exit</button>";
+                  } else if (topr_status == "COMPLETED" && $('#remain_qty').val() > 0){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm()' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
@@ -1134,6 +1156,20 @@
         $('#delete_tmc_' + id).prop('disabled', true);
         $.ajax({
           url: '/delete_tmc/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            reload_machine_table();
+          }
+        });
+      }
+
+      function stop_mc_tmc(id){
+        $('#stop_mc_tmc_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/stop_mc_tmc/',
           data: {
             'id': id,
           },
@@ -1192,6 +1228,21 @@
         $('#stop_setup_topr_' + id).prop('disabled', true);
         $.ajax({
           url: '/stop_setup_topr/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            reload_operator_table();
+          }
+        });
+      }
+
+      function stop_work_topr(id){
+        $('#stop_work_topr_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/stop_work_topr/',
           data: {
             'id': id,
           },
@@ -1355,19 +1406,19 @@
       }
 
       //-- SHORTCUT SEARCH
-        document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
+      document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
             if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
         });
 
-        document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
+      document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
             if ($("#sc_order_no").val().length == 10) $("#sc_operation_no").focus();
         });
 
-        document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
+      document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
             if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
         });
 
-        function shortcut_search(){
+      function shortcut_search(){
           var order_no =  $("#sc_order_no").val();
           var operation_no =  $("#sc_operation_no").val();
           (order_no.length != 10)? invalid("sc_order_no"): valid("sc_order_no");
