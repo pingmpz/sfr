@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 import pyodbc
 from django.http import JsonResponse
+from datetime import datetime
 
 ################################################################################
 ##################################### PAGES ####################################
@@ -266,6 +267,26 @@ def stop_mc_tmc(request):
     }
     return JsonResponse(data)
 
+def get_topr_for_confirm(request):
+    id = request.GET.get('id')
+    topr = getTOPRbyID(id)
+    operator = get_operator(topr.EmpID)
+    operator_text = operator.EmpID.strip() + " | " + operator.EmpName
+    machine_text = ""
+    if topr.MachineNumber != None:
+        machine = get_machine(topr.MachineNumber)
+        machine_text = machine.MachineNumber + " | " + machine.MachineName
+    start_time = topr.Startdt.strftime("%d-%m-%Y, %H:%M:%S")
+    stop_time = topr.Stopdt.strftime("%d-%m-%Y, %H:%M:%S")
+    print(start_time, stop_time)
+    data = {
+        'operator_text': operator_text,
+        'machine_text': machine_text,
+        'start_time': start_time,
+        'stop_time': stop_time,
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -418,7 +439,7 @@ def getTMCbyID(id):
 
 def getTOPRbyID(id):
     cursor = get_connection().cursor()
-    cursor.execute("SELECT TMC.Status as TMCStatus,* FROM [T_OPR] as TOPR INNER JOIN [SAP_Routing] as RT ON TOPR.OperationNo = RT.OperationNumber LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ID = " + str(id))
+    cursor.execute("SELECT TOPR.ProductionOrderNo as OrderNo, TOPR.StartDateTime as Startdt, TOPR.StopDateTime as Stopdt, TMC.Status as TMCStatus,* FROM [T_OPR] as TOPR INNER JOIN [SAP_Routing] as RT ON TOPR.OperationNo = RT.OperationNumber LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TOPR.ID = " + str(id))
     result = cursor.fetchall()
     if(len(result) == 0):
         tmc = None
@@ -487,7 +508,6 @@ def stopMachineTMC(id):
     conn.commit()
     return
 
-#-- NEED FIX !!
 def startWorkTOPR(id):
     conn = get_connection()
     cursor = conn.cursor()
@@ -501,16 +521,17 @@ def startWorkTOPR(id):
         sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP WHERE ID = " + str(topr.T_MC_ID)
         cursor.execute(sql)
         conn.commit()
-        #-- POST SETUP DATA OF OPERATOR #-- NEED FIX !!!
-        sql = """INSERT INTO [dbo].[SFR2SAP]
-           ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID],[MachineNo])
-           VALUES """
-        sql += "(CURRENT_TIMESTAMP,'"+topr.WorkCenter+"','"+topr.ProductionOrderNo+"','"+topr.OperationNumber+"',0,0,0,0,0,NULL,NULL,NULL,NULL,"+topr.EmpID+",'"+topr.MachineNumber+"')"
-        print(sql)
+        #-- POST SETUP DATA OF OPERATOR
+        topr = getTOPRbyID(id)
+        startdate = topr.Startdt.strftime("%Y%m%d");
+        starttime = topr.Startdt.strftime("%H%M%S");
+        stopdate = topr.Stopdt.strftime("%Y%m%d");
+        stoptime = topr.Stopdt.strftime("%H%M%S");
+        setuptime = int(((topr.Stopdt - topr.Startdt).total_seconds())/60)
+        sql = "INSERT INTO [dbo].[SFR2SAP] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID],[MachineNo]) VALUES "
+        sql += "(CURRENT_TIMESTAMP,'"+topr.WorkCenter+"','"+topr.OrderNo+"','"+topr.OperationNumber+"',0,0,'"+str(setuptime)+"',0,'"+str(setuptime)+"','"+startdate+"','"+starttime+"','"+stopdate+"','"+stoptime+"',"+topr.EmpID+",'"+topr.MachineNumber+"')"
         cursor.execute(sql)
         conn.commit()
-        #-- POST SETUP DATA OF MACHINE #-- NEED FIX !!!
-
         #-- MACHINE : WORKING
         sql = "UPDATE [T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE ID = " + str(topr.T_MC_ID)
         cursor.execute(sql)
@@ -521,23 +542,29 @@ def startWorkTOPR(id):
     conn.commit()
     return
 
-#-- NEED FIX !!
 def stopSetupTOPR(id):
     conn = get_connection()
     cursor = conn.cursor()
-    topr = getTOPRbyID(id)
     #-- OPERATOR : SAVE SETUP TIME
     sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
     cursor.execute(sql)
     conn.commit()
     #-- MACHINE : SAVE SETUP TIME
+    topr = getTOPRbyID(id)
     sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(topr.T_MC_ID)
     cursor.execute(sql)
     conn.commit()
-    #-- POST SETUP DATA OF OPERATOR #-- NEED FIX !!!
-
-    #-- POST SETUP DATA OF MACHINE #-- NEED FIX !!!
-
+    #-- POST SETUP DATA OF OPERATOR
+    topr = getTOPRbyID(id)
+    startdate = topr.Startdt.strftime("%Y%m%d");
+    starttime = topr.Startdt.strftime("%H%M%S");
+    stopdate = topr.Stopdt.strftime("%Y%m%d");
+    stoptime = topr.Stopdt.strftime("%H%M%S");
+    setuptime = int(((topr.Stopdt - topr.Startdt).total_seconds())/60)
+    sql = "INSERT INTO [dbo].[SFR2SAP] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID],[MachineNo]) VALUES "
+    sql += "(CURRENT_TIMESTAMP,'"+topr.WorkCenter+"','"+topr.OrderNo+"','"+topr.OperationNumber+"',0,0,'"+str(setuptime)+"',0,'"+str(setuptime)+"','"+startdate+"','"+starttime+"','"+stopdate+"','"+stoptime+"',"+topr.EmpID+",'"+topr.MachineNumber+"')"
+    cursor.execute(sql)
+    conn.commit()
     #-- MACHINE : GO BACK TO WAITING
     sql = "UPDATE [T_MC] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING' WHERE ID = " + str(topr.T_MC_ID)
     cursor.execute(sql)
@@ -548,17 +575,29 @@ def stopSetupTOPR(id):
     conn.commit()
     return
 
-#-- NEED FIX !!
 def stopWorkTOPR(id):
     conn = get_connection()
     cursor = conn.cursor()
-    topr = getTOPRbyID(id)
     #-- OPERATOR : SAVE WORKING TIME
     sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
     cursor.execute(sql)
     conn.commit()
-    #-- POST WORKING DATA OF OPERATOR #-- NEED FIX !!!
-
+    #-- POST WORKING DATA OF OPERATOR
+    topr = getTOPRbyID(id)
+    startdate = topr.Startdt.strftime("%Y%m%d");
+    starttime = topr.Startdt.strftime("%H%M%S");
+    stopdate = topr.Stopdt.strftime("%Y%m%d");
+    stoptime = topr.Stopdt.strftime("%H%M%S");
+    worktimeOperator = str(int(((topr.Stopdt - topr.Startdt).total_seconds())/60))
+    worktimeMachine = 0
+    mc_no = ""
+    if topr.MachineNumber != None:
+        mc_no = topr.MachineNumber
+        worktimeMachine = worktimeOperator
+    sql = "INSERT INTO [dbo].[SFR2SAP] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID],[MachineNo]) VALUES "
+    sql += "(CURRENT_TIMESTAMP,'"+topr.WorkCenter+"','"+topr.OrderNo+"','"+topr.OperationNumber+"',0,0,0,'"+str(worktimeMachine)+"','"+str(worktimeOperator)+"','"+startdate+"','"+starttime+"','"+stopdate+"','"+stoptime+"',"+topr.EmpID+",'"+mc_no+"')"
+    cursor.execute(sql)
+    conn.commit()
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & MACHINE IS MANUAL
     if(topr.T_MC_ID != None and hasOperatorWorking(topr.T_MC_ID) == False and topr.Auto_Manual.strip() == 'Manual'):
         #-- MACHINE : STOP WORKING

@@ -825,22 +825,39 @@
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
+              <input type="text" id="confirm_id" hidden>
               <div class="col-md-12">
                 <div class="form-group row">
                   <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
                   <div class="col-md-7">
-                    <input class="form-control" type="text" id="confirm_operator" value="5731 | Yashawantatul Mangalmurti (MIS)" readonly>
+                    <input class="form-control" type="text" id="confirm_operator" readonly>
                   </div>
                 </div>
                 {% if operation.MachineType == 'Machine' %}
                 <div class="form-group row">
                   <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
                   <div class="col-md-7">
-                    <input class="form-control" type="text" id="confirm_machine" value="BTA-01 | Miyano BNF16" readonly>
+                    <input class="form-control" type="text" id="confirm_machine" readonly>
                   </div>
                 </div>
                 {% endif %}
                 <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="text" id="confirm_start_time" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="text" id="confirm_stop_time" readonly>
+                      </div>
+                    </div>
+                  </div>
                   <div class="col-md-6">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
@@ -864,7 +881,7 @@
                         <select class="form-control" id="reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.ID}}">{{rejectReason.Name}}</option>
+                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -883,7 +900,7 @@
               <div class="text-danger text-center small" id="confirm_invalid_text"></div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-primary" type="button" onclick="confirm()">Confirm</button>
+              <button class="btn btn-primary" type="button" id="confirm_button" onclick="confirm()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -942,7 +959,7 @@
               if (data.canAdd) {
                 currentMachineNo = data.MachineNumber;
                 currentMachineName = data.MachineName;
-                $('#machine_name').val(data.MachineNumber + " | " + data.MachineName);
+                $('#machine_name').val(data.MachineNumber+" | "+data.MachineName);
                 $('#machine_add_button').prop('disabled', false);
                 valid('machine_name');
                 $('#machine_name').addClass('text-success');
@@ -978,7 +995,7 @@
                 $('#operator_setup_button').prop('disabled', false);
                 currentOperatorId = data.EmpID;
                 currentOperatorName = data.EmpName;
-                $('#operator_name').val(data.EmpID + " | " + data.EmpName + " (" + data.Department + ")");
+                $('#operator_name').val(data.EmpID+" | "+data.EmpName+" ("+data.Department+")");
                 valid('operator_name');
                 $('#operator_name').addClass('text-success');
               } else {
@@ -1014,7 +1031,7 @@
                 // console.log(tmc);
                 for(var j = 0;j < tmc.length;j++){
                   var tmc_id = tmc[0];
-                  var tmc_machine_name = tmc[8] + " | " + tmc[9];
+                  var tmc_machine_name = tmc[8]+" | "+tmc[9];
                   var tmc_startdatetime = tmc[4];
                   var startdatetime = (tmc_startdatetime == null)?"-":getFullDateTime(tmc_startdatetime);
                   var tmc_stopdatetime = tmc[5];
@@ -1026,25 +1043,25 @@
                     break;
                   }
                   row = "";
-                  row += "<tr id='machine_row_" + tmc_id + "'>";
+                  row += "<tr id='machine_row_"+tmc_id+"'>";
                   row += "<td>";
                   if(tmc_status != "SETUP"){
-                    row += "<input type='radio' class='my-radio' name='machine_radio' value='" + tmc_id + "' checked>";
+                    row += "<input type='radio' class='my-radio' name='machine_radio' value='"+tmc_id+"' checked>";
                   }
                   row += "</td>";
-                  row += "<td class='small'>" + tmc_machine_name + "</td>";
+                  row += "<td class='small'>"+tmc_machine_name+"</td>";
                   row += (tmc_status == "WAITING")?"<td class='font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += tmc_status;
-                  row += "<input type='text' id='machine_status_" + tmc_id + "' value='" + tmc_status + "' hidden>";
+                  row += "<input type='text' id='machine_status_"+tmc_id+"' value='"+tmc_status+"' hidden>";
                   row += "</td>";
                   row += "<td class='small'>";
-                  row += "<div>" + startdatetime + "</div>";
+                  row += "<div>"+startdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
                   if(tmc_status == "WAITING"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_tmc_" + tmc_id + "' onclick='delete_tmc(" + tmc_id + ")'>Delete</button>";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_tmc_"+tmc_id+"' onclick='delete_tmc("+tmc_id+")'>Delete</button>";
                   } else if (tmc_status == "WORKING" && mc_type == "Auto" && data.hasOperatorWorkingList[i] == false){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_mc_tmc_" + tmc_id + "' onclick='stop_mc_tmc(" + tmc_id + ")'>Stop Machine</button>";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_mc_tmc_"+tmc_id+"' onclick='stop_mc_tmc("+tmc_id+")'>Stop Machine</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
@@ -1075,7 +1092,7 @@
           dataType: 'json',
           success: function (data) {
             if(data.toprList.length == 0){
-              var row = "<tr><td colspan='" + ((machine_type == 'Machine')?5:4) + "'>Please add operator above.</td></tr>";
+              var row = "<tr><td colspan='"+((machine_type == 'Machine')?5:4)+"'>Please add operator above.</td></tr>";
               $("#operator_table_body").append(row);
             } else {
               for(var i = 0;i < data.toprList.length;i++){
@@ -1084,31 +1101,31 @@
                 // console.log(topr);
                 for(var j = 0;j < topr.length;j++){
                   var topr_id = topr[0];
-                  var topr_machine_name = (topr[19] == null)?null:topr[19] + " | " + topr[20];
-                  var topr_operator_name = topr[1] + " | " + topr[9];
+                  var topr_machine_name = (topr[19] == null)?null:topr[19]+" | "+topr[20];
+                  var topr_operator_name = topr[1]+" | "+topr[9];
                   var topr_startdatetime = topr[3];
                   var startdatetime = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
                   var topr_stopdatetime = topr[4];
                   var stopdatetime = (topr_stopdatetime == null)?"-":getFullDateTime(topr_stopdatetime);
                   var topr_status = $.trim(topr[5]);
                   row = "";
-                  row += "<tr id='operator_row_" + topr_id + "'>";
-                  row += (topr_machine_name == null)? "":"<td class='small'>" + topr_machine_name + "</td>";
-                  row += "<td class='small'>" + topr_operator_name + "</td>";
+                  row += "<tr id='operator_row_"+topr_id+"'>";
+                  row += (topr_machine_name == null)? "":"<td class='small'>"+topr_machine_name+"</td>";
+                  row += "<td class='small'>"+topr_operator_name+"</td>";
                   row += (topr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
-                  row += topr_status + "</td>";
+                  row += topr_status+"</td>";
                   row += "<td class='small'>";
-                  row += "<div> <strong>START</strong> " + startdatetime + "</div>";
-                  row += "<div> <strong>STOP</strong> " + stopdatetime + "</div>";
+                  row += "<div> <strong>START</strong> "+startdatetime+"</div>";
+                  row += "<div> <strong>STOP</strong> "+stopdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
                   if(topr_status == "WORKING"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_" + topr_id + "' onclick='stop_work_topr(" + topr_id + ")'>Stop Working</button>";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_"+topr_id+"' onclick='stop_work_topr("+topr_id+")'>Stop Working</button>";
                   } else if (topr_status == "SETUP"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_" + topr_id + "' onclick='start_work_topr(" + topr_id + ")'>Start Working</button> ";
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_topr_" + topr_id + "' onclick='stop_setup_topr(" + topr_id + ")'>Stop Setup & Exit</button>";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_"+topr_id+"' onclick='start_work_topr("+topr_id+")'>Start Working</button> ";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_topr_"+topr_id+"' onclick='stop_setup_topr("+topr_id+")'>Stop Setup & Exit</button>";
                   } else if (topr_status == "COMPLETED" && $('#remain_qty').val() > 0){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm()' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+topr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
@@ -1250,6 +1267,25 @@
           success: function (data) {
             if($("#machine_type").val() == 'Machine') reload_machine_table();
             reload_operator_table();
+          }
+        });
+      }
+
+      function prepare_confirm(id){
+        $('#confirm_button').prop('disabled', true);
+        $.ajax({
+          url: '/get_topr_for_confirm/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            $('#confirm_id').val(id);
+            $('#confirm_operator').val(data.operator_text);
+            $('#confirm_machine').val(data.machine_text);
+            $('#confirm_start_time').val(data.start_time);
+            $('#confirm_stop_time').val(data.stop_time);
+            $('#confirm_button').prop('disabled', false);
           }
         });
       }
@@ -1434,18 +1470,18 @@
       valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
 
       function remove_valid(input_id){
-        $("#" + input_id).removeClass("is-invalid");
-        $("#" + input_id).removeClass("is-valid");
+        $("#"+input_id).removeClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
       }
 
       function valid(input_id){
-        $("#" + input_id).addClass("is-valid");
-        $("#" + input_id).removeClass("is-invalid");
+        $("#"+input_id).addClass("is-valid");
+        $("#"+input_id).removeClass("is-invalid");
       }
 
       function invalid(input_id){
-        $("#" + input_id).addClass("is-invalid");
-        $("#" + input_id).removeClass("is-valid");
+        $("#"+input_id).addClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
       }
 
       //-- DYNAMIC INPUT
@@ -1578,12 +1614,12 @@
            var hour = frontZero(new Date(str).getHours().toString());
            var minute = frontZero(new Date(str).getMinutes().toString());
            var second = frontZero(new Date(str).getSeconds().toString());
-           result = date + "-" + month + "-" + year + ", " + hour + ":" + minute + ":" + second;
+           result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
            return result
         }
 
         function frontZero(str){
-          return (str.length != 2)?"0" + str:str;
+          return (str.length != 2)?"0"+str:str;
         }
     </script>
   </body>
