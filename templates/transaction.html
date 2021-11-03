@@ -171,25 +171,25 @@
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-info"><strong>Process Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="process_qty" value="10" readonly>
+                                  <input class="form-control" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="remain_qty" value="10" readonly>
+                                  <input class="form-control" type="text" id="remain_qty" value="{{remainQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="accepted_qty" value="0" readonly>
+                                  <input class="form-control" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-4 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
                                 <div class="col-md-8">
-                                  <input class="form-control" type="text" id="rejected_qty" value="0" readonly>
+                                  <input class="form-control" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
                                 </div>
                               </div>
                             </div>
@@ -287,19 +287,7 @@
                         <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
-                      <!-- No Process -->
-                      <div class="col-md-12" {% if hasNoProcess == False %}hidden{% endif %}>
-                        <div class="card text-white bg-dark text-center">
-                          <div class="card-body text-center">
-                            <br><br><br><br><br>
-                            <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>THE OPERATION IS WAITING..</strong></h3>
-                            <br><br><br><br><br><br>
-                          </div>
-                        </div>
-                      </div>
-                      {% if hasNoProcess == False %}
+                      {% if remainQty > 0 %}
                       {% if isJoined == True %}
                       <!-- Joining -->
                       <div class="col-md-12">
@@ -314,7 +302,6 @@
                         </div>
                       </div>
                       {% endif %}
-                      {% if isJoined == False %}
                       <!-- Machine/Operator -->
                       <div class="col-md-12">
                         <div class="card border-secondary">
@@ -391,6 +378,33 @@
                         </div>
                       </div>
                       {% endif %}
+                      {% if remainQty == 0 and operation.ProcessQty != 0 %}
+                      <!-- Completed Operation -->
+                      <div class="col-md-12">
+                        <div class="card text-white bg-success text-center">
+                          <div class="card-body text-center">
+                            <br><br><br><br><br>
+                            <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
+                            <br>
+                            <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
+                            <br><br><br><br><br><br>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+                      {% if remainQty == 0 and operation.ProcessQty == 0 %}
+                      <!-- Waiting Operation -->
+                      <div class="col-md-12">
+                        <div class="card text-white bg-dark text-center">
+                          <div class="card-body text-center">
+                            <br><br><br><br><br>
+                            <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
+                            <br>
+                            <h3><strong>THIS OPERATION IS WAITING</strong></h3>
+                            <br><br><br><br><br><br>
+                          </div>
+                        </div>
+                      </div>
                       {% endif %}
                     </div>
                   </div>
@@ -934,8 +948,8 @@
 
       $(document).ready(function() {
         showTime();
-        if($("#has_data").val() == "true"){
-          reload_machine_table();
+        if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
+          if($("#machine_type").val() == 'Machine') reload_machine_table();
           reload_operator_table();
         }
       });
