@@ -30,6 +30,7 @@ def transaction(request, orderoprno):
     operationList = []
     rejectReasonList = []
     materialGroupList = []
+    purchaseGroupList = []
     lastestOperation = -1 # For Order !Operation
     operationBefore = -1
     operationAfter = -1
@@ -56,6 +57,7 @@ def transaction(request, orderoprno):
                 #-- GET REJECT REASON LIST
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
+                purchaseGroupList = getPurchaseGroupList()
             #-- GET LAST OPERATION
             else:
                 if len(operationList) != 0:
@@ -72,6 +74,7 @@ def transaction(request, orderoprno):
         'operationList' : operationList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
+        'purchaseGroupList' : purchaseGroupList,
         'lastestOperation' : lastestOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -412,7 +415,13 @@ def getRejectReasonList():
 
 def getMaterialGroupList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [materialGroup]"
+    sql = "SELECT * FROM [MaterialGroup]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getPurchaseGroupList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [PurchaseGroup]"
     cursor.execute(sql)
     return cursor.fetchall()
 
