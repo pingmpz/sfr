@@ -29,6 +29,7 @@ def transaction(request, orderoprno):
     isFirstPage = False
     operationList = []
     rejectReasonList = []
+    materialGroupList = []
     lastestOperation = -1 # For Order !Operation
     operationBefore = -1
     operationAfter = -1
@@ -54,6 +55,7 @@ def transaction(request, orderoprno):
                             operationAfter = operationList[i+1].OperationNumber
                 #-- GET REJECT REASON LIST
                 rejectReasonList = getRejectReasonList()
+                materialGroupList = getMaterialGroupList()
             #-- GET LAST OPERATION
             else:
                 if len(operationList) != 0:
@@ -69,6 +71,7 @@ def transaction(request, orderoprno):
         'joinList' : joinList,
         'operationList' : operationList,
         'rejectReasonList' : rejectReasonList,
+        'materialGroupList' : materialGroupList,
         'lastestOperation' : lastestOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -273,12 +276,15 @@ def start_work_topr(request):
     if topr.TMCStatus.strip() == "SETUP":
         #-- OPERATOR : SAVE SETUP TIME
         updateTOPR(id, "COMPLETED")
+        #-- LOG OPERATOR SETUP TIME ?????
         #-- MACHINE : SAVE SETUP TIME
         updateTMC(topr.T_MC_ID, "COMPLETED")
-        #-- POST SETUP DATA OF OPERATOR
+        #-- LOG MACHINE SETUP TIME ?????
+        #-- POST SETUP TIME
         topr = getTOPRbyID(id)
         setuptime = int(((topr.TOPRStopDateTime - topr.TOPRStartDateTime).total_seconds())/60)
         insertSFR2SAP(topr.WorkCenter,topr.OrderNo,topr.OperationNumber,0,0,setuptime,0,setuptime,topr.TOPRStartDateTime,topr.TOPRStopDateTime,topr.EmpID,topr.MachineNumber)
+        #-- POST SETUP TIME FOR JOINING LIST ?????
         #-- MACHINE : WORKING
         updateTMC(topr.T_MC_ID, "WORKING")
     #-- OPERATOR : WORKING
@@ -291,12 +297,15 @@ def stop_setup_topr(request):
     id = request.GET.get('id')
     #-- OPERATOR : SAVE SETUP TIME
     updateTOPR(id, "COMPLETED")
+    #-- LOG OPERATOR SETUP TIME ?????
     #-- MACHINE : SAVE SETUP TIME
     topr = getTOPRbyID(id)
     updateTMC(topr.T_MC_ID, "COMPLETED")
-    #-- POST SETUP DATA OF OPERATOR
+    #-- LOG MACHINE SETUP TIME ?????
+    #-- POST SETUP TIME
     setuptime = int(((topr.TOPRStopDateTime - topr.TOPRStartDateTime).total_seconds())/60)
     insertSFR2SAP(topr.WorkCenter,topr.OrderNo,topr.OperationNumber,0,0,setuptime,0,setuptime,topr.TOPRStartDateTime,topr.TOPRStopDateTime,topr.EmpID,topr.MachineNumber)
+    #-- POST SETUP TIME FOR JOINING LIST ?????
     #-- MACHINE : WAITING
     updateTMC(topr.T_MC_ID, "WAITING")
     #-- OPERATOR : EXIT
@@ -307,19 +316,26 @@ def stop_setup_topr(request):
 
 def stop_work_topr(request):
     id = request.GET.get('id')
+    topr = getTOPRbyID(id)
+    status = topr.Status
     #-- OPERATOR : SAVE WORKING TIME
     updateTOPR(id, "COMPLETED")
-    #-- POST WORKING DATA OF OPERATOR
+    #-- LOG OPERATOR WORKING TIME ?????
+    #-- POST WORKING TIME
     topr = getTOPRbyID(id)
     worktimeOperator = str(int(((topr.TOPRStopDateTime - topr.TOPRStartDateTime).total_seconds())/60))
     worktimeMachine = 0
     if topr.MachineNumber != None:
         worktimeMachine = worktimeOperator
+    if status == "EXT-WORK":
+        worktimeOperator = 0
     insertSFR2SAP(topr.WorkCenter,topr.OrderNo,topr.OperationNumber,0,0,0,worktimeMachine,worktimeOperator,topr.TOPRStartDateTime,topr.TOPRStopDateTime,topr.EmpID,topr.MachineNumber)
+    #-- POST WORKING TIME FOR JOINING LIST ?????
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & MACHINE IS MANUAL
     if(topr.T_MC_ID != None and hasOperatorWorking(topr.T_MC_ID) == False and topr.Auto_Manual.strip() == 'Manual'):
         #-- MACHINE : STOP
         updateTMC(topr.T_MC_ID, "COMPLETED")
+        #-- LOG MACHINE WORKING TIME ?????
     data = {
     }
     return JsonResponse(data)
@@ -328,6 +344,7 @@ def stop_mc_tmc(request):
     id = request.GET.get('id')
     #-- MACHINE : STOP
     updateTMC(id, "COMPLETED")
+    #-- LOG MACHINE WORKING TIME ?????
     data = {
     }
     return JsonResponse(data)
@@ -390,6 +407,12 @@ def getOperatorList():
 def getRejectReasonList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [RejectReason]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getMaterialGroupList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [materialGroup]"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -535,7 +558,7 @@ def isMachineWorking(machine_no):
 
 def isOperatorWorking(operator_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_id + "' AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_id + "' AND Status <> 'COMPLETED' AND Status <> 'EXT-WORK'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 

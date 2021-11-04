@@ -40,6 +40,10 @@
           background-color:#dbf2f2;
           color:black;
       }
+      .bg-plum {
+          background-color:#b691ff;
+          color:white;
+      }
       .my-btn {
         width: 90px;
       }
@@ -345,7 +349,7 @@
                                 <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
                               <div class="col-md-3">
-                                <button type="button" class="btn btn-pill btn-success" id='operator_work_button' onclick="add_topr('WORKING')" disabled>Start Work</button>
+                                <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_topr('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
                                 {% if operation.MachineType == 'Machine' %}
                                 <button type="button" class="btn btn-pill bg-green text-white" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
                                 {% endif %}
@@ -540,15 +544,16 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_cost_element" autocomplete="off" value="51201102" readonly>
+                    <input class="form-control form-control-sm" type="text" id="add_cost_element" autocomplete="off" value="51202101" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
                   <div class="col-md-8">
                     <select class="form-control form-control-sm" id="add_mat_group" name="">
-                      <option value="0" selected>ZSERVICE</option>
-                      <option value="1">Z????</option>
+                      {% for materialGroup in materialGroupList %}
+                      <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
+                      {% endfor %}
                     </select>
                   </div>
                 </div>
@@ -651,7 +656,7 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_cost_element" autocomplete="off" value="51201102" readonly>
+                    <input class="form-control form-control-sm" type="text" id="change_cost_element" autocomplete="off" value="51202101" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -1140,7 +1145,7 @@
                   row += "<div> <strong>STOP</strong> "+stopdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
-                  if(topr_status == "WORKING"){
+                  if(topr_status == "WORKING" || topr_status == "EXT-WORK"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_"+topr_id+"' onclick='stop_work_topr("+topr_id+")'>Stop Working</button>";
                   } else if (topr_status == "SETUP"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_"+topr_id+"' onclick='start_work_topr("+topr_id+")'>Start Working</button> ";
