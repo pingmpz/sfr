@@ -280,28 +280,19 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        <button type="button" class="btn btn-lg btn-primary my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</button>
+                        {% if remainQty != 0 %}
+                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         <button type="button" class="btn btn-lg btn-danger my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
+                        {% endif %}
+                        {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
+                        {% endif %}
                         <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
                         <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
-                      {% if remainQty > 0 %}
-                      {% if isJoined == True %}
-                      <!-- Joining -->
-                      <div class="col-md-12">
-                        <div class="card text-white bg-warning text-center">
-                          <div class="card-body text-center">
-                            <br>
-                            <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>THIS OPERATION IS JOINING WITH..</strong></h3>
-                            <h5><a href="/transaction/12345678901234">1234567890-1234</a></h5>
-                          </div>
-                        </div>
-                      </div>
-                      {% endif %}
+                      {% if remainQty > 0 %} <!-- *** START CONDITION 1 *** -->
+                      {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %} <!-- *** START CONDITION 2 *** -->
                       <!-- Machine/Operator -->
                       <div class="col-md-12">
                         <div class="card border-secondary">
@@ -377,8 +368,23 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %}
-                      {% if remainQty == 0 and operation.ProcessQty != 0 %}
+                      {% endif %} <!-- *** END CONDITION 2 *** -->
+                      {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %} <!-- *** START CONDITION 2 *** -->
+                      <!-- Joining -->
+                      <div class="col-md-12">
+                        <div class="card text-white bg-warning text-center">
+                          <div class="card-body text-center">
+                            <br>
+                            <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
+                            <br>
+                            <h3><strong>THIS OPERATION IS JOINING WITH..</strong></h3>
+                            <h5><a href="/transaction/{{operation.JoinToOrderNo}}{{operation.JoinToOperationNo}}">{{operation.JoinToOrderNo}}-{{operation.JoinToOperationNo}}</a></h5>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %} <!-- *** END CONDITION 2 *** -->
+                      {% else %}<!-- *** ELSE CONDITION 1 *** -->
+                      {% if operation.ProcessQty != 0 %} <!-- *** START CONDITION 2 *** -->
                       <!-- Completed Operation -->
                       <div class="col-md-12">
                         <div class="card text-white bg-success text-center">
@@ -391,8 +397,8 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %}
-                      {% if remainQty == 0 and operation.ProcessQty == 0 %}
+                      {% endif %} <!-- *** END CONDITION 2 *** -->
+                      {% if operation.ProcessQty == 0 %} <!-- *** START CONDITION 2 *** -->
                       <!-- Waiting Operation -->
                       <div class="col-md-12">
                         <div class="card text-white bg-dark text-center">
@@ -405,7 +411,8 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %}
+                      {% endif %} <!-- *** END CONDITION 2 *** -->
+                      {% endif %} <!-- *** END CONDITION 1 *** -->
                     </div>
                   </div>
                 </div>
@@ -716,26 +723,26 @@
         <div class="modal-dialog modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title"><i class="c-icon cil-list"></i> Join List</h4>
+              <h4 class="modal-title"><i class="c-icon cil-list"></i> Join List ({{joinList|length}})</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
               <table class="table table-sm table-responsive-sm table-outline text-center">
                 <thead class="bg-darkslategray">
                   <tr>
-                    <th>Production Order - Operation No</th>
+                    <th>No</th>
+                    <th>Production Order</th>
+                    <th>Operation No</th>
                   </tr>
                 </thead>
                 <tbody>
+                  {% for item in joinList %}
                   <tr>
-                    <td><a href="/transaction/11111111111111">1111111111-2222</a></td>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{item.ProductionOrderNo}}</td>
+                    <td>{{item.OperationNumber}}</td>
                   </tr>
-                  <tr>
-                    <td><a href="/transaction/22222222221111">2222222222-2222</a></td>
-                  </tr>
-                  <tr>
-                    <td><a href="/transaction/33333333331111">3333333333-2222</a></td>
-                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>

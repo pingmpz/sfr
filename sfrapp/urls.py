@@ -6,6 +6,7 @@ urlpatterns = [
     ### PAGE
     path('index/', views.index, name='index'),
     path('transaction/<str:orderoprno>', views.transaction, name='transaction'),
+    path('join_activity/<str:orderoprno>', views.join_activity, name='join_activity'),
     #-- MASTER
     path('wcg_master/', views.wcg_master, name='wcg_master'),
     path('wc_master/', views.wc_master, name='wc_master'),
