@@ -28,9 +28,12 @@
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <style media="screen">
-      .bg-green {
+      .bg-yellowgreen {
           background-color:#9dd04d;
           color:white;
+      }
+      .text-yellowgreen {
+          color:#9dd04d;
       }
       .bg-darkslategray {
           background-color:#30475e;
@@ -43,6 +46,9 @@
       .bg-plum {
           background-color:#b691ff;
           color:white;
+      }
+      .text-plum {
+          color:#b691ff;
       }
       .my-btn {
         width: 90px;
@@ -311,9 +317,10 @@
                             <strong>Machine/Operator</strong>
                             <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                             data-content="
-                            - <strong class='text-success'>Start Working</strong> while machine is waiting will automactically start machine.<br>
                             - <strong class='text-danger'>Stop Working</strong> on manual machine will automactically stop machine.<br>
                             - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
+                            - User working on <strong class='text-plum'>External Process</strong> can still work on other operations.<br>
+                            - <strong class='text-plum'>External Process</strong> only keep startdatetime and stopdatetime, but not working time.<br>
                             ">?
                             </a>
                           </div>
@@ -358,7 +365,7 @@
                               <div class="col-md-3">
                                 <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_topr('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
                                 {% if operation.MachineType == 'Machine' %}
-                                <button type="button" class="btn btn-pill bg-green text-white" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
+                                <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
                                 {% endif %}
                               </div>
                             </div>
