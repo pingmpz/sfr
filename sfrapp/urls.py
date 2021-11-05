@@ -31,4 +31,5 @@ urlpatterns = [
     path('stop_setup_topr/', views.stop_setup_topr, name='stop_setup_topr'),
     path('stop_work_topr/', views.stop_work_topr, name='stop_work_topr'),
     path('get_topr_for_confirm/', views.get_topr_for_confirm, name='get_topr_for_confirm'),
+    path('confirm/', views.confirm, name='confirm'),
 ]

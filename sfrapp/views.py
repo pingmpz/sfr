@@ -404,6 +404,30 @@ def get_topr_for_confirm(request):
     }
     return JsonResponse(data)
 
+def confirm(request):
+    confirm_id = request.GET.get('confirm_id')
+    good_qty = request.GET.get('good_qty')
+    reject_qty = request.GET.get('reject_qty')
+    reject_reason = request.GET.get('reject_reason')
+    other_reason = request.GET.get('other_reason')
+    if reject_reason == "-1":
+        reject_reason = ""
+    elif reject_reason == "OTHER":
+        reject_reason = other_reason
+    topr = getTOPRbyID(confirm_id)
+    #-- POST CONFIRMATION
+    insertSFR2SAP(topr.WorkCenter,topr.OrderNo,topr.OperationNumber,good_qty,reject_qty,0,0,0,"","",topr.EmpID,topr.MachineNumber)
+    #-- UPDATE QTY OF CURRECT OPERATION
+    updateQtyTCON(topr.OrderNo,topr.OperationNumber, 0, good_qty, reject_qty)
+    #-- UPDATE PROCESS QTY OF NEXT OPERATION
+    nextOperation = getNextOperation(topr.OrderNo,topr.OperationNumber)
+    if nextOperation != None:
+        updateQtyTCON(nextOperation.ProductionOrderNo,nextOperation.OperationNumber, good_qty, 0, 0)
+    data = {
+    }
+    return JsonResponse(data)
+
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -463,41 +487,41 @@ def get_operationList(orderNo):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getTMCList(orderNo, operationNo):
+def getTMCList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNo = '" + operationNo + "' ORDER BY TMC.ID ASC"
+    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY TMC.ID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getTOPRList(orderNo, operationNo):
+def getTOPRList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [T_OPR] as TOPR INNER JOIN [User] as U ON TOPR.EmpID = U.EmpID"
     sql += " LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID"
     sql += " LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE TOPR.ProductionOrderNo = '" + orderNo + "' AND TOPR.OperationNo = '" + operationNo + "' ORDER BY TOPR.ID ASC"
+    sql += " WHERE TOPR.ProductionOrderNo = '" + order_no + "' AND TOPR.OperationNo = '" + operation_no + "' ORDER BY TOPR.ID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getJoinList(orderNo, operationNo):
+def getJoinList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE JoinToOrderNo = '" + orderNo + "' AND JoinToOperationNo = '" + operationNo + "'"
+    sql = "SELECT * FROM [T_CON] WHERE JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()
 
 ### 1 ITEM ###
 
-def getOrder(orderNo):
+def getOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + orderNo + "'"
+    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()[0]
 
-def getOperation(orderNo, operationNo):
+def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT *"
     sql += " FROM [T_CON] as RT INNER JOIN [WorkCenter] as WC ON RT.WorkCenter = WC.WorkCenterName"
-    sql += " WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'"
+    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()[0]
 
@@ -571,17 +595,30 @@ def getTOPRbyEmpId(operator_id):
         topr = result[0]
     return topr
 
+def getNextOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT *"
+    sql += " FROM [T_CON] as RT INNER JOIN [WorkCenter] as WC ON RT.WorkCenter = WC.WorkCenterName"
+    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber > '" + operation_no + "' ORDER BY OperationNumber ASC"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        operation = None
+    else:
+        operation = result[0]
+    return operation
+
 ### BOOLEAN ###
 
-def isExistOrder(orderNo):
+def isExistOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + orderNo + "'"
+    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
-def isExistOperation(orderNo, operationNo):
+def isExistOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + orderNo + "' AND OperationNumber = '" + operationNo + "'"
+    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -681,11 +718,13 @@ def deleteTOPR(id):
     conn.commit()
     return
 
-def insertSFR2SAP(workcenter,orderNo,operationNo,yiled,scrap,setup,oper,labor,startDateTime,stopDateTime,empId,machineNo):
-    startdate = startDateTime.strftime("%Y%m%d")
-    starttime = startDateTime.strftime("%H%M%S")
-    stopdate = stopDateTime.strftime("%Y%m%d")
-    stoptime = stopDateTime.strftime("%H%M%S")
+def insertSFR2SAP(workcenter,orderNo,operationNo,yiled,scrap,setup,oper,labor,start_date_time,stop_date_time,empId,machineNo):
+    startdate = starttime = stopdate = stoptime = ""
+    if start_date_time != "" and stop_date_time!= "":
+        startdate = start_date_time.strftime("%Y%m%d")
+        starttime = start_date_time.strftime("%H%M%S")
+        stopdate = stop_date_time.strftime("%Y%m%d")
+        stoptime = stop_date_time.strftime("%H%M%S")
     if machineNo == None:
         machineNo = ""
     conn = get_connection()
@@ -706,6 +745,15 @@ def insertSFR2SAP(workcenter,orderNo,operationNo,yiled,scrap,setup,oper,labor,st
     sql += "'" + str(stoptime) + "',"
     sql += "'" + str(empId) + "',"
     sql += "'" + str(machineNo) + "')"
+    print_sql(sql)
+    cursor.execute(sql)
+    conn.commit()
+
+def updateQtyTCON(order_no, operation_no, process_qty, accept_qty, reject_qty):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [T_CON] SET [ProcessQty] += " + str(process_qty) + ", [AcceptedQty] += " + str(accept_qty) + ", [RejectedQty] += " + str(reject_qty)
+    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
     print_sql(sql)
     cursor.execute(sql)
     conn.commit()

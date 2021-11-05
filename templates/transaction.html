@@ -413,7 +413,9 @@
                             <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
                             <br>
                             <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
-                            <br><br><br><br><br><br>
+                            <h6>Start Process : {{operation.ProcessStart}}</h6>
+                            <h6>Stop Process : {{operation.ProcessStop}}</h6>
+                            <br><br><br><br>
                           </div>
                         </div>
                       </div>
@@ -1425,6 +1427,7 @@
         $("#confirm_invalid_text").text("");
         if($('#good_qty').val() == "") $('#good_qty').val("0");
         if($('#reject_qty').val() == "") $('#reject_qty').val("0");
+        var confirm_id = $('#confirm_id').val();
         var remain_qty = parseFloat($('#remain_qty').val());
         var good_qty = parseFloat($('#good_qty').val());
         var reject_qty = parseFloat($('#reject_qty').val());
@@ -1433,10 +1436,24 @@
         if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
         else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
         else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason");
-        else if(reject_reason == 0 && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field");
+        else if(reject_reason == "OTHER" && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field");
         else if(other_reason.includes("|")) $("#confirm_invalid_text").text("character | is not allow to use.");
         else {
-          //-- DO SOMETHING
+          $('#confirm_button').prop('disabled', true);
+          $.ajax({
+            url: '/confirm/',
+            data: {
+              'confirm_id': confirm_id,
+              'good_qty': good_qty,
+              'reject_qty': reject_qty,
+              'reject_reason': reject_reason,
+              'other_reason': other_reason,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
         }
       }
 
@@ -1563,7 +1580,7 @@
       }
 
       $('#reject_reason').on("change", function() {
-        if($('#reject_reason').val() != 0){
+        if($('#reject_reason').val() != "OTHER"){
           $("#other_reason").prop("readonly", true);
           $("#other_reason").val("");
         } else {
