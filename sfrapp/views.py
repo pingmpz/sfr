@@ -137,6 +137,20 @@ def rej_master(request):
     }
     return render(request, 'rej_master.html', context)
 
+def matg_master(request):
+    materialGroupList = getMaterialGroupList()
+    context = {
+        'materialGroupList' : materialGroupList,
+    }
+    return render(request, 'matg_master.html', context)
+
+def purg_master(request):
+    purchaseGroupList = getPurchaseGroupList()
+    context = {
+        'purchaseGroupList' : purchaseGroupList,
+    }
+    return render(request, 'purg_master.html', context)
+
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################

@@ -71,7 +71,7 @@
                         </thead>
                         <tbody>
                           {% for machine in machineList %}
-                          <tr class="{% if machine.IsActive != 1 %}text-danger{% endif %}">
+                          <tr class="{% if machine.IsActive == False %}text-danger{% endif %}">
                             <td>{{machine.MachineNumber}}</td>
                             <td>{{machine.MachineName}}</td>
                             <td>{{machine.WorkCenterName}}</td>

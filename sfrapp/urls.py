@@ -13,6 +13,8 @@ urlpatterns = [
     path('mc_master/', views.mc_master, name='mc_master'),
     path('user_master/', views.user_master, name='user_master'),
     path('rej_master/', views.rej_master, name='rej_master'),
+    path('matg_master/', views.matg_master, name='matg_master'),
+    path('purg_master/', views.purg_master, name='purg_master'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
     path('validate_operator/', views.validate_operator, name='validate_operator'),
