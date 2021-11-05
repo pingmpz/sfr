@@ -28,10 +28,11 @@ def transaction(request, orderoprno):
     joinList = []
     isFirstPage = False
     operationList = []
+    operationStatusList = []
     rejectReasonList = []
     materialGroupList = []
     purchaseGroupList = []
-    lastestOperation = -1 # For Order !Operation
+    currentOperation = -1 # For Order !Operation
     operationBefore = -1
     operationAfter = -1
     #--
@@ -46,22 +47,38 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 operation = getOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
-                joinList = getJoinList(orderNo, operationNo)
-                #-- GET PREV & NEXT OPERATION
+                if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
+                    joinList = getJoinList(orderNo, operationNo)
                 for i in range(len(operationList)):
+                    #-- GET STATUS OF OPERATION LIST
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if operationList[i].ProcessQty == 0:
+                        operationStatusList.append("WAITING")
+                    elif tempRemainQty > 0:
+                        operationStatusList.append("WORKING")
+                    elif tempRemainQty == 0:
+                        operationStatusList.append("COMPLETED")
+                    else:
+                        operationStatusList.append("ERROR")
+                    #-- GET PREV & NEXT OPERATION
                     if operationNo.strip() == operationList[i].OperationNumber.strip():
                         if i != 0:
                             operationBefore = operationList[i-1].OperationNumber
                         if i != len(operationList) - 1:
                             operationAfter = operationList[i+1].OperationNumber
-                #-- GET REJECT REASON LIST
+                #-- GET ETC LIST
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
-            #-- GET LAST OPERATION
+                #-- GET OPERATION LIST STATUS
+            #-- GET OPERATION WITH REMAINING QTY > 0
             else:
-                if len(operationList) != 0:
-                    lastestOperation = operationList[len(operationList) - 1].OperationNumber
+                currentOperation = operationList[0].OperationNumber
+                for i in range(len(operationList)):
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if tempRemainQty > 0:
+                        currentOperation = operationList[i].OperationNumber
+                        break
             #--
     context = {
         'orderNo' : orderNo,
@@ -72,10 +89,11 @@ def transaction(request, orderoprno):
         'remainQty' : remainQty,
         'joinList' : joinList,
         'operationList' : operationList,
+        'operationStatusList' : operationStatusList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
-        'lastestOperation' : lastestOperation,
+        'currentOperation' : currentOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
     }
