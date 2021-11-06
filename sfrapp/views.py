@@ -54,10 +54,10 @@ def transaction(request, orderoprno):
                         operationStatusList.append("WAITING")
                     elif tempRemainQty == 0:
                         operationStatusList.append("COMPLETED")
-                    elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
-                        operationStatusList.append("READY")
-                    elif tempRemainQty > 0:
+                    elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
                         operationStatusList.append("WORKING")
+                    elif tempRemainQty > 0:
+                        operationStatusList.append("READY")
                     else:
                         operationStatusList.append("ERROR")
                     #-- GET PREV & NEXT OPERATION
@@ -298,6 +298,10 @@ def add_topr(request):
     operator_id = request.GET.get('operator_id')
     tmc_id = request.GET.get('tmc_id')
     status = request.GET.get('status')
+    #-- OPERATION : UPDATE PROCESS STOP
+    tcon = getTCON(order_no, operation_no)
+    if tcon.ProcessStart == None:
+        updateQtyTCON(order_no, operation_no, 0, 0, 0, "START")
     #-- OPERATOR : WORKING/SETUP
     insertTOPR(order_no, operation_no, operator_id, tmc_id, status)
     #-- IF OPERATION IS NOT LABOR TYPE
@@ -426,7 +430,7 @@ def confirm(request):
         workcenter = topr.MachineNumber
     insertSFR2SAP(workcenter,topr.OrderNo,topr.OperationNumber,good_qty,reject_qty,0,0,0,"","",topr.EmpID)
     #-- UPDATE QTY OF CURRECT OPERATION
-    updateQtyTCON(topr.OrderNo,topr.OperationNumber, 0, good_qty, reject_qty)
+    updateQtyTCON(topr.OrderNo,topr.OperationNumber, 0, good_qty, reject_qty, "STOP")
     #-- UPDATE PROCESS QTY OF NEXT OPERATION
     nextOperation = getNextOperation(topr.OrderNo,topr.OperationNumber)
     if nextOperation != None:
@@ -581,6 +585,17 @@ def getTOPR(id):
     else:
         tmc = result[0]
     return tmc
+
+def getTCON(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        tcon = None
+    else:
+        tcon = result[0]
+    return tcon
 
 def getWorkingMachineNo(machine_no):
     cursor = get_connection().cursor()
@@ -756,10 +771,14 @@ def insertSFR2SAP(workcenter,orderNo,operationNo,yiled,scrap,setup,oper,labor,st
     cursor.execute(sql)
     conn.commit()
 
-def updateQtyTCON(order_no, operation_no, process_qty, accept_qty, reject_qty):
+def updateQtyTCON(order_no, operation_no, process_qty, accept_qty, reject_qty, status):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [T_CON] SET [ProcessQty] += " + str(process_qty) + ", [AcceptedQty] += " + str(accept_qty) + ", [RejectedQty] += " + str(reject_qty)
+    if status == "START":
+        sql += ", [ProcessStart] = CURRENT_TIMESTAMP"
+    elif status == "STOP":
+        sql += ", [ProcessStop] = CURRENT_TIMESTAMP"
     sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
     print_sql(sql)
     cursor.execute(sql)

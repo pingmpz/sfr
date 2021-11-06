@@ -262,7 +262,6 @@
                                       data-content="
                                       <strong class='text-success'>COMPLETED</strong><br>
                                       <strong class='text-warning'>WORKING</strong><br>
-                                      <strong class='text-info'>READY</strong><br>
                                       <strong class='text-danger'>ERROR</strong><br>
                                       ">?
                                       </a>
@@ -277,9 +276,8 @@
                                     <td>
                                       {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
-                                      {% else %}<i class="c-icon c-icon-sm cib-discover text-white" style="padding-top:5px"></i>{% endif %}
+                                      {% endif %}
                                     </td>
                                     <td>
                                       {% if operation.OperationNumber != operationNo %}
