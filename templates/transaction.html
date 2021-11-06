@@ -50,6 +50,9 @@
       .text-plum {
           color:#b691ff;
       }
+      .text-palegoldenrod {
+        color:#dfffad;
+      }
       .my-btn {
         width: 90px;
       }
@@ -253,7 +256,17 @@
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
-                                    <th>Status</th>
+                                    <th>
+                                      Status
+                                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                                      data-content="
+                                      <strong class='text-success'>COMPLETED</strong><br>
+                                      <strong class='text-warning'>WORKING</strong><br>
+                                      <strong class='text-info'>READY</strong><br>
+                                      <strong class='text-danger'>ERROR</strong><br>
+                                      ">?
+                                      </a>
+                                    </th>
                                     <th>Operation No</th>
                                     <th>Work Center</th>
                                   </tr>
@@ -262,10 +275,11 @@
                                   {% for operation in operationList %}
                                   <tr {% if operation.OperationNumber.strip == operationNo.strip %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon cib-discover text-success"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon cib-discover text-warning"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon cib-discover text-danger"></i>
-                                      {% endif %}
+                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
+                                      {% else %}<i class="c-icon c-icon-sm cib-discover text-white" style="padding-top:5px"></i>{% endif %}
                                     </td>
                                     <td>
                                       {% if operation.OperationNumber != operationNo %}
@@ -398,7 +412,7 @@
                             <h3><strong>THIS OPERATION IS JOINING</strong></h3>
                             <br>
                             <a href="/transaction/{{operation.JoinToOrderNo}}{{operation.JoinToOperationNo}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO JOIN OPERATION #{{operation.JoinToOrderNo}}-{{operation.JoinToOperationNo}}&nbsp;&nbsp;&nbsp;</strong></a>
-                            <br><br><br><br>><br>
+                            <br><br><br><br><br>
                           </div>
                         </div>
                       </div>
@@ -1084,13 +1098,13 @@
                 // console.log(tmc);
                 for(var j = 0;j < tmc.length;j++){
                   var tmc_id = tmc[0];
-                  var tmc_machine_name = tmc[8]+" | "+tmc[9];
+                  var tmc_machine_name = tmc[7]+" | "+tmc[8];
                   var tmc_startdatetime = tmc[4];
                   var startdatetime = (tmc_startdatetime == null)?"-":getFullDateTime(tmc_startdatetime);
                   var tmc_stopdatetime = tmc[5];
                   var stopdatetime = (tmc_stopdatetime == null)?"-":getFullDateTime(tmc_stopdatetime);
                   var tmc_status = $.trim(tmc[6]);
-                  var mc_type = $.trim(tmc[11]);
+                  var mc_type = $.trim(tmc[10]);
                   if(tmc_status == "COMPLETED") {
                     completed_count++;
                     break;
@@ -1154,7 +1168,7 @@
                 // console.log(topr);
                 for(var j = 0;j < topr.length;j++){
                   var topr_id = topr[0];
-                  var topr_machine_name = (topr[19] == null)?null:topr[19]+" | "+topr[20];
+                  var topr_machine_name = (topr[18] == null)?null:topr[18]+" | "+topr[19];
                   var topr_operator_name = topr[1]+" | "+topr[9];
                   var topr_startdatetime = topr[3];
                   var startdatetime = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
