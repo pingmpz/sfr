@@ -60,8 +60,10 @@
                       <table class="table table-sm table-striped small" id="wc_master_table">
                         <thead>
                           <tr>
+                            <th>Work Center No</th>
                             <th>Work Center Name</th>
                             <th>Work Center Group</th>
+                            <th>Routing</th>
                             <th>Work Center Type</th>
                             <th>External Process</th>
                             <th>Machine Type</th>
@@ -71,14 +73,16 @@
                         </thead>
                         <tbody>
                           {% for workCenter in workCenterList %}
-                          <tr>
+                          <tr class="{% if workCenter.IsActive == False %}text-danger{% endif %}">
+                            <td>{{workCenter.WorkCenterNo}}</td>
                             <td>{{workCenter.WorkCenterName}}</td>
-                            <td>{{workCenter.WorkCenterGroupName}}</td>
-                            <td>{{workCenter.MachineType}}</td>
-                            <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
-                            <td>?</td>
-                            <td>?</td>
-                            <td>?</td>
+                            <td>{{workCenter.WorkCenterGroup}}</td>
+                            <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{{workCenter.WorkCenterType}}</td>
+                            <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{% if workCenter.MachineType != None %}{{workCenter.MachineType}}{% endif %}</td>
+                            <td>{{workCenter.HourlyRate|floatformat:"0"}}</td>
+                            <td>{% if workCenter.Noted != None %}{{workCenter.Noted}}{% endif %}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
