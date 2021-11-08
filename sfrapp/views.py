@@ -26,7 +26,7 @@ def transaction(request, orderoprno):
     operation = None
     remainQty = -1
     joinList = []
-    isFirstPage = False
+    state = "ERROR"
     operationList = []
     operationStatusList = []
     rejectReasonList = []
@@ -37,14 +37,19 @@ def transaction(request, orderoprno):
     operationAfter = -1
     #--
     if orderoprno == "0":
-        isFirstPage = True
+        state = "FIRSTPAGE"
     else:
         orderNo = orderoprno[0:10]
         operationNo = orderoprno[10:14]
-        if isExistOrder(orderNo):
+        if isExistOrder(orderNo) == False and isExistSAPOrder(orderNo) == False:
+            state = "NODATAFOUND"
+        else:
+            if isExistOrder(orderNo) == False:
+                setDataFromSAP(orderNo)
             order = getOrder(orderNo)
-            operationList = get_operationList(orderNo)
+            operationList = getOperationList(orderNo)
             if isExistOperation(orderNo, operationNo):
+                state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 for i in range(len(operationList)):
@@ -61,11 +66,11 @@ def transaction(request, orderoprno):
                     else:
                         operationStatusList.append("ERROR")
                     #-- GET PREV & NEXT OPERATION
-                    if operationNo.strip() == operationList[i].OperationNumber.strip():
+                    if operationNo == operationList[i].OperationNo.strip():
                         if i != 0:
-                            operationBefore = operationList[i-1].OperationNumber
+                            operationBefore = operationList[i-1].OperationNo
                         if i != len(operationList) - 1:
-                            operationAfter = operationList[i+1].OperationNumber
+                            operationAfter = operationList[i+1].OperationNo
                 #-- GET JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
@@ -75,18 +80,18 @@ def transaction(request, orderoprno):
                 purchaseGroupList = getPurchaseGroupList()
             #-- GET OPERATION WITH REMAINING QTY > 0
             else:
+                state = "NOOPERATIONFOUND"
                 if len(operationList) > 0:
-                    currentOperation = operationList[0].OperationNumber
+                    currentOperation = operationList[0].OperationNo
                     for i in range(len(operationList)):
                         tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
                         if tempRemainQty > 0:
-                            currentOperation = operationList[i].OperationNumber
+                            currentOperation = operationList[i].OperationNo
                             break
-            #--
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
-        'isFirstPage' : isFirstPage,
+        'state' : state,
         'order' : order,
         'operation' : operation,
         'remainQty' : remainQty,
@@ -103,18 +108,10 @@ def transaction(request, orderoprno):
     return render(request, 'transaction.html', context)
 
 def join_activity(request, orderoprno):
-    orderNo = ""
-    operationNo = ""
-    order = None
-    operation = None
-    #--
-    if orderoprno == "0":
-        isFirstPage = True
-    else:
-        orderNo = orderoprno[0:10]
-        operationNo = orderoprno[10:14]
-        order = getOrder(orderNo)
-        operation = getOperation(orderNo, operationNo)
+    orderNo = orderoprno[0:10]
+    operationNo = orderoprno[10:14]
+    order = getOrder(orderNo)
+    operation = getOperation(orderNo, operationNo)
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
@@ -123,26 +120,12 @@ def join_activity(request, orderoprno):
 
 #------------------------------------------------------------------------ MASTER
 
-def wcg_master(request):
-    workCenterGroupList = getWorkCenterGroupList()
-    context = {
-        'workCenterGroupList' : workCenterGroupList,
-    }
-    return render(request, 'wcg_master.html', context)
-
 def wc_master(request):
     workCenterList = getWorkCenterList()
     context = {
         'workCenterList' : workCenterList,
     }
     return render(request, 'wc_master.html', context)
-
-def mc_master(request):
-    machineList = getMachineList()
-    context = {
-        'machineList' : machineList,
-    }
-    return render(request, 'mc_master.html', context)
 
 def user_master(request):
     operatorList = getOperatorList()
@@ -404,7 +387,6 @@ def get_topr_for_confirm(request):
         machine_text = machine.MachineNumber + " | " + machine.MachineName
     start_time = topr.TOPRStartDateTime.strftime("%d-%m-%Y, %H:%M:%S")
     stop_time = topr.TOPRStopDateTime.strftime("%d-%m-%Y, %H:%M:%S")
-    print(start_time, stop_time)
     data = {
         'operator_text': operator_text,
         'machine_text': machine_text,
@@ -446,33 +428,21 @@ def confirm(request):
 
 def get_connection():
     # conn = pyodbc.connect('Driver={SQL Server};''Server=SVSP-SQL;''Database=SFR;''UID=CCSGROUPS\sqladmin;''PWD=$ql@2019;''Trusted_Connection=yes;')
-    conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
+    # conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
+    conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS01;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
     return conn
 
 #-------------------------------------------------------------------------- LIST
 
-def getWorkCenterGroupList():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [WorkCenterGroup]"
-    cursor.execute(sql)
-    return cursor.fetchall()
-
 def getWorkCenterList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [WorkCenter] INNER JOIN [WorkCenterGroup] ON [WorkCenter].WorkCenterGroupID = [WorkCenterGroup].WorkCenterGroupID"
-    cursor.execute(sql)
-    return cursor.fetchall()
-
-def getMachineList():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [Machine] as MC INNER JOIN [WorkCenter] as WC ON MC.WorkCenterID = WC.WorkCenterID"
-    sql += " INNER JOIN [WorkCenterGroup] as WCG ON WC.WorkCenterGroupID = WCG.WorkCenterGroupID"
+    sql = "SELECT * FROM [WorkCenter]"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [User]"
+    sql = "SELECT * FROM [Employee]"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -494,31 +464,31 @@ def getPurchaseGroupList():
     cursor.execute(sql)
     return cursor.fetchall()
 
-def get_operationList(orderNo):
+def getOperationList(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + orderNo + "'"
+    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getTMCList(order_no, operation_no):
+def getOperatingWorkCenterList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY TMC.ID ASC"
+    sql = "SELECT * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY OWC.OperatingWorCenterID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getTOPRList(order_no, operation_no):
+def getOperatingOperatorList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] as TOPR INNER JOIN [User] as U ON TOPR.EmpID = U.EmpID"
-    sql += " LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID"
-    sql += " LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE TOPR.ProductionOrderNo = '" + order_no + "' AND TOPR.OperationNo = '" + operation_no + "' ORDER BY TOPR.ID ASC"
+    sql = "SELECT * FROM [OperatingOperator] as OOPR INNER JOIN [User] as U ON OOPR.EmpID = U.EmpID"
+    sql += " INNER JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorCenterID = OWC.OperatingWorCenterID"
+    sql += " INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getJoinList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "'"
+    sql = "SELECT * FROM [OperationControl] WHERE JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -526,263 +496,138 @@ def getJoinList(order_no, operation_no):
 
 def getOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
+    sql = "SELECT * FROM [OrderControl] as ORD"
+    sql += " INNER JOIN [SAP_Order] as SAPORD ON ORD.OrderNo = SAPORD.ProductionOrderNo"
+    sql += " WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
-    return cursor.fetchall()[0]
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        return None
+    return result[0]
 
 def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT *"
-    sql += " FROM [T_CON] as RT INNER JOIN [WorkCenter] as WC ON RT.WorkCenter = WC.WorkCenterName"
-    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
-    cursor.execute(sql)
-    return cursor.fetchall()[0]
-
-def getMachine(machine_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [Machine] WHERE MachineNumber = '" + machine_no + "'"
+    sql = "SELECT * FROM [OperationControl] as OPT"
+    sql += " INNER JOIN [SAP_Routing] as SAPRT ON OPT.OperationNo = SAPRT.OperationNumber"
+    sql += " INNER JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     result = cursor.fetchall()
     if(len(result) == 0):
-        machine = None
-    else:
-        machine = result[0]
-    return machine
+        return None
+    return result[0]
+
+def getWorkCenter(workcenter_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "'"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        return None
+    return result[0]
 
 def getOperator(operator_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [User] WHERE EmpID = '" + operator_id + "'"
+    sql = "SELECT * FROM [Employee] WHERE EmpID = '" + operator_id + "'"
     cursor.execute(sql)
     result = cursor.fetchall()
     if(len(result) == 0):
-        operator = None
-    else:
-        operator = result[0]
-    return operator
+        return None
+    return result[0]
 
-def getTMC(id):
+#----------------------------------------------------------------------- BOOLEAN
+
+def isExistSAPOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber WHERE TMC.ID = " + str(id)
+    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
+    return (len(cursor.fetchall()) > 0)
 
-def getTOPR(id):
+def isExistSAPOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT TOPR.ProductionOrderNo as OrderNo, TOPR.StartDateTime as TOPRStartDateTime, TOPR.StopDateTime as TOPRStopDateTime, TMC.Status as TMCStatus,*"
-    sql += " FROM [T_OPR] as TOPR INNER JOIN [T_CON] as RT ON TOPR.OperationNo = RT.OperationNumber"
-    sql += " LEFT JOIN [T_MC] as TMC ON TOPR.T_MC_ID = TMC.ID"
-    sql += " LEFT JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE TOPR.ID = " + str(id)
+    sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
-
-def getTCON(order_no, operation_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tcon = None
-    else:
-        tcon = result[0]
-    return tcon
-
-def getWorkingMachineNo(machine_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_MC] as TMC INNER JOIN [Machine] as MC ON TMC.MachineNumber = MC.MachineNumber"
-    sql += " WHERE TMC.MachineNumber = '" + machine_no + "' AND status <> 'COMPLETED'"
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        tmc = None
-    else:
-        tmc = result[0]
-    return tmc
-
-def getWorkingEmpId(operator_id):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_id + "' AND status <> 'COMPLETED' AND status <> 'EXT-WORK'"
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        topr = None
-    else:
-        topr = result[0]
-    return topr
-
-def getNextOperation(order_no, operation_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT *"
-    sql += " FROM [T_CON] as RT INNER JOIN [WorkCenter] as WC ON RT.WorkCenter = WC.WorkCenterName"
-    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber > '" + operation_no + "' ORDER BY OperationNumber ASC"
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        operation = None
-    else:
-        operation = result[0]
-    return operation
-
-### BOOLEAN ###
+    return (len(cursor.fetchall()) > 0)
 
 def isExistOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
+    sql = "SELECT * FROM [OrderControl] WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
 def isExistOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_CON] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
+    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
-def isExistOperator(EmpID):
+def isExistOperator(emp_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [User] WHERE EmpID = '" + EmpID + "'"
-    cursor.execute(sql)
-    return (len(cursor.fetchall()) > 0)
-
-def isMachineWorking(machine_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_MC] WHERE MachineNumber = '" + machine_no + "' AND Status <> 'COMPLETED'"
-    cursor.execute(sql)
-    return (len(cursor.fetchall()) > 0)
-
-def isOperatorWorking(operator_id):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] WHERE EmpID = '" + operator_id + "' AND Status <> 'COMPLETED' AND Status <> 'EXT-WORK'"
-    cursor.execute(sql)
-    return (len(cursor.fetchall()) > 0)
-
-def hasOperatorWorking(tmc_id):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [T_OPR] WHERE T_MC_ID = " + str(tmc_id) + " AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [Employee] WHERE EmpID = '" + emp_id + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
 #--------------------------------------------------------------------------- EXC
 
-def insertTMC(order_no, operation_no, machine_no):
+def setDataFromSAP(order_no):
+    setOrderControlFromSAP(order_no)
+    setOperationControlFromSAP(order_no)
+    return
+
+def setOrderControlFromSAP(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [T_MC] ([ProductionOrderNo],[OperationNo],[MachineNumber],[Status])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + machine_no + "','WAITING')"
-    print_sql(sql)
+    sql = "INSERT INTO [OrderControl] ([OrderNo]) VALUES ('" + order_no + "')"
     cursor.execute(sql)
     conn.commit()
     return
 
-def insertTOPR(order_no, operation_no, operator_id, tmc_id, status):
+def setOperationControlFromSAP(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [T_OPR] ([ProductionOrderNo],[OperationNo],[EmpID],[T_MC_ID],[StartDateTime],[Status])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "'," + str(tmc_id) + ",CURRENT_TIMESTAMP,'" + status + "')"
-    print_sql(sql)
+    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
-    conn.commit()
+    order = cursor.fetchall()[0]
+    sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY OperationNumber ASC"
+    cursor.execute(sql)
+    operations = cursor.fetchall()
+    isFirstOperation = True
+    for i in range(len(operations)):
+        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty])"
+        if isFirstOperation:
+            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', " + str(order.ProductionOrderQuatity) + ", 0, 0)"
+            isFirstOperation = False
+        else:
+            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', 0, 0, 0)"
+        cursor.execute(sql)
+        conn.commit()
     return
 
-def updateTMC(id, status):
+def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup_time, oper_time, labor_time, start_date_time, stop_date_time, emp_id):
+    start_date = start_date_time.strftime("%Y%m%d")
+    start_time = start_date_time.strftime("%H%M%S")
+    stop_date = stop_date_time.strftime("%Y%m%d")
+    stop_time = stop_date_time.strftime("%H%M%S")
     conn = get_connection()
     cursor = conn.cursor()
-    sql = ""
-    if status == "WAITING":
-        sql = "UPDATE [T_MC] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING' WHERE ID = " + str(id)
-    if status == "WORKING":
-        sql = "UPDATE [T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE ID = " + str(id)
-    if status == "SETUP":
-        sql = "UPDATE [T_MC] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'SETUP' WHERE ID = " + str(id)
-    if status == "COMPLETED":
-        sql = "UPDATE [T_MC] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
-    print_sql(sql)
-    cursor.execute(sql)
-    conn.commit()
-
-def updateTOPR(id, status):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = ""
-    if status == "WAITING":
-        sql = "UPDATE [T_OPR] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING' WHERE ID = " + str(id)
-    if status == "WORKING":
-        sql = "UPDATE [T_OPR] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE ID = " + str(id)
-    if status == "SETUP":
-        sql = "UPDATE [T_OPR] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'SETUP' WHERE ID = " + str(id)
-    if status == "COMPLETED":
-        sql = "UPDATE [T_OPR] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE ID = " + str(id)
-    print_sql(sql)
-    cursor.execute(sql)
-    conn.commit()
-
-def deleteTMC(id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "DELETE FROM [T_MC] WHERE ID = " + str(id)
-    print_sql(sql)
-    cursor.execute(sql)
-    conn.commit()
-    return
-
-def deleteTOPR(id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "DELETE FROM [T_OPR] WHERE ID = " + str(id)
-    print_sql(sql)
-    cursor.execute(sql)
-    conn.commit()
-    return
-
-def insertSFR2SAP(workcenter,orderNo,operationNo,yiled,scrap,setup,oper,labor,start_date_time,stop_date_time,empId):
-    startdate = starttime = stopdate = stoptime = ""
-    if start_date_time != "" and stop_date_time!= "":
-        startdate = start_date_time.strftime("%Y%m%d")
-        starttime = start_date_time.strftime("%H%M%S")
-        stopdate = stop_date_time.strftime("%Y%m%d")
-        stoptime = stop_date_time.strftime("%H%M%S")
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[SFR2SAP] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
+    sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
     sql += " VALUES (CURRENT_TIMESTAMP,"
     sql += "'" + str(workcenter) + "',"
-    sql += "'" + str(orderNo) + "',"
-    sql += "'" + str(operationNo) + "',"
+    sql += "'" + str(order_no) + "',"
+    sql += "'" + str(operation_no) + "',"
     sql += "'" + str(yiled) + "',"
     sql += "'" + str(scrap) + "',"
-    sql += "'" + str(setup) + "',"
-    sql += "'" + str(oper) + "',"
-    sql += "'" + str(labor) + "',"
-    sql += "'" + str(startdate) + "',"
-    sql += "'" + str(starttime) + "',"
-    sql += "'" + str(stopdate) + "',"
-    sql += "'" + str(stoptime) + "',"
-    sql += "'" + str(empId) + "')"
-    print_sql(sql)
+    sql += "'" + str(setup_time) + "',"
+    sql += "'" + str(oper_time) + "',"
+    sql += "'" + str(labor_time) + "',"
+    sql += "'" + str(start_date) + "',"
+    sql += "'" + str(start_time) + "',"
+    sql += "'" + str(stop_date) + "',"
+    sql += "'" + str(stop_time) + "',"
+    sql += "'" + str(emp_id) + "')"
     cursor.execute(sql)
     conn.commit()
-
-def updateQtyTCON(order_no, operation_no, process_qty, accept_qty, reject_qty, status):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "UPDATE [T_CON] SET [ProcessQty] += " + str(process_qty) + ", [AcceptedQty] += " + str(accept_qty) + ", [RejectedQty] += " + str(reject_qty)
-    if status == "START":
-        sql += ", [ProcessStart] = CURRENT_TIMESTAMP"
-    elif status == "STOP":
-        sql += ", [ProcessStop] = CURRENT_TIMESTAMP"
-    sql += " WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
-    print_sql(sql)
-    cursor.execute(sql)
-    conn.commit()
+    return
 
 ################################################################################
 ################################################################################
@@ -792,10 +637,3 @@ def FourDigitOperationNo(operationNo):
     while len(result) < 4:
         result = "0" + result
     return result
-
-def print_sql(sql):
-    if True:
-        print('################################# SQL STATEMENT #################################')
-        print(sql)
-        print('#################################################################################')
-    return

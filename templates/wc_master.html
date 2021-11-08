@@ -62,8 +62,11 @@
                           <tr>
                             <th>Work Center Name</th>
                             <th>Work Center Group</th>
-                            <th>Machine/Labor</th>
+                            <th>Work Center Type</th>
                             <th>External Process</th>
+                            <th>Machine Type</th>
+                            <th>Hourly Rate</th>
+                            <th>Noted</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -73,6 +76,9 @@
                             <td>{{workCenter.WorkCenterGroupName}}</td>
                             <td>{{workCenter.MachineType}}</td>
                             <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
+                            <td>?</td>
+                            <td>?</td>
+                            <td>?</td>
                           </tr>
                           {% endfor %}
                         </tbody>

@@ -8,9 +8,7 @@ urlpatterns = [
     path('transaction/<str:orderoprno>', views.transaction, name='transaction'),
     path('join_activity/<str:orderoprno>', views.join_activity, name='join_activity'),
     #-- MASTER
-    path('wcg_master/', views.wcg_master, name='wcg_master'),
     path('wc_master/', views.wc_master, name='wc_master'),
-    path('mc_master/', views.mc_master, name='mc_master'),
     path('user_master/', views.user_master, name='user_master'),
     path('rej_master/', views.rej_master, name='rej_master'),
     path('matg_master/', views.matg_master, name='matg_master'),

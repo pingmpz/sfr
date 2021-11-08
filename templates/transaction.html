@@ -90,7 +90,7 @@
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
             <li class="breadcrumb-item">Transaction</li>
-            {% if isFirstPage == False %}
+            {% if state != "FIRSTPAGE" %}
             <li class="breadcrumb-item active">
               {% if operationBefore != -1 %}<a href="/transaction/{{orderNo}}{{operationBefore}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
               <span id="bc_order_no">{{orderNo}}</span>&nbsp;-&nbsp;<span id="bc_operation_no">{{operationNo}}</span>
@@ -115,7 +115,7 @@
             <div class="fade-in">
               <input type="text" id="has_data" value="{% if isFirstPage == False and order != None and operation != None %}true{% else %}false{% endif %}" hidden>
               <!-- Main Body -->
-              {% if isFirstPage == False and order != None and operation != None %}
+              {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
                   <!-- Left Content -->
                   <div class="col-sm-12 col-md-4">
@@ -272,7 +272,7 @@
                                 </thead>
                                 <tbody>
                                   {% for operation in operationList %}
-                                  <tr {% if operation.OperationNumber.strip == operationNo.strip %}class="bg-lavender"{% endif %}>
+                                  <tr {% if operation.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
@@ -280,13 +280,13 @@
                                       {% endif %}
                                     </td>
                                     <td>
-                                      {% if operation.OperationNumber != operationNo %}
-                                      <a href="/transaction/{{orderNo}}{{operation.OperationNumber}}">{{operation.OperationNumber}}</a>
+                                      {% if operation.OperationNo != operationNo %}
+                                      <a href="/transaction/{{orderNo}}{{operation.OperationNo}}">{{operation.OperationNo}}</a>
                                       {% else %}
-                                      {{operation.OperationNumber}}
+                                      {{operation.OperationNo}}
                                       {% endif %}
                                     </td>
-                                    <td>{{operation.WorkCenter}}</td>
+                                    <td>{{operation.WorkCenterNo}}</td>
                                   </tr>
                                   {% endfor %}
                                 </tbody>
@@ -452,34 +452,32 @@
                 </div>
               {% endif%}
               <!-- Not Found -->
-              {% if isFirstPage == False and operation == None %}
+              {% if state != "FIRSTPAGE" and state != "DATAFOUND" %}
               <div class="row">
                 <div class="col-md-12 text-center">
                   <br><br><br><br><br><br><br><br>
                   <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
                   <br>
-                  {% if order == None %}
+                  {% if state == "NODATAFOUND" %}
                   <h1><strong>PRODUCTION ORDER NOT FOUND</strong></h1>
-                  {% else %}
+                  {% elif state == "NOOPERATIONFOUND" %}
                   <h1><strong>OPERATION NOT FOUND</strong></h1>
                   {% endif %}
                   <p>
-                    <strong>PRODUCTION NO</strong><br><span class="{% if order == None %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
+                    <strong>PRODUCTION NO</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
                     <br>
                     <strong>OPERATION NO</strong><br><span class="text-danger"><strong><span id="nf_operation_no">{{operationNo}}</span></strong></span>
                   </p>
-                  {% if order != None %}
-                  {% if currentOperation != -1 %}
-                  <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation.strip}}&nbsp;&nbsp;&nbsp;</strong></a>
-                  {% else %}
+                  {% if state == "NOOPERATIONFOUND" and currentOperation != -1 %}
+                  <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                  {% elif state == "NOOPERATIONFOUND" %}
                   <p class="text-danger">*** THIS PRODUCTION ORDER HAS ONLY HEADER PLEASE CONTACT ADMIN ***</p>
-                  {% endif %}
                   {% endif %}
                 </div>
               </div>
               {% endif%}
               <!-- First Page -->
-              {% if isFirstPage == True %}
+              {% if state == "FIRSTPAGE" %}
               <div class="row">
                 <div class="col-md-12 text-center">
                   <br><br><br><br><br><br><br><br><br><br>
@@ -999,10 +997,10 @@
 
       $(document).ready(function() {
         showTime();
-        if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
-          if($("#machine_type").val() == 'Machine') reload_machine_table();
-          reload_operator_table();
-        }
+        // if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
+        //   if($("#machine_type").val() == 'Machine') reload_machine_table();
+        //   reload_operator_table();
+        // }
       });
 
       //-- MAIN SCRIPT
