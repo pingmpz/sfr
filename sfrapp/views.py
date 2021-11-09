@@ -284,6 +284,7 @@ def add_operating_operator(request):
     operator_id = request.GET.get('operator_id')
     owc_id = request.GET.get('owc_id')
     status = request.GET.get('status')
+    refresh = False
     #-- OPERATOR : WORKING/SETUP/EXT-WORK
     insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     #-- IF OPERATION IS NOT LABOR TYPE
@@ -292,6 +293,7 @@ def add_operating_operator(request):
         updateOperatingWorkCenter(owc_id, status)
     #-- IF NOT START OPERATION YET
     if hasNotStartOperation(order_no, operation_no):
+        refresh = True
         #-- OPERATION : START
         updateOperationControl(order_no, operation_no, 0, 0, "START")
         #-- IF NOT START ORDER YET
@@ -299,6 +301,7 @@ def add_operating_operator(request):
             #-- ORDER : START
             updateOrderControl(order_no, "START")
     data = {
+        'refresh' : refresh,
     }
     return JsonResponse(data)
 

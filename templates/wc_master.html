@@ -64,8 +64,8 @@
                             <th>Work Center Name</th>
                             <th>Work Center Group</th>
                             <th>Routing</th>
-                            <th>Work Center Type</th>
                             <th>External Process</th>
+                            <th>Work Center Type</th>
                             <th>Machine Type</th>
                             <th>Hourly Rate</th>
                             <th>Noted</th>
@@ -78,8 +78,8 @@
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
                             <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{{workCenter.WorkCenterType}}</td>
                             <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{{workCenter.WorkCenterType}}</td>
                             <td>{% if workCenter.MachineType != None %}{{workCenter.MachineType}}{% endif %}</td>
                             <td>{{workCenter.HourlyRate|floatformat:"0"}}</td>
                             <td>{% if workCenter.Noted != None %}{{workCenter.Noted}}{% endif %}</td>
