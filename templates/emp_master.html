@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>User Master | Shopfloor Reporting Application</title>
+    <title>Employee Master | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -39,7 +39,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">User Master ({{operatorList|length}})</li>
+            <li class="breadcrumb-item">Employee Master ({{operatorList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -57,12 +57,12 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-striped small" id="user_master_table">
+                      <table class="table table-sm table-striped small" id="emp_master_table">
                         <thead>
                           <tr>
                             <th>No</th>
                             <th>Name</th>
-                            <th>Department</th>
+                            <th>Section</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -70,7 +70,7 @@
                           <tr>
                             <td data-order="{{operator.EmpID}}">{{operator.EmpID}}</td>
                             <td>{{operator.EmpName}}</td>
-                            <td>{{operator.Remarks}}</td>
+                            <td>{{operator.Section}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -106,7 +106,7 @@
       });
 
       $(document).ready(function() {
-        $('#user_master_table').DataTable( {
+        $('#emp_master_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });

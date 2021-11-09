@@ -113,7 +113,7 @@
         <main class="c-main">
           <div class="container-fluid">
             <div class="fade-in">
-              <input type="text" id="has_data" value="{% if isFirstPage == False and order != None and operation != None %}true{% else %}false{% endif %}" hidden>
+              <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}" hidden>
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
@@ -322,46 +322,46 @@
                       </div>
                       {% if remainQty > 0 %} <!-- *** START CONDITION 1 *** -->
                       {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %} <!-- *** START CONDITION 2 *** -->
-                      <!-- Machine/Operator -->
+                      <!-- WorkCenter/Operator -->
                       <div class="col-md-12">
                         <div class="card border-secondary">
                           <div class="card-header">
-                            <strong>Machine/Operator</strong>
+                            <strong>Work Center/Operator</strong>
                             <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                             data-content="
-                            - <strong class='text-danger'>Stop Working</strong> on manual machine will automactically stop machine.<br>
+                            - <strong class='text-danger'>Stop Working</strong> on manual workcenter will automatically stop workcenter.<br>
                             - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
-                            - User working on <strong class='text-plum'>External Process</strong> can still work on other operations.<br>
+                            - Employee working on <strong class='text-plum'>External Process</strong> can still work on other operations.<br>
                             - <strong class='text-plum'>External Process</strong> only keep startdatetime and stopdatetime, but not working time.<br>
                             ">?
                             </a>
                           </div>
                           <div class="card-body">
                             <div hidden>
-                              <input type="text" id="machine_type" value="{{operation.MachineType}}">
+                              <input type="text" id="workcenter_type" value="{{operation.WorkCenterType}}">
                             </div>
-                            {% if operation.MachineType == 'Machine' %}
+                            {% if operation.WorkCenterType == 'Machine' %}
                             <div class="form-group row">
-                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Machine</strong></label>
+                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
                               <div class="col-md-2">
-                                <input class="form-control" type="text" id="machine_no" autocomplete="off" value="">
+                                <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="">
                               </div>
                               <div class="col-md-5">
-                                <input class="form-control" type="text" id="machine_name" value="" readonly>
+                                <input class="form-control" type="text" id="workcenter_name" value="" readonly>
                               </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='machine_add_button' onclick="add_tmc()" disabled>Add</button></div>
+                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='workcenter_add_button' onclick="add_operating_workcenter()" disabled>Add</button></div>
                             </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="machine_table">
+                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="workcenter_table">
                               <thead class="bg-darkslategray">
                                 <tr>
                                   <th></th>
-                                  <th>Machine</th>
+                                  <th>Work Center</th>
                                   <th>Status</th>
                                   <th>Start Time</th>
                                   <th></th>
                                 </tr>
                               </thead>
-                              <tbody id="machine_table_body">
+                              <tbody id="workcenter_table_body">
 
                               </tbody>
                             </table>
@@ -375,16 +375,16 @@
                                 <input class="form-control" type="text" id="operator_name" value="" readonly>
                               </div>
                               <div class="col-md-3">
-                                <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_topr('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
-                                {% if operation.MachineType == 'Machine' %}
-                                <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_topr('SETUP')" disabled>Start Setup</button>
+                                <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
+                                {% if operation.WorkCenterType == 'Machine' %}
+                                <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled>Start Setup</button>
                                 {% endif %}
                               </div>
                             </div>
                             <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
                               <thead class="bg-darkslategray">
                                 <tr>
-                                  {% if operation.MachineType == 'Machine' %}<th>Machine</th>{% endif %}
+                                  {% if operation.WorkCenterType == 'Machine' %}<th>Work Center</th>{% endif %}
                                   <th>Operator</th>
                                   <th>Status</th>
                                   <th>Start-Stop Time</th>
@@ -814,7 +814,7 @@
                       <thead class="bg-darkslategray">
                         <tr>
                           <th>Operator</th>
-                          <th>Machine</th>
+                          <th>Work Center</th>
                           <th>Type</th>
                           <th>Start Time</th>
                           <th>Finish Time</th>
@@ -844,7 +844,7 @@
                       <thead class="bg-darkslategray">
                         <tr>
                           <th>Operator</th>
-                          <th>Machine</th>
+                          <th>Work Center</th>
                           <th>Good Qty</th>
                           <th>Reject Qty</th>
                           <th>Reason</th>
@@ -896,11 +896,11 @@
                     <input class="form-control" type="text" id="confirm_operator" readonly>
                   </div>
                 </div>
-                {% if operation.MachineType == 'Machine' %}
+                {% if operation.WorkCenterType == 'Machine' %}
                 <div class="form-group row">
-                  <label class="col-md-3 col-form-label text-right"><strong>Machine</strong></label>
+                  <label class="col-md-3 col-form-label text-right"><strong>Work Center</strong></label>
                   <div class="col-md-7">
-                    <input class="form-control" type="text" id="confirm_machine" readonly>
+                    <input class="form-control" type="text" id="confirm_workcenter" readonly>
                   </div>
                 </div>
                 {% endif %}
@@ -990,48 +990,47 @@
       });
 
       //-- INITIALIZE
-      var isSearchingMachine = false;
+      var isSearchingWorkCenter = false;
       var isSearchingOperator = false;
-      var currentMachineNo = null;
+      var currentWorkCenterNo = null;
       var currentOperatorId = null;
 
       $(document).ready(function() {
         showTime();
-        // if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
-        //   if($("#machine_type").val() == 'Machine') reload_machine_table();
-        //   reload_operator_table();
-        // }
+        if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
+          if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
+          reload_operator_table();
+        }
       });
 
       //-- MAIN SCRIPT
-      $("#machine_no").on("change keyup", function() {
-        $('#machine_name').val('');
-        $('#machine_add_button').prop('disabled', true);
-        remove_valid('machine_name');
-        $('#machine_name').removeClass('text-danger');
-        var machine_no = $('#machine_no').val();
-        if(isSearchingMachine == false && machine_no.length >= 4){
-          isSearchingMachine = true;
+      $("#workcenter_no").on("change keyup", function() {
+        $('#workcenter_name').val('');
+        $('#workcenter_add_button').prop('disabled', true);
+        remove_valid('workcenter_name');
+        $('#workcenter_name').removeClass('text-danger');
+        var workcenter_no = $('#workcenter_no').val();
+        if(isSearchingWorkCenter == false && workcenter_no.length >= 3){
+          isSearchingWorkCenter = true;
           $.ajax({
-            url: '/get_machine_data/',
+            url: '/get_workcenter_data/',
             data: {
-              'machine_no': machine_no,
+              'workcenter_no': workcenter_no,
             },
             dataType: 'json',
             success: function (data) {
               if (data.canAdd) {
-                currentMachineNo = data.MachineNumber;
-                currentMachineName = data.MachineName;
-                $('#machine_name').val(data.MachineNumber+" | "+data.MachineName);
-                $('#machine_add_button').prop('disabled', false);
-                valid('machine_name');
-                $('#machine_name').addClass('text-success');
+                currentWorkCenterNo = data.WorkCenterNo;
+                $('#workcenter_name').val(data.WorkCenterNo+" | "+data.WorkCenterName);
+                $('#workcenter_add_button').prop('disabled', false);
+                valid('workcenter_name');
+                $('#workcenter_name').addClass('text-success');
               } else {
-                $('#machine_name').val(data.invalid_text);
-                invalid('machine_name');
-                $('#machine_name').addClass('text-danger');
+                $('#workcenter_name').val(data.invalid_text);
+                invalid('workcenter_name');
+                $('#workcenter_name').addClass('text-danger');
               }
-              isSearchingMachine = false;
+              isSearchingWorkCenter = false;
             }
           });
         }
@@ -1058,7 +1057,7 @@
                 $('#operator_setup_button').prop('disabled', false);
                 currentOperatorId = data.EmpID;
                 currentOperatorName = data.EmpName;
-                $('#operator_name').val(data.EmpID+" | "+data.EmpName+" ("+data.Department+")");
+                $('#operator_name').val(data.EmpID+" | "+data.EmpName+" ("+data.Section+")");
                 valid('operator_name');
                 $('#operator_name').addClass('text-success');
               } else {
@@ -1072,11 +1071,11 @@
         }
       });
       //---------------------------------------------------------------------------------------------------- TABLES
-      function create_machine_table(){
+      function create_workcenter_table(){
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
         $.ajax({
-          url: '/get_all_tmc/',
+          url: '/get_operating_workcenter_list/',
           data: {
             'order_no': order_no,
             'operation_no': operation_no,
@@ -1084,57 +1083,57 @@
           dataType: 'json',
           success: function (data) {
             var completed_count = 0;
-            if(data.tmcList.length == 0){
-              var row = "<tr><td colspan='5'>Please add machine above.</td></tr>";
-              $("#machine_table_body").append(row);
+            if(data.OWCList.length == 0){
+              var row = "<tr><td colspan='5'>Please add workcenter above.</td></tr>";
+              $("#workcenter_table_body").append(row);
             } else {
-              for(var i = 0;i < data.tmcList.length;i++){
-                var tmc = data.tmcList[i];
+              for(var i = 0;i < data.OWCList.length;i++){
+                var owc = data.OWCList[i];
                 var row = "";
-                // console.log(tmc);
-                for(var j = 0;j < tmc.length;j++){
-                  var tmc_id = tmc[0];
-                  var tmc_machine_name = tmc[7]+" | "+tmc[8];
-                  var tmc_startdatetime = tmc[4];
-                  var startdatetime = (tmc_startdatetime == null)?"-":getFullDateTime(tmc_startdatetime);
-                  var tmc_stopdatetime = tmc[5];
-                  var stopdatetime = (tmc_stopdatetime == null)?"-":getFullDateTime(tmc_stopdatetime);
-                  var tmc_status = $.trim(tmc[6]);
-                  var mc_type = $.trim(tmc[10]);
-                  if(tmc_status == "COMPLETED") {
+                // console.log(owc);
+                for(var j = 0;j < owc.length;j++){
+                  var owc_id = owc[0];
+                  var owc_workcenter_name = owc[7]+" | "+owc[8];
+                  var owc_startdatetime = owc[4];
+                  var startdatetime = (owc_startdatetime == null)?"-":getFullDateTime(owc_startdatetime);
+                  var owc_stopdatetime = owc[5];
+                  var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTime(owc_stopdatetime);
+                  var owc_status = $.trim(owc[6]);
+                  var mc_type = $.trim(owc[13]);
+                  if(owc_status == "COMPLETED") {
                     completed_count++;
                     break;
                   }
                   row = "";
-                  row += "<tr id='machine_row_"+tmc_id+"'>";
+                  row += "<tr id='workcenter_row_"+owc_id+"'>";
                   row += "<td>";
-                  if(tmc_status != "SETUP"){
-                    row += "<input type='radio' class='my-radio' name='machine_radio' value='"+tmc_id+"' checked>";
+                  if(owc_status != "SETUP"){
+                    row += "<input type='radio' class='my-radio' name='workcenter_radio' value='"+owc_id+"' checked>";
                   }
                   row += "</td>";
-                  row += "<td class='small'>"+tmc_machine_name+"</td>";
-                  row += (tmc_status == "WAITING")?"<td class='font-weight-bold'>":"<td class='blink font-weight-bold'>";
-                  row += tmc_status;
-                  row += "<input type='text' id='machine_status_"+tmc_id+"' value='"+tmc_status+"' hidden>";
+                  row += "<td class='small'>"+owc_workcenter_name+"</td>";
+                  row += (owc_status == "WAITING")?"<td class='font-weight-bold'>":"<td class='blink font-weight-bold'>";
+                  row += owc_status;
+                  row += "<input type='text' id='workcenter_status_"+owc_id+"' value='"+owc_status+"' hidden>";
                   row += "</td>";
                   row += "<td class='small'>";
                   row += "<div>"+startdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
-                  if(tmc_status == "WAITING"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_tmc_"+tmc_id+"' onclick='delete_tmc("+tmc_id+")'>Delete</button>";
-                  } else if (tmc_status == "WORKING" && mc_type == "Auto" && data.hasOperatorWorkingList[i] == false){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_mc_tmc_"+tmc_id+"' onclick='stop_mc_tmc("+tmc_id+")'>Stop Machine</button>";
+                  if(owc_status == "WAITING"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_operating_workcenter_"+owc_id+"' onclick='delete_operating_workcenter("+owc_id+")'>Delete</button>";
+                  } else if (owc_status == "WORKING" && mc_type == "Auto" && data.hasOperatorOperatingList[i] == false){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_operating_workcenter_"+owc_id+"' onclick='stop_operating_workcenter("+owc_id+")'>Stop Machine</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
                 }
-                $("#machine_table_body").append(row);
+                $("#workcenter_table_body").append(row);
                 dynamic_operator_setup();
               }
-              if(completed_count == data.tmcList.length){
-                var row = "<tr><td colspan='5'>Please add machine above.</td></tr>";
-                $("#machine_table_body").append(row);
+              if(completed_count == data.OWCList.length){
+                var row = "<tr><td colspan='5'>Please add workcenter above.</td></tr>";
+                $("#workcenter_table_body").append(row);
               }
             }
             dynamic_operator_id();
@@ -1145,50 +1144,50 @@
       function create_operator_table(){
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
-        var machine_type = $("#machine_type").val();
+        var workcenter_type = $("#workcenter_type").val();
         $.ajax({
-          url: '/get_all_topr/',
+          url: '/get_operating_operator_list/',
           data: {
             'order_no': order_no,
             'operation_no': operation_no,
           },
           dataType: 'json',
           success: function (data) {
-            if(data.toprList.length == 0){
-              var row = "<tr><td colspan='"+((machine_type == 'Machine')?5:4)+"'>Please add operator above.</td></tr>";
+            if(data.OOPRList.length == 0){
+              var row = "<tr><td colspan='"+((workcenter_type == 'Machine')?5:4)+"'>Please add operator above.</td></tr>";
               $("#operator_table_body").append(row);
             } else {
-              for(var i = 0;i < data.toprList.length;i++){
-                var topr = data.toprList[i];
+              for(var i = 0;i < data.OOPRList.length;i++){
+                var oopr = data.OOPRList[i];
                 var row = "";
-                // console.log(topr);
-                for(var j = 0;j < topr.length;j++){
-                  var topr_id = topr[0];
-                  var topr_machine_name = (topr[18] == null)?null:topr[18]+" | "+topr[19];
-                  var topr_operator_name = topr[1]+" | "+topr[9];
-                  var topr_startdatetime = topr[3];
-                  var startdatetime = (topr_startdatetime == null)?"-":getFullDateTime(topr_startdatetime);
-                  var topr_stopdatetime = topr[4];
-                  var stopdatetime = (topr_stopdatetime == null)?"-":getFullDateTime(topr_stopdatetime);
-                  var topr_status = $.trim(topr[5]);
+                // console.log(oopr);
+                for(var j = 0;j < oopr.length;j++){
+                  var oopr_id = oopr[0];
+                  var oopr_workcenter_name = (oopr[18] == null)?null:oopr[18]+" | "+oopr[19];
+                  var oopr_operator_name = oopr[1]+" | "+oopr[9];
+                  var oopr_startdatetime = oopr[5];
+                  var startdatetime = (oopr_startdatetime == null)?"-":getFullDateTime(oopr_startdatetime);
+                  var oopr_stopdatetime = oopr[6];
+                  var stopdatetime = (oopr_stopdatetime == null)?"-":getFullDateTime(oopr_stopdatetime);
+                  var oopr_status = $.trim(oopr[7]);
                   row = "";
-                  row += "<tr id='operator_row_"+topr_id+"'>";
-                  row += (topr_machine_name == null)? "":"<td class='small'>"+topr_machine_name+"</td>";
-                  row += "<td class='small'>"+topr_operator_name+"</td>";
-                  row += (topr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
-                  row += topr_status+"</td>";
+                  row += "<tr id='operator_row_"+oopr_id+"'>";
+                  row += (oopr_workcenter_name == null)? "":"<td class='small'>"+oopr_workcenter_name+"</td>";
+                  row += "<td class='small'>"+oopr_operator_name+"</td>";
+                  row += (oopr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
+                  row += oopr_status+"</td>";
                   row += "<td class='small'>";
                   row += "<div> <strong>START</strong> "+startdatetime+"</div>";
                   row += "<div> <strong>STOP</strong> "+stopdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
-                  if(topr_status == "WORKING" || topr_status == "EXT-WORK"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_topr_"+topr_id+"' onclick='stop_work_topr("+topr_id+")'>Stop Working</button>";
-                  } else if (topr_status == "SETUP"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_topr_"+topr_id+"' onclick='start_work_topr("+topr_id+")'>Start Working</button> ";
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_topr_"+topr_id+"' onclick='stop_setup_topr("+topr_id+")'>Stop Setup & Exit</button>";
-                  } else if (topr_status == "COMPLETED" && $('#remain_qty').val() > 0){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+topr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                  if(oopr_status == "WORKING" || oopr_status == "EXT-WORK"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_operating_operator_"+oopr_id+"' onclick='stop_work_operating_operator("+oopr_id+")'>Stop Working</button>";
+                  } else if (oopr_status == "SETUP"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button> ";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_operating_operator_"+oopr_id+"' onclick='stop_setup_operating_operator("+oopr_id+")'>Stop Setup & Exit</button>";
+                  } else if (oopr_status == "COMPLETED" && $('#remain_qty').val() > 0){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
                   }
                   row += "</td>";
                   row += "</tr>";
@@ -1200,9 +1199,9 @@
         });
       }
 
-      function reload_machine_table(){
-        $("#machine_table > tbody").empty();
-        create_machine_table();
+      function reload_workcenter_table(){
+        $("#workcenter_table > tbody").empty();
+        create_workcenter_table();
       }
 
       function reload_operator_table(){
@@ -1210,72 +1209,72 @@
         create_operator_table();
       }
 
-      //---------------------------------------------------------------------------------------------------- MACHINE
-      function add_tmc(){
-        $('#machine_add_button').prop('disabled', true);
+      //---------------------------------------------------------------------------------------------------- WORKCENTER
+      function add_operating_workcenter(){
+        $('#workcenter_add_button').prop('disabled', true);
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
         $.ajax({
-          url: '/add_tmc/',
+          url: '/add_operating_workcenter/',
           data: {
             'order_no': order_no,
             'operation_no': operation_no,
-            'machine_no': currentMachineNo,
+            'workcenter_no': currentWorkCenterNo,
           },
           dataType: 'json',
           success: function (data) {
-            $('#machine_no').val("");
-            $('#machine_name').val("");
-            remove_valid('machine_name');
-            reload_machine_table();
+            $('#workcenter_no').val("");
+            $('#workcenter_name').val("");
+            remove_valid('workcenter_name');
+            reload_workcenter_table();
           }
         });
       }
 
-      function delete_tmc(id){
-        $('#delete_tmc_' + id).prop('disabled', true);
+      function delete_operating_workcenter(id){
+        $('#delete_operating_workcenter_' + id).prop('disabled', true);
         $.ajax({
-          url: '/delete_tmc/',
+          url: '/delete_operating_workcenter/',
           data: {
             'id': id,
           },
           dataType: 'json',
           success: function (data) {
-            reload_machine_table();
+            reload_workcenter_table();
           }
         });
       }
 
-      function stop_mc_tmc(id){
-        $('#stop_mc_tmc_' + id).prop('disabled', true);
+      function stop_operating_workcenter(id){
+        $('#stop_operating_workcenter_' + id).prop('disabled', true);
         $.ajax({
-          url: '/stop_mc_tmc/',
+          url: '/stop_operating_workcenter/',
           data: {
             'id': id,
           },
           dataType: 'json',
           success: function (data) {
-            reload_machine_table();
+            reload_workcenter_table();
           }
         });
       }
       //---------------------------------------------------------------------------------------------------- OPERATOR
-      function add_topr(status){
+      function add_operating_operator(status){
         $('#operator_work_button').prop('disabled', true);
         $('#operator_setup_button').prop('disabled', true);
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
-        var tmc_id = "NULL";
-        if ($('input[name="machine_radio"]').length > 0){
-          tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
+        var owc_id = -1;
+        if ($('input[name="workcenter_radio"]').length > 0){
+          owc_id = document.querySelector('input[name="workcenter_radio"]:checked').value;
         }
         $.ajax({
-          url: '/add_topr/',
+          url: '/add_operating_operator/',
           data: {
             'order_no': order_no,
             'operation_no': operation_no,
             'operator_id': currentOperatorId,
-            'tmc_id': tmc_id,
+            'owc_id': owc_id,
             'status': status,
           },
           dataType: 'json',
@@ -1283,52 +1282,52 @@
             $('#operator_id').val("");
             $('#operator_name').val("");
             remove_valid('operator_name');
-            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
         });
       }
 
-      function start_work_topr(id){
-        $('#start_work_topr_' + id).prop('disabled', true);
+      function start_work_operating_operator(id){
+        $('#start_work_operating_operator_' + id).prop('disabled', true);
         $.ajax({
-          url: '/start_work_topr/',
+          url: '/start_work_operating_operator/',
           data: {
             'id': id,
           },
           dataType: 'json',
           success: function (data) {
-            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
         });
       }
 
-      function stop_setup_topr(id){
-        $('#stop_setup_topr_' + id).prop('disabled', true);
+      function stop_setup_operating_operator(id){
+        $('#stop_setup_operating_operator_' + id).prop('disabled', true);
         $.ajax({
-          url: '/stop_setup_topr/',
+          url: '/stop_setup_operating_operator/',
           data: {
             'id': id,
           },
           dataType: 'json',
           success: function (data) {
-            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
         });
       }
 
-      function stop_work_topr(id){
-        $('#stop_work_topr_' + id).prop('disabled', true);
+      function stop_work_operating_operator(id){
+        $('#stop_work_operating_operator_' + id).prop('disabled', true);
         $.ajax({
-          url: '/stop_work_topr/',
+          url: '/stop_work_operating_operator/',
           data: {
             'id': id,
           },
           dataType: 'json',
           success: function (data) {
-            if($("#machine_type").val() == 'Machine') reload_machine_table();
+            if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
         });
@@ -1337,7 +1336,7 @@
       function prepare_confirm(id){
         $('#confirm_button').prop('disabled', true);
         $.ajax({
-          url: '/get_topr_for_confirm/',
+          url: '/get_data_for_confirm/',
           data: {
             'id': id,
           },
@@ -1345,7 +1344,7 @@
           success: function (data) {
             $('#confirm_id').val(id);
             $('#confirm_operator').val(data.operator_text);
-            $('#confirm_machine').val(data.machine_text);
+            $('#confirm_workcenter').val(data.workcenter_text);
             $('#confirm_start_time').val(data.start_time);
             $('#confirm_stop_time').val(data.stop_time);
             $('#confirm_button').prop('disabled', false);
@@ -1563,15 +1562,15 @@
       }
 
       //-- DYNAMIC INPUT
-      $(document).on('change', 'input[type=radio][name=machine_radio]', function (event) {
+      $(document).on('change', 'input[type=radio][name=workcenter_radio]', function (event) {
           dynamic_operator_setup();
       });
 
       function dynamic_operator_setup(){
-        if ($('input[name="machine_radio"]').length > 0){
-          tmc_id = document.querySelector('input[name="machine_radio"]:checked').value;
-          var tmc_status = $('#machine_status_' + tmc_id).val();
-          if(tmc_status == "WORKING"){
+        if ($('input[name="workcenter_radio"]').length > 0){
+          owc_id = document.querySelector('input[name="workcenter_radio"]:checked').value;
+          var owc_status = $('#workcenter_status_' + owc_id).val();
+          if(owc_status == "WORKING"){
             $("#operator_setup_button").prop('hidden', true);
           } else {
             $("#operator_setup_button").prop('hidden', false);
@@ -1580,9 +1579,9 @@
       }
 
       function dynamic_operator_id(){
-        if($('#machine_type').val() == 'Labor'){
+        if($('#workcenter_type').val() == 'Labor'){
           $("#operator_id").prop('readonly', false);
-        } else if($('#machine_type').val() == 'Machine' && $('input[name="machine_radio"]').length > 0){
+        } else if($('#workcenter_type').val() == 'Machine' && $('input[name="workcenter_radio"]').length > 0){
           $("#operator_id").prop('readonly', false);
         } else {
           $("#operator_id").prop('readonly', true);
