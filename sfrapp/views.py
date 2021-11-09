@@ -383,6 +383,7 @@ def get_data_for_confirm(request):
     }
     return JsonResponse(data)
 
+#-- NEED FIX
 def confirm(request):
     confirm_id = request.GET.get('confirm_id')
     good_qty = request.GET.get('good_qty')
