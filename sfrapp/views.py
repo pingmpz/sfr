@@ -417,7 +417,8 @@ def confirm(request):
     if oopr.WorkCenterNo == None:
         workcenter = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo).WorkCenterNo
     insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
-    #-- CONFIRM : LOG @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    #-- CONFIRM : LOG
+    insertHistoryConfirm(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
     #-- UPDATE QTY OF CURRENT OPERATION
     updateOperationControl(oopr.OperatorOrderNo,oopr.OperatorOperationNo, good_qty, reject_qty, "UPDATEQTY")
     #-- UPDATE PROCESS QTY OF NEXT OPERATION
@@ -674,7 +675,7 @@ def isLastOperation(order_no, operation_no):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
-#--------------------------------------------------------------------------- EXC
+#--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
     setOrderControlFromSAP(order_no)
@@ -710,6 +711,8 @@ def setOperationControlFromSAP(order_no):
         conn.commit()
     return
 
+#------------------------------------------------------------------------ INSERT
+
 def insertOperatingWorkCenter(order_no, operation_no, workcenter_no):
     conn = get_connection()
     cursor = conn.cursor()
@@ -728,33 +731,42 @@ def insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     conn.commit()
     return
 
-def deleteOperatingWorkCenter(id):
+def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup_time, oper_time, labor_time, start_date_time, stop_date_time, emp_id):
+    start_date = start_date_time.strftime("%Y%m%d")
+    start_time = start_date_time.strftime("%H%M%S")
+    stop_date = stop_date_time.strftime("%Y%m%d")
+    stop_time = stop_date_time.strftime("%H%M%S")
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "DELETE FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = " + str(id)
+    sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
+    sql += " VALUES (CURRENT_TIMESTAMP,"
+    sql += "'" + str(workcenter) + "',"
+    sql += "'" + str(order_no) + "',"
+    sql += "'" + str(operation_no) + "',"
+    sql += "'" + str(yiled) + "',"
+    sql += "'" + str(scrap) + "',"
+    sql += "'" + str(setup_time) + "',"
+    sql += "'" + str(oper_time) + "',"
+    sql += "'" + str(labor_time) + "',"
+    sql += "'" + str(start_date) + "',"
+    sql += "'" + str(start_time) + "',"
+    sql += "'" + str(stop_date) + "',"
+    sql += "'" + str(stop_time) + "',"
+    sql += "'" + str(emp_id) + "')"
     cursor.execute(sql)
     conn.commit()
     return
 
-def deleteOperatingOperator(id):
+def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, accept, reject, reason):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "DELETE FROM [OperatingOperator] WHERE OperatingOperatorID = " + str(id)
+    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[AcceptQty],[RejectedQty],[RejectReason],[ConfirmDateTime])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + workcenter_no + "','" + str(accept) + "','" + str(reject) + "','" + reason + "',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return
 
-def deleteAllControlData(order_no, operation_no):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "DELETE FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
-    cursor.execute(sql)
-    conn.commit()
-    cursor = conn.cursor()
-    sql = "DELETE FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
-    cursor.execute(sql)
-    conn.commit()
-    return
+#------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
     conn = get_connection()
@@ -787,32 +799,6 @@ def updateOperatingOperator(id, status):
     cursor.execute(sql)
     conn.commit()
 
-def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup_time, oper_time, labor_time, start_date_time, stop_date_time, emp_id):
-    start_date = start_date_time.strftime("%Y%m%d")
-    start_time = start_date_time.strftime("%H%M%S")
-    stop_date = stop_date_time.strftime("%Y%m%d")
-    stop_time = stop_date_time.strftime("%H%M%S")
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
-    sql += " VALUES (CURRENT_TIMESTAMP,"
-    sql += "'" + str(workcenter) + "',"
-    sql += "'" + str(order_no) + "',"
-    sql += "'" + str(operation_no) + "',"
-    sql += "'" + str(yiled) + "',"
-    sql += "'" + str(scrap) + "',"
-    sql += "'" + str(setup_time) + "',"
-    sql += "'" + str(oper_time) + "',"
-    sql += "'" + str(labor_time) + "',"
-    sql += "'" + str(start_date) + "',"
-    sql += "'" + str(start_time) + "',"
-    sql += "'" + str(stop_date) + "',"
-    sql += "'" + str(stop_time) + "',"
-    sql += "'" + str(emp_id) + "')"
-    cursor.execute(sql)
-    conn.commit()
-    return
-
 def updateOrderControl(order_no, status):
     conn = get_connection()
     cursor = conn.cursor()
@@ -837,6 +823,36 @@ def updateOperationControl(order_no, operation_no, accept, reject, status):
         sql = "UPDATE [OperationControl] SET [AcceptedQty] += " + str(accept) + ", [RejectedQty] += " + str(reject) + " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no  + "'"
     if status == "PROCESSQTY":
         sql = "UPDATE [OperationControl] SET [ProcessQty] += " + str(accept) + " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+#------------------------------------------------------------------------ DELETE
+
+def deleteOperatingWorkCenter(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteOperatingOperator(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperatingOperator] WHERE OperatingOperatorID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteAllControlData(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
