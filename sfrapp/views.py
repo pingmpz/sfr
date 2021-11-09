@@ -757,6 +757,15 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     conn.commit()
     return
 
+def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, start_date_time, stop_date_time):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[StartDateTime],[StopDateTime])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + workcenter_no + "','" + type + "','" + start_date_time + "','" + stop_date_time + "')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, accept, reject, reason):
     conn = get_connection()
     cursor = conn.cursor()
