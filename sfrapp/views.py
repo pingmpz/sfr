@@ -553,7 +553,7 @@ def getPurchaseGroupList():
 
 def getOperationList(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "'"
+    sql = "SELECT * FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 

@@ -270,6 +270,7 @@
                                     </th>
                                     <th>Operation No</th>
                                     <th>Work Center</th>
+                                    <th></th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -290,6 +291,12 @@
                                       {% endif %}
                                     </td>
                                     <td>{{operation.WorkCenterNo}}</td>
+                                    <td>
+                                      {% if operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
+                                      {% elif operation.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
+                                      {% elif operation.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
+                                      {% endif %}
+                                    </td>
                                   </tr>
                                   {% endfor %}
                                 </tbody>
