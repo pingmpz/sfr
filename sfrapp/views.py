@@ -472,6 +472,7 @@ def confirm(request):
         updateOperationControl(oopr.OperatorOrderNo, oopr.OperatorOperationNo, 0, 0, "STOP")
         #-- IF LAST OPERATION IN ORDER
         if isLastOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo):
+            print('YES')
             #-- ORDER : STOP
             updateOrderControl(oopr.OperatorOrderNo, "STOP")
     data = {
@@ -750,9 +751,10 @@ def hasNotStartOperation(order_no, operation_no):
 
 def isLastOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo > '" + operation_no + "' ORDER BY OperationNo DESC"
+    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo DESC"
     cursor.execute(sql)
-    return (len(cursor.fetchall()) > 0)
+    result = cursor.fetchall()
+    return (result[0].OperationNo.strip() == operation_no)
 
 #--------------------------------------------------------------------------- SET
 

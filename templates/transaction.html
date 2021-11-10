@@ -318,7 +318,7 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 %}
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' %}
                         <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         <button type="button" class="btn btn-lg btn-danger my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
                         {% endif %}
@@ -883,7 +883,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="confirm_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="confirm_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -1351,6 +1351,7 @@
             $('#confirm_start_time').val(data.start_time);
             $('#confirm_stop_time').val(data.stop_time);
             $('#confirm_button').prop('disabled', false);
+            $('#good_qty').focus();
           }
         });
       }
