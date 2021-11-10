@@ -119,7 +119,7 @@
 
       $(document).ready(function() {
         $('#sap_routing_master_table').DataTable( {
-            "order":  0, "asc" ,
+            "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });
       });
