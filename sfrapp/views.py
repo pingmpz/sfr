@@ -462,6 +462,24 @@ def confirm(request):
     }
     return JsonResponse(data)
 
+def reset_all(request):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = """
+            DELETE FROM OperatingOperator
+            DELETE FROM OperatingWorkCenter
+            DELETE FROM SFR2SAP_Report
+            DELETE FROM HistoryConfirm
+            DELETE FROM HistoryOperate
+            DELETE FROM OrderControl
+            DELETE FROM OperationControl
+            """
+    cursor.execute(sql)
+    conn.commit()
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################

@@ -100,6 +100,7 @@
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            <button type="button" class="btn btn-sm btn-pill bg-danger text-white" onclick="reset_all()">RESET ALL !</button>
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
@@ -1211,7 +1212,6 @@
         create_operator_table();
       }
 
-      //---------------------------------------------------------------------------------------------------- WORKCENTER
       function add_operating_workcenter(){
         $('#workcenter_add_button').prop('disabled', true);
         var order_no = $("#order_no").val();
@@ -1260,7 +1260,7 @@
           }
         });
       }
-      //---------------------------------------------------------------------------------------------------- OPERATOR
+
       function add_operating_operator(status){
         $('#operator_work_button').prop('disabled', true);
         $('#operator_setup_button').prop('disabled', true);
@@ -1354,6 +1354,19 @@
           }
         });
       }
+
+      function reset_all(){
+        $.ajax({
+          url: '/reset_all/',
+          data: {
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+
       //----------------------------------------------------------------------------------------------------
 
       //-- ADD OPERATION
