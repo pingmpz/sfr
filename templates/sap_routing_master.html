@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Work Center Master | Shopfloor Reporting Application</title>
+    <title>SAP Routing Master | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -39,7 +39,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Work Center ({{workCenterList|length}})</li>
+            <li class="breadcrumb-item">SAP Routing ({{sapRoutingList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -57,32 +57,32 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-striped small" id="wc_master_table">
+                      <table class="table table-sm table-striped small" id="sap_routing_master_table">
                         <thead>
                           <tr>
-                            <th>Work Center No</th>
-                            <th>Work Center Name</th>
-                            <th>Work Center Group</th>
-                            <th>Routing</th>
-                            <th>External Process</th>
-                            <th>Work Center Type</th>
-                            <th>Machine Type</th>
-                            <th>Hourly Rate</th>
-                            <th>Noted</th>
+                            <th>ProductionOrderNo</th>
+                            <th>OperationNumber</th>
+                            <th>WorkCenter</th>
+                            <th>PlanStartDate</th>
+                            <th>PlanFinishDate</th>
+                            <th>EstimateSetTime</th>
+                            <th>EstimateOperationTime</th>
+                            <th>EstimateLaborTime</th>
+                            <th>DateGetFromSAP</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for workCenter in workCenterList %}
-                          <tr class="{% if workCenter.IsActive == False %}text-danger{% endif %}">
-                            <td>{{workCenter.WorkCenterNo}}</td>
-                            <td>{{workCenter.WorkCenterName}}</td>
-                            <td>{{workCenter.WorkCenterGroup}}</td>
-                            <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{{workCenter.WorkCenterType}}</td>
-                            <td>{{workCenter.MachineType|default_if_none:""}}</td>
-                            <td>{{workCenter.HourlyRate|floatformat:"0"}}</td>
-                            <td>{{workCenter.Noted|default_if_none:""}}</td>
+                          {% for routing in sapRoutingList %}
+                          <tr>
+                            <td><strong>{{routing.ProductionOrderNo|default_if_none:""}}</strong></td>
+                            <td><strong>{{routing.OperationNumber|default_if_none:""}}</strong></td>
+                            <td>{{routing.WorkCenter|default_if_none:""}}</td>
+                            <td>{{routing.PlanStartDate|default_if_none:""}}</td>
+                            <td>{{routing.PlanFinishDate|default_if_none:""}}</td>
+                            <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
+                            <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
+                            <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
+                            <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -100,9 +100,9 @@
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
-    <!--[if IE]><!-->
+    <!--if IE><!-->
     <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
-    <!--<![endif]-->
+    <!--<!endif-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Data Table JS -->
@@ -118,8 +118,8 @@
       });
 
       $(document).ready(function() {
-        $('#wc_master_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+        $('#sap_routing_master_table').DataTable( {
+            "order":  0, "asc" ,
             'iDisplayLength': 100,
         });
       });

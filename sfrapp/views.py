@@ -162,6 +162,22 @@ def purg_master(request):
     }
     return render(request, 'purg_master.html', context)
 
+#--------------------------------------------------------------------------- SAP
+
+def sap_order_master(request):
+    sapOrderList = getSAPOrderList()
+    context = {
+        'sapOrderList' : sapOrderList,
+    }
+    return render(request, 'sap_order_master.html', context)
+
+def sap_routing_master(request):
+    sapRoutingList = getSAPRoutingList()
+    context = {
+        'sapRoutingList' : sapRoutingList,
+    }
+    return render(request, 'sap_routing_master.html', context)
+
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################
@@ -491,6 +507,18 @@ def get_connection():
     return conn
 
 #-------------------------------------------------------------------------- LIST
+
+def getSAPOrderList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SAP_Order] ORDER BY ProductionOrderNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPRoutingList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SAP_Routing] ORDER BY ProductionOrderNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
 
 def getWorkCenterList():
     cursor = get_connection().cursor()

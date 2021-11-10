@@ -13,6 +13,9 @@ urlpatterns = [
     path('rej_master/', views.rej_master, name='rej_master'),
     path('matg_master/', views.matg_master, name='matg_master'),
     path('purg_master/', views.purg_master, name='purg_master'),
+    #-- SAP
+    path('sap_order_master/', views.sap_order_master, name='sap_order_master'),
+    path('sap_routing_master/', views.sap_routing_master, name='sap_routing_master'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
     path('validate_operator/', views.validate_operator, name='validate_operator'),
