@@ -305,7 +305,7 @@
                     <div class="row">
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
-                        {% if order.ProcessStop != None %}
+                        {% if order.ProcessStop == None %}
                         <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None %}
@@ -324,7 +324,9 @@
                         {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
                         {% endif %}
+                        {% if historyOperateList|length > 0 or historyConfirmList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
+                        {% endif %}
                         <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
@@ -813,8 +815,8 @@
             <div class="modal-body">
               <div class="nav-tabs-boxed">
                 <ul class="nav nav-tabs" role="tablist">
-                  <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate</a></li>
-                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm</a></li>
+                  <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate ({{historyOperateList|length}})</a></li>
+                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm ({{historyConfirmList|length}})</a></li>
                 </ul>
                 <div class="tab-content">
                   <!-- Operate Tab -->
@@ -830,20 +832,17 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {% for operate in historyOperateList %}
+                        {% if operate.EmpID != None %}
                         <tr>
-                          <td>5731</td>
-                          <td>BTA-01</td>
-                          <td>SETUP</td>
-                          <td>28-10-2021 10:05</td>
-                          <td>28-10-2021 11:23</td>
+                          <td>{{operate.EmpID}}</td>
+                          <td>{{operate.WorkCenterNo}}</td>
+                          <td>{{operate.Type}}</td>
+                          <td>{{operate.StartDateTime}}</td>
+                          <td>{{operate.StopDateTime}}</td>
                         </tr>
-                        <tr>
-                          <td>5731</td>
-                          <td>BTA-01</td>
-                          <td>WORK</td>
-                          <td>28-10-2021 10:05</td>
-                          <td>28-10-2021 11:23</td>
-                        </tr>
+                        {% endif %}
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -861,22 +860,16 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {% for confirm in historyConfirmList %}
                         <tr>
-                          <td>5731</td>
-                          <td>BTA-01</td>
-                          <td>3</td>
-                          <td>0</td>
-                          <td>-</td>
-                          <td>28-10-2021 17:24</td>
+                          <td>{{confirm.EmpID}}</td>
+                          <td>{{confirm.WorkCenterNo}}</td>
+                          <td>{{confirm.AcceptedQty}}</td>
+                          <td>{{confirm.RejectedQty}}</td>
+                          <td>{{confirm.RejectReason}}</td>
+                          <td>{{confirm.ConfirmDateTime}}</td>
                         </tr>
-                        <tr>
-                          <td>5731</td>
-                          <td>BTA-01</td>
-                          <td>2</td>
-                          <td>1</td>
-                          <td>RUST</td>
-                          <td>28-10-2021 17:24</td>
-                        </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>

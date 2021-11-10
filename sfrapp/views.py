@@ -25,10 +25,12 @@ def transaction(request, orderoprno):
     order = None
     operation = None
     remainQty = -1
-    joinList = []
     state = "ERROR"
     operationList = []
     operationStatusList = []
+    joinList = []
+    historyOperateList = []
+    historyConfirmList = []
     rejectReasonList = []
     materialGroupList = []
     purchaseGroupList = []
@@ -74,6 +76,9 @@ def transaction(request, orderoprno):
                 #-- GET JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
+                #-- GET HISTORY LIST
+                historyOperateList = getHistoryOperateList(orderNo, operationNo)
+                historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
                 #-- GET ETC LIST
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
@@ -95,9 +100,11 @@ def transaction(request, orderoprno):
         'order' : order,
         'operation' : operation,
         'remainQty' : remainQty,
-        'joinList' : joinList,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
+        'joinList' : joinList,
+        'historyOperateList' : historyOperateList,
+        'historyConfirmList' : historyConfirmList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
@@ -525,6 +532,18 @@ def getJoinList(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getHistoryOperateList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryOperate] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getHistoryConfirmList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryConfirm] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 #-------------------------------------------------------------------------- ITEM
 
 def getOrder(order_no):
@@ -785,7 +804,7 @@ def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, typ
 def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, accept, reject, reason):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[AcceptQty],[RejectedQty],[RejectReason],[ConfirmDateTime])"
+    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[AcceptedQty],[RejectedQty],[RejectReason],[ConfirmDateTime])"
     sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + workcenter_no + "','" + str(accept) + "','" + str(reject) + "','" + reason + "',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
