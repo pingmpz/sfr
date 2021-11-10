@@ -164,19 +164,26 @@ def purg_master(request):
 
 #--------------------------------------------------------------------------- SAP
 
-def sap_order_master(request):
+def sap_order(request):
     sapOrderList = getSAPOrderList()
     context = {
         'sapOrderList' : sapOrderList,
     }
-    return render(request, 'sap_order_master.html', context)
+    return render(request, 'sap_order.html', context)
 
-def sap_routing_master(request):
+def sap_routing(request):
     sapRoutingList = getSAPRoutingList()
     context = {
         'sapRoutingList' : sapRoutingList,
     }
-    return render(request, 'sap_routing_master.html', context)
+    return render(request, 'sap_routing.html', context)
+
+def sap_report(request):
+    sapReportList = getSAPReportList()
+    context = {
+        'sapReportList' : sapReportList,
+    }
+    return render(request, 'sap_report.html', context)
 
 ################################################################################
 #################################### REQUEST ###################################
@@ -518,6 +525,12 @@ def getSAPOrderList():
 def getSAPRoutingList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [SAP_Routing] ORDER BY ProductionOrderNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPReportList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SFR2SAP_Report] ORDER BY ProductionOrderNo ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 

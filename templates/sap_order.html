@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>SAP Order Master | Shopfloor Reporting Application</title>
+    <title>SAP Order | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -77,7 +77,7 @@
                           <a class="toggle-vis small text-primary" data-column="16">DateGetFromSAP</a>
                       </div>
                       <br>
-                      <table class="table table-sm table-striped small" id="sap_order_master_table">
+                      <table class="table table-sm table-striped small" id="sap_order_table" style="width: 100%">
                         <thead>
                           <tr>
                             <th>CustomerPONo</th>
@@ -155,7 +155,7 @@
 
       var table;
       $(document).ready(function() {
-        table = $('#sap_order_master_table').DataTable( {
+        table = $('#sap_order_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
             "scrollX": true
@@ -167,7 +167,7 @@
         var column = table.column( $(this).attr('data-column') );
         column.visible( ! column.visible() );
         (column.visible())? $(this).removeClass("text-danger"): $(this).addClass("text-danger");
-    } );
+      });
     </script>
   </body>
 </html>

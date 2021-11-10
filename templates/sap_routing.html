@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>SAP Routing Master | Shopfloor Reporting Application</title>
+    <title>SAP Routing | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -57,7 +57,7 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-striped small" id="sap_routing_master_table">
+                      <table class="table table-sm table-striped small" id="sap_routing_table">
                         <thead>
                           <tr>
                             <th>ProductionOrderNo</th>
@@ -118,7 +118,7 @@
       });
 
       $(document).ready(function() {
-        $('#sap_routing_master_table').DataTable( {
+        $('#sap_routing_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });
