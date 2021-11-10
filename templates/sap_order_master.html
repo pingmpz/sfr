@@ -57,6 +57,26 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
+                      <div class="text-center">
+                          <a class="toggle-vis small text-primary" data-column="0">CustomerPONo</a> |
+                          <a class="toggle-vis small text-primary" data-column="1">PartNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="2">PartName</a> |
+                          <a class="toggle-vis small text-primary" data-column="3">SalesOrderNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="4">SalesCreateDate</a> |
+                          <a class="toggle-vis small text-primary" data-column="5">SalesOrderQuantity</a> |
+                          <a class="toggle-vis small text-primary" data-column="6">ProductionOrderNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="7">ProductionOrderQuatity</a> |
+                          <a class="toggle-vis small text-primary" data-column="8">FG_MaterialCode</a> |
+                          <a class="toggle-vis small text-primary" data-column="9">RM_MaterialCode</a> |
+                          <a class="toggle-vis small text-primary" data-column="10">MRP_Controller</a> |
+                          <a class="toggle-vis small text-primary" data-column="11">RequestDate</a> |
+                          <a class="toggle-vis small text-primary" data-column="12">ReleaseDate</a> |
+                          <a class="toggle-vis small text-primary" data-column="13">DrawingNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="14">RoutingGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="15">RoutingGroupCounter</a> |
+                          <a class="toggle-vis small text-primary" data-column="16">DateGetFromSAP</a>
+                      </div>
+                      <br>
                       <table class="table table-sm table-striped small" id="sap_order_master_table">
                         <thead>
                           <tr>
@@ -133,13 +153,21 @@
         }, 2000);
       });
 
+      var table;
       $(document).ready(function() {
-        $('#sap_order_master_table').DataTable( {
+        table = $('#sap_order_master_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
             "scrollX": true
         });
       });
+
+      $('a.toggle-vis').on( 'click', function (e) {
+        e.preventDefault();
+        var column = table.column( $(this).attr('data-column') );
+        column.visible( ! column.visible() );
+        (column.visible())? $(this).removeClass("text-danger"): $(this).addClass("text-danger");
+    } );
     </script>
   </body>
 </html>
