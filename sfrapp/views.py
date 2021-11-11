@@ -119,9 +119,11 @@ def join_activity(request, orderoprno):
     operationNo = orderoprno[10:14]
     order = getOrder(orderNo)
     operation = getOperation(orderNo, operationNo)
+    joinableList = getJoinableList(orderNo, operation.WorkCenterGroup)
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
+        'joinableList' : joinableList,
     }
     return render(request, 'join_activity.html', context)
 
@@ -593,6 +595,17 @@ def getOperatingOperatorList(order_no, operation_no):
 def getJoinList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] WHERE JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getJoinableList(order_no, work_center_group):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo "
+    sql += "WHERE WC.WorkCenterGroup = '" + work_center_group + "'"
+    sql += " AND WorkCenterType = 'Machine'"
+    sql += " AND ProcessQty - (AcceptedQty + RejectedQty) <> 0"
+    sql += " AND OrderNo <> '" + order_no + "'"
+    sql += " AND ProcessStart IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 

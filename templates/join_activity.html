@@ -74,27 +74,22 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <p class="text-center">Please select production order no - operation no to join to..</p>
+                      <p class="text-center">
+                        Please select production order no - operation no to join to..
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Rules"
+                        data-content="
+                        1) Has Remaining Quantity.<br>
+                        2) Not Start Process Yet.<br>
+                        3) Machining Type Operation.<br>
+                        4) Same Work Center Group.<br>
+                        5) Different Production Order.">?
+                        </a>
+                      </p>
                       <h1 class="text-center">{{orderNo}} - {{operationNo}}</h1><br>
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
-                        <option value="50007864470020">5000786447 - 0020 | BTA_A20</option>
-                        <option value="50007864470030">5000786447 - 0030 | BTA_A20</option>
-                        <option value="50007864470040">5000786447 - 0040 | BTA_BW12</option>
-                        <option value="50007864470050">5000786447 - 0050 | BTA_BW12</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
-                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        {% for join in joinableList %}
+                        <option value="{{join.OrderNo}}{{join.OperationNo}}">{{join.OrderNo}} - {{join.OperationNo}} | {{join.WorkCenterNo}}</option>
+                        {% endfor %}
                       </select>
                     </div>
                   </div>
@@ -112,6 +107,8 @@
     <!--[if IE]><!-->
     <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
     <!--<![endif]-->
+    <!-- Popover JS -->
+    <script src="{% static "js/popovers.js" %}"></script>
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Multiple Select CSS -->
