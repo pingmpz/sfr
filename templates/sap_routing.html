@@ -74,8 +74,8 @@
                         <tbody>
                           {% for routing in sapRoutingList %}
                           <tr>
-                            <td><strong>{{routing.ProductionOrderNo|default_if_none:""}}</strong></td>
-                            <td><strong>{{routing.OperationNumber|default_if_none:""}}</strong></td>
+                            <td>{{routing.ProductionOrderNo|default_if_none:""}}</td>
+                            <td>{{routing.OperationNumber|default_if_none:""}}</td>
                             <td>{{routing.WorkCenter|default_if_none:""}}</td>
                             <td>{{routing.PlanStartDate|default_if_none:""}}</td>
                             <td>{{routing.PlanFinishDate|default_if_none:""}}</td>
@@ -119,7 +119,7 @@
 
       $(document).ready(function() {
         $('#sap_routing_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 8, "desc" ],[ 0, "asc" ],[ 1, "asc" ]],
             'iDisplayLength': 100,
         });
       });

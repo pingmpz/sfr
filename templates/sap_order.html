@@ -108,7 +108,7 @@
                             <td>{{order.SalesOrderNo|default_if_none:""}}</td>
                             <td>{{order.SalesCreateDate|default_if_none:""}}</td>
                             <td>{{order.SalesOrderQuantity|default_if_none:""}}</td>
-                            <td><strong>{{order.ProductionOrderNo|default_if_none:""}}</strong></td>
+                            <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
                             <td>{{order.ProductionOrderQuatity|default_if_none:""}}</td>
                             <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
                             <td>{{order.RM_MaterialCode|default_if_none:""}}</td>
@@ -156,7 +156,7 @@
       var table;
       $(document).ready(function() {
         table = $('#sap_order_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 16, "desc" ],[ 6, "asc" ]],
             'iDisplayLength': 100,
             "scrollX": true
         });
