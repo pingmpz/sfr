@@ -213,6 +213,7 @@ def validate_new_operation(request):
 
 def get_workcenter_data(request):
     workcenter_no = request.GET.get('workcenter_no')
+    work_center_group = request.GET.get('work_center_group')
     canAdd = False
     invalid_text = ''
     WorkCenterNo = None
@@ -221,8 +222,11 @@ def get_workcenter_data(request):
     if workcenter != None:
         WorkCenterNo = workcenter.WorkCenterNo
         WorkCenterName = workcenter.WorkCenterName
+        print(workcenter.WorkCenterGroup, work_center_group)
         if workcenter.IsRouting:
             invalid_text = WorkCenterNo + " is a rounting."
+        elif workcenter.WorkCenterGroup != work_center_group:
+            invalid_text = WorkCenterNo + " is in " + workcenter.WorkCenterGroup + " Group."
         elif isWorkCenterOperating(workcenter_no):
             owc = getWorkCenterOperatingByWorkCenterNo(workcenter_no)
             invalid_text = WorkCenterNo + " is working at " + owc.OrderNo + "-" + owc.OperationNo + "."

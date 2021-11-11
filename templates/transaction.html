@@ -27,56 +27,7 @@
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
-    <style media="screen">
-      .bg-yellowgreen {
-          background-color:#9dd04d;
-          color:white;
-      }
-      .text-yellowgreen {
-          color:#9dd04d;
-      }
-      .bg-darkslategray {
-          background-color:#30475e;
-          color:white;
-      }
-      .bg-lavender {
-          background-color:#dbf2f2;
-          color:black;
-      }
-      .bg-plum {
-          background-color:#b691ff;
-          color:white;
-      }
-      .text-plum {
-          color:#b691ff;
-      }
-      .text-palegoldenrod {
-        color:#dfffad;
-      }
-      .my-btn {
-        width: 90px;
-      }
-      .my-radio {
-        width: 18px;
-        height: 18px;
-      }
-      .blink {
-        animation: blinker 1s step-start infinite;
-      }
-
-      @keyframes blinker {
-        /* 10% { opacity: 0.1; } */
-        20% { opacity: 0.2; }
-        /* 30% { opacity: 0.3; } */
-        40% { opacity: 0.4; }
-        /* 50% { opacity: 0.5; } */
-        60% { opacity: 0.6; }
-        /* 70% { opacity: 0.7; } */
-        80% { opacity: 0.8; }
-        /* 90% { opacity: 0.9; } */
-        100% { opacity: 1; }
-      }
-    </style>
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -122,16 +73,30 @@
                   <div class="col-sm-12 col-md-4">
                     <div class="card border-secondary">
                       <div class="card-body">
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Production Order No</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control" type="text" id="order_no" value="{{orderNo}}" readonly>
+                        <div class="row">
+                          <div class="col-md-3 text-center">
+                            <div class="ui-widget-info">
+                              <h1 class="ui-value">{{operation.ProcessQty.normalize}}</h1>
+                              <span class="ui-label">Process</span>
+                            </div>
                           </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Operation No</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" readonly>
+                          <div class="col-md-3 text-center">
+                            <div class="ui-widget-warning">
+                              <h1 class="ui-value">{{remainQty.normalize}}</h1>
+                              <span class="ui-label">Remain</span>
+                            </div>
+                          </div>
+                          <div class="col-md-3 text-center">
+                            <div class="ui-widget-success">
+                              <h1 class="ui-value">{{operation.AcceptedQty.normalize}}</h1>
+                              <span class="ui-label">Accept</span>
+                            </div>
+                          </div>
+                          <div class="col-md-3 text-center">
+                            <div class="ui-widget-danger">
+                              <h1 class="ui-value">{{operation.RejectedQty.normalize}}</h1>
+                              <span class="ui-label">Reject</span>
+                            </div>
                           </div>
                         </div>
                         <br>
@@ -146,24 +111,36 @@
                             <!-- Operation Tab -->
                             <div class="tab-pane active" id="operation-tab" role="tabpanel">
                               <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Production Order No</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="order_no" value="{{orderNo}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Operation No</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-info"><strong>Process Qty</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
                                 </div>
                               </div>
-                              <div class="form-group row">
+                              <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="remain_qty" value="{{remainQty}}" readonly>
                                 </div>
                               </div>
-                              <div class="form-group row">
+                              <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
                                 </div>
                               </div>
-                              <div class="form-group row">
+                              <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
@@ -174,6 +151,12 @@
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="work_center_group" value="{{operation.WorkCenterGroup}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
@@ -1075,6 +1058,7 @@
 
       //-- MAIN SCRIPT
       $("#workcenter_no").on("change keyup", function() {
+        var work_center_group = $('#work_center_group').val();
         $('#workcenter_name').val('');
         $('#workcenter_add_button').prop('disabled', true);
         remove_valid('workcenter_name');
@@ -1086,6 +1070,7 @@
             url: '/get_workcenter_data/',
             data: {
               'workcenter_no': workcenter_no,
+              'work_center_group' : work_center_group,
             },
             dataType: 'json',
             success: function (data) {
