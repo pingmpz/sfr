@@ -25,6 +25,18 @@
     <!-- Select CSS -->
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Multiple Select CSS -->
+    <link href="{% static "vendors/bootstrap-multiple-select/dist/bootstrap-duallistbox.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <style>
+    .moveall{
+      display: none;
+    }
+    .removeall{
+      display: none;
+    }
+    </style>
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -52,10 +64,38 @@
           <div class="container-fluid">
             <div class="fade-in">
               <div class="row">
+                <div class="col-md-6 text-left">
+                  <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#save_modal"><i class="c-icon c-icon-xl cil-save"></i><br>Save</button>
+                </div>
+                <div class="col-md-6 text-right">
+                  <a href="/transaction/{{orderNo}}{{operationNo}}" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Back</a>
+                  <p></p>
+                </div>
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      
+                      <p class="text-center">Please select production order no - operation no to join to..</p>
+                      <h1 class="text-center">{{orderNo}} - {{operationNo}}</h1><br>
+                      <select class="c-multi-select" id="join_list" multiple style="height:400px">
+                        <option value="50007864470020">5000786447 - 0020 | BTA_A20</option>
+                        <option value="50007864470030">5000786447 - 0030 | BTA_A20</option>
+                        <option value="50007864470040">5000786447 - 0040 | BTA_BW12</option>
+                        <option value="50007864470050">5000786447 - 0050 | BTA_BW12</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                        <option value="50007864470060">5000786447 - 0060 | SL</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -74,6 +114,8 @@
     <!--<![endif]-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Multiple Select CSS -->
+    <script src="{% static "vendors/bootstrap-multiple-select/dist/jquery.bootstrap-duallistbox.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>
@@ -81,8 +123,14 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
+        setTimeout(function() {
+
+        }, 30000);
       });
 
+      var join_list = $('#join_list').bootstrapDualListbox({
+        btnClass: 'btn-dark',
+      });
     </script>
   </body>
 </html>
