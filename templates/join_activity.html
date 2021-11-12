@@ -96,7 +96,9 @@
                       {% if joinableList|length > 0 %}
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
                         {% for join in joinableList %}
-                        <option value="{{join.OrderNo}}{{join.OperationNo}}">{{join.OrderNo}} - {{join.OperationNo}} | {{join.WorkCenterNo}}</option>
+                        <option value="{{join.OrderNo}}{{join.OperationNo}}" style="font-size: 16px; font-weight:1">
+                          {{join.OrderNo}} - {{join.OperationNo}} | {{join.WorkCenterNo}}
+                        </option>
                         {% endfor %}
                       </select>
                       {% else %}
@@ -119,14 +121,15 @@
     </div>
     <!-- *** MODAL *** -->
     <div class="modal fade" id="join_modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-primary" role="document">
+      <div class="modal-dialog modal-lg modal-primary" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title"><i class="c-icon cil-list"></i> Join List</h4>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
           </div>
           <div class="modal-body">
-            <table class="table table-sm table-responsive-sm table-outline text-center">
+            <table class="table table-sm table-responsive-sm table-outline text-center" id="joinl_list_table">
+              <h2 class="text-center">Please recheck your selection..</h2><br>
               <thead class="bg-darkslategray">
                 <tr>
                   <th>No</th>
@@ -170,8 +173,9 @@
 
       function prepare_join(){
         var join_list = $('#join_list').val();
+        $("#joinl_list_table > tbody").empty();
         for(var i = 0;i < join_list.length;i++){
-          var row = "<tr><td>TEST</td></tr>";
+          var row = "<tr><td>" + (i+1) + "</td><td>" + join_list[i] + "</td><td>" + join_list[i] + "</td></tr>";
           $("#joinl_list_table_body").append(row);
         }
       }

@@ -320,10 +320,10 @@
                                   {% for operation in operationList %}
                                   <tr {% if operation.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
+                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon cib-discover text-warning" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon cib-discover text-info" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon cib-discover text-danger" style="padding-top:5px"></i>
                                       {% endif %}
                                     </td>
                                     <td>
