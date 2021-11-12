@@ -34,6 +34,7 @@ urlpatterns = [
     path('stop_work_operating_operator/', views.stop_work_operating_operator, name='stop_work_operating_operator'),
     path('get_data_for_confirm/', views.get_data_for_confirm, name='get_data_for_confirm'),
     path('confirm/', views.confirm, name='confirm'),
+    path('join/', views.join, name='join'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

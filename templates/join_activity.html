@@ -73,6 +73,8 @@
                   <p></p>
                 </div>
                 <div class="col-md-12">
+                  <input class="form-control" type="text" id="order_no" value="{{orderNo}}" hidden>
+                  <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" hidden>
                   <div class="card">
                     <div class="card-body">
                       <div class="row">
@@ -148,7 +150,7 @@
             </table>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button">Join Now</button>
+            <button class="btn btn-primary" type="button" onclick="join()" id="join_now_button">Join Now</button>
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -187,6 +189,25 @@
           row += "</tr>";
           $("#joinl_list_table_body").append(row);
         }
+      }
+
+      function join(){
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        var join_list = $('#join_list').val();
+        $("#join_now_button").prop("disabled", true);
+        $.ajax({
+          url: '/join/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+            'join_list': join_list,
+          },
+          dataType: 'json',
+          success: function (data) {
+            window.location.href = '/transaction/' + order_no + operation_no;
+          }
+        });
       }
 
       $("#join_list").on("change",function (event) {

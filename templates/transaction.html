@@ -359,16 +359,16 @@
                         {% if order.ProcessStop == None %}
                         <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
                         {% endif %}
-                        {% if operation.ProcessStart == None %}
+                        {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
                         {% endif %}
-                        {% if operation.ProcessStart == None %}
+                        {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None %}
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         {% endif %}
                         {% if joinList|length > 0 %}
@@ -837,16 +837,14 @@
                 <thead class="bg-darkslategray">
                   <tr>
                     <th>No</th>
-                    <th>Production Order</th>
-                    <th>Operation No</th>
+                    <th>Prod. Order - Oper. No</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for item in joinList %}
+                  {% for join in joinList %}
                   <tr>
                     <td>{{forloop.counter}}</td>
-                    <td>{{item.ProductionOrderNo}}</td>
-                    <td>{{item.OperationNumber}}</td>
+                    <td><a href="/transaction/{{join.OrderNo}}{{join.OperationNo}}">{{join.OrderNo}} - {{join.OperationNo}}</a></td>
                   </tr>
                   {% endfor %}
                 </tbody>

@@ -492,6 +492,21 @@ def confirm(request):
     }
     return JsonResponse(data)
 
+def join(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    join_list = request.GET.getlist('join_list[]')
+    for join_item in join_list:
+        join_order_no = join_item[0:10]
+        join_operation_no = join_item[10:14]
+        #-- JOIN PROCESS
+        joinProcess(order_no, operation_no, join_order_no, join_operation_no)
+        #-- CLEAR ALL CONTROL DATA OF JOIN PROCESS
+        deleteAllControlData(join_order_no, join_operation_no)
+    data = {
+    }
+    return JsonResponse(data)
+
 def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()
@@ -945,6 +960,14 @@ def updateOperationControl(order_no, operation_no, accept, reject, status):
         sql = "UPDATE [OperationControl] SET [AcceptedQty] += " + str(accept) + ", [RejectedQty] += " + str(reject) + " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no  + "'"
     if status == "PROCESSQTY":
         sql = "UPDATE [OperationControl] SET [ProcessQty] += " + str(accept) + " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def joinProcess(order_no, operation_no, join_order_no, join_operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OperationControl] SET [JoinToOrderNo] = '" + order_no + "', [JoinToOperationNo] = '" + operation_no + "' WHERE OrderNo = '" + join_order_no + "' AND OperationNo = '" + join_operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
