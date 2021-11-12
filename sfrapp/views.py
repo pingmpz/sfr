@@ -61,6 +61,8 @@ def transaction(request, orderoprno):
                         operationStatusList.append("WAITING")
                     elif tempRemainQty == 0:
                         operationStatusList.append("COMPLETED")
+                    elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
+                        operationStatusList.append("JOINING")
                     elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
                         operationStatusList.append("WORKING")
                     elif tempRemainQty > 0:

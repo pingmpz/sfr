@@ -305,6 +305,7 @@
                                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                       data-content="
                                       <strong class='text-success'>COMPLETED</strong><br>
+                                      <strong class='text-primary'>JOINING</strong><br>
                                       <strong class='text-warning'>WORKING</strong><br>
                                       <strong class='text-info'>READY</strong><br>
                                       <strong class='text-danger'>ERROR</strong><br>
@@ -321,6 +322,7 @@
                                   <tr {% if operation.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon cib-discover text-primary" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon cib-discover text-warning" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon cib-discover text-info" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon cib-discover text-danger" style="padding-top:5px"></i>
@@ -466,7 +468,7 @@
                       {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %} <!-- *** START CONDITION 2 *** -->
                       <!-- Joining -->
                       <div class="col-md-12">
-                        <div class="card text-white bg-warning text-center">
+                        <div class="card text-white bg-primary text-center">
                           <div class="card-body text-center">
                             <br><br><br><br><br>
                             <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
