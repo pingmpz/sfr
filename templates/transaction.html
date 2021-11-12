@@ -76,25 +76,25 @@
                         <div class="row">
                           <div class="col-md-3 text-center">
                             <div class="ui-widget-info fade-in">
-                              <h1 class="ui-value">{{operation.ProcessQty.normalize}}</h1>
-                              <span class="ui-label">Process</span>
+                              <h1 class="ui-value text-info"><strong>{{operation.ProcessQty.normalize}}</strong></h1>
+                              <span class="ui-label text-info">Process</span>
                             </div>
                           </div>
                           <div class="col-md-3 text-center">
                             <div class="ui-widget-warning fade-in">
-                              <h1 class="ui-value">{{remainQty.normalize}}</h1>
-                              <span class="ui-label">Remain</span>
+                              <h1 class="ui-value text-warning"><strong>{{remainQty.normalize}}</strong></h1>
+                              <span class="ui-label text-warning">Remain</span>
                             </div>
                           </div>
                           <div class="col-md-3 text-center">
                             <div class="ui-widget-success fade-in">
-                              <h1 class="ui-value">{{operation.AcceptedQty.normalize}}</h1>
-                              <span class="ui-label">Accept</span>
+                              <h1 class="ui-value text-success"><strong>{{operation.AcceptedQty.normalize}}</strong></h1>
+                              <span class="ui-label text-success">Accept</span>
                             </div>
                           </div>
                           <div class="col-md-3 text-center">
                             <div class="ui-widget-danger fade-in">
-                              <h1 class="ui-value">{{operation.RejectedQty.normalize}}</h1>
+                              <h1 class="ui-value text-danger"><strong>{{operation.RejectedQty.normalize}}</strong></h1>
                               <span class="ui-label">Reject</span>
                             </div>
                           </div>
@@ -368,8 +368,10 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' %}
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None %}
                         <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
+                        {% endif %}
+                        {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-danger my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
                         {% endif %}
                         {% if joinList|length > 0 %}

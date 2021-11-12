@@ -54,7 +54,6 @@
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-
           </div>
         </div>
       </header>
@@ -65,7 +64,9 @@
             <div class="fade-in">
               <div class="row">
                 <div class="col-md-6 text-left">
-                  <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#save_modal"><i class="c-icon c-icon-xl cil-save"></i><br>Save</button>
+                  {% if joinableList|length > 0 %}
+                  <button type="button" class="btn btn-lg btn-primary my-btn small" data-toggle="modal" data-target="#join_modal" onclick="prepare_join()" id="join_button" disabled><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</button>
+                  {% endif %}
                 </div>
                 <div class="col-md-6 text-right">
                   <a href="/transaction/{{orderNo}}{{operationNo}}" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Back</a>
@@ -74,23 +75,37 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <p class="text-center">
-                        Please select production order no - operation no to join to..
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Rules"
-                        data-content="
-                        1) Has Remaining Quantity.<br>
-                        2) Not Start Process Yet.<br>
-                        3) Machining Type Operation.<br>
-                        4) Same Work Center Group.<br>
-                        5) Different Production Order.">?
-                        </a>
-                      </p>
-                      <h1 class="text-center">{{orderNo}} - {{operationNo}}</h1><br>
+                      <div class="row">
+                        <div class="col-4"></div>
+                        <div class="col-4">
+                          <p class="text-center">
+                            Please select production order no - operation no to join to..
+                          </p>
+                          <h1 class="text-center">{{orderNo}} - {{operationNo}}</h1><br>
+                        </div>
+                        <div class="col-2"></div>
+                        <div class="col-2 small">
+                          <strong><u>Conditions</u></strong><br>
+                          1) Has Remaining Quantity.<br>
+                          2) Not Start Process Yet.<br>
+                          3) Machining Type Operation.<br>
+                          4) Same Work Center Group.<br>
+                          5) Different Production Order.
+                        </div>
+                      </div>
+                      {% if joinableList|length > 0 %}
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
                         {% for join in joinableList %}
                         <option value="{{join.OrderNo}}{{join.OperationNo}}">{{join.OrderNo}} - {{join.OperationNo}} | {{join.WorkCenterNo}}</option>
                         {% endfor %}
                       </select>
+                      {% else %}
+                      <div class="bg-danger" style="height:471px">
+                        <br><br><br><br><br><br><br><br><br><br>
+                        <h1 class="text-center text-white">NO OPERATION AVAILABLE TO JOIN FOR NOW !</h1>
+                        <br><br><br><br><br><br><br><br><br><br>
+                      </div>
+                      {% endif %}
                     </div>
                   </div>
                 </div>
@@ -101,6 +116,35 @@
       </div>
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
+    </div>
+    <!-- *** MODAL *** -->
+    <div class="modal fade" id="join_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title"><i class="c-icon cil-list"></i> Join List</h4>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-sm table-responsive-sm table-outline text-center">
+              <thead class="bg-darkslategray">
+                <tr>
+                  <th>No</th>
+                  <th>Production Order</th>
+                  <th>Operation No</th>
+                </tr>
+              </thead>
+              <tbody id="joinl_list_table_body">
+
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button">Join Now</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -120,12 +164,21 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
-        setTimeout(function() {
-
-        }, 30000);
       });
 
       var join_list = $('#join_list').bootstrapDualListbox();
+
+      function prepare_join(){
+        var join_list = $('#join_list').val();
+        for(var i = 0;i < join_list.length;i++){
+          var row = "<tr><td>TEST</td></tr>";
+          $("#joinl_list_table_body").append(row);
+        }
+      }
+
+      $("#join_list").on("change",function (event) {
+        ($('#join_list').val().length == 0)? $('#join_button').prop("disabled", true):$('#join_button').prop("disabled", false);
+      });
     </script>
   </body>
 </html>
