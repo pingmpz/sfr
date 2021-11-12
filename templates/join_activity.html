@@ -97,10 +97,15 @@
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
                         {% for join in joinableList %}
                         <option value="{{join.OrderNo}}{{join.OperationNo}}" style="font-size: 16px; font-weight:1">
-                          {{join.OrderNo}} - {{join.OperationNo}} | {{join.WorkCenterNo}}
+                          {{join.OrderNo}} - {{join.OperationNo}} ({{join.WorkCenterNo}})
                         </option>
                         {% endfor %}
                       </select>
+                      <div hidden>
+                        {% for join in joinableList %}
+                        <input type="text" id="wc_{{join.OrderNo}}{{join.OperationNo}}" value="{{join.WorkCenterNo}}">
+                        {% endfor %}
+                      </div>
                       {% else %}
                       <div class="bg-danger" style="height:471px">
                         <br><br><br><br><br><br><br><br><br><br>
@@ -124,7 +129,7 @@
       <div class="modal-dialog modal-lg modal-primary" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title"><i class="c-icon cil-list"></i> Join List</h4>
+            <h4 class="modal-title"><i class="c-icon cil-fullscreen-exit"></i> Join List</h4>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
           </div>
           <div class="modal-body">
@@ -133,8 +138,8 @@
               <thead class="bg-darkslategray">
                 <tr>
                   <th>No</th>
-                  <th>Production Order</th>
-                  <th>Operation No</th>
+                  <th>Prod. Order - Oper. No</th>
+                  <th>WorkCenter</th>
                 </tr>
               </thead>
               <tbody id="joinl_list_table_body">
@@ -175,7 +180,11 @@
         var join_list = $('#join_list').val();
         $("#joinl_list_table > tbody").empty();
         for(var i = 0;i < join_list.length;i++){
-          var row = "<tr><td>" + (i+1) + "</td><td>" + join_list[i] + "</td><td>" + join_list[i] + "</td></tr>";
+          var row = "<tr>";
+          row += "<td>" + (i+1) + "</td>";
+          row += "<td><a href='/transaction/" + join_list[i] + "' target='_blank'>" + join_list[i].substring(0, 10) + " - " + join_list[i].substring(10, 14) + "</a></td>";
+          row += "<td>" + $("#wc_" + join_list[i]).val() + "</td>";
+          row += "</tr>";
           $("#joinl_list_table_body").append(row);
         }
       }
