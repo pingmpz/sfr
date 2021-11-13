@@ -101,7 +101,7 @@
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
                         {% for join in joinableList %}
                         <option value="{{join.OCOrderNo}}{{join.OCOperationNo}}" style="font-size: 16px; font-weight:1">
-                          {{join.OCOrderNo}} - {{join.OCOperationNo}} ({{join.OCWorkCenterNo.strip}})
+                          {{join.OCOrderNo}}-{{join.OCOperationNo}} ({{join.OCWorkCenterNo.strip}})
                         </option>
                         {% endfor %}
                       </select>

@@ -367,7 +367,7 @@ def start_work_operating_operator(request):
         #-- SAP : SETUP TIME
         oopr = getOperatorOperatingByID(id)
         setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
-        insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,setuptime,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- WORKCENTER : WORKING
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WORKING")
     #-- OPERATOR : WORKING
@@ -390,7 +390,7 @@ def stop_setup_operating_operator(request):
     # insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "SETUP", owc.StartDateTime, owc.StopDateTime)
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
-    insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,setuptime,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+    insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- WORKCENTER : WAITING
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
     #-- OPERATOR : EXIT

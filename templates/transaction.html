@@ -66,9 +66,11 @@
           <div class="container-fluid">
             <div class="fade-in">
               <!-- Hidden Input -->
-              <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}" hidden>
-              <input type="text" id="join_list_length" value="{{joinList|length}}" hidden>
-              <input type="text" id="is_operating" value="{{IsOperating}}">
+              <div hidden>
+                <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}">
+                <input type="text" id="join_list_length" value="{{joinList|length}}">
+                <input type="text" id="is_operating" value="{{IsOperating}}">
+              </div>
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
@@ -1029,7 +1031,7 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="number" id="good_qty" autocomplete="off" value="0">
+                        <input class="form-control" type="number" id="good_qty" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -1037,7 +1039,7 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="number" id="reject_qty" autocomplete="off" value="0">
+                        <input class="form-control" type="number" id="reject_qty" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -1389,7 +1391,7 @@
           },
           dataType: 'json',
           success: function (data) {
-            if($("#is_operating").val() == "False" && $("#join_list_length").val() > 0) location.reload();
+            if($("#is_operating").val() == "False" && $("#join_list_length").val() > 0 && $("#workcenter_type").val() == 'Machine') location.reload();
             if(data.refresh) location.reload();
             $('#operator_id').val("");
             $('#operator_name').val("");
@@ -1425,7 +1427,7 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            if($("#workcenter_type").val()  == "Machine") location.reload();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1441,7 +1443,7 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            if($("#workcenter_type").val() == "Machine") location.reload();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
