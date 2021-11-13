@@ -540,6 +540,7 @@ def reset_all(request):
             DELETE FROM SFR2SAP_Report
             DELETE FROM HistoryConfirm
             DELETE FROM HistoryOperate
+            DELETE FROM HistoryJoin
             DELETE FROM OrderControl
             DELETE FROM OperationControl
             """
