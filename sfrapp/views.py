@@ -617,12 +617,22 @@ def getJoinList(order_no, operation_no):
 
 def getJoinableList(order_no, work_center_group):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo "
-    sql += "WHERE WC.WorkCenterGroup = '" + work_center_group + "'"
+    sql = "SELECT OC.OrderNo as OCOrderNo, OC.OperationNo as OCOperationNo, OC.WorkCenterNo as OCWorkCenterNo, *"
+    sql += " FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [OperatingOperator] as OOPR ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
+    sql += " WHERE "
+    #1
+    sql += " ProcessQty - (AcceptedQty + RejectedQty) <> 0"
+    #2
+    sql += " AND (EmpID IS NULL OR STATUS = 'COMPLETED')"
+    #3
     sql += " AND WorkCenterType = 'Machine'"
-    sql += " AND ProcessQty - (AcceptedQty + RejectedQty) <> 0"
-    sql += " AND OrderNo <> '" + order_no + "'"
-    sql += " AND ProcessStart IS NULL"
+    #4
+    sql += " AND WC.WorkCenterGroup = '" + work_center_group + "'"
+    #5
+    sql += " AND OC.OrderNo <> '" + order_no + "'"
+    #6
+    sql += " AND JoinToOrderNo IS NULL AND JoinToOperationNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 

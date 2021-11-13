@@ -95,7 +95,7 @@
                           <div class="col-md-3 text-center">
                             <div class="ui-widget-danger fade-in">
                               <h1 class="ui-value text-danger"><strong>{{operation.RejectedQty.normalize}}</strong></h1>
-                              <span class="ui-label">Reject</span>
+                              <span class="ui-label text-danger">Reject</span>
                             </div>
                           </div>
                         </div>
@@ -370,7 +370,7 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         {% endif %}
                         {% if joinList|length > 0 %}

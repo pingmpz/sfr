@@ -89,23 +89,25 @@
                         <div class="col-2 small">
                           <strong><u>Conditions</u></strong><br>
                           1) Has Remaining Quantity.<br>
-                          2) Not Start Process Yet.<br>
+                          2) No Operator Working.<br>
                           3) Machining Type Operation.<br>
                           4) Same Work Center Group.<br>
-                          5) Different Production Order.
+                          5) Different Production Order.<br>
+                          6) Is Not Joining.<br>
                         </div>
                       </div>
+                      <br>
                       {% if joinableList|length > 0 %}
                       <select class="c-multi-select" id="join_list" multiple style="height:400px">
                         {% for join in joinableList %}
-                        <option value="{{join.OrderNo}}{{join.OperationNo}}" style="font-size: 16px; font-weight:1">
-                          {{join.OrderNo}} - {{join.OperationNo}} ({{join.WorkCenterNo}})
+                        <option value="{{join.OCOrderNo}}{{join.OCOperationNo}}" style="font-size: 16px; font-weight:1">
+                          {{join.OCOrderNo}} - {{join.OCOperationNo}} ({{join.OCWorkCenterNo.strip}})
                         </option>
                         {% endfor %}
                       </select>
                       <div hidden>
                         {% for join in joinableList %}
-                        <input type="text" id="wc_{{join.OrderNo}}{{join.OperationNo}}" value="{{join.WorkCenterNo}}">
+                        <input type="text" id="wc_{{join.OCOrderNo}}{{join.OCOperationNo}}" value="{{join.OCWorkCenterNo}}">
                         {% endfor %}
                       </div>
                       {% else %}
