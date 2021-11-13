@@ -65,7 +65,9 @@
         <main class="c-main">
           <div class="container-fluid">
             <div class="fade-in">
+              <!-- Hidden Input -->
               <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}" hidden>
+              <input type="text" id="join_list_length" value="{{joinList|length}}" hidden>
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
@@ -370,16 +372,16 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.ProcessStart == None and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         {% endif %}
                         {% if joinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" disabled><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
                         {% endif %}
                         {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
                         {% endif %}
-                        {% if historyOperateList|length > 0 or historyConfirmList|length > 0 %}
+                        {% if historyOperateList|length > 0 or historyConfirmList|length > 0 or historyJoinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
                         {% endif %}
                         <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
@@ -827,6 +829,23 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="break_join_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-fullscreen"></i> Break Join</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to break join activity ?</h3><br>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-danger" type="button" onclick="break_join()" id="break_now_button">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal fade" id="join_list_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-primary" role="document">
           <div class="modal-content">
@@ -870,6 +889,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                   <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate ({{historyOperateList|length}})</a></li>
                   <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm ({{historyConfirmList|length}})</a></li>
+                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join ({{historyJoinList|length}})</a></li>
                 </ul>
                 <div class="tab-content">
                   <!-- Operate Tab -->
@@ -921,6 +941,34 @@
                           <td>{{confirm.RejectedQty}}</td>
                           <td>{{confirm.RejectReason}}</td>
                           <td>{{confirm.ConfirmDateTime}}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- Join Tab -->
+                  <div class="tab-pane" id="join-tab" role="tabpanel">
+                    <table class="table table-sm table-responsive-sm table-outline small">
+                      <thead class="bg-darkslategray">
+                        <tr>
+                          <th>Join To</th>
+                          <th>Join By</th>
+                          <th>Start</th>
+                          <th>Stop</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for join in historyJoinList %}
+                        <tr>
+                          {% if orderNo == join.JoinToOrderNo and operationNo == join.JoinToOperationNo %}
+                          <td>{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</td>
+                          <td><a href="/transaction/{{join.JoinByOrderNo}}{{join.JoinByOperationNo}}">{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</a></td>
+                          {% elif orderNo == join.JoinByOrderNo and operationNo == join.JoinByOperationNo %}
+                          <td><a href="/transaction/{{join.JoinToOrderNo}}{{join.JoinToOperationNo}}">{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</a></td>
+                          <td>{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</td>
+                          {% endif %}
+                          <td>{{join.StartDateTime}}</td>
+                          <td>{{join.StopDateTime}}</td>
                         </tr>
                         {% endfor %}
                       </tbody>
@@ -1244,7 +1292,11 @@
                     row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button> ";
                     row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_operating_operator_"+oopr_id+"' onclick='stop_setup_operating_operator("+oopr_id+")'>Stop Setup & Exit</button>";
                   } else if (oopr_status == "COMPLETED" && $('#remain_qty').val() > 0){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                    if($('#join_list_length').val() == 0) {
+                      row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                    } else {
+                      row += "<small class='text-danger'>BREAK JOIN TO CONFIRM</small>";
+                    }
                   }
                   row += "</td>";
                   row += "</tr>";
@@ -1406,6 +1458,22 @@
             $('#confirm_stop_time').val(data.stop_time);
             $('#confirm_button').prop('disabled', false);
             $('#good_qty').focus();
+          }
+        });
+      }
+
+      function break_join(){
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        $.ajax({
+          url: '/break_join/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
           }
         });
       }

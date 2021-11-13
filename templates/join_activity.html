@@ -138,12 +138,18 @@
           </div>
           <div class="modal-body">
             <table class="table table-sm table-responsive-sm table-outline text-center" id="joinl_list_table">
-              <h2 class="text-center">Please recheck your selection..</h2><br>
+              <br><h3 class="text-center">Please recheck your selection..</h3>
+              <p class="text-center text-danger small">*** All working workcenter/operator in join list below will be terminate ***</p>
               <thead class="bg-darkslategray">
                 <tr>
                   <th>No</th>
                   <th>Prod. Order - Oper. No</th>
                   <th>WorkCenter</th>
+                </tr>
+                <tr class="bg-lavender">
+                  <td>MAIN</td>
+                  <td>{{orderNo}} - {{operationNo}}</td>
+                  <td>{{operation.WorkCenterNo}}</td>
                 </tr>
               </thead>
               <tbody id="joinl_list_table_body">

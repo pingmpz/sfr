@@ -31,6 +31,7 @@ def transaction(request, orderoprno):
     joinList = []
     historyOperateList = []
     historyConfirmList = []
+    historyJoinList = []
     rejectReasonList = []
     materialGroupList = []
     purchaseGroupList = []
@@ -81,6 +82,7 @@ def transaction(request, orderoprno):
                 #-- GET HISTORY LIST
                 historyOperateList = getHistoryOperateList(orderNo, operationNo)
                 historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
+                historyJoinList = getHistoryJoinList(orderNo, operationNo)
                 #-- GET ETC LIST
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
@@ -107,6 +109,7 @@ def transaction(request, orderoprno):
         'joinList' : joinList,
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
+        'historyJoinList' : historyJoinList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
@@ -125,6 +128,7 @@ def join_activity(request, orderoprno):
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
+        'operation' : operation,
         'joinableList' : joinableList,
     }
     return render(request, 'join_activity.html', context)
@@ -498,6 +502,8 @@ def join(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
     join_list = request.GET.getlist('join_list[]')
+    #-- CLEAR ALL CONTROL DATA OF JOIN PROCESS (MAIN)
+    deleteAllControlData(order_no, operation_no)
     for join_item in join_list:
         join_order_no = join_item[0:10]
         join_operation_no = join_item[10:14]
@@ -505,6 +511,22 @@ def join(request):
         joinProcess(order_no, operation_no, join_order_no, join_operation_no)
         #-- CLEAR ALL CONTROL DATA OF JOIN PROCESS
         deleteAllControlData(join_order_no, join_operation_no)
+    data = {
+    }
+    return JsonResponse(data)
+
+def break_join(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    operation = getOperation(order_no, operation_no)
+    joinList = getJoinList(order_no, operation_no)
+    for join in joinList:
+        print(join)
+        #-- COPY COMPLETE OPERATING OPERATION TO JOINING OPERATION @@@@@@@@@@@@@
+        #-- REMOVE JOIN
+        joinProcessRemove(join.OrderNo, join.OperationNo)
+        #-- HISTORY : JOIN
+        insertHistoryJoin(order_no, operation_no, join.OrderNo, join.OperationNo, join.JoinStartDateTime)
     data = {
     }
     return JsonResponse(data)
@@ -645,6 +667,14 @@ def getHistoryOperateList(order_no, operation_no):
 def getHistoryConfirmList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryConfirm] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getHistoryJoinList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryJoin] "
+    sql += " WHERE (JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "')"
+    sql += " OR (JoinByOrderNo = '" + order_no + "' AND JoinByOperationNo = '" + operation_no + "')"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -915,6 +945,15 @@ def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, acc
     conn.commit()
     return
 
+def insertHistoryJoin(order_no, operation_no, join_order_no, join_operation_no, start_date_time):
+    startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [HistoryJoin] ([JoinToOrderNo],[JoinToOperationNo],[JoinByOrderNo],[JoinByOperationNo],[StartDateTime],[StopDateTime])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + join_order_no + "','" + join_operation_no + "','" + startDateTime + "',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -979,7 +1018,16 @@ def updateOperationControl(order_no, operation_no, accept, reject, status):
 def joinProcess(order_no, operation_no, join_order_no, join_operation_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [OperationControl] SET [JoinToOrderNo] = '" + order_no + "', [JoinToOperationNo] = '" + operation_no + "' WHERE OrderNo = '" + join_order_no + "' AND OperationNo = '" + join_operation_no + "'"
+    sql = "UPDATE [OperationControl] SET [JoinToOrderNo] = '" + order_no + "', [JoinToOperationNo] = '" + operation_no + "', [JoinStartDateTime] = CURRENT_TIMESTAMP"
+    sql += " WHERE OrderNo = '" + join_order_no + "' AND OperationNo = '" + join_operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def joinProcessRemove(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OperationControl] SET [JoinToOrderNo] = NULL, [JoinToOperationNo] = NULL, [JoinStartDateTime] = NULL WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
