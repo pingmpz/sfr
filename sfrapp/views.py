@@ -488,6 +488,7 @@ def confirm(request):
     operation = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
     if remainQty == 0:
+        #-- AUTO MACHINE RUNNING @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         #-- CLEAR ALL CONTROL DATA
         deleteAllControlData(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
         #-- STOP OPERATION
