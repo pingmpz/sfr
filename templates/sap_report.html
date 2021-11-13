@@ -71,7 +71,8 @@
                           <a class="toggle-vis small text-primary" data-column="10">StartTime</a> |
                           <a class="toggle-vis small text-primary" data-column="11">FinishDate</a> |
                           <a class="toggle-vis small text-primary" data-column="12">FinishTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="13">EmployeeID</a>
+                          <a class="toggle-vis small text-primary" data-column="13">EmployeeID</a> |
+                          <a class="toggle-vis small text-primary" data-column="14">Type</a>
                       </div>
                       <br>
                       <table class="table table-sm table-striped small" id="sap_report_table" style="width: 100%">
@@ -91,12 +92,13 @@
                             <th>FinishDate</th>
                             <th>FinishTime</th>
                             <th>EmployeeID</th>
+                            <th>Type</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for report in sapReportList %}
                           <tr>
-                            <td>{{report.DateTimeStamp|default_if_none:""}}</td>
+                            <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|default_if_none:""}}</td>
                             <td>{{report.WorkCenter|default_if_none:""}}</td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
                             <td>{{report.OperationNumber|default_if_none:""}}</td>
@@ -110,6 +112,13 @@
                             <td>{{report.FinishDate|default_if_none:""}}</td>
                             <td>{{report.FinishTime|default_if_none:""}}</td>
                             <td>{{report.EmployeeID|default_if_none:""}}</td>
+                            <td>
+                              <strong>
+                              {% if report.Yiled != 0.0000 or report.Scrap != 0.0000 %}<span class="text-primary">Quantity</span>
+                              {% else %}<span class="text-success">Time</span>
+                              {% endif %}
+                              </strong>
+                            </td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -147,7 +156,7 @@
       var table;
       $(document).ready(function() {
         table = $('#sap_report_table').DataTable( {
-            "order": [[ 0, "desc" ],[ 2, "desc" ],[ 3, "desc" ]],
+            "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
             "scrollX": true
         });
