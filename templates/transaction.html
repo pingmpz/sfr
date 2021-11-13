@@ -68,6 +68,7 @@
               <!-- Hidden Input -->
               <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}" hidden>
               <input type="text" id="join_list_length" value="{{joinList|length}}" hidden>
+              <input type="text" id="is_operating" value="{{IsOperating}}">
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
@@ -372,11 +373,11 @@
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
+                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and IsOperating == False and joinList|length == 0 %}
+                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_button"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
                         {% endif %}
-                        {% if joinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
+                        {% if joinList|length > 0 and IsOperating == False %}
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_button"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
                         {% endif %}
                         {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
@@ -1362,6 +1363,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            location.reload();
             reload_workcenter_table();
           }
         });
@@ -1387,6 +1389,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            if($("#is_operating").val() == "False" && $("#join_list_length").val() > 0) location.reload();
             if(data.refresh) location.reload();
             $('#operator_id').val("");
             $('#operator_name').val("");
@@ -1406,6 +1409,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            if($("#is_operating").val() == "False") location.reload();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1421,6 +1425,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            location.reload();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1436,6 +1441,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            location.reload();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }

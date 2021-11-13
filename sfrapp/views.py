@@ -24,6 +24,7 @@ def transaction(request, orderoprno):
     operationNo = ""
     order = None
     operation = None
+    IsOperating = False
     remainQty = -1
     state = "ERROR"
     operationList = []
@@ -54,6 +55,7 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
+                IsOperating = isOperatingOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 for i in range(len(operationList)):
                     #-- GET STATUS OF OPERATION LIST
@@ -103,6 +105,7 @@ def transaction(request, orderoprno):
         'state' : state,
         'order' : order,
         'operation' : operation,
+        'IsOperating' : IsOperating,
         'remainQty' : remainQty,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
@@ -520,9 +523,15 @@ def break_join(request):
     operation_no = request.GET.get('operation_no')
     operation = getOperation(order_no, operation_no)
     joinList = getJoinList(order_no, operation_no)
+    operating_workcenter_list = getOperatingWorkCenterList(order_no, operation_no)
+    operating_operator_list = getOperatingOperatorList(order_no, operation_no)
     for join in joinList:
-        print(join)
-        #-- COPY COMPLETE OPERATING OPERATION TO JOINING OPERATION @@@@@@@@@@@@@
+        #-- COPY COMPLETE OPERATING OPERATION TO JOINING OPERATION
+        for owc in operating_workcenter_list:
+            owc_id = getInsertJoinOperatingWorkCenter(join.OrderNo, join.OperationNo, owc.WorkCenterNo, owc.StartDateTime, owc.StopDateTime)
+            for oopr in operating_operator_list:
+                if oopr.OperatingWorkCenterID == owc.OperatingWorkCenterID:
+                    insertJoinOperatingOperator(join.OrderNo, join.OperationNo, oopr.EmpID, owc_id, oopr.StartDateTime, oopr.StopDateTime)
         #-- REMOVE JOIN
         joinProcessRemove(join.OrderNo, join.OperationNo)
         #-- HISTORY : JOIN
@@ -825,6 +834,16 @@ def hasOperatorOperating(owc_id):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
+def isOperatingOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETED'"
+    cursor.execute(sql)
+    if len(cursor.fetchall()) > 0:
+        return True
+    sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETED'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 def hasNotStartOrder(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OrderControl] WHERE OrderNo = '" + order_no + "' AND ProcessStart IS NULL"
@@ -896,6 +915,33 @@ def insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     cursor = conn.cursor()
     sql = "INSERT INTO [OperatingOperator] ([OrderNo],[OperationNo],[EmpID],[OperatingWorkCenterID],[Status],[StartDateTime])"
     sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + str(owc_id) + "','" + status + "',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def getInsertJoinOperatingWorkCenter(order_no, operation_no, workcenter_no, start_date_time, stop_date_time):
+    startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    stopDateTime = stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OperatingWorkCenter] ([OrderNo],[OperationNo],[WorkCenterNo],[StartDateTime],[StopDateTime],[Status])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + workcenter_no + "','" + startDateTime + "','" + stopDateTime + "','COMPLETED')"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "SELECT SCOPE_IDENTITY()"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        return None
+    return result[0][0]
+
+def insertJoinOperatingOperator(order_no, operation_no, operator_id, owc_id, start_date_time, stop_date_time):
+    startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    stopDateTime = stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OperatingOperator] ([OrderNo],[OperationNo],[EmpID],[OperatingWorkCenterID],[StartDateTime],[StopDateTime],[Status])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + str(owc_id) + "','" + startDateTime + "','" + stopDateTime + "','COMPLETED')"
     cursor.execute(sql)
     conn.commit()
     return
