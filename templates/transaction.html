@@ -492,6 +492,7 @@
                             <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
                             <h6>Start Process : {{operation.ProcessStart}}</h6>
                             <h6>Stop Process : {{operation.ProcessStop}}</h6>
+                            <h6>Good Qunatity Percentage : {{operation.ProcessQty.normalize|divide:operation.AcceptedQty.normalize|multiple:100}}%</h6>
                             <br><br><br><br>
                           </div>
                         </div>
@@ -506,7 +507,11 @@
                             <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
                             <br>
                             <h3><strong>THIS OPERATION IS WAITING</strong></h3>
-                            <br><br><br><br><br><br>
+                            <br>
+                            {% if currentOperation != -1 %}
+                            <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                            {% endif %}
+                            <br><br><br><br><br>
                           </div>
                         </div>
                       </div>
@@ -1079,6 +1084,14 @@
             <div class="modal-body">
               <div class="col-md-12">
                 <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group row">
+                      <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-10">
+                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
                   <div class="col-md-6">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong> <span class="text-danger">*</span></label>
@@ -1089,9 +1102,9 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                        <input class="form-control" type="text" id="mp_workcenter_no" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
                       </div>
                     </div>
                   </div>

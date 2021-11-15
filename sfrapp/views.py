@@ -48,6 +48,7 @@ def transaction(request, orderoprno):
         if isExistOrder(orderNo) == False and isExistSAPOrder(orderNo) == False:
             state = "NODATAFOUND"
         else:
+            state = "NOOPERATIONFOUND"
             if isExistOrder(orderNo) == False:
                 setDataFromSAP(orderNo)
             order = getOrder(orderNo)
@@ -90,15 +91,13 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
             #-- GET OPERATION WITH REMAINING QTY > 0
-            else:
-                state = "NOOPERATIONFOUND"
-                if len(operationList) > 0:
-                    currentOperation = operationList[0].OperationNo
-                    for i in range(len(operationList)):
-                        tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                        if tempRemainQty > 0:
-                            currentOperation = operationList[i].OperationNo
-                            break
+            if len(operationList) > 0:
+                currentOperation = operationList[0].OperationNo
+                for i in range(len(operationList)):
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if tempRemainQty > 0:
+                        currentOperation = operationList[i].OperationNo
+                        break
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
