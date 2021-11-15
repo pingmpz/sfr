@@ -395,7 +395,10 @@ def stop_setup_operating_operator(request):
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
     #-- OPERATOR : EXIT
     deleteOperatingOperator(id)
+    #-- CHECK REMAINING IS OPERATING
+    IsOperating = isOperatingOperation(oopr.OrderNo, oopr.OperationNo)
     data = {
+        'IsOperating' : IsOperating,
     }
     return JsonResponse(data)
 
@@ -427,7 +430,10 @@ def stop_work_operating_operator(request):
         #-- WORKCENTER : OPERATING TIME LOG ?? MANUAL NO NEED KEEP DATA
         # owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
         # insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+    #-- CHECK REMAINING IS OPERATING
+    IsOperating = isOperatingOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
     data = {
+        'IsOperating' : IsOperating,
     }
     return JsonResponse(data)
 
@@ -438,7 +444,10 @@ def stop_operating_workcenter(request):
     #-- WORKCENTER : OPERATING TIME LOG
     owc = getWorkCenterOperatingByID(id)
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+    #-- CHECK REMAINING IS OPERATING
+    IsOperating = isOperatingOperation(owc.OrderNo, owc.OperationNo)
     data = {
+        'IsOperating' : IsOperating,
     }
     return JsonResponse(data)
 

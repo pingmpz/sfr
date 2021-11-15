@@ -66,10 +66,12 @@
           <div class="container-fluid">
             <div class="fade-in">
               <!-- Hidden Input -->
-              <div hidden>
-                <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}true{% else %}false{% endif %}">
-                <input type="text" id="join_list_length" value="{{joinList|length}}">
+              <div>
+                <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}True{% else %}False{% endif %}">
                 <input type="text" id="is_operating" value="{{IsOperating}}">
+                <input type="text" id="workcenter_type" value="{{operation.WorkCenterType}}">
+                <input type="text" id="join_list_length" value="{{joinList|length}}">
+                <input type="text" id="is_joining" value="{% if operation.JoinToOrderNo != None %}True{% else %}False{% endif %}">
               </div>
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
@@ -364,28 +366,24 @@
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         {% if order.ProcessStop == None %}
-                        <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus"></i><br>Add</button>
+                        <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus" id="add_main_button"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        {% if remainQty != 0 and operation.WorkCenterType == 'Machine' and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and IsOperating == False and joinList|length == 0 %}
-                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_button"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
-                        {% endif %}
-                        {% if joinList|length > 0 and IsOperating == False %}
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_button"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
-                        {% endif %}
+                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_main_button"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
+                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
                         {% if joinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
+                        <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
                         {% endif %}
                         {% if historyOperateList|length > 0 or historyConfirmList|length > 0 or historyJoinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
+                        <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
                         {% endif %}
                         <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
                         <p></p>
@@ -408,9 +406,6 @@
                             </a>
                           </div>
                           <div class="card-body">
-                            <div hidden>
-                              <input type="text" id="workcenter_type" value="{{operation.WorkCenterType}}">
-                            </div>
                             {% if operation.WorkCenterType == 'Machine' %}
                             <div class="form-group row">
                               <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
@@ -1103,10 +1098,11 @@
 
       $(document).ready(function() {
         showTime();
-        if($("#has_data").val() == "true" && $("#remain_qty").val() > 0){
+        if($("#has_data").val() == "True" && $("#remain_qty").val() > 0){
           if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
           reload_operator_table();
         }
+        dynamic_join();
       });
 
       //-- MAIN SCRIPT
@@ -1352,6 +1348,11 @@
           dataType: 'json',
           success: function (data) {
             reload_workcenter_table();
+            $('#operator_work_button').prop('disabled', true);
+            $('#operator_setup_button').prop('disabled', true);
+            $('#operator_id').val("");
+            $('#operator_name').val("");
+            remove_valid('operator_name');
           }
         });
       }
@@ -1365,7 +1366,8 @@
           },
           dataType: 'json',
           success: function (data) {
-            location.reload();
+            $("#is_operating").val(capitalizeFirstLetter(data.IsOperating.toString()));
+            dynamic_join();
             reload_workcenter_table();
           }
         });
@@ -1391,8 +1393,9 @@
           },
           dataType: 'json',
           success: function (data) {
-            if($("#is_operating").val() == "False" && $("#join_list_length").val() > 0 && $("#workcenter_type").val() == 'Machine') location.reload();
             if(data.refresh) location.reload();
+            $("#is_operating").val("True");
+            dynamic_join();
             $('#operator_id').val("");
             $('#operator_name').val("");
             remove_valid('operator_name');
@@ -1411,7 +1414,8 @@
           },
           dataType: 'json',
           success: function (data) {
-            if($("#is_operating").val() == "False") location.reload();
+            $("#is_operating").val("True");
+            dynamic_join();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1427,7 +1431,8 @@
           },
           dataType: 'json',
           success: function (data) {
-            if($("#workcenter_type").val()  == "Machine") location.reload();
+            $("#is_operating").val(capitalizeFirstLetter(data.IsOperating.toString()));
+            dynamic_join();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1443,7 +1448,8 @@
           },
           dataType: 'json',
           success: function (data) {
-            if($("#workcenter_type").val() == "Machine") location.reload();
+            $("#is_operating").val(capitalizeFirstLetter(data.IsOperating.toString()));
+            dynamic_join();
             if($("#workcenter_type").val() == 'Machine') reload_workcenter_table();
             reload_operator_table();
           }
@@ -1735,6 +1741,19 @@
         }
       }
 
+      function dynamic_join(){
+        if($("#join_list_length").val() > 0 && $("#is_operating").val() == "False"){
+          $("#break_join_main_button").prop("hidden", false);
+        } else {
+          $("#break_join_main_button").prop("hidden", true);
+        }
+        if($("#join_list_length").val() == 0 && $("#is_operating").val() == "False" && $("#workcenter_type").val() == 'Machine' && $("#remain_qty").val() > 0 && $("#is_joining").val() == "False"){
+          $("#join_main_button").prop("hidden", false);
+        } else {
+          $("#join_main_button").prop("hidden", true);
+        }
+      }
+
       $('#reject_reason').on("change", function() {
         if($('#reject_reason').val() != "OTHER"){
           $("#other_reason").prop("readonly", true);
@@ -1845,6 +1864,12 @@
         function frontZero(str){
           return (str.length != 2)?"0"+str:str;
         }
+
+      //-- ETC
+
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
     </script>
   </body>
 </html>
