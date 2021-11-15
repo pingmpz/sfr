@@ -80,30 +80,26 @@
                   <div class="col-sm-12 col-md-4">
                     <div class="card border-secondary">
                       <div class="card-body">
-                        <div class="row">
-                          <div class="col-md-3 text-center">
-                            <div class="ui-widget-info fade-in">
-                              <h1 class="ui-value text-info"><strong>{{operation.ProcessQty.normalize}}</strong></h1>
-                              <span class="ui-label text-info">Process</span>
-                            </div>
+                        <!-- Quantity -->
+                        <div class="text-center">
+                          <div class="ui-widget-info fade-in">
+                            <h1 class="ui-value text-info"><strong>{{operation.ProcessQty.normalize}}</strong></h1>
+                            <span class="ui-label text-info">Process</span>
                           </div>
-                          <div class="col-md-3 text-center">
-                            <div class="ui-widget-warning fade-in">
-                              <h1 class="ui-value text-warning"><strong>{{remainQty.normalize}}</strong></h1>
-                              <span class="ui-label text-warning">Remain</span>
-                            </div>
+                          &nbsp;
+                          <div class="ui-widget-warning fade-in">
+                            <h1 class="ui-value text-warning"><strong>{{remainQty.normalize}}</strong></h1>
+                            <span class="ui-label text-warning">Remain</span>
                           </div>
-                          <div class="col-md-3 text-center">
-                            <div class="ui-widget-success fade-in">
-                              <h1 class="ui-value text-success"><strong>{{operation.AcceptedQty.normalize}}</strong></h1>
-                              <span class="ui-label text-success">Accept</span>
-                            </div>
+                          &nbsp;
+                          <div class="ui-widget-success fade-in">
+                            <h1 class="ui-value text-success"><strong>{{operation.AcceptedQty.normalize}}</strong></h1>
+                            <span class="ui-label text-success">Accept</span>
                           </div>
-                          <div class="col-md-3 text-center">
-                            <div class="ui-widget-danger fade-in">
-                              <h1 class="ui-value text-danger"><strong>{{operation.RejectedQty.normalize}}</strong></h1>
-                              <span class="ui-label text-danger">Reject</span>
-                            </div>
+                          &nbsp;
+                          <div class="ui-widget-danger fade-in">
+                            <h1 class="ui-value text-danger"><strong>{{operation.RejectedQty.normalize}}</strong></h1>
+                            <span class="ui-label text-danger">Reject</span>
                           </div>
                         </div>
                         <br>
@@ -344,8 +340,7 @@
                                     </td>
                                     <td>{{operation.WorkCenterNo}}</td>
                                     <td>
-                                      {% if operation.WorkCenterNo == "STD" %}<i class="c-icon c-icon-sm cil-drop"></i>
-                                      {% elif operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
+                                      {% if operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
                                       {% elif operation.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
                                       {% elif operation.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
                                       {% endif %}
@@ -367,26 +362,26 @@
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         {% if order.ProcessStop == None %}
-                        <button type="button" class="btn btn-lg btn-success my-btn small" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xl cil-plus" id="add_main_button"></i><br>Add</button>
+                        <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xs cil-plus" id="add_main_button"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-lg btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xl cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button"><i class="c-icon c-icon-xl cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        <a type="button" class="btn btn-lg btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_main_button"><i class="c-icon c-icon-xl cil-fullscreen-exit"></i><br>Join</a>
-                        <button type="button" class="btn btn-lg btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon c-icon-xl cil-fullscreen"></i><br>Break Join</button>
+                        <a type="button" class="btn btn-xs btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_main_button"><i class="c-icon c-icon-xs cil-fullscreen-exit"></i><br>Join</a>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon c-icon-xs cil-fullscreen"></i><br>Break Join</button>
                         {% if joinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon c-icon-xl cil-list"></i><br>Join List</button>
+                        <button type="button" class="btn btn-xs btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon c-icon-xs cil-list"></i><br>Join List</button>
                         {% endif %}
                         {% if historyOperateList|length > 0 or historyConfirmList|length > 0 or historyJoinList|length > 0 %}
-                        <button type="button" class="btn btn-lg btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon c-icon-xl cil-history"></i><br>History</button>
+                        <button type="button" class="btn btn-xs btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon c-icon-xs cil-history"></i><br>History</button>
                         {% endif %}
-                        <a href="/transaction/0" class="btn btn-lg btn-dark my-btn small"><i class="c-icon c-icon-xl cil-account-logout"></i><br>Exit</a>
+                        <a href="/transaction/0" class="btn btn-xs btn-dark my-btn small"><i class="c-icon c-icon-xs cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
                       {% if remainQty > 0 %} <!-- *** START CONDITION 1 *** -->
@@ -405,6 +400,9 @@
                             - Be Careful !, <strong class='text-primary'>Confirm</strong> all remaining quantity will terminate all working operator and workcenter.<br>
                             ">?
                             </a>
+                            <div class="card-header-actions">
+                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal">Manual Report</button>
+                            </div>
                           </div>
                           <div class="card-body">
                             {% if operation.WorkCenterType == 'Machine' %}
@@ -1066,6 +1064,96 @@
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" type="button" id="confirm_button" onclick="confirm()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="manual_report_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-primary" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-clipboard"></i> Manual Report</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="text" id="mp_emp_id">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="datetime-local" id="mp_start_time">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="datetime-local" id="mp_stop_time">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="mp_good_qty" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="mp_reject_qty" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Reason</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control" id="mp_reject_reason">
+                          <option value="-1" selected>-</option>
+                          {% for rejectReason in rejectReasonList %}
+                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="text" id="mp_other_reason" autocomplete="off" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-danger text-center small" id="mp_invalid_text"></div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" type="button" id="mp_button" onclick="manual_report()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -1767,6 +1855,15 @@
         }
       });
 
+      $('#mp_reject_reason').on("change", function() {
+        if($('#mp_reject_reason').val() != "OTHER"){
+          $("#mp_other_reason").prop("readonly", true);
+          $("#mp_other_reason").val("");
+        } else {
+          $("#mp_other_reason").prop("readonly", false)
+        }
+      });
+
       $('#add_control_key').on("change", function() {
         ($('#add_control_key').val() == "PP01")? $("#add_pp01").prop("hidden", false): $("#add_pp01").prop("hidden", true);
         ($('#add_control_key').val() == "PP01")? $("#add_pp02").prop("hidden", true): $("#add_pp02").prop("hidden", false);
@@ -1778,6 +1875,11 @@
       });
 
       //-- KET RESTRICT
+      $("#mp_emp_id").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#add_est_set_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -1841,38 +1943,32 @@
       $("#sc_order_no").on("keypress keyup blur",function (event) {
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
-       });
+      });
 
-       $("#sc_operation_no").on("keypress keyup blur",function (event) {
-           $(this).val($(this).val().replace(/[^\d].+/, ""));
-           if((event.which < 48 || event.which > 57)) event.preventDefault();
-        });
-
-        //-- ETC
-        function capitalizeFirstLetter(str) {
-           return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        function getFullDateTime(str) {
-           var result = "";
-           var year = new Date(str).getFullYear();
-           var month = frontZero((new Date(str).getMonth() + 1).toString());
-           var date = frontZero(new Date(str).getDate().toString());
-           var hour = frontZero(new Date(str).getHours().toString());
-           var minute = frontZero(new Date(str).getMinutes().toString());
-           var second = frontZero(new Date(str).getSeconds().toString());
-           result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
-           return result
-        }
-
-        function frontZero(str){
-          return (str.length != 2)?"0"+str:str;
-        }
+      $("#sc_operation_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
       //-- ETC
+      function capitalizeFirstLetter(str) {
+         return str.charAt(0).toUpperCase() + str.slice(1);
+      }
 
-      function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+      function getFullDateTime(str) {
+         var result = "";
+         var year = new Date(str).getFullYear();
+         var month = frontZero((new Date(str).getMonth() + 1).toString());
+         var date = frontZero(new Date(str).getDate().toString());
+         var hour = frontZero(new Date(str).getHours().toString());
+         var minute = frontZero(new Date(str).getMinutes().toString());
+         var second = frontZero(new Date(str).getSeconds().toString());
+         result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
+         return result
+      }
+
+      function frontZero(str){
+        return (str.length != 2)?"0"+str:str;
       }
     </script>
   </body>
