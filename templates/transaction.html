@@ -59,6 +59,9 @@
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm bg-info text-white" onclick="shortcut_search()">GO!</button></div>
           </div>
         </div>
+        <div class="progress" style="height: 4px; width: 100%">
+          <progress style="width: 100%;" value="0" max="300" id="progressBar"></progress>
+        </div>
       </header>
       <!-- *** BODY *** -->
       <div class="c-body">
@@ -1194,6 +1197,12 @@
           window.location.href = '/transaction/0'
         }, 300000);
       });
+
+      var timeleft = 300;
+      var downloadTimer = setInterval(function(){
+        document.getElementById("progressBar").value = 300 - timeleft;
+        timeleft -= 1;
+      }, 1000);
 
       //-- INITIALIZE
       var isSearchingWorkCenter = false;

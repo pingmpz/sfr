@@ -56,6 +56,9 @@
           <div class="c-subheader-nav d-md-down-none mfe-2">
           </div>
         </div>
+        <div class="progress" style="height: 4px; width: 100%">
+          <progress style="width: 100%;" value="0" max="300" id="progressBar"></progress>
+        </div>
       </header>
       <!-- *** BODY *** -->
       <div class="c-body">
@@ -186,6 +189,12 @@
           window.location.href = '/transaction/0'
         }, 300000);
       });
+
+      var timeleft = 300;
+      var downloadTimer = setInterval(function(){
+        document.getElementById("progressBar").value = 300 - timeleft;
+        timeleft -= 1;
+      }, 1000);
 
       var join_list = $('#join_list').bootstrapDualListbox();
 
