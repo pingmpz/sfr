@@ -344,7 +344,8 @@
                                     </td>
                                     <td>{{operation.WorkCenterNo}}</td>
                                     <td>
-                                      {% if operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
+                                      {% if operation.WorkCenterNo == "STD" %}<i class="c-icon c-icon-sm cil-drop"></i>
+                                      {% elif operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
                                       {% elif operation.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
                                       {% elif operation.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
                                       {% endif %}
@@ -1088,6 +1089,9 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
+        setTimeout(function() {
+          window.location.href = '/transaction/0'
+        }, 300000);
       });
 
       //-- INITIALIZE

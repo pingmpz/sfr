@@ -233,7 +233,6 @@ def get_workcenter_data(request):
     if workcenter != None:
         WorkCenterNo = workcenter.WorkCenterNo
         WorkCenterName = workcenter.WorkCenterName
-        print(workcenter.WorkCenterGroup, work_center_group)
         if workcenter.IsRouting:
             invalid_text = WorkCenterNo + " is a rounting."
         elif workcenter.WorkCenterGroup != work_center_group:
@@ -306,6 +305,7 @@ def get_operating_operator_list(request):
     return JsonResponse(data)
 
 def add_operating_workcenter(request):
+    #-- *** ONLY MACHINE TYPE ***
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
     workcenter_no = request.GET.get('workcenter_no')
@@ -316,6 +316,7 @@ def add_operating_workcenter(request):
     return JsonResponse(data)
 
 def delete_operating_workcenter(request):
+    #-- *** ONLY MACHINE TYPE ***
     id = request.GET.get('id')
     #-- WORKCENTER : DELETE
     deleteOperatingWorkCenter(id)
@@ -351,6 +352,7 @@ def add_operating_operator(request):
     return JsonResponse(data)
 
 def start_work_operating_operator(request):
+    #-- *** ONLY MACHINE TYPE ***
     id = request.GET.get('id')
     oopr = getOperatorOperatingByID(id)
     if oopr.WorkCenterStatus.strip() == "SETUP":
@@ -361,9 +363,6 @@ def start_work_operating_operator(request):
         insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
         #-- WORKCENTER : SAVE SETUP TIME
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
-        #-- WORKCENTER : SETUP TIME LOG ?? SETUP NO NEED KEEP DATA
-        # owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
-        # insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "SETUP", owc.StartDateTime, owc.StopDateTime)
         #-- SAP : SETUP TIME
         oopr = getOperatorOperatingByID(id)
         setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
@@ -377,6 +376,7 @@ def start_work_operating_operator(request):
     return JsonResponse(data)
 
 def stop_setup_operating_operator(request):
+    #-- *** ONLY MACHINE TYPE ***
     id = request.GET.get('id')
     #-- OPERATOR : SAVE SETUP TIME
     updateOperatingOperator(id, "COMPLETED")
@@ -385,9 +385,6 @@ def stop_setup_operating_operator(request):
     insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
     #-- WORKCENTER : SAVE SETUP TIME
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
-    #-- WORKCENTER : SETUP TIME LOG ?? SETUP NO NEED KEEP DATA
-    # owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
-    # insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "SETUP", owc.StartDateTime, owc.StopDateTime)
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
     insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
@@ -417,6 +414,8 @@ def stop_work_operating_operator(request):
     if oopr.WorkCenterNo == None:
         workcenter = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo).WorkCenterNo
         worktimeMachine = 0
+    if oopr.MachineType.strip() == 'Auto':
+        worktimeMachine = 0
     if status == "EXT-WORK":
         worktimeOperator = 0
         type = "EXT-WORK"
@@ -427,9 +426,6 @@ def stop_work_operating_operator(request):
     if(oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual'):
         #-- WORKCENTER : STOP
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
-        #-- WORKCENTER : OPERATING TIME LOG ?? MANUAL NO NEED KEEP DATA
-        # owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
-        # insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
     data = {
@@ -438,11 +434,15 @@ def stop_work_operating_operator(request):
     return JsonResponse(data)
 
 def stop_operating_workcenter(request):
+    #-- *** ONLY AUTO MACHINE TYPE ***
     id = request.GET.get('id')
     #-- WORKCENTER : STOP
     updateOperatingWorkCenter(id, "COMPLETED")
-    #-- WORKCENTER : OPERATING TIME LOG
+    #-- SAP : WORKING TIME
     owc = getWorkCenterOperatingByID(id)
+    worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+    insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,oopr.StopDateTime,'9999')
+    #-- WORKCENTER : OPERATING TIME LOG
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(owc.OrderNo, owc.OperationNo)
@@ -481,32 +481,44 @@ def confirm(request):
         reject_reason = other_reason
     #-- SAP : CONFIRM
     oopr = getOperatorOperatingByID(confirm_id)
+    orderNo = oopr.OperatorOrderNo
+    operationNo = oopr.OperatorOperationNo
     workcenter = oopr.WorkCenterNo
     if oopr.WorkCenterNo == None:
-        workcenter = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo).WorkCenterNo
-    insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        workcenter = getOperation(orderNo, operationNo).WorkCenterNo
+    insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- CONFIRM : LOG
-    insertHistoryConfirm(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
+    insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
     #-- UPDATE QTY OF CURRENT OPERATION
-    updateOperationControl(oopr.OperatorOrderNo,oopr.OperatorOperationNo, good_qty, reject_qty, "UPDATEQTY")
+    updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
     #-- UPDATE PROCESS QTY OF NEXT OPERATION
-    nextOperation = getNextOperation(oopr.OperatorOrderNo,oopr.OperatorOperationNo)
+    nextOperation = getNextOperation(orderNo,operationNo)
     if nextOperation != None:
         updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
     #-- NO MORE REMAINING QTY
-    operation = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
+    operation = getOperation(orderNo, operationNo)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
     if remainQty == 0:
-        #-- AUTO MACHINE RUNNING @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        #-- IF AUTO MACHINE(S) STILL WORKING
+        owcList = getOperatingWorkCenterList(orderNo, operationNo)
+        for owc in owcList:
+            if owc.Status == 'WORKING':
+                #-- WORKCENTER : STOP
+                updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
+                #-- SAP : WORKING TIME
+                owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
+                worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+                insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
+                #-- WORKCENTER : OPERATING TIME LOG
+                insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
         #-- CLEAR ALL CONTROL DATA
-        deleteAllControlData(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
+        deleteAllControlData(orderNo, operationNo)
         #-- STOP OPERATION
-        updateOperationControl(oopr.OperatorOrderNo, oopr.OperatorOperationNo, 0, 0, "STOP")
+        updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
         #-- IF LAST OPERATION IN ORDER
-        if isLastOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo):
-            print('YES')
+        if isLastOperation(orderNo, operationNo):
             #-- ORDER : STOP
-            updateOrderControl(oopr.OperatorOrderNo, "STOP")
+            updateOrderControl(orderNo, "STOP")
     data = {
     }
     return JsonResponse(data)

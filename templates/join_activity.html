@@ -182,6 +182,9 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
+        setTimeout(function() {
+          window.location.href = '/transaction/0'
+        }, 300000);
       });
 
       var join_list = $('#join_list').bootstrapDualListbox();
