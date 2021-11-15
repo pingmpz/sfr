@@ -478,46 +478,50 @@ def confirm(request):
         reject_reason = ""
     elif reject_reason == "OTHER":
         reject_reason = other_reason
-    #-- SAP : CONFIRM
-    oopr = getOperatorOperatingByID(confirm_id)
-    orderNo = oopr.OperatorOrderNo
-    operationNo = oopr.OperatorOperationNo
-    workcenter = oopr.WorkCenterNo
-    if oopr.WorkCenterNo == None:
-        workcenter = getOperation(orderNo, operationNo).WorkCenterNo
-    insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
-    #-- CONFIRM : LOG
-    insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
-    #-- UPDATE QTY OF CURRENT OPERATION
-    updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
-    #-- UPDATE PROCESS QTY OF NEXT OPERATION
-    nextOperation = getNextOperation(orderNo,operationNo)
-    if nextOperation != None:
-        updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
-    #-- NO MORE REMAINING QTY
+    #-- RECHECK QTY
     operation = getOperation(orderNo, operationNo)
-    remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
-    if remainQty == 0:
-        #-- IF AUTO MACHINE(S) STILL WORKING
-        owcList = getOperatingWorkCenterList(orderNo, operationNo)
-        for owc in owcList:
-            if owc.Status == 'WORKING':
-                #-- WORKCENTER : STOP
-                updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
-                #-- SAP : WORKING TIME
-                owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
-                worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
-                insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
-                #-- WORKCENTER : OPERATING TIME LOG
-                insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
-        #-- CLEAR ALL CONTROL DATA
-        deleteAllControlData(orderNo, operationNo)
-        #-- STOP OPERATION
-        updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
-        #-- IF LAST OPERATION IN ORDER
-        if isLastOperation(orderNo, operationNo):
-            #-- ORDER : STOP
-            updateOrderControl(orderNo, "STOP")
+    remainQty = (operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+    if remainQty >= good_qty + reject_qty:
+        #-- SAP : CONFIRM
+        oopr = getOperatorOperatingByID(confirm_id)
+        orderNo = oopr.OperatorOrderNo
+        operationNo = oopr.OperatorOperationNo
+        workcenter = oopr.WorkCenterNo
+        if oopr.WorkCenterNo == None:
+            workcenter = getOperation(orderNo, operationNo).WorkCenterNo
+        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- CONFIRM : LOG
+        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
+        #-- UPDATE QTY OF CURRENT OPERATION
+        updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
+        #-- UPDATE PROCESS QTY OF NEXT OPERATION
+        nextOperation = getNextOperation(orderNo,operationNo)
+        if nextOperation != None:
+            updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
+        #-- NO MORE REMAINING QTY
+        operation = getOperation(orderNo, operationNo)
+        remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+        if remainQty == 0:
+            #-- IF AUTO MACHINE(S) STILL WORKING
+            owcList = getOperatingWorkCenterList(orderNo, operationNo)
+            for owc in owcList:
+                if owc.Status == 'WORKING':
+                    #-- WORKCENTER : STOP
+                    updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
+                    #-- SAP : WORKING TIME
+                    owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
+                    worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+                    insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
+                    #-- WORKCENTER : OPERATING TIME LOG
+                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+            #-- CLEAR ALL CONTROL DATA
+            deleteAllControlData(orderNo, operationNo)
+            #-- STOP OPERATION
+            updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
+            #-- IF LAST OPERATION IN ORDER
+            if isLastOperation(orderNo, operationNo):
+                #-- ORDER : STOP
+                updateOrderControl(orderNo, "STOP")
     data = {
     }
     return JsonResponse(data)
