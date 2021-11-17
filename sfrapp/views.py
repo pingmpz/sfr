@@ -480,8 +480,8 @@ def confirm(request):
         reject_reason = other_reason
     #-- RECHECK QTY
     operation = getOperation(orderNo, operationNo)
-    remainQty = (operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
-    if remainQty >= good_qty + reject_qty:
+    remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+    if remainQty >= (int(good_qty) + int(reject_qty)):
         #-- SAP : CONFIRM
         oopr = getOperatorOperatingByID(confirm_id)
         orderNo = oopr.OperatorOrderNo
