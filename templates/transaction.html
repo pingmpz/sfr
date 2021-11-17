@@ -495,7 +495,10 @@
                             <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
                             <h6>Start Process : {{operation.ProcessStart}}</h6>
                             <h6>Stop Process : {{operation.ProcessStop}}</h6>
-                            <h6>Good Qunatity Percentage : {{operation.ProcessQty.normalize|divide:operation.AcceptedQty.normalize|multiple:100}}%</h6>
+                            <br>
+                            {% if currentOperation != -1 %}
+                            <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                            {% endif %}
                             <br><br><br><br>
                           </div>
                         </div>
@@ -1078,7 +1081,7 @@
         </div>
       </div>
       <div class="modal" id="manual_report_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-primary" role="document">
+        <div class="modal-dialog modal-xl modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title"><i class="c-icon cil-clipboard"></i> Manual Report</h4>
@@ -1087,14 +1090,6 @@
             <div class="modal-body">
               <div class="col-md-12">
                 <div class="row">
-                  <div class="col-md-12">
-                    <div class="form-group row">
-                      <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
-                      <div class="col-md-10">
-                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
-                      </div>
-                    </div>
-                  </div>
                   <div class="col-md-6">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong> <span class="text-danger">*</span></label>
@@ -1105,25 +1100,64 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
+                    <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
                         <input class="form-control" type="text" id="mp_workcenter_no" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Work Type</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8 col-form-label">
+                        <div class="form-check form-check-inline mr-1">
+                          <input class="form-check-input" id="mp_setup_checkbox" type="checkbox" value="SETUP">
+                          <label class="form-check-label" for="mp_setup_checkbox">Setup</label>
+                        </div>
+                        <div class="form-check form-check-inline mr-1">
+                          <input class="form-check-input" id="mp_operate_checkbox" type="checkbox" value="OPERATE" checked>
+                          <label class="form-check-label" for="mp_operate_checkbox">Operate</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Setup Start Time</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_start_time">
+                        <input class="form-control" type="datetime-local" id="mp_setup_start_time">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Setup Stop Time</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="datetime-local" id="mp_setup_stop_time">
                       </div>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>{% if operation.WorkCenterType == 'Machine' %}Operate{% endif %} Start Time</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_stop_time">
+                        <input class="form-control" type="datetime-local" id="mp_operate_start_time">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>{% if operation.WorkCenterType == 'Machine' %}Operate{% endif %} Stop Time</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="datetime-local" id="mp_operate_stop_time">
                       </div>
                     </div>
                   </div>

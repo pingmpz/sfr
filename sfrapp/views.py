@@ -413,7 +413,7 @@ def stop_work_operating_operator(request):
     if oopr.WorkCenterNo == None:
         workcenter = getOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo).WorkCenterNo
         worktimeMachine = 0
-    if oopr.MachineType.strip() == 'Auto':
+    elif oopr.MachineType.strip() == 'Auto':
         worktimeMachine = 0
     if status == "EXT-WORK":
         worktimeOperator = 0
@@ -422,7 +422,7 @@ def stop_work_operating_operator(request):
     #-- OPERATOR : OPERATING TIME LOG
     insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & WORKCENTER IS MANUAL
-    if(oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual'):
+    if oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual':
         #-- WORKCENTER : STOP
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
     #-- CHECK REMAINING IS OPERATING
@@ -479,14 +479,14 @@ def confirm(request):
     elif reject_reason == "OTHER":
         reject_reason = other_reason
     #-- RECHECK QTY
+    oopr = getOperatorOperatingByID(confirm_id)
+    orderNo = oopr.OperatorOrderNo
+    operationNo = oopr.OperatorOperationNo
+    workcenter = oopr.WorkCenterNo
     operation = getOperation(orderNo, operationNo)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
     if remainQty >= (int(good_qty) + int(reject_qty)):
         #-- SAP : CONFIRM
-        oopr = getOperatorOperatingByID(confirm_id)
-        orderNo = oopr.OperatorOrderNo
-        operationNo = oopr.OperatorOperationNo
-        workcenter = oopr.WorkCenterNo
         if oopr.WorkCenterNo == None:
             workcenter = getOperation(orderNo, operationNo).WorkCenterNo
         insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
