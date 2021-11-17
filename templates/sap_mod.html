@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>SAP Routing | Shopfloor Reporting Application</title>
+    <title>SAP Modifier | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -39,10 +39,11 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">SAP Routing ({{sapRoutingList|length}})</li>
+            <li class="breadcrumb-item">SAP Modifier ({{sapModifierList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            <div class="timer"></div>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
           </div>
@@ -58,46 +59,64 @@
                   <div class="card">
                     <div class="card-body">
                       <div class="text-center">
-                          <a class="toggle-vis small text-primary" data-column="0">ProductionOrderNo</a> |
-                          <a class="toggle-vis small text-primary" data-column="1">OperationNumber</a> |
-                          <a class="toggle-vis small text-primary" data-column="2">WorkCenter</a> |
-                          <a class="toggle-vis small text-primary" data-column="3">PlanStartDate</a> |
-                          <a class="toggle-vis small text-primary" data-column="4">PlanFinishDate</a> |
-                          <a class="toggle-vis small text-primary" data-column="5">EstimateSetTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="6">EstimateOperationTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="7">EstimateLaborTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="8">Plant</a> |
-                          <a class="toggle-vis small text-primary" data-column="9">DateGetFromSAP</a>
+                          <a class="toggle-vis small text-primary" data-column="0">DateTimeStamp</a> |
+                          <a class="toggle-vis small text-primary" data-column="1">Mode</a> |
+                          <a class="toggle-vis small text-primary" data-column="2">OrderNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="3">OperationNo</a> |
+                          <a class="toggle-vis small text-primary" data-column="4">ControlKey</a> |
+                          <a class="toggle-vis small text-primary" data-column="5">WorkCenter</a> |
+                          <a class="toggle-vis small text-primary" data-column="6">PlannedDeliveryTime</a> |
+                          <a class="toggle-vis small text-primary" data-column="7">CostElement</a> |
+                          <a class="toggle-vis small text-primary" data-column="8">Price</a> |
+                          <a class="toggle-vis small text-primary" data-column="9">Currency</a> |
+                          <a class="toggle-vis small text-primary" data-column="10">MaterialGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="11">PurchasingGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="12">PurchasingOrg</a> |
+                          <a class="toggle-vis small text-primary" data-column="13">SetupTime</a> |
+                          <a class="toggle-vis small text-primary" data-column="14">OperTime</a> |
+                          <a class="toggle-vis small text-primary" data-column="15">LaborTime</a>
                       </div>
                       <br>
-                      <table class="table table-sm table-striped small" id="sap_routing_table" style="width: 100%">
+                      <table class="table table-sm table-striped small" id="sap_mod_table" style="width: 100%">
                         <thead>
                           <tr>
-                            <th>ProductionOrderNo</th>
-                            <th>OperationNumber</th>
+                            <th>DateTimeStamp</th>
+                            <th>Mode</th>
+                            <th>OrderNo</th>
+                            <th>OperationNo</th>
+                            <th>ControlKey</th>
                             <th>WorkCenter</th>
-                            <th>PlanStartDate</th>
-                            <th>PlanFinishDate</th>
-                            <th>EstimateSetTime</th>
-                            <th>EstimateOperationTime</th>
-                            <th>EstimateLaborTime</th>
-                            <th>Plant</th>
-                            <th>DateGetFromSAP</th>
+                            <th>PlannedDeliveryTime</th>
+                            <th>CostElement</th>
+                            <th>Price</th>
+                            <th>Currency</th>
+                            <th>MaterialGroup</th>
+                            <th>PurchasingGroup</th>
+                            <th>PurchasingOrg</th>
+                            <th>SetupTime</th>
+                            <th>OperTime</th>
+                            <th>LaborTime</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for routing in sapRoutingList %}
+                          {% for mod in sapModifierList %}
                           <tr>
-                            <td>{{routing.ProductionOrderNo|default_if_none:""}}</td>
-                            <td>{{routing.OperationNumber|default_if_none:""}}</td>
-                            <td>{{routing.WorkCenter|default_if_none:""}}</td>
-                            <td>{{routing.PlanStartDate|default_if_none:""}}</td>
-                            <td>{{routing.PlanFinishDate|default_if_none:""}}</td>
-                            <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
-                            <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
-                            <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
-                            <td>?</td>
-                            <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
+                            <td data-order="{{mod.DateTimeStamp|date:"U"}}">{{mod.DateTimeStamp|default_if_none:""}}</td>
+                            <td>{{mod.Mode|default_if_none:""}}</td>
+                            <td>{{mod.OrderNo|default_if_none:""}}</td>
+                            <td>{{mod.OperationNo|default_if_none:""}}</td>
+                            <td>{{mod.ControlKey|default_if_none:""}}</td>
+                            <td>{{mod.WorkCenter|default_if_none:""}}</td>
+                            <td>{{mod.PlannedDeliveryTime|default_if_none:""}}</td>
+                            <td>{{mod.CostElement|default_if_none:""}}</td>
+                            <td>{{mod.Price|default_if_none:""}}</td>
+                            <td>{{mod.Currency|default_if_none:""}}</td>
+                            <td>{{mod.MaterialGroup|default_if_none:""}}</td>
+                            <td>{{mod.PurchasingGroup|default_if_none:""}}</td>
+                            <td>{{mod.PurchasingOrg|default_if_none:""}}</td>
+                            <td>{{mod.SetupTime|default_if_none:""}}</td>
+                            <td>{{mod.OperTime|default_if_none:""}}</td>
+                            <td>{{mod.LaborTime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -115,9 +134,9 @@
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
-    <!--if IE><!-->
+    <!--[if IE]><!-->
     <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
-    <!--<!endif-->
+    <!--<![endif]-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Data Table JS -->
@@ -134,9 +153,10 @@
 
       var table;
       $(document).ready(function() {
-        table = $('#sap_routing_table').DataTable( {
-            "order": [[ 8, "desc" ],[ 0, "asc" ],[ 1, "asc" ]],
+        table = $('#sap_mod_table').DataTable( {
+            "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
+            "scrollX": true
         });
       });
 

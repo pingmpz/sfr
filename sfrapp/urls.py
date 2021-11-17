@@ -17,6 +17,7 @@ urlpatterns = [
     path('sap_order/', views.sap_order, name='sap_order'),
     path('sap_routing/', views.sap_routing, name='sap_routing'),
     path('sap_report/', views.sap_report, name='sap_report'),
+    path('sap_mod/', views.sap_mod, name='sap_mod'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
     path('validate_operator/', views.validate_operator, name='validate_operator'),

@@ -72,9 +72,11 @@
                           <a class="toggle-vis small text-primary" data-column="11">RequestDate</a> |
                           <a class="toggle-vis small text-primary" data-column="12">ReleaseDate</a> |
                           <a class="toggle-vis small text-primary" data-column="13">DrawingNo</a> |
-                          <a class="toggle-vis small text-primary" data-column="14">RoutingGroup</a> |
-                          <a class="toggle-vis small text-primary" data-column="15">RoutingGroupCounter</a> |
-                          <a class="toggle-vis small text-primary" data-column="16">DateGetFromSAP</a>
+                          <a class="toggle-vis small text-primary" data-column="14">AeroSpace</a> |
+                          <a class="toggle-vis small text-primary" data-column="15">RoutingGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="16">RoutingGroupCounter</a> |
+                          <a class="toggle-vis small text-primary" data-column="17">Plant</a> |
+                          <a class="toggle-vis small text-primary" data-column="18">DateGetFromSAP</a>
                       </div>
                       <br>
                       <table class="table table-sm table-striped small" id="sap_order_table" style="width: 100%">
@@ -94,8 +96,10 @@
                             <th>RequestDate</th>
                             <th>ReleaseDate</th>
                             <th>DrawingNo</th>
+                            <th>AeroSpace</th>
                             <th>RoutingGroup</th>
                             <th>RoutingGroupCounter</th>
+                            <th>Plant</th>
                             <th>DateGetFromSAP</th>
                           </tr>
                         </thead>
@@ -116,8 +120,10 @@
                             <td>{{order.RequestDate|default_if_none:""}}</td>
                             <td>{{order.ReleaseDate|default_if_none:""}}</td>
                             <td>{{order.DrawingNo|default_if_none:""}}</td>
+                            <td>?</td>
                             <td>{{order.RoutingGroup|default_if_none:""}}</td>
                             <td>{{order.RoutingGroupCounter|default_if_none:""}}</td>
+                            <td>?</td>
                             <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}

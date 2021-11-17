@@ -195,6 +195,13 @@ def sap_report(request):
     }
     return render(request, 'sap_report.html', context)
 
+def sap_mod(request):
+    sapModifierList = getSAPModifierList()
+    context = {
+        'sapModifierList' : sapModifierList,
+    }
+    return render(request, 'sap_mod.html', context)
+
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################
@@ -598,19 +605,25 @@ def get_connection():
 
 def getSAPOrderList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] ORDER BY ProductionOrderNo ASC"
+    sql = "SELECT * FROM [SAP_Order] ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getSAPRoutingList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Routing] ORDER BY ProductionOrderNo ASC"
+    sql = "SELECT * FROM [SAP_Routing] ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getSAPReportList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SFR2SAP_Report] ORDER BY ProductionOrderNo ASC"
+    sql = "SELECT * FROM [SFR2SAP_Report] ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPModifierList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SFR2SAP_Modifier] ORDER BY DateTimeStamp DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
