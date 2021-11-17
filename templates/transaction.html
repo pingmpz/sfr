@@ -51,12 +51,12 @@
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            <button type="button" class="btn btn-sm btn-pill bg-danger text-white" onclick="reset_all()">RESET ALL !</button>
+            <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button>
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
             <div style="width:15%"><input type="text" class="form-control form-control-sm" maxlength="4" id="sc_operation_no" autocomplete="off" value="{{operationNo}}"></div>
-            &nbsp;&nbsp;<div><button type="button" class="btn btn-sm bg-info text-white" onclick="shortcut_search()">GO!</button></div>
+            &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="shortcut_search()">Go !</button></div>
           </div>
         </div>
         <div class="progress" style="height: 4px; width: 100%">
@@ -1080,8 +1080,8 @@
           </div>
         </div>
       </div>
-      <div class="modal" id="manual_report_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-xl modal-primary" role="document">
+      <div class="modal fade" id="manual_report_modal" tabindex="-1" role="dialog">
+       <div class="modal-dialog modal-xl modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title"><i class="c-icon cil-clipboard"></i> Manual Report</h4>
@@ -1090,19 +1090,28 @@
             <div class="modal-body">
               <div class="col-md-12">
                 <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group row">
+                      <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <div class="col-md-10">
+                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Work Time</strong></div><div class="col-md-5"><hr></div>
                   <div class="col-md-6">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="text" id="mp_emp_id">
+                        <input class="form-control" type="text" id="mp_emp_id" autocomplete="off">
                       </div>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Labor (min)</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                        <input class="form-control" type="number" id="mp_labor_time" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -1116,51 +1125,38 @@
                   </div>
                   <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Work Type</strong> <span class="text-danger">*</span></label>
-                      <div class="col-md-8 col-form-label">
-                        <div class="form-check form-check-inline mr-1">
-                          <input class="form-check-input" id="mp_setup_checkbox" type="checkbox" value="SETUP">
-                          <label class="form-check-label" for="mp_setup_checkbox">Setup</label>
-                        </div>
-                        <div class="form-check form-check-inline mr-1">
-                          <input class="form-check-input" id="mp_operate_checkbox" type="checkbox" value="OPERATE" checked>
-                          <label class="form-check-label" for="mp_operate_checkbox">Operate</label>
-                        </div>
+                      <label class="col-md-4 col-form-label text-right"><strong>Setup (min)</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="mp_setup_time" autocomplete="off">
                       </div>
                     </div>
                   </div>
+                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}></div>
                   <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Setup Start Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Operate (min)</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_setup_start_time">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
-                    <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Setup Stop Time</strong> <span class="text-danger">*</span></label>
-                      <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_setup_stop_time">
+                        <input class="form-control" type="number" id="mp_operate_time" autocomplete="off">
                       </div>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>{% if operation.WorkCenterType == 'Machine' %}Operate{% endif %} Start Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_operate_start_time">
+                        <input class="form-control" type="datetime-local" id="mp_start_time">
                       </div>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>{% if operation.WorkCenterType == 'Machine' %}Operate{% endif %} Stop Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="datetime-local" id="mp_operate_stop_time">
+                        <input class="form-control" type="datetime-local" id="mp_stop_time">
                       </div>
                     </div>
                   </div>
+                  <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Quantity</strong></div><div class="col-md-5"><hr></div>
                   <div class="col-md-6">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
@@ -1227,15 +1223,13 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
-        setTimeout(function() {
-          window.location.href = '/transaction/0'
-        }, 300000);
       });
 
       var timeleft = 300;
       var downloadTimer = setInterval(function(){
         document.getElementById("progressBar").value = 300 - timeleft;
-        timeleft -= 1;
+        timeleft -= ($("#has_data").val() == "True")?1:0;
+        if(timeleft == 0) window.location.href = '/transaction/0';
       }, 1000);
 
       //-- INITIALIZE
@@ -1322,7 +1316,7 @@
           });
         }
       });
-      //---------------------------------------------------------------------------------------------------- TABLES
+
       function create_workcenter_table(){
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
@@ -1458,11 +1452,13 @@
       function reload_workcenter_table(){
         $("#workcenter_table > tbody").empty();
         create_workcenter_table();
+        timeleft = 300;
       }
 
       function reload_operator_table(){
         $("#operator_table > tbody").empty();
         create_operator_table();
+        timeleft = 300;
       }
 
       function add_operating_workcenter(){
@@ -1640,6 +1636,81 @@
         });
       }
 
+      function confirm(){
+        $("#confirm_invalid_text").text("");
+        if($('#good_qty').val() == "") $('#good_qty').val("0");
+        if($('#reject_qty').val() == "") $('#reject_qty').val("0");
+        var confirm_id = $('#confirm_id').val();
+        var remain_qty = parseFloat($('#remain_qty').val());
+        var good_qty = parseFloat($('#good_qty').val());
+        var reject_qty = parseFloat($('#reject_qty').val());
+        var reject_reason = $('#reject_reason').val();
+        var other_reason = $('#other_reason').val();
+        if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0.");
+        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+        else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason.");
+        else if(reject_reason == "OTHER" && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field.");
+        else if(other_reason.includes("|")) $("#confirm_invalid_text").text("character | is not allow to use.");
+        else {
+          $('#confirm_button').prop('disabled', true);
+          $.ajax({
+            url: '/confirm/',
+            data: {
+              'confirm_id': confirm_id,
+              'good_qty': good_qty,
+              'reject_qty': reject_qty,
+              'reject_reason': reject_reason,
+              'other_reason': other_reason,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
+        }
+      }
+
+      function manual_report(){
+        $("#mp_invalid_text").text("");
+        if($('#mp_labor_time').val() == "") $('#mp_labor_time').val("0");
+        if($('#mp_setup_time').val() == "") $('#mp_setup_time').val("0");
+        if($('#mp_operate_time').val() == "") $('#mp_operate_time').val("0");
+        if($('#mp_good_qty').val() == "") $('#mp_good_qty').val("0");
+        if($('#mp_reject_qty').val() == "") $('#mp_reject_qty').val("0");
+        var workcenter_type = $('#workcenter_type').val();
+        var password = $('#mp_password').val();
+        var emp_id = $('#mp_emp_id').val();
+        var workcenter_no = $('#mp_workcenter_no').val();
+        var labor_time = parseFloat($('#mp_labor_time').val());
+        var operate_time = parseFloat($('#mp_operate_time').val());
+        var setup_time = parseFloat($('#mp_setup_time').val());
+        var good_qty = parseFloat($('#mp_good_qty').val());
+        var start_time = new Date($('#mp_start_time').val());
+        var stop_time = new Date($('#mp_stop_time').val());
+        var remain_qty = parseFloat($('#remain_qty').val());
+        var good_qty = parseFloat($('#mp_good_qty').val());
+        var reject_qty = parseFloat($('#mp_reject_qty').val());
+        var reject_reason = $('#mp_reject_reason').val();
+        var other_reason = $('#mp_other_reason').val();
+        if(password == "") $("#mp_invalid_text").text("Please fill password.");
+        else if(emp_id == "") $("#mp_invalid_text").text("Please fill Employee ID.");
+        else if(workcenter_no == "") $("#mp_invalid_text").text("Please fill WorkCenter.");
+        else if($('#mp_start_time').val() == "") $("#mp_invalid_text").text("Please fill Start Time.");
+        else if($('#mp_stop_time').val() == "") $("#mp_invalid_text").text("Please fill Stop Time.");
+        else if(start_time >= stop_time) $("#mp_invalid_text").text("Start Time >= Stop Time");
+        else if(remain_qty < good_qty + reject_qty) $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+        else if(reject_qty > 0 && reject_reason == -1) $("#mp_invalid_text").text("Please select reject reason.");
+        else if(reject_reason == "OTHER" && other_reason == "") $("#mp_invalid_text").text("Please fill reason in other reason field.");
+        else if(other_reason.includes("|")) $("#mp_invalid_text").text("character | is not allow to use.");
+        else if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0) $("#mp_invalid_text").text("At least one value need to be more than 0.");
+        // Validate Password
+        // Validate EmpID
+        // Validate WorkCenter
+        else {
+          // REPORT !!
+        }
+      }
+
       function reset_all(){
         $.ajax({
           url: '/reset_all/',
@@ -1652,7 +1723,7 @@
         });
       }
 
-      //----------------------------------------------------------------------------------------------------
+      //---------------------------------------------------------------------------------------------------- MODIFIER
 
       //-- ADD OPERATION
       function add(){
@@ -1732,40 +1803,7 @@
         $('#trash_confirm_button').prop('disabled', false);
       }
 
-      // CONFIRM
-      function confirm(){
-        $("#confirm_invalid_text").text("");
-        if($('#good_qty').val() == "") $('#good_qty').val("0");
-        if($('#reject_qty').val() == "") $('#reject_qty').val("0");
-        var confirm_id = $('#confirm_id').val();
-        var remain_qty = parseFloat($('#remain_qty').val());
-        var good_qty = parseFloat($('#good_qty').val());
-        var reject_qty = parseFloat($('#reject_qty').val());
-        var reject_reason = $('#reject_reason').val();
-        var other_reason = $('#other_reason').val();
-        if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0");
-        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty");
-        else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason");
-        else if(reject_reason == "OTHER" && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field");
-        else if(other_reason.includes("|")) $("#confirm_invalid_text").text("character | is not allow to use.");
-        else {
-          $('#confirm_button').prop('disabled', true);
-          $.ajax({
-            url: '/confirm/',
-            data: {
-              'confirm_id': confirm_id,
-              'good_qty': good_qty,
-              'reject_qty': reject_qty,
-              'reject_reason': reject_reason,
-              'other_reason': other_reason,
-            },
-            dataType: 'json',
-            success: function (data) {
-              location.reload();
-            }
-          });
-        }
-      }
+      //----------------------------------------------------------------------------------------------------
 
       //-- VALIDATION
       function validate_operator(emp_id, _callback){
@@ -1902,6 +1940,11 @@
         }
       }
 
+      $('#mp_setup_checkbox').change(function() {
+          (this.checked)? $("#mp_setup_start_time_group").prop("hidden", false):$("#mp_setup_start_time_group").prop("hidden", true);
+          (this.checked)? $("#mp_setup_stop_time_group").prop("hidden", false):$("#mp_setup_stop_time_group").prop("hidden", true);
+      });
+
       $('#reject_reason').on("change", function() {
         if($('#reject_reason').val() != "OTHER"){
           $("#other_reason").prop("readonly", true);
@@ -1931,11 +1974,6 @@
       });
 
       //-- KET RESTRICT
-      $("#mp_emp_id").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
       $("#add_est_set_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -1992,6 +2030,36 @@
       });
 
       $("#reject_qty").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_emp_id").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_labor_time").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_setup_time").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_operate_time").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_good_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#mp_reject_qty").on("keypress keyup blur",function (event) {
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
