@@ -371,7 +371,7 @@
                         <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="generate_del_text()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
@@ -817,18 +817,10 @@
             </div>
             <div class="modal-body">
               <br><h3 class="text-center">Are you sure to delete this operation ?</h3><br>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="delete_emp_id" autocomplete="off" value="">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Delete Reason</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="delete_reason" autocomplete="off" value="">
-                </div>
-              </div>
+              <h1 class="text-center text-danger" id="del_text"></h1>
+              <br>
+              <p class="text-center"><small>Please fill the above code to the input field below.</small></p>
+              <input type="text" class="form-control text-center" maxlength="4" id="del_code" autocomplete="off">
             </div>
             <div class="modal-footer">
               <button class="btn btn-danger" type="button" id="trash_confirm_button" onclick="trash()">Confirm</button>
@@ -1785,22 +1777,34 @@
 
       //-- DELETE OPERATION
       function trash(){
-        $('#trash_confirm_button').prop('disabled', true);
-        var emp_id = $("#delete_emp_id").val();
-        var reason = $("#delete_reason").val();
-        remove_valid_many(["change_emp_id", "delete_reason"]);
-        validate_operator(emp_id, function(result){
-          if(!result){
-            invalid("delete_emp_id");
-          } else if (reason.length == 0){
-            valid("delete_emp_id");
-            invalid("delete_reason");
-          } else {
-            valid_many(["delete_emp_id","delete_reason"]);
-            //-- DO SOMETHING
-          }
-        });
-        $('#trash_confirm_button').prop('disabled', false);
+        remove_valid("del_code");
+        var del_text = $("#del_text").text();
+        var del_code = $("#del_code").val();
+        if(del_text != del_code){
+          invalid("del_code");
+        } else {
+          valid("del_code");
+          $('#trash_confirm_button').prop('disabled', true);
+          var order_no = $('#order_no').val();
+          var operation_no = $('#operation_no').val();
+          $.ajax({
+            url: '/delete_operation/',
+            data: {
+              'order_no': order_no,
+              'operation_no': operation_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              window.location.href = '/transaction/' + data.nextlink;
+            }
+          });
+        }
+      }
+
+      function generate_del_text(){
+        $("#del_text").text(generate_code(4));
+        remove_valid("del_code");
+        $("#del_code").val("");
       }
 
       //----------------------------------------------------------------------------------------------------
@@ -2093,6 +2097,17 @@
 
       function frontZero(str){
         return (str.length != 2)?"0"+str:str;
+      }
+
+      function generate_code(length) {
+          var result = '';
+          var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
+          // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+         }
+         return result;
       }
     </script>
   </body>

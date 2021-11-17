@@ -37,6 +37,7 @@ urlpatterns = [
     path('confirm/', views.confirm, name='confirm'),
     path('join/', views.join, name='join'),
     path('break_join/', views.break_join, name='break_join'),
+    path('delete_operation/', views.delete_operation, name='delete_operation'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

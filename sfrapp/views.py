@@ -522,7 +522,7 @@ def confirm(request):
                     #-- WORKCENTER : OPERATING TIME LOG
                     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
             #-- CLEAR ALL CONTROL DATA
-            deleteAllControlData(orderNo, operationNo)
+            deleteAllOperatingData(orderNo, operationNo)
             #-- STOP OPERATION
             updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
             #-- IF LAST OPERATION IN ORDER
@@ -538,14 +538,14 @@ def join(request):
     operation_no = request.GET.get('operation_no')
     join_list = request.GET.getlist('join_list[]')
     #-- CLEAR ALL CONTROL DATA OF JOIN PROCESS (MAIN)
-    deleteAllControlData(order_no, operation_no)
+    deleteAllOperatingData(order_no, operation_no)
     for join_item in join_list:
         join_order_no = join_item[0:10]
         join_operation_no = join_item[10:14]
         #-- JOIN PROCESS
         joinProcess(order_no, operation_no, join_order_no, join_operation_no)
         #-- CLEAR ALL CONTROL DATA OF JOIN PROCESS
-        deleteAllControlData(join_order_no, join_operation_no)
+        deleteAllOperatingData(join_order_no, join_operation_no)
     data = {
     }
     return JsonResponse(data)
@@ -572,6 +572,30 @@ def break_join(request):
     }
     return JsonResponse(data)
 
+def delete_operation(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    operation = getOperation(order_no, operation_no)
+    nextlink = "0"
+    #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
+    deleteAllOperatingData(order_no, operation_no)
+    #-- TRANSFER PROCESS QTY TO NEXT OPERATION
+    nextOperation = getNextOperation(order_no, operation_no)
+    if nextOperation != None:
+        nextlink = nextOperation.OrderNo + nextOperation.OperationNo
+        updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, operation.ProcessQty, 0, "PROCESSQTY")
+    else:
+        #-- ORDER : STOP
+        updateOrderControl(orderNo, "STOP")
+    #-- SAP MODIFIER : DELETE OPERATION
+    insertSFR2SAP_Modifier_Delete(order_no, operation_no)
+    #-- DELETE THIS OPERATION
+    deleteOperationControl(order_no, operation_no)
+    data = {
+        'nextlink' : nextlink,
+    }
+    return JsonResponse(data)
+
 def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()
@@ -579,6 +603,7 @@ def reset_all(request):
             DELETE FROM OperatingOperator
             DELETE FROM OperatingWorkCenter
             DELETE FROM SFR2SAP_Report
+            DELETE FROM SFR2SAP_Modifier
             DELETE FROM HistoryConfirm
             DELETE FROM HistoryOperate
             DELETE FROM HistoryJoin
@@ -1010,6 +1035,17 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     conn.commit()
     return
 
+def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [SFR2SAP_Modifier] ([DateTimeStamp],[Mode],[OrderNo],[OperationNo])"
+    sql += " VALUES (CURRENT_TIMESTAMP,'31',"
+    sql += "'" + str(order_no) + "',"
+    sql += "'" + str(operation_no) + "')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, start_date_time, stop_date_time):
     startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
     stopDateTime = stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -1135,7 +1171,7 @@ def deleteOperatingOperator(id):
     conn.commit()
     return
 
-def deleteAllControlData(order_no, operation_no):
+def deleteAllOperatingData(order_no, operation_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
@@ -1143,6 +1179,14 @@ def deleteAllControlData(order_no, operation_no):
     conn.commit()
     cursor = conn.cursor()
     sql = "DELETE FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteOperationControl(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
