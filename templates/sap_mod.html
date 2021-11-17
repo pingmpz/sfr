@@ -81,7 +81,18 @@
                         <thead>
                           <tr>
                             <th>DateTimeStamp</th>
-                            <th>Mode</th>
+                            <th>
+                              Mode
+                              <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                              data-content="
+                              <span class='text-success'><strong>11</strong> - Add</span><br>
+                              <span class='text-success'><strong>12</strong> - Add (External Process)</span><br>
+                              <span class='text-warning'><strong>21</strong> - Change</span><br>
+                              <span class='text-warning'><strong>22</strong> - Change (External Process)</span><br>
+                              <span class='text-danger'><strong>31</strong> - Delete</span><br>
+                              ">?
+                              </a>
+                            </th>
                             <th>OrderNo</th>
                             <th>OperationNo</th>
                             <th>ControlKey</th>
@@ -100,7 +111,7 @@
                         </thead>
                         <tbody>
                           {% for mod in sapModifierList %}
-                          <tr>
+                          <tr class="{% if mod.Mode == '31' %}text-danger{% elif mod.Mode == '11' or mod.Mode == '12'%}text-success{% elif mod.Mode == '21' or mod.Mode == '22'%}text-warning{% endif %}">
                             <td data-order="{{mod.DateTimeStamp|date:"U"}}">{{mod.DateTimeStamp|default_if_none:""}}</td>
                             <td>{{mod.Mode|default_if_none:""}}</td>
                             <td>{{mod.OrderNo|default_if_none:""}}</td>
@@ -142,6 +153,8 @@
     <!-- Data Table JS -->
     <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
     <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Popover JS -->
+    <script src="{% static "js/popovers.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>

@@ -589,6 +589,7 @@ def delete_operation(request):
         updateOrderControl(orderNo, "STOP")
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
+    #-- HISTORY : DELETE OPERATION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
     data = {
