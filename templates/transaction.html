@@ -1875,7 +1875,7 @@
         });
 
       document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
-            if ($("#sc_order_no").val().length == 10) $("#sc_operation_no").focus();
+            if ($("#sc_order_no").val().length == 12) $("#sc_operation_no").focus();
         });
 
       document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
@@ -1885,9 +1885,9 @@
       function shortcut_search(){
           var order_no =  $("#sc_order_no").val();
           var operation_no =  $("#sc_operation_no").val();
-          (order_no.length != 10)? invalid("sc_order_no"): valid("sc_order_no");
-          (operation_no.length != 4)? invalid("sc_operation_no"): valid("sc_operation_no");
-          if(order_no.length == 10 && operation_no.length == 4){
+          (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
+          (operation_no.length < 4)? invalid("sc_operation_no"): valid("sc_operation_no");
+          if(order_no.length >= 6 && operation_no.length == 4){
             remove_valid_many(["sc_order_no","sc_operation_no"]);
             window.open('/transaction/' + order_no + operation_no, '_self');
           }

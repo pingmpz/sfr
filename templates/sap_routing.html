@@ -94,7 +94,7 @@
                           <a class="toggle-vis small text-primary" data-column="5">EstimateSetTime</a> |
                           <a class="toggle-vis small text-primary" data-column="6">EstimateOperationTime</a> |
                           <a class="toggle-vis small text-primary" data-column="7">EstimateLaborTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="8">Plant</a> |
+                          <a class="toggle-vis small text-primary" data-column="8">SystemStatus</a> |
                           <a class="toggle-vis small text-primary" data-column="9">DateGetFromSAP</a>
                       </div>
                       <br>
@@ -109,7 +109,7 @@
                             <th>EstimateSetTime</th>
                             <th>EstimateOperationTime</th>
                             <th>EstimateLaborTime</th>
-                            <th>Plant</th>
+                            <th>SystemStatus</th>
                             <th>DateGetFromSAP</th>
                           </tr>
                         </thead>
@@ -124,7 +124,7 @@
                             <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
-                            <td>?</td>
+                            <td>{{routing.SystemStatus|default_if_none:""}}</td>
                             <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}

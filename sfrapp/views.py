@@ -20,6 +20,7 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
+    print(len(orderoprno))
     orderNo = ""
     operationNo = ""
     order = None
@@ -44,8 +45,8 @@ def transaction(request, orderoprno):
     if orderoprno == "0":
         state = "FIRSTPAGE"
     else:
-        orderNo = orderoprno[0:10]
-        operationNo = orderoprno[10:14]
+        orderNo = orderoprno[0:len(orderoprno) - 4]
+        operationNo = orderoprno[len(orderoprno) - 4:len(orderoprno)]
         if isExistOrder(orderNo) == False and isExistSAPOrder(orderNo) == False:
             state = "NODATAFOUND"
         else:
