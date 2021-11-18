@@ -20,10 +20,10 @@ urlpatterns = [
     path('sap_mod/', views.sap_mod, name='sap_mod'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
-    path('validate_operator/', views.validate_operator, name='validate_operator'),
-    path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
+    #-- MAIN TABLE
     path('get_workcenter_data/', views.get_workcenter_data, name='get_workcenter_data'),
     path('get_operator_data/', views.get_operator_data, name='get_operator_data'),
+    #-- INNER MAIN TABLE
     path('get_operating_workcenter_list/', views.get_operating_workcenter_list, name='get_operating_workcenter_list'),
     path('get_operating_operator_list/', views.get_operating_operator_list, name='get_operating_operator_list'),
     path('add_operating_workcenter/', views.add_operating_workcenter, name='add_operating_workcenter'),
@@ -33,11 +33,15 @@ urlpatterns = [
     path('start_work_operating_operator/', views.start_work_operating_operator, name='start_work_operating_operator'),
     path('stop_setup_operating_operator/', views.stop_setup_operating_operator, name='stop_setup_operating_operator'),
     path('stop_work_operating_operator/', views.stop_work_operating_operator, name='stop_work_operating_operator'),
+    #-- CONFIRMATION
     path('get_data_for_confirm/', views.get_data_for_confirm, name='get_data_for_confirm'),
     path('confirm/', views.confirm, name='confirm'),
+    #-- JOIN
     path('join/', views.join, name='join'),
     path('break_join/', views.break_join, name='break_join'),
+    #-- MODIFIER
     path('delete_operation/', views.delete_operation, name='delete_operation'),
+    path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

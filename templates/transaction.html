@@ -115,212 +115,224 @@
                           </ul>
                           <div class="tab-content">
                             <!-- Operation Tab -->
-                            <div class="tab-pane active" id="operation-tab" role="tabpanel">
+                            <div class="tab-pane small active" id="operation-tab" role="tabpanel">
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Production Order No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="order_no" value="{{orderNo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Operation No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Operation Start</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="operation_start" value="{{operation.ProcessStart|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="operation_start" value="{{operation.ProcessStart|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Operation Stop</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="operation_stop" value="{{operation.ProcessStop|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="operation_stop" value="{{operation.ProcessStop|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-info"><strong>Process Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="remain_qty" value="{{remainQty}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="remain_qty" value="{{remainQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
                                 </div>
                               </div>
                               <hr>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="work_center_group" value="{{operation.WorkCenterGroup}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Plan Start</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="plan_start" value="{{operation.PlanStartDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Plan Finish</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="plan_finish" value="{{operation.PlanFinishDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="est_set_time" value="{{operation.EstimateSetTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_set_time" value="{{operation.EstimateSetTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                             </div>
                             <!-- Production Order Tab -->
-                            <div class="tab-pane" id="order-tab" role="tabpanel">
+                            <div class="tab-pane small" id="order-tab" role="tabpanel">
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right text-primary"><strong>Prod. Order Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Order Start</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control form-control-sm" type="text" id="order_start" value="{{order.ProcessStart|default_if_none:""}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Order Stop</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control form-control-sm" type="text" id="order_stop" value="{{order.ProcessStop|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Customer PO No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="customer_po_no" value="{{order.CustomerPONo|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Part No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="part_no" value="{{order.PartNo|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Part Name</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="part_name" value="{{order.PartName|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Sales Order No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="sale_order_no" value="{{order.SalesOrderNo|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="sale_order_no" value="{{order.SalesOrderNo|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Sales Create Date</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="sale_create_date" value="{{order.SalesCreateDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="sale_create_date" value="{{order.SalesCreateDate|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Sales Order Qty</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="sale_order_qty" value="{{order.SalesOrderQuantity|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="sale_order_qty" value="{{order.SalesOrderQuantity|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>FG Mat Code</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="fg_material_code" value="{{order.FG_MaterialCode|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="fg_material_code" value="{{order.FG_MaterialCode|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>RM Mat Code</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="rm_material_code" value="{{order.RM_MaterialCode|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="rm_material_code" value="{{order.RM_MaterialCode|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>MRP Controller</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="mrp_controller" value="{{order.MRP_Controller|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="mrp_controller" value="{{order.MRP_Controller|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Request Date</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="request_date" value="{{order.request_date|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Release Date</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="release_date" value="{{order.ReleaseDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="release_date" value="{{order.ReleaseDate|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Drawing No</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Routing Group</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="routing_group" value="{{order.RoutingGroup|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="routing_group" value="{{order.RoutingGroup|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Routing Group Counter</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="routing_group_counter" value="{{order.RoutingGroupCounter|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="routing_group_counter" value="{{order.RoutingGroupCounter|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Plant</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="plant" value="{{order.Plant|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plant" value="{{order.Plant|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                             </div>
                             <!-- Structure Tab -->
-                            <div class="tab-pane" id="structure-tab" role="tabpanel">
+                            <div class="tab-pane small" id="structure-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
@@ -345,11 +357,11 @@
                                   {% for operation in operationList %}
                                   <tr {% if operation.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon cib-discover text-success" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon cib-discover text-primary" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon cib-discover text-warning" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon cib-discover text-info" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon cib-discover text-danger" style="padding-top:5px"></i>
+                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
                                       {% endif %}
                                     </td>
                                     <td>
@@ -386,7 +398,7 @@
                         <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon c-icon-xs cil-plus"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button" disabled><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="prepare_delete()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
@@ -1743,10 +1755,15 @@
         if(operation_no_temp.length < 4) for(var i = operation_no_temp.length;i < 4;i++) operation_no_temp = "0" + operation_no_temp;
         $("#add_operation_no").val(operation_no_temp);
         var order_no = $("#order_no").val();
-        var operation_no = $("#add_operation_no").val();
+        var new_operation_no = $("#add_operation_no").val();
         var work_center = $("#add_work_center").val();
         var control = $("#add_control_key").val();
         remove_valid_many(["add_operation_no","add_work_center"]);
+        validate_new_operation(new_operation_no, function(canAdd) {
+          if(canAdd){
+
+          }
+        });
         $('#add_confirm_button').prop('disabled', false);
       }
 
@@ -1758,24 +1775,6 @@
       //-- CHANGE OPERATION
       function change(){
         $('#change_confirm_button').prop('disabled', true);
-        var emp_id = $("#change_emp_id").val();
-        var reason = $("#change_reason").val();
-        var work_center = $("#change_work_center").val();
-        remove_valid_many(["change_emp_id","change_reason","change_work_center"]);
-        validate_operator(emp_id, function(result){
-          if(!result){
-            invalid("change_emp_id");
-          } else if (reason.length == 0){
-            valid("change_emp_id");
-            invalid("change_reason");
-          } else if (work_center.length == 0){
-            valid_many(["change_emp_id","change_reason"]);
-            invalid("change_work_center");
-          } else {
-            valid_many(["change_emp_id","change_reason","change_work_center"]);
-            //-- DO SOMETHING
-          }
-        });
         $('#change_confirm_button').prop('disabled', false);
       }
 
@@ -1815,55 +1814,27 @@
       //----------------------------------------------------------------------------------------------------
 
       //-- VALIDATION
-      function validate_operator(emp_id, _callback){
-        if(emp_id.length == 0) {
-          _callback(false);
-          return;
-        } else {
-          $.ajax({
-            url: '/validate_operator/',
-            data: {
-              'emp_id': emp_id,
-            },
-            dataType: 'json',
-            success: function (data) {
-              if (data.isExist) {
-                _callback(true);
-                return;
-              } else {
-                _callback(false);
-                return;
-              }
-            }
-          });
-        }
-      }
-
-      function validate_new_operation(order_no, new_operation_no, _callback){
+      function validate_new_operation(new_operation_no, _callback){
+        var order_no = $("#order_no").val();
         var current_operation_no = $("#operation_no").val();
-        if(new_operation_no.length != 4 || new_operation_no <= current_operation_no) { //-- NEED FIX
-          _callback(false);
-          return;
-        } else {
-          $.ajax({
-            url: '/validate_new_operation/',
-            data: {
-              'order_no': order_no,
-              'current_operation_no': current_operation_no,
-              'new_operation_no': new_operation_no,
-            },
-            dataType: 'json',
-            success: function (data) {
-              if (data.canAdd) {
-                _callback(true);
-                return;
-              } else {
-                _callback(false);
-                return;
-              }
+        $.ajax({
+          url: '/validate_new_operation/',
+          data: {
+            'order_no': order_no,
+            'current_operation_no': current_operation_no,
+            'new_operation_no': new_operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data.canAdd) {
+              _callback(true);
+              return;
+            } else {
+              _callback(false);
+              return;
             }
-          });
-        }
+          }
+        });
       }
 
       //-- SHORTCUT SEARCH

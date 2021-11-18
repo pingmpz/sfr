@@ -206,25 +206,27 @@ def sap_mod(request):
 #################################### REQUEST ###################################
 ################################################################################
 
-def validate_operator(request):
-    emp_id = request.GET.get('emp_id')
-    isExist = isExistOperator(emp_id)
+#-------------------------------------------------------------------- MAIN TABLE
+
+def get_operating_workcenter_list(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    OWCList = [list(i) for i in getOperatingWorkCenterList(order_no, operation_no)]
+    hasOperatorOperatingList = []
+    for owc in OWCList:
+        hasOperatorOperatingList.append(hasOperatorOperating(owc[0]))
     data = {
-        'isExist': isExist,
+        'OWCList': OWCList,
+        'hasOperatorOperatingList': hasOperatorOperatingList,
     }
     return JsonResponse(data)
 
-#-- NEED FIX
-def validate_new_operation(request):
+def get_operating_operator_list(request):
     order_no = request.GET.get('order_no')
-    current_operation_no = request.GET.get('current_operation_no')
-    new_operation_no = request.GET.get('new_operation_no')
-    canAdd = False
-    isExist = isExistOperation(order_no, new_operation_no)
-    if isExist == False:
-        canAdd = True
+    operation_no = request.GET.get('operation_no')
+    OOPRList = [list(i) for i in getOperatingOperatorList(order_no, operation_no)]
     data = {
-        'canAdd': canAdd,
+        'OOPRList': OOPRList,
     }
     return JsonResponse(data)
 
@@ -288,27 +290,7 @@ def get_operator_data(request):
     }
     return JsonResponse(data)
 
-def get_operating_workcenter_list(request):
-    order_no = request.GET.get('order_no')
-    operation_no = request.GET.get('operation_no')
-    OWCList = [list(i) for i in getOperatingWorkCenterList(order_no, operation_no)]
-    hasOperatorOperatingList = []
-    for owc in OWCList:
-        hasOperatorOperatingList.append(hasOperatorOperating(owc[0]))
-    data = {
-        'OWCList': OWCList,
-        'hasOperatorOperatingList': hasOperatorOperatingList,
-    }
-    return JsonResponse(data)
-
-def get_operating_operator_list(request):
-    order_no = request.GET.get('order_no')
-    operation_no = request.GET.get('operation_no')
-    OOPRList = [list(i) for i in getOperatingOperatorList(order_no, operation_no)]
-    data = {
-        'OOPRList': OOPRList,
-    }
-    return JsonResponse(data)
+#-------------------------------------------------------------- INNER MAIN TABLE
 
 def add_operating_workcenter(request):
     #-- *** ONLY MACHINE TYPE ***
@@ -475,6 +457,8 @@ def stop_operating_workcenter(request):
     }
     return JsonResponse(data)
 
+#------------------------------------------------------------------ CONFIRMATION
+
 def get_data_for_confirm(request):
     id = request.GET.get('id')
     oopr = getOperatorOperatingByID(id)
@@ -555,6 +539,8 @@ def confirm(request):
     }
     return JsonResponse(data)
 
+#-------------------------------------------------------------------------- JOIN
+
 def join(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
@@ -594,6 +580,8 @@ def break_join(request):
     }
     return JsonResponse(data)
 
+#---------------------------------------------------------------------- MODIFIER
+
 def delete_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
@@ -616,6 +604,19 @@ def delete_operation(request):
     deleteOperationControl(order_no, operation_no)
     data = {
         'nextlink' : nextlink,
+    }
+    return JsonResponse(data)
+
+def validate_new_operation(request):
+    order_no = request.GET.get('order_no')
+    current_operation_no = request.GET.get('current_operation_no')
+    new_operation_no = request.GET.get('new_operation_no')
+    canAdd = False
+    isExist = isExistOperation(order_no, new_operation_no)
+    if isExist == False:
+        canAdd = True
+    data = {
+        'canAdd': canAdd,
     }
     return JsonResponse(data)
 
