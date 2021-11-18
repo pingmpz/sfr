@@ -128,6 +128,18 @@
                                   <input class="form-control" type="text" id="operation_no" value="{{operationNo}}" readonly>
                                 </div>
                               </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Operation Start</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="operation_start" value="{{operation.ProcessStart|default_if_none:""}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Operation Stop</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="operation_stop" value="{{operation.ProcessStop|default_if_none:""}}" readonly>
+                                </div>
+                              </div>
                               <div class="form-group row" hidden>
                                 <label class="col-md-5 col-form-label text-right text-info"><strong>Process Qty</strong></label>
                                 <div class="col-md-7">
@@ -295,6 +307,12 @@
                                 </div>
                               </div>
                               <div class="form-group row">
+                                <label class="col-md-5 col-form-label text-right"><strong>Plant</strong></label>
+                                <div class="col-md-7">
+                                  <input class="form-control" type="text" id="plant" value="{{order.Plant|default_if_none:""}}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
@@ -365,13 +383,13 @@
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         {% if order.ProcessStop == None %}
-                        <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal"><i class="c-icon c-icon-xs cil-plus" id="add_main_button"></i><br>Add</button>
+                        <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon c-icon-xs cil-plus"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="generate_del_text()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="prepare_delete()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
@@ -404,7 +422,7 @@
                             ">?
                             </a>
                             <div class="card-header-actions">
-                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal"><del>Manual Report</del></button>
+                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" disabled><del>Manual Report</del></button>
                             </div>
                           </div>
                           <div class="card-body">
@@ -412,7 +430,7 @@
                             <div class="form-group row">
                               <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
                               <div class="col-md-2">
-                                <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="">
+                                <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                               </div>
                               <div class="col-md-5">
                                 <input class="form-control" type="text" id="workcenter_name" value="" readonly>
@@ -570,7 +588,7 @@
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
       <!-- *** MODAL *** -->
-      <div class="modal fade" id="add_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="add_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-success" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -580,19 +598,16 @@
             <div class="modal-body">
               <br><h3 class="text-center">Are you sure to add new operation ?</h3><br>
               <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_emp_id" autocomplete="off" value="">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Add Reason</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_reason" autocomplete="off" value="">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Operation No</strong></label>
+                <label class="col-md-4 col-form-label text-right small">
+                  <strong>New Operation No</strong>
+                  <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
+                  data-content="
+                  1) Not Exist Number.<br>
+                  2) Only After Working/Completed Operation.<br>
+                  3) Never Deleted Number.<br>
+                  ">!
+                  </a>
+                </label>
                 <div class="col-md-8">
                   <input class="form-control form-control-sm" type="text" id="add_operation_no" autocomplete="off" maxlength="4" value="">
                 </div>
@@ -600,7 +615,7 @@
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_work_center" autocomplete="off" value="">
+                  <input class="form-control form-control-sm" type="text" id="add_work_center" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                 </div>
               </div>
               <div class="form-group row">
@@ -692,7 +707,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="change_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="change_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-warning" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -808,7 +823,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="delete_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-danger" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -829,7 +844,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="break_join_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="break_join_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-danger" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -846,7 +861,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="join_list_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="join_list_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -877,7 +892,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="history_modal" tabindex="-1" role="dialog">
+      <div class="modal" id="history_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-info modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -1720,35 +1735,20 @@
       //-- ADD OPERATION
       function add(){
         $('#add_confirm_button').prop('disabled', true);
+        var operation_no_temp = $("#add_operation_no").val();
+        if(operation_no_temp.length < 4) for(var i = operation_no_temp.length;i < 4;i++) operation_no_temp = "0" + operation_no_temp;
+        $("#add_operation_no").val(operation_no_temp);
         var order_no = $("#order_no").val();
-        var emp_id = $("#add_emp_id").val();
-        var reason = $("#add_reason").val();
         var operation_no = $("#add_operation_no").val();
         var work_center = $("#add_work_center").val();
         var control = $("#add_control_key").val();
-        remove_valid_many(["add_emp_id","add_reason","add_operation_no","add_work_center"]);
-        validate_operator(emp_id, function(result){
-          if(!result){
-            invalid("add_emp_id");
-          } else if (reason.length == 0){
-            valid("add_emp_id");
-            invalid("add_reason");
-          } else {
-            valid_many(["add_emp_id","add_reason"]);
-            validate_new_operation(order_no, operation_no, function(result){
-              if(!result){
-                invalid("add_operation_no");
-              } else if (work_center.length == 0){
-                valid("add_operation_no");
-                invalid("add_work_center");
-              } else {
-                valid_many(["add_operation_no","add_work_center"]);
-                //-- DO SOMETHING
-              }
-           });
-          }
-        });
+        remove_valid_many(["add_operation_no","add_work_center"]);
         $('#add_confirm_button').prop('disabled', false);
+      }
+
+      function prepare_add(){
+        $("#add_operation_no").val("");
+        $("#add_operation_no").focus();
       }
 
       //-- CHANGE OPERATION
@@ -1801,10 +1801,11 @@
         }
       }
 
-      function generate_del_text(){
+      function prepare_delete(){
         $("#del_text").text(generate_code(4));
         remove_valid("del_code");
         $("#del_code").val("");
+        $("#del_code").focus();
       }
 
       //----------------------------------------------------------------------------------------------------

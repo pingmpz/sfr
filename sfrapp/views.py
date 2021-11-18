@@ -352,6 +352,16 @@ def add_operating_operator(request):
         if hasNotStartOrder(order_no):
             #-- ORDER : START
             updateOrderControl(order_no, "START")
+    #-- IF JOINING
+    joinList = getJoinList(order_no, operation_no)
+    for join in joinList:
+        if hasNotStartOperation(join.OrderNo, join.OperationNo):
+            #-- OPERATION : START
+            updateOperationControl(join.OrderNo, join.OperationNo, 0, 0, "START")
+            #-- IF NOT START ORDER YET
+            if hasNotStartOrder(join.OrderNo):
+                #-- ORDER : START
+                updateOrderControl(join.OrderNo, "START")
     data = {
         'refresh' : refresh,
     }
@@ -447,7 +457,7 @@ def stop_operating_workcenter(request):
     #-- SAP : WORKING TIME
     owc = getWorkCenterOperatingByID(id)
     worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
-    insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,oopr.StopDateTime,'9999')
+    insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
     #-- CHECK REMAINING IS OPERATING
