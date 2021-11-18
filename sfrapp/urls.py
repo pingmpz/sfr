@@ -15,8 +15,8 @@ urlpatterns = [
     path('purg_master/', views.purg_master, name='purg_master'),
     path('curr_master/', views.curr_master, name='curr_master'),
     #-- SAP
-    path('sap_order/', views.sap_order, name='sap_order'),
-    path('sap_routing/', views.sap_routing, name='sap_routing'),
+    path('sap_order/<str:fdate>&<str:fhour>', views.sap_order, name='sap_order'),
+    path('sap_routing/<str:fdate>&<str:fhour>', views.sap_routing, name='sap_routing'),
     path('sap_report/', views.sap_report, name='sap_report'),
     path('sap_mod/', views.sap_mod, name='sap_mod'),
     path('blank/', views.blank, name='blank'),
@@ -43,6 +43,7 @@ urlpatterns = [
     #-- MODIFIER
     path('delete_operation/', views.delete_operation, name='delete_operation'),
     path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
+    path('validate_routing/', views.validate_routing, name='validate_routing'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

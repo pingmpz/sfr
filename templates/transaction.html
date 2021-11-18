@@ -621,13 +621,13 @@
                   </a>
                 </label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_operation_no" autocomplete="off" maxlength="4" value="">
+                  <input class="form-control form-control-sm" type="text" id="add_new_operation_no" autocomplete="off" maxlength="4" value="">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_work_center" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                  <input class="form-control form-control-sm" type="text" id="add_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                 </div>
               </div>
               <div class="form-group row">
@@ -643,19 +643,19 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_set_time" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="number" id="add_est_set_time" autocomplete="off" value="0">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_operation_time" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="number" id="add_est_operation_time" autocomplete="off" value="0">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off" value="0">
                   </div>
                 </div>
               </div>
@@ -705,8 +705,9 @@
                   </div>
                   <div class="col-md-3">
                     <select class="form-control form-control-sm" id="add_currency">
-                      <option value="THB" selected>THB</option>
-                      <option value="USD">USD</option>
+                      {% for currency in currencyList %}
+                      <option value="{{currency.Name}}" {% if currency.Name.strip == 'THB' %}selected{% endif %}>{{currency.Name}}</option>
+                      {% endfor %}
                     </select>
                   </div>
                 </div>
@@ -1751,25 +1752,39 @@
       //-- ADD OPERATION
       function add(){
         $('#add_confirm_button').prop('disabled', true);
-        var operation_no_temp = $("#add_operation_no").val();
+        var operation_no_temp = $("#add_new_operation_no").val();
         if(operation_no_temp.length < 4) for(var i = operation_no_temp.length;i < 4;i++) operation_no_temp = "0" + operation_no_temp;
-        $("#add_operation_no").val(operation_no_temp);
+        $("#add_new_operation_no").val(operation_no_temp);
         var order_no = $("#order_no").val();
-        var new_operation_no = $("#add_operation_no").val();
-        var work_center = $("#add_work_center").val();
-        var control = $("#add_control_key").val();
-        remove_valid_many(["add_operation_no","add_work_center"]);
+        var new_operation_no = $("#add_new_operation_no").val();
+        var work_center_no = $("#add_work_center_no").val();
+        var control_key = $("#add_control_key").val();
+        remove_valid_many(["add_new_operation_no","add_work_center_no"]);
         validate_new_operation(new_operation_no, function(canAdd) {
           if(canAdd){
+            valid("add_new_operation_no");
+            validate_routing(work_center_no, function(canUse) {
+              if(canAdd){
+                valid("add_work_center_no");
+                if(control_key == "PP01"){
 
+                } else {
+
+                }
+              } else {
+                invalid("add_work_center_no");
+              }
+            });
+          } else {
+            invalid("add_new_operation_no");
           }
         });
         $('#add_confirm_button').prop('disabled', false);
       }
 
       function prepare_add(){
-        $("#add_operation_no").val("");
-        $("#add_operation_no").focus();
+        $("#add_new_operation_no").val("");
+        $("#add_new_operation_no").focus();
       }
 
       //-- CHANGE OPERATION
@@ -1805,7 +1820,7 @@
       }
 
       function prepare_delete(){
-        $("#del_text").text(generate_code(4));
+        $("#del_text").text(generateRandomCode(4));
         remove_valid("del_code");
         $("#del_code").val("");
         $("#del_code").focus();
@@ -1816,17 +1831,34 @@
       //-- VALIDATION
       function validate_new_operation(new_operation_no, _callback){
         var order_no = $("#order_no").val();
-        var current_operation_no = $("#operation_no").val();
         $.ajax({
           url: '/validate_new_operation/',
           data: {
             'order_no': order_no,
             'current_operation_no': current_operation_no,
-            'new_operation_no': new_operation_no,
           },
           dataType: 'json',
           success: function (data) {
             if (data.canAdd) {
+              _callback(true);
+              return;
+            } else {
+              _callback(false);
+              return;
+            }
+          }
+        });
+      }
+
+      function validate_routing(work_center_no, _callback){
+        $.ajax({
+          url: '/validate_routing/',
+          data: {
+            'work_center_no': work_center_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data.canUse) {
               _callback(true);
               return;
             } else {
@@ -1954,6 +1986,11 @@
       });
 
       //-- KET RESTRICT
+      $("#add_new_operation_no").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#add_est_set_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -1965,11 +2002,6 @@
       });
 
       $("#add_est_labor_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#add_operation_no").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
@@ -2075,15 +2107,12 @@
         return (str.length != 2)?"0"+str:str;
       }
 
-      function generate_code(length) {
-          var result = '';
-          var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
-          // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          var charactersLength = characters.length;
-          for ( var i = 0; i < length; i++ ) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-         }
-         return result;
+      function generateRandomCode(length) {
+        var result = '';
+        var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'; // remove i l o 0
+        // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for ( var i = 0; i < length; i++ ) result += characters.charAt(Math.floor(Math.random() * characters.length));
+        return result;
       }
     </script>
   </body>

@@ -26,7 +26,7 @@ def transaction(request, orderoprno):
     operation = None
     IsOperating = False
     remainQty = -1
-    state = "ERROR"
+    state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
     operationList = []
     operationStatusList = []
     joinList = []
@@ -36,9 +36,10 @@ def transaction(request, orderoprno):
     rejectReasonList = []
     materialGroupList = []
     purchaseGroupList = []
-    currentOperation = -1 # For Order !Operation
-    operationBefore = -1
-    operationAfter = -1
+    currencyList = []
+    currentOperation = -1
+    operationBefore = -1 #-- For Prev Operation Button
+    operationAfter = -1 #-- For Next Operation Button
     #--
     if orderoprno == "0":
         state = "FIRSTPAGE"
@@ -90,6 +91,7 @@ def transaction(request, orderoprno):
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
+                currencyList = getCurrencyList()
             #-- GET OPERATION WITH REMAINING QTY > 0
             if len(operationList) > 0:
                 currentOperation = operationList[0].OperationNo
@@ -115,6 +117,7 @@ def transaction(request, orderoprno):
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
+        'currencyList' : currencyList,
         'currentOperation' : currentOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -181,16 +184,20 @@ def curr_master(request):
 
 #--------------------------------------------------------------------------- SAP
 
-def sap_order(request):
-    sapOrderList = getSAPOrderList()
+def sap_order(request, fdate, fhour):
+    sapOrderList = getSAPOrderList(fdate, fhour)
     context = {
+        'fdate' : fdate,
+        'fhour' : fhour,
         'sapOrderList' : sapOrderList,
     }
     return render(request, 'sap_order.html', context)
 
-def sap_routing(request):
-    sapRoutingList = getSAPRoutingList()
+def sap_routing(request, fdate, fhour):
+    sapRoutingList = getSAPRoutingList(fdate, fhour)
     context = {
+        'fdate' : fdate,
+        'fhour' : fhour,
         'sapRoutingList' : sapRoutingList,
     }
     return render(request, 'sap_routing.html', context)
@@ -616,14 +623,33 @@ def delete_operation(request):
 
 def validate_new_operation(request):
     order_no = request.GET.get('order_no')
-    current_operation_no = request.GET.get('current_operation_no')
     new_operation_no = request.GET.get('new_operation_no')
-    canAdd = False
-    isExist = isExistOperation(order_no, new_operation_no)
-    if isExist == False:
-        canAdd = True
+    canAdd = True
+    #1
+    if isExistOperation(order_no, new_operation_no):
+        canAdd = False
+    #2
+    operationList = getOperationList(order_no)
+    for i in range(len(operationList)):
+        if operationList[i].ProcessStart != None and new_operation_no < operationList.OpeerationNo:
+            canAdd = False
+            break
+    #3 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     data = {
         'canAdd': canAdd,
+    }
+    return JsonResponse(data)
+
+def validate_routing(request):
+    work_center_no = request.GET.get('work_center_no')
+    canUse = True
+    work_center = getWorkCenter(work_center_no)
+    if work_center == None:
+        canUse = False
+    elif work_center.IsRouting == False:
+        canUse = False
+    data = {
+        'canUse': canUse,
     }
     return JsonResponse(data)
 
@@ -659,15 +685,23 @@ def get_connection():
 
 #-------------------------------------------------------------------------- LIST
 
-def getSAPOrderList():
+def getSAPOrderList(fdate, fhour):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Order] ORDER BY DateGetFromSAP DESC"
+    sql = ""
+    if fhour == "ALL":
+        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+    else:
+        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getSAPRoutingList():
+def getSAPRoutingList(fdate, fhour):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Routing] ORDER BY DateGetFromSAP DESC"
+    sql = ""
+    if fhour == "ALL":
+        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+    else:
+        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -796,10 +830,7 @@ def getOrder(order_no):
     sql += " INNER JOIN [SAP_Order] as SAPORD ON ORD.OrderNo = SAPORD.ProductionOrderNo"
     sql += " WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
@@ -808,37 +839,25 @@ def getOperation(order_no, operation_no):
     sql += " INNER JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getWorkCenter(workcenter_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterNo = '" + str(workcenter_no) + "'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getOperator(operator_id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [Employee] WHERE EmpID = " + str(operator_id)
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getWorkCenterOperatingByWorkCenterNo(workcenter_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingWorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "' AND Status <> 'COMPLETED'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getOperatorOperatingByEmpID(operator_id):
     cursor = get_connection().cursor()
@@ -848,19 +867,13 @@ def getOperatorOperatingByEmpID(operator_id):
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OOPR.EmpID = " + str(operator_id) + " AND OOPR.Status <> 'COMPLETED' AND OOPR.Status <> 'EXT-WORK'"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getWorkCenterOperatingByID(id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = " + str(id)
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getOperatorOperatingByID(id):
     cursor = get_connection().cursor()
@@ -870,19 +883,13 @@ def getOperatorOperatingByID(id):
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OOPR.OperatingOperatorID = " + str(id)
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 def getNextOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo > '" + operation_no + "' ORDER BY OperationNo ASC"
     cursor.execute(sql)
-    result = cursor.fetchall()
-    if(len(result) == 0):
-        return None
-    return result[0]
+    return cursor.fetchone()
 
 #----------------------------------------------------------------------- BOOLEAN
 
