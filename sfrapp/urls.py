@@ -13,6 +13,7 @@ urlpatterns = [
     path('rej_master/', views.rej_master, name='rej_master'),
     path('matg_master/', views.matg_master, name='matg_master'),
     path('purg_master/', views.purg_master, name='purg_master'),
+    path('curr_master/', views.curr_master, name='curr_master'),
     #-- SAP
     path('sap_order/', views.sap_order, name='sap_order'),
     path('sap_routing/', views.sap_routing, name='sap_routing'),

@@ -172,6 +172,13 @@ def purg_master(request):
     }
     return render(request, 'purg_master.html', context)
 
+def curr_master(request):
+    currencyList = getCurrencyList()
+    context = {
+        'currencyList' : currencyList,
+    }
+    return render(request, 'curr_master.html', context)
+
 #--------------------------------------------------------------------------- SAP
 
 def sap_order(request):
@@ -703,6 +710,12 @@ def getMaterialGroupList():
 def getPurchaseGroupList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [PurchaseGroup]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getCurrencyList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [Currency]"
     cursor.execute(sql)
     return cursor.fetchall()
 
