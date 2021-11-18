@@ -20,7 +20,6 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
-    print(len(orderoprno))
     orderNo = ""
     operationNo = ""
     order = None
@@ -126,8 +125,8 @@ def transaction(request, orderoprno):
     return render(request, 'transaction.html', context)
 
 def join_activity(request, orderoprno):
-    orderNo = orderoprno[0:10]
-    operationNo = orderoprno[10:14]
+    orderNo = orderoprno[0:len(orderoprno) - 4]
+    operationNo = orderoprno[len(orderoprno) - 4:len(orderoprno)]
     order = getOrder(orderNo)
     operation = getOperation(orderNo, operationNo)
     joinableList = getJoinableList(orderNo, operation.WorkCenterGroup)
