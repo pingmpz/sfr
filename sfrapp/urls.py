@@ -17,8 +17,8 @@ urlpatterns = [
     #-- SAP
     path('sap_order/<str:fdate>&<str:fhour>', views.sap_order, name='sap_order'),
     path('sap_routing/<str:fdate>&<str:fhour>', views.sap_routing, name='sap_routing'),
-    path('sap_report/', views.sap_report, name='sap_report'),
-    path('sap_mod/', views.sap_mod, name='sap_mod'),
+    path('sap_report/<str:fdate>&<str:fhour>', views.sap_report, name='sap_report'),
+    path('sap_mod/<str:fdate>&<str:fhour>', views.sap_mod, name='sap_mod'),
     path('blank/', views.blank, name='blank'),
     ### REQUEST
     #-- MAIN TABLE

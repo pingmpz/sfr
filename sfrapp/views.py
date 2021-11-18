@@ -202,16 +202,20 @@ def sap_routing(request, fdate, fhour):
     }
     return render(request, 'sap_routing.html', context)
 
-def sap_report(request):
-    sapReportList = getSAPReportList()
+def sap_report(request, fdate, fhour):
+    sapReportList = getSAPReportList(fdate, fhour)
     context = {
+        'fdate' : fdate,
+        'fhour' : fhour,
         'sapReportList' : sapReportList,
     }
     return render(request, 'sap_report.html', context)
 
-def sap_mod(request):
-    sapModifierList = getSAPModifierList()
+def sap_mod(request, fdate, fhour):
+    sapModifierList = getSAPModifierList(fdate, fhour)
     context = {
+        'fdate' : fdate,
+        'fhour' : fhour,
         'sapModifierList' : sapModifierList,
     }
     return render(request, 'sap_mod.html', context)
@@ -705,15 +709,22 @@ def getSAPRoutingList(fdate, fhour):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getSAPReportList():
+def getSAPReportList(fdate, fhour):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SFR2SAP_Report] ORDER BY DateTimeStamp DESC"
+    sql = ""
+    if fhour == "ALLDAY":
+        sql = "SELECT * FROM [SFR2SAP_Report] WHERE DateTimeStamp >= '" + fdate + " 00:00:00' AND DateTimeStamp <= '" + fdate + " 23:59:59' ORDER BY DateTimeStamp DESC"
+    else:
+        sql = "SELECT * FROM [SFR2SAP_Report] WHERE DateTimeStamp >= '" + fdate + " " + fhour + ":00:00' AND DateTimeStamp <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateTimeStamp DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getSAPModifierList():
+def getSAPModifierList(fdate, fhour):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SFR2SAP_Modifier] ORDER BY DateTimeStamp DESC"
+    if fhour == "ALLDAY":
+        sql = "SELECT * FROM [SFR2SAP_Modifier] WHERE DateTimeStamp >= '" + fdate + " 00:00:00' AND DateTimeStamp <= '" + fdate + " 23:59:59' ORDER BY DateTimeStamp DESC"
+    else:
+        sql = "SELECT * FROM [SFR2SAP_Modifier] WHERE DateTimeStamp >= '" + fdate + " " + fhour + ":00:00' AND DateTimeStamp <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateTimeStamp DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
