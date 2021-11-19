@@ -62,6 +62,7 @@
                           <tr>
                             <th>ID</th>
                             <th>Name</th>
+                            <th>Default</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -69,6 +70,7 @@
                           <tr>
                             <td>{{purchaseGroup.ID}}</td>
                             <td>{{purchaseGroup.Name}}</td>
+                            <td>{% if purchaseGroup.IsDefault %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
                           </tr>
                           {% endfor %}
                         </tbody>

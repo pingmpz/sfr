@@ -61,12 +61,14 @@
                         <thead>
                           <tr>
                             <th>Currency Name</th>
+                            <th>Default</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for currency in currencyList %}
                           <tr>
                             <td>{{currency.Name}}</td>
+                            <td>{% if currency.IsDefault %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
                           </tr>
                           {% endfor %}
                         </tbody>

@@ -44,6 +44,7 @@ urlpatterns = [
     path('delete_operation/', views.delete_operation, name='delete_operation'),
     path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
     path('validate_routing/', views.validate_routing, name='validate_routing'),
+    path('add_operation/', views.add_operation, name='add_operation'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

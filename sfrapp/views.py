@@ -673,6 +673,30 @@ def validate_routing(request):
     }
     return JsonResponse(data)
 
+def add_operation(request):
+    order_no = request.GET.get('order_no')
+    new_operation_no = request.GET.get('new_operation_no')
+    work_center_no = request.GET.get('work_center_no')
+    control_key = request.GET.get('control_key')
+    est_setup_time = request.GET.get('est_setup_time')
+    est_operate_time = request.GET.get('est_operate_time')
+    est_labor_time = request.GET.get('est_labor_time')
+    pdt = request.GET.get('pdt')
+    purchasing_org = request.GET.get('purchasing_org')
+    cost_element = request.GET.get('cost_element')
+    mat_group = request.GET.get('mat_group')
+    purchasing_group = request.GET.get('purchasing_group')
+    price_unit = request.GET.get('price_unit')
+    price = request.GET.get('price')
+    currency = request.GET.get('currency')
+    #-- SAP : ADD OPERATION
+    insertSFR2SAP_Modifier_Add(order_no, new_operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
+    #-- HISTORY : ADD OPERATION
+    #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
+    data = {
+    }
+    return JsonResponse(data)
+
 def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()
@@ -1113,6 +1137,47 @@ def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
     sql += " VALUES (CURRENT_TIMESTAMP,'31',"
     sql += "'" + str(order_no) + "',"
     sql += "'" + str(operation_no) + "')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
+    conn = get_connection()
+    cursor = conn.cursor()
+    mode = ""
+    sql = ""
+    if control_key == "PP01":
+        mode = "11"
+        sql = "INSERT INTO [SFR2SAP_Modifier]"
+        sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
+        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += "'" + str(mode) + "',"
+        sql += "'" + str(order_no) + "',"
+        sql += "'" + str(operation_no) + "',"
+        sql += "'" + str(control_key) + "',"
+        sql += "'" + str(work_center_no) + "',"
+        sql += "" + str(est_setup_time) + ","
+        sql += "" + str(est_operate_time) + ","
+        sql += "" + str(est_labor_time) + ")"
+    elif control_key == "PP02":
+        mode = "12"
+        sql = "INSERT INTO [SFR2SAP_Modifier]"
+        sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[PlannedDeliveryTime],[CostElement],[PriceUnit],[Price],[Currency],[MaterialGroup],[PurchasingGroup],[PurchasingOrg])"
+        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += "'" + str(mode) + "',"
+        sql += "'" + str(order_no) + "',"
+        sql += "'" + str(operation_no) + "',"
+        sql += "'" + str(control_key) + "',"
+        sql += "'" + str(work_center_no) + "',"
+        sql += "" + str(pdt) + ","
+        sql += "'" + str(cost_element) + "',"
+        sql += "" + str(price_unit) + ","
+        sql += "" + str(price) + ","
+        sql += "'" + str(currency) + "',"
+        sql += "'" + str(mat_group) + "',"
+        sql += "'" + str(purchasing_group) + "',"
+        sql += "'" + str(purchasing_org) + "')"
+    print(sql)
     cursor.execute(sql)
     conn.commit()
     return

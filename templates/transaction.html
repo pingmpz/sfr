@@ -51,6 +51,7 @@
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            <input type="password" hidden> <!-- Prevent Auto fill Password -->
             <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button>
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
@@ -192,13 +193,13 @@
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_set_time" value="{{operation.EstimateSetTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstimateSetTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_operation_time" value="{{operation.EstimateOoperationTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstimateOoperationTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
@@ -634,8 +635,8 @@
                 <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
                 <div class="col-md-8">
                   <select class="form-control form-control-sm" id="add_control_key">
-                    <option value="PP01" selected>PP01 (Internal Process)</option>
-                    <option value="PP02">PP02 (External Process)</option>
+                    <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
+                    <option value="PP02">Routing/Ref. op. set - external proc.</option>
                   </select>
                 </div>
               </div>
@@ -643,19 +644,19 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_set_time" autocomplete="off" value="0">
+                    <input class="form-control form-control-sm" type="number" id="add_est_setup_time" autocomplete="off">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_operation_time" autocomplete="off" value="0">
+                    <input class="form-control form-control-sm" type="number" id="add_est_operate_time" autocomplete="off">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off" value="0">
+                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off">
                   </div>
                 </div>
               </div>
@@ -669,7 +670,7 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_purchasing_org" autocomplete="off" value="3000" readonly>
+                    <input class="form-control form-control-sm" type="text" id="add_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -693,20 +694,26 @@
                   <div class="col-md-8">
                     <select class="form-control form-control-sm" id="add_purchasing_group">
                       {% for purchaseGroup in purchaseGroupList %}
-                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.ID.strip == '345' %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
+                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
                       {% endfor %}
                     </select>
                   </div>
                 </div>
                 <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="add_price_unit" autocomplete="off">
+                  </div>
+                </div>
+                <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
                   <div class="col-md-5">
-                    <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off">
                   </div>
                   <div class="col-md-3">
                     <select class="form-control form-control-sm" id="add_currency">
                       {% for currency in currencyList %}
-                      <option value="{{currency.Name}}" {% if currency.Name.strip == 'THB' %}selected{% endif %}>{{currency.Name}}</option>
+                      <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -760,13 +767,13 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_set_time" autocomplete="off" value="{{operation.EstimateSetTime}}">
+                    <input class="form-control form-control-sm" type="number" id="change_est_setup_time" autocomplete="off" value="{{operation.EstimateSetTime}}">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_operation_time" autocomplete="off" value="{{operation.EstimateOoperationTime}}">
+                    <input class="form-control form-control-sm" type="number" id="change_est_operate_time" autocomplete="off" value="{{operation.EstimateOoperationTime}}">
                   </div>
                 </div>
                 <div class="form-group row">
@@ -1755,38 +1762,100 @@
       //-- ADD OPERATION
       function add(){
         $('#add_confirm_button').prop('disabled', true);
-        var operation_no_temp = $("#add_new_operation_no").val();
-        if(operation_no_temp.length < 4) for(var i = operation_no_temp.length;i < 4;i++) operation_no_temp = "0" + operation_no_temp;
-        $("#add_new_operation_no").val(operation_no_temp);
+        // a
+        $("#add_new_operation_no").val(frontZero($("#add_new_operation_no").val(), 4));
+        if($('#add_est_setup_time').val() == "") $('#add_est_setup_time').val("0");
+        if($('#add_est_operate_time').val() == "") $('#add_est_operate_time').val("0");
+        if($('#add_est_labor_time').val() == "") $('#add_est_labor_time').val("0");
+        if($('#add_price_unit').val() == "") $('#add_price_unit').val("0");
+        if($('#add_price').val() == "") $('#add_price').val("0");
+        $('#add_price').val(roundToTwo($('#add_price').val()));
+        // b
         var order_no = $("#order_no").val();
         var new_operation_no = $("#add_new_operation_no").val();
         var work_center_no = $("#add_work_center_no").val();
         var control_key = $("#add_control_key").val();
-        remove_valid_many(["add_new_operation_no","add_work_center_no"]);
+        var est_setup_time = parseFloat($('#add_est_setup_time').val());
+        var est_operate_time = parseFloat($('#add_est_operate_time').val());
+        var est_labor_time = parseFloat($('#add_est_labor_time').val());
+        var pdt = $("#add_pdt").val();
+        var purchasing_org = $("#add_purchasing_org").val();
+        var cost_element = $("#add_cost_element").val();
+        var mat_group = $("#add_mat_group").val();
+        var purchasing_group = $("#add_purchasing_group").val();
+        var price_unit = parseFloat($('#add_price_unit').val());
+        var price = parseFloat($('#add_price').val());
+        var currency = $('#add_currency').val();
+        var isAddable = false;
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_price_unit","add_price"]);
+        // c
         validate_new_operation(new_operation_no, function(canAdd) {
-          if(canAdd){
+          if(!canAdd) {
+            invalid("add_new_operation_no");
+            $('#add_confirm_button').prop('disabled', false);
+          } else {
             valid("add_new_operation_no");
             validate_routing(work_center_no, function(canUse) {
-              if(canUse){
+              if(!canUse) {
+                invalid("add_work_center_no");
+                $('#add_confirm_button').prop('disabled', false);
+              } else {
                 valid("add_work_center_no");
                 if(control_key == "PP01"){
-
-                } else {
-
+                  isAddable = true;
+                } else if(control_key == "PP02"){
+                  if(price_unit <= 0 || $('#add_price_unit').val().length > 6) invalid("add_price_unit");
+                  else {
+                    valid("add_price_unit");
+                    if(price <= 0 || $('#add_price').val().split(".")[0].length > 9) invalid("add_price");
+                    else {
+                      valid("add_price");
+                      isAddable = true;
+                    }
+                  }
                 }
-              } else {
-                invalid("add_work_center_no");
+                if(isAddable){
+                  $.ajax({
+                    url: '/add_operation/',
+                    data: {
+                      'order_no': order_no,
+                      'new_operation_no': new_operation_no,
+                      'work_center_no': work_center_no,
+                      'control_key': control_key,
+                      'est_setup_time': est_setup_time,
+                      'est_operate_time': est_operate_time,
+                      'est_labor_time': est_labor_time,
+                      'pdt': pdt,
+                      'purchasing_org': purchasing_org,
+                      'cost_element': cost_element,
+                      'mat_group': mat_group,
+                      'purchasing_group': purchasing_group,
+                      'price_unit': price_unit,
+                      'price': price,
+                      'currency': currency,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                      location.reload();
+                    }
+                  });
+                } else {
+                  $('#add_confirm_button').prop('disabled', false);
+                }
               }
             });
-          } else {
-            invalid("add_new_operation_no");
           }
         });
-        $('#add_confirm_button').prop('disabled', false);
       }
 
       function prepare_add(){
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_price_unit","add_price"]);
         $("#add_new_operation_no").val("");
+        $("#add_est_setup_time").val("");
+        $("#add_est_operate_time").val("");
+        $("#add_est_labor_time").val("");
+        $("#add_price_unit").val("");
+        $("#add_price").val("");
         $("#add_new_operation_no").focus();
       }
 
@@ -1990,12 +2059,12 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#add_est_set_time").on("keypress keyup blur",function (event) {
+      $("#add_est_setup_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#add_est_operation_time").on("keypress keyup blur",function (event) {
+      $("#add_est_operate_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
@@ -2010,12 +2079,17 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#change_est_set_time").on("keypress keyup blur",function (event) {
+      $("#add_price_unit").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#change_est_operation_time").on("keypress keyup blur",function (event) {
+      $("#change_est_setup_time").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#change_est_operate_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
@@ -2115,6 +2189,10 @@
         // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for ( var i = 0; i < length; i++ ) result += characters.charAt(Math.floor(Math.random() * characters.length));
         return result;
+      }
+
+      function roundToTwo(num) {
+        return +(Math.round(num + "e+2")  + "e-2");
       }
     </script>
   </body>

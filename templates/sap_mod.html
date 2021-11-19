@@ -94,14 +94,15 @@
                           <a class="toggle-vis small text-primary" data-column="5">WorkCenter</a> |
                           <a class="toggle-vis small text-primary" data-column="6">PlannedDeliveryTime</a> |
                           <a class="toggle-vis small text-primary" data-column="7">CostElement</a> |
-                          <a class="toggle-vis small text-primary" data-column="8">Price</a> |
-                          <a class="toggle-vis small text-primary" data-column="9">Currency</a> |
-                          <a class="toggle-vis small text-primary" data-column="10">MaterialGroup</a> |
-                          <a class="toggle-vis small text-primary" data-column="11">PurchasingGroup</a> |
-                          <a class="toggle-vis small text-primary" data-column="12">PurchasingOrg</a> |
-                          <a class="toggle-vis small text-primary" data-column="13">SetupTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="14">OperTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="15">LaborTime</a>
+                          <a class="toggle-vis small text-primary" data-column="8">Price Unit</a> |
+                          <a class="toggle-vis small text-primary" data-column="9">Price</a> |
+                          <a class="toggle-vis small text-primary" data-column="10">Currency</a> |
+                          <a class="toggle-vis small text-primary" data-column="11">MaterialGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="12">PurchasingGroup</a> |
+                          <a class="toggle-vis small text-primary" data-column="13">PurchasingOrg</a> |
+                          <a class="toggle-vis small text-primary" data-column="14">SetupTime</a> |
+                          <a class="toggle-vis small text-primary" data-column="15">OperTime</a> |
+                          <a class="toggle-vis small text-primary" data-column="16">LaborTime</a>
                       </div>
                       <br>
                       <table class="table table-sm table-striped small" id="sap_mod_table" style="width: 100%">
@@ -126,6 +127,7 @@
                             <th>WorkCenter</th>
                             <th>PlannedDeliveryTime</th>
                             <th>CostElement</th>
+                            <th>PriceUnit</th>
                             <th>Price</th>
                             <th>Currency</th>
                             <th>MaterialGroup</th>
@@ -147,6 +149,7 @@
                             <td>{{mod.WorkCenter|default_if_none:""}}</td>
                             <td>{{mod.PlannedDeliveryTime|default_if_none:""}}</td>
                             <td>{{mod.CostElement|default_if_none:""}}</td>
+                            <td>{{mod.PriceUnit|default_if_none:""}}</td>
                             <td>{{mod.Price|default_if_none:""}}</td>
                             <td>{{mod.Currency|default_if_none:""}}</td>
                             <td>{{mod.MaterialGroup|default_if_none:""}}</td>
