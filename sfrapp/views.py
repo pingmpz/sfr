@@ -185,6 +185,10 @@ def curr_master(request):
 #--------------------------------------------------------------------------- SAP
 
 def sap_order(request, fdate, fhour):
+    if fdate == "TODAY":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fhour == "NOW":
+        fhour = datetime.today().strftime('%H')
     sapOrderList = getSAPOrderList(fdate, fhour)
     context = {
         'fdate' : fdate,
@@ -194,6 +198,10 @@ def sap_order(request, fdate, fhour):
     return render(request, 'sap_order.html', context)
 
 def sap_routing(request, fdate, fhour):
+    if fdate == "TODAY":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fhour == "NOW":
+        fhour = datetime.today().strftime('%H')
     sapRoutingList = getSAPRoutingList(fdate, fhour)
     context = {
         'fdate' : fdate,
@@ -203,6 +211,10 @@ def sap_routing(request, fdate, fhour):
     return render(request, 'sap_routing.html', context)
 
 def sap_report(request, fdate, fhour):
+    if fdate == "TODAY":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fhour == "NOW":
+        fhour = datetime.today().strftime('%H')
     sapReportList = getSAPReportList(fdate, fhour)
     context = {
         'fdate' : fdate,
@@ -212,6 +224,10 @@ def sap_report(request, fdate, fhour):
     return render(request, 'sap_report.html', context)
 
 def sap_mod(request, fdate, fhour):
+    if fdate == "TODAY":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fhour == "NOW":
+        fhour = datetime.today().strftime('%H')
     sapModifierList = getSAPModifierList(fdate, fhour)
     context = {
         'fdate' : fdate,
@@ -635,7 +651,7 @@ def validate_new_operation(request):
     #2
     operationList = getOperationList(order_no)
     for i in range(len(operationList)):
-        if operationList[i].ProcessStart != None and new_operation_no < operationList.OpeerationNo:
+        if operationList[i].ProcessStart != None and new_operation_no < operationList[i].OperationNo:
             canAdd = False
             break
     #3 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

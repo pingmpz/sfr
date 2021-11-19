@@ -1241,6 +1241,8 @@
     <script src="{% static "js/popovers.js" %}"></script>
     <!-- Custom JS -->
     <script src="{% static "customize/js/clock.js" %}"></script>
+
+    <!-- MAIN -->
     <script>
       document.addEventListener("DOMContentLoaded", function(event) {
         setTimeout(function() {
@@ -1270,7 +1272,20 @@
         dynamic_join();
       });
 
-      //-- MAIN SCRIPT
+      function reset_all(){
+        $.ajax({
+          url: '/reset_all/',
+          data: {
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+    </script>
+    <!-- MAIN TABLE -->
+    <script>
       $("#workcenter_no").on("change keyup", function() {
         var work_center_group = $('#work_center_group').val();
         $('#workcenter_name').val('');
@@ -1734,21 +1749,9 @@
           // REPORT !!
         }
       }
-
-      function reset_all(){
-        $.ajax({
-          url: '/reset_all/',
-          data: {
-          },
-          dataType: 'json',
-          success: function (data) {
-            location.reload();
-          }
-        });
-      }
-
-      //---------------------------------------------------------------------------------------------------- MODIFIER
-
+    </script>
+    <!-- MODIFIER -->
+    <script>
       //-- ADD OPERATION
       function add(){
         $('#add_confirm_button').prop('disabled', true);
@@ -1764,7 +1767,7 @@
           if(canAdd){
             valid("add_new_operation_no");
             validate_routing(work_center_no, function(canUse) {
-              if(canAdd){
+              if(canUse){
                 valid("add_work_center_no");
                 if(control_key == "PP01"){
 
@@ -1825,48 +1828,42 @@
         $("#del_code").val("");
         $("#del_code").focus();
       }
-
-      //----------------------------------------------------------------------------------------------------
-
+    </script>
+    <!-- VALIDATION AND SHORTCUT SEARCH -->
+    <script>
       //-- VALIDATION
       function validate_new_operation(new_operation_no, _callback){
         var order_no = $("#order_no").val();
-        $.ajax({
-          url: '/validate_new_operation/',
-          data: {
-            'order_no': order_no,
-            'current_operation_no': current_operation_no,
-          },
-          dataType: 'json',
-          success: function (data) {
-            if (data.canAdd) {
-              _callback(true);
-              return;
-            } else {
-              _callback(false);
-              return;
+        if(new_operation_no == "0000") _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_new_operation/',
+            data: {
+              'order_no': order_no,
+              'new_operation_no': new_operation_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.canAdd)? _callback(true):_callback(false);
             }
-          }
-        });
+          });
+        }
       }
 
       function validate_routing(work_center_no, _callback){
-        $.ajax({
-          url: '/validate_routing/',
-          data: {
-            'work_center_no': work_center_no,
-          },
-          dataType: 'json',
-          success: function (data) {
-            if (data.canUse) {
-              _callback(true);
-              return;
-            } else {
-              _callback(false);
-              return;
+        if(work_center_no.length > 3) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_routing/',
+            data: {
+              'work_center_no': work_center_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.canUse)? _callback(true):_callback(false);
             }
-          }
-        });
+          });
+        }
       }
 
       //-- SHORTCUT SEARCH
@@ -1884,7 +1881,7 @@
 
       function shortcut_search(){
           var order_no =  $("#sc_order_no").val();
-          var operation_no =  $("#sc_operation_no").val();
+          var operation_no =  frontZero($("#sc_operation_no").val(), 4);
           (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
           (operation_no.length < 4)? invalid("sc_operation_no"): valid("sc_operation_no");
           if(order_no.length >= 6 && operation_no.length == 4){
@@ -1911,8 +1908,9 @@
         $("#"+input_id).addClass("is-invalid");
         $("#"+input_id).removeClass("is-valid");
       }
-
-      //-- DYNAMIC INPUT
+    </script>
+    <!-- DYNAMIC INPUT -->
+    <script>
       $(document).on('change', 'input[type=radio][name=workcenter_radio]', function (event) {
           dynamic_operator_setup();
       });
@@ -1984,8 +1982,9 @@
         ($('#change_control_key').val() == "PP01")? $("#change_pp01").prop("hidden", false): $("#change_pp01").prop("hidden", true);
         ($('#change_control_key').val() == "PP01")? $("#change_pp02").prop("hidden", true): $("#change_pp02").prop("hidden", false);
       });
-
-      //-- KET RESTRICT
+    </script>
+    <!-- KET RESTRICT -->
+    <script>
       $("#add_new_operation_no").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -2085,8 +2084,9 @@
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
-
-      //-- ETC
+    </script>
+    <!-- ETC -->
+    <script>
       function capitalizeFirstLetter(str) {
          return str.charAt(0).toUpperCase() + str.slice(1);
       }
@@ -2094,17 +2094,19 @@
       function getFullDateTime(str) {
          var result = "";
          var year = new Date(str).getFullYear();
-         var month = frontZero((new Date(str).getMonth() + 1).toString());
-         var date = frontZero(new Date(str).getDate().toString());
-         var hour = frontZero(new Date(str).getHours().toString());
-         var minute = frontZero(new Date(str).getMinutes().toString());
-         var second = frontZero(new Date(str).getSeconds().toString());
+         var month = frontZero((new Date(str).getMonth() + 1).toString(), 2);
+         var date = frontZero(new Date(str).getDate().toString(), 2);
+         var hour = frontZero(new Date(str).getHours().toString(), 2);
+         var minute = frontZero(new Date(str).getMinutes().toString(), 2);
+         var second = frontZero(new Date(str).getSeconds().toString(), 2);
          result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
          return result
       }
 
-      function frontZero(str){
-        return (str.length != 2)?"0"+str:str;
+      function frontZero(str, len){
+        var result = str;
+        for(var i = str.length;i < len;i++) result = "0" + result;
+        return result;
       }
 
       function generateRandomCode(length) {
