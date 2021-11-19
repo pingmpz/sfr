@@ -1933,7 +1933,7 @@
       }
 
       function validate_routing(work_center_no, _callback){
-        if(work_center_no.length > 3) _callback(false);
+        if(work_center_no.length < 3) _callback(false);
         else {
           $.ajax({
             url: '/validate_routing/',
