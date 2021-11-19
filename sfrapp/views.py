@@ -57,6 +57,7 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
+                print(operation)
                 IsOperating = isOperatingOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 for i in range(len(operationList)):
@@ -675,7 +676,7 @@ def validate_routing(request):
 
 def add_operation(request):
     order_no = request.GET.get('order_no')
-    new_operation_no = request.GET.get('new_operation_no')
+    operation_no = request.GET.get('new_operation_no')
     work_center_no = request.GET.get('work_center_no')
     control_key = request.GET.get('control_key')
     est_setup_time = request.GET.get('est_setup_time')
@@ -689,10 +690,16 @@ def add_operation(request):
     price_unit = request.GET.get('price_unit')
     price = request.GET.get('price')
     currency = request.GET.get('currency')
+    #-- ADD OPERATION CONTROL
+    insertOperationControl(order_no, operation_no, work_center_no)
     #-- SAP : ADD OPERATION
-    insertSFR2SAP_Modifier_Add(order_no, new_operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
-    #-- HISTORY : ADD OPERATION
+    insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
+    #-- HISTORY : ADD OPERATION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
+    nextOperation = getNextOperation(order_no, operation_no)
+    if nextOperation != None:
+        updateOperationControl(order_no, operation_no, nextOperation.ProcessQty, 0, "PROCESSQTY")
+        updateOperationControl(order_no,nextOperation.OperationNo, (nextOperation.ProcessQty * -1), 0, "PROCESSQTY")
     data = {
     }
     return JsonResponse(data)
@@ -886,8 +893,8 @@ def getOrder(order_no):
 def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] as OPT"
-    sql += " INNER JOIN [SAP_Routing] as SAPRT ON OPT.OperationNo = SAPRT.OperationNumber"
     sql += " INNER JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [SAP_Routing] as SAPRT ON OPT.OrderNo = SAPRT.ProductionOrderNo AND OPT.OperationNo = SAPRT.OperationNumber"
     sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return cursor.fetchone()
@@ -1177,7 +1184,15 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
         sql += "'" + str(mat_group) + "',"
         sql += "'" + str(purchasing_group) + "',"
         sql += "'" + str(purchasing_org) + "')"
-    print(sql)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertOperationControl(order_no, operation_no, work_center_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty])"
+    sql += " VALUES ('" + order_no + "', '" + operation_no + "', '" + work_center_no + "', 0, 0, 0)"
     cursor.execute(sql)
     conn.commit()
     return

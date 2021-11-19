@@ -169,7 +169,7 @@
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenter}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
@@ -1787,7 +1787,7 @@
         var price = parseFloat($('#add_price').val());
         var currency = $('#add_currency').val();
         var isAddable = false;
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_price_unit","add_price"]);
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
         // c
         validate_new_operation(new_operation_no, function(canAdd) {
           if(!canAdd) {
@@ -1802,7 +1802,19 @@
               } else {
                 valid("add_work_center_no");
                 if(control_key == "PP01"){
-                  isAddable = true;
+                  if($('#add_est_setup_time').val().split(".")[0].length > 6) invalid("add_est_setup_time");
+                  else {
+                    valid("add_est_setup_time");
+                    if($('#add_est_operate_time').val().split(".")[0].length > 6) invalid("add_est_operate_time");
+                    else {
+                      valid("add_est_operate_time");
+                      if($('#add_est_labor_time').val().split(".")[0].length > 6) invalid("add_est_labor_time");
+                      else {
+                        valid("add_est_labor_time");
+                        isAddable = true;
+                      }
+                    }
+                  }
                 } else if(control_key == "PP02"){
                   if(price_unit <= 0 || $('#add_price_unit').val().length > 6) invalid("add_price_unit");
                   else {
@@ -1849,8 +1861,9 @@
       }
 
       function prepare_add(){
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_price_unit","add_price"]);
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
         $("#add_new_operation_no").val("");
+        $("#add_work_center_no").val("");
         $("#add_est_setup_time").val("");
         $("#add_est_operate_time").val("");
         $("#add_est_labor_time").val("");
