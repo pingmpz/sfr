@@ -399,7 +399,7 @@
                         <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon c-icon-xs cil-plus"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button" disabled><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button" onclick="prepare_change()"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
                         <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="prepare_delete()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
@@ -737,29 +737,17 @@
             <div class="modal-body">
               <br><h3 class="text-center">Are you sure to change this operation ?</h3><br>
               <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_emp_id" autocomplete="off" value="">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Change Reason</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_reason" autocomplete="off" value="">
-                </div>
-              </div>
-              <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_work_center" autocomplete="off" value="{{operation.WorkCenter}}">
+                  <input class="form-control form-control-sm" type="text" id="change_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
                 <div class="col-md-8">
                   <select class="form-control form-control-sm" id="change_control_key">
-                    <option value="PP01" selected>PP01 (Internal Process)</option>
-                    <option value="PP02">PP02 (External Process)</option>
+                    <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
+                    <option value="PP02">Routing/Ref. op. set - external proc.</option>
                   </select>
                 </div>
               </div>
@@ -767,19 +755,19 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_setup_time" autocomplete="off" value="{{operation.EstimateSetTime}}">
+                    <input class="form-control form-control-sm" type="number" id="change_est_setup_time" autocomplete="off">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_operate_time" autocomplete="off" value="{{operation.EstimateOoperationTime}}">
+                    <input class="form-control form-control-sm" type="number" id="change_est_operate_time" autocomplete="off">
                   </div>
                 </div>
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off" value="{{operation.EstimateLaborTime}}">
+                    <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off">
                   </div>
                 </div>
               </div>
@@ -793,7 +781,7 @@
                 <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
                   <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_purchasing_org" autocomplete="off" value="3000" readonly>
+                    <input class="form-control form-control-sm" type="text" id="change_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -817,20 +805,27 @@
                   <div class="col-md-8">
                     <select class="form-control form-control-sm" id="change_purchasing_group">
                       {% for purchaseGroup in purchaseGroupList %}
-                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.ID.strip == '345' %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
+                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
                       {% endfor %}
                     </select>
                   </div>
                 </div>
                 <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
+                  <div class="col-md-8">
+                    <input class="form-control form-control-sm" type="number" id="change_price_unit" autocomplete="off">
+                  </div>
+                </div>
+                <div class="form-group row">
                   <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
                   <div class="col-md-5">
-                    <input class="form-control form-control-sm" type="number" id="change_price" autocomplete="off" value="">
+                    <input class="form-control form-control-sm" type="number" id="change_price" autocomplete="off">
                   </div>
                   <div class="col-md-3">
                     <select class="form-control form-control-sm" id="change_currency">
-                      <option value="THB" selected>THB</option>
-                      <option value="USD">USD</option>
+                      {% for currency in currencyList %}
+                      <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
+                      {% endfor %}
                     </select>
                   </div>
                 </div>
@@ -1851,7 +1846,7 @@
                     },
                     dataType: 'json',
                     success: function (data) {
-                      location.reload();
+                      window.location.href = "/transaction/" + order_no + new_operation_no;
                     }
                   });
                 } else {
@@ -1861,18 +1856,6 @@
             });
           }
         });
-      }
-
-      function prepare_add(){
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
-        $("#add_new_operation_no").val("");
-        $("#add_work_center_no").val("");
-        $("#add_est_setup_time").val("");
-        $("#add_est_operate_time").val("");
-        $("#add_est_labor_time").val("");
-        $("#add_price_unit").val("");
-        $("#add_price").val("");
-        $("#add_new_operation_no").focus();
       }
 
       //-- CHANGE OPERATION
@@ -1907,11 +1890,37 @@
         }
       }
 
+      function prepare_add(){
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        $("#add_new_operation_no").val("");
+        $("#add_work_center_no").val("");
+        $("#add_est_setup_time").val("");
+        $("#add_est_operate_time").val("");
+        $("#add_est_labor_time").val("");
+        $("#add_price_unit").val("");
+        $("#add_price").val("");
+        $("#add_new_operation_no").focus();
+        timeleft = 300;
+      }
+
+      function prepare_change(){
+        remove_valid_many(["change_new_operation_no","change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        $("#change_work_center_no").val($("#work_center").val());
+        $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
+        $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
+        $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
+        $("#change_price_unit").val("");
+        $("#change_price").val("");
+        $("#change_work_center_no").focus();
+        timeleft = 300;
+      }
+
       function prepare_delete(){
         $("#del_text").text(generateRandomCode(4));
         remove_valid("del_code");
         $("#del_code").val("");
         $("#del_code").focus();
+        timeleft = 300;
       }
     </script>
     <!-- VALIDATION AND SHORTCUT SEARCH -->
