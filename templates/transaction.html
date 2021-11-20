@@ -1757,7 +1757,6 @@
     </script>
     <!-- MODIFIER -->
     <script>
-      //-- ADD OPERATION
       function add(){
         $('#add_confirm_button').prop('disabled', true);
         // a
@@ -1858,13 +1857,97 @@
         });
       }
 
-      //-- CHANGE OPERATION
       function change(){
         $('#change_confirm_button').prop('disabled', true);
-        $('#change_confirm_button').prop('disabled', false);
+        // a
+        if($('#change_est_setup_time').val() == "") $('#change_est_setup_time').val("0");
+        if($('#change_est_operate_time').val() == "") $('#change_est_operate_time').val("0");
+        if($('#change_est_labor_time').val() == "") $('#change_est_labor_time').val("0");
+        if($('#change_price_unit').val() == "") $('#change_price_unit').val("0");
+        if($('#change_price').val() == "") $('#change_price').val("0");
+        $('#change_price').val(roundToTwo($('#change_price').val()));
+        // b
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        var work_center_no = $("#change_work_center_no").val();
+        var control_key = $("#change_control_key").val();
+        var est_setup_time = parseFloat($('#change_est_setup_time').val());
+        var est_operate_time = parseFloat($('#change_est_operate_time').val());
+        var est_labor_time = parseFloat($('#change_est_labor_time').val());
+        var pdt = $("#change_pdt").val();
+        var purchasing_org = $("#change_purchasing_org").val();
+        var cost_element = $("#change_cost_element").val();
+        var mat_group = $("#change_mat_group").val();
+        var purchasing_group = $("#change_purchasing_group").val();
+        var price_unit = parseFloat($('#change_price_unit').val());
+        var price = parseFloat($('#change_price').val());
+        var currency = $('#change_currency').val();
+        var isChangable = false;
+        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        // c
+        validate_routing(work_center_no, function(canUse) {
+          if(!canUse) {
+            invalid("change_work_center_no");
+            $('#change_confirm_button').prop('disabled', false);
+          } else {
+            valid("change_work_center_no");
+            if(control_key == "PP01"){
+              if($('#change_est_setup_time').val().split(".")[0].length > 6) invalid("change_est_setup_time");
+              else {
+                valid("change_est_setup_time");
+                if($('#change_est_operate_time').val().split(".")[0].length > 6) invalid("change_est_operate_time");
+                else {
+                  valid("change_est_operate_time");
+                  if($('#change_est_labor_time').val().split(".")[0].length > 6) invalid("change_est_labor_time");
+                  else {
+                    valid("change_est_labor_time");
+                    isChangable = true;
+                  }
+                }
+              }
+            } else if(control_key == "PP02"){
+              if(price_unit <= 0 || $('#change_price_unit').val().length > 6) invalid("change_price_unit");
+              else {
+                valid("change_price_unit");
+                if(price <= 0 || $('#change_price').val().split(".")[0].length > 9) invalid("change_price");
+                else {
+                  valid("change_price");
+                  isChangable = true;
+                }
+              }
+            }
+            if(isChangable){
+              $.ajax({
+                url: '/change_operation/',
+                data: {
+                  'order_no': order_no,
+                  'operation_no': operation_no,
+                  'work_center_no': work_center_no,
+                  'control_key': control_key,
+                  'est_setup_time': est_setup_time,
+                  'est_operate_time': est_operate_time,
+                  'est_labor_time': est_labor_time,
+                  'pdt': pdt,
+                  'purchasing_org': purchasing_org,
+                  'cost_element': cost_element,
+                  'mat_group': mat_group,
+                  'purchasing_group': purchasing_group,
+                  'price_unit': price_unit,
+                  'price': price,
+                  'currency': currency,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            } else {
+              $('#change_confirm_button').prop('disabled', false);
+            }
+          }
+        });
       }
 
-      //-- DELETE OPERATION
       function trash(){
         remove_valid("del_code");
         var del_text = $("#del_text").text();
@@ -1904,11 +1987,15 @@
       }
 
       function prepare_change(){
-        remove_valid_many(["change_new_operation_no","change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
-        $("#change_work_center_no").val($("#work_center").val());
-        $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
-        $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
-        $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
+        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        // $("#change_work_center_no").val($("#work_center").val());
+        // $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
+        // $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
+        // $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
+        $("#change_work_center_no").val("");
+        $("#change_est_setup_time").val("");
+        $("#change_est_operate_time").val("");
+        $("#change_est_labor_time").val("");
         $("#change_price_unit").val("");
         $("#change_price").val("");
         $("#change_work_center_no").focus();
@@ -1945,7 +2032,7 @@
       }
 
       function validate_routing(work_center_no, _callback){
-        if(work_center_no.length < 3) _callback(false);
+        if(work_center_no.length < 2) _callback(false);
         else {
           $.ajax({
             url: '/validate_routing/',
