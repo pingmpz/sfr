@@ -1205,12 +1205,15 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Reason</strong></label>
+                      <label class="col-md-4 col-form-label text-right">
+                        <strong>Reason</strong>
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>MATERIAL DEFECT</u><br> - Reject Qty will not send to SAP.">!</a>
+                      </label>
                       <div class="col-md-8">
                         <select class="form-control" id="mp_reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
+                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}} {% if rejectReason.Name.strip == 'MATERIAL DEFECT' %}*{% endif %}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -1667,6 +1670,12 @@
     <!-- CONFIRM & MANUAL REPORT -->
     <script>
       function prepare_confirm(id){
+        remove_valid_many(["good_qty","reject_qty","reject_reason","other_reason"]);
+        $('#good_qty').val("");
+        $('#reject_qty').val("");
+        $('#reject_reason').val(-1);
+        $('#other_reason').val("");
+        $('#confirm_id').val(id);
         $('#confirm_button').prop('disabled', true);
         $.ajax({
           url: '/get_data_for_confirm/',
@@ -1675,7 +1684,6 @@
           },
           dataType: 'json',
           success: function (data) {
-            $('#confirm_id').val(id);
             $('#confirm_operator').val(data.operator_text);
             $('#confirm_workcenter').val(data.workcenter_text);
             $('#confirm_start_time').val(data.start_time);
@@ -1715,12 +1723,44 @@
         var reject_qty = parseFloat($('#reject_qty').val());
         var reject_reason = $('#reject_reason').val();
         var other_reason = $('#other_reason').val();
-        if(good_qty <= 0 && reject_qty <= 0) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0.");
-        else if(remain_qty < good_qty + reject_qty) $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
-        else if(reject_qty > 0 && reject_reason == -1) $("#confirm_invalid_text").text("Please select reject reason.");
-        else if(reject_reason == "OTHER" && other_reason == "") $("#confirm_invalid_text").text("Please fill reason in other reason field.");
-        else if(other_reason.includes("|")) $("#confirm_invalid_text").text("character | is not allow to use.");
-        else {
+        var canConfirm = false;
+        remove_valid_many(["good_qty","reject_qty","reject_reason","other_reason"]);
+        if(good_qty <= 0 && reject_qty <= 0){
+          invalid("good_qty");
+          invalid("reject_qty");
+          $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be 0.");
+        } else {
+          valid("good_qty");
+          valid("reject_qty");
+          if(remain_qty < good_qty + reject_qty) {
+            invalid("good_qty");
+            invalid("reject_qty");
+            $("#confirm_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+          } else {
+            valid("good_qty");
+            valid("reject_qty");
+            if(reject_qty > 0 && reject_reason == -1) {
+              invalid("reject_reason");
+              $("#confirm_invalid_text").text("Please select reject reason.");
+            } else {
+              valid("reject_reason");
+              if(reject_reason == "OTHER" && other_reason == "") {
+                invalid("other_reason");
+                $("#confirm_invalid_text").text("Please fill reason in other reason field.");
+              } else {
+                valid("other_reason");
+                if(other_reason.includes("|")) {
+                  invalid("other_reason");
+                  $("#confirm_invalid_text").text("character | is not allow to use.");
+                } else {
+                  valid("other_reason");
+                  canConfirm = true;
+                }
+              }
+            }
+          }
+        }
+        if(canConfirm) {
           $('#confirm_button').prop('disabled', true);
           if (reject_qty == 0) reject_reason = "";
           $.ajax({
