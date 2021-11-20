@@ -631,11 +631,11 @@ def delete_operation(request):
         updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, operation.ProcessQty, 0, "PROCESSQTY")
     else:
         #-- ORDER : STOP
-        updateOrderControl(orderNo, "STOP")
+        updateOrderControl(operation_no, "STOP")
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
     #-- HISTORY : DELETE OPERATION
-    insertHistoryDelete(order_no, operation_no, getClientIP(request))
+    insertHistoryModifier("DELETE", order_no, operation_no, getClientIP(request))
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
     data = {
@@ -694,10 +694,14 @@ def add_operation(request):
     price = request.GET.get('price')
     currency = request.GET.get('currency')
     #-- ADD OPERATION CONTROL
-    insertOperationControl(order_no, operation_no, work_center_no)
+    if control_key == "PP01":
+        insertOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time)
+    else:
+        insertOperationControl(order_no, operation_no, work_center_no, 0, 0, 0)
     #-- SAP : ADD OPERATION
     insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
-    #-- HISTORY : ADD OPERATION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    #-- HISTORY : ADD OPERATION
+    insertHistoryModifier("ADD", order_no, operation_no, getClientIP(request))
     #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
@@ -718,7 +722,7 @@ def reset_all(request):
             DELETE FROM HistoryConfirm
             DELETE FROM HistoryOperate
             DELETE FROM HistoryJoin
-            DELETE FROM HistoryDelete
+            DELETE FROM HistoryModifier
             DELETE FROM OrderControl
             DELETE FROM OperationControl
             """
@@ -1034,7 +1038,7 @@ def isLastOperation(order_no, operation_no):
 
 def isExistDeletedOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryDelete] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    sql = "SELECT * FROM [HistoryModifier] WHERE Type = 'DELETE' AND OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -1062,14 +1066,12 @@ def setOperationControlFromSAP(order_no):
     sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY OperationNumber ASC"
     cursor.execute(sql)
     operations = cursor.fetchall()
-    isFirstOperation = True
     for i in range(len(operations)):
-        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty])"
-        if isFirstOperation:
-            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', " + str(order.ProductionOrderQuatity) + ", 0, 0)"
-            isFirstOperation = False
+        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[EstSetupTime],[EstOperationTime],[EstLaborTime])"
+        if i == 0:
+            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', " + str(order.ProductionOrderQuatity) + ", 0, 0," + str(operations[i].EstimateSetTime) + "," + str(operations[i].EstimateOperationTime) + "," + str(operations[i].EstimateLaborTime) + ")"
         else:
-            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', 0, 0, 0)"
+            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', 0, 0, 0," + str(operations[i].EstimateSetTime) + "," + str(operations[i].EstimateOperationTime) + "," + str(operations[i].EstimateLaborTime) + ")"
         cursor.execute(sql)
         conn.commit()
     return
@@ -1198,11 +1200,11 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     conn.commit()
     return
 
-def insertOperationControl(order_no, operation_no, work_center_no):
+def insertOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty])"
-    sql += " VALUES ('" + order_no + "', '" + operation_no + "', '" + work_center_no + "', 0, 0, 0)"
+    sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[EstSetupTime],[EstOperationTime],[EstLaborTime])"
+    sql += " VALUES ('" + str(order_no) + "', '" + str(operation_no) + "', '" + str(work_center_no) + "', 0, 0, 0," + str(est_setup_time) + "," + str(est_operate_time) + "," + str(est_labor_time) + ")"
     cursor.execute(sql)
     conn.commit()
     return
@@ -1237,11 +1239,11 @@ def insertHistoryJoin(order_no, operation_no, join_order_no, join_operation_no, 
     conn.commit()
     return
 
-def insertHistoryDelete(order_no, operation_no, ip):
+def insertHistoryModifier(type, order_no, operation_no, ip):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[HistoryDelete] ([OrderNo],[OperationNo],[ClientIP],[DeleteDateTime])"
-    sql += " VALUES ('" + str(order_no) + "','" + str(operation_no) + "','" + str(ip) + "',CURRENT_TIMESTAMP)"
+    sql = "INSERT INTO [dbo].[HistoryModifier] ([Type],[OrderNo],[OperationNo],[ClientIP],[ModifyDateTime])"
+    sql += " VALUES ('" + str(type) + "','" + str(order_no) + "','" + str(operation_no) + "','" + str(ip) + "',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return

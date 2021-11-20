@@ -193,25 +193,25 @@
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstimateSetTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstimateOoperationTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstimateLaborTime|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:'Created at SFR'}}" readonly>
                                 </div>
                               </div>
                             </div>
@@ -1262,6 +1262,10 @@
         timeleft -= ($("#has_data").val() == "True")?1:0;
         if(timeleft == 0) window.location.href = '/transaction/0';
       }, 1000);
+
+      window.addEventListener( "pageshow", function (event) {
+        if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) window.location.reload();
+      });
 
       //-- INITIALIZE
       var isSearchingWorkCenter = false;
