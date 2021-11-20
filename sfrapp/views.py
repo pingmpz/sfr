@@ -634,7 +634,8 @@ def delete_operation(request):
         updateOrderControl(orderNo, "STOP")
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
-    #-- HISTORY : DELETE OPERATION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    #-- HISTORY : DELETE OPERATION
+    insertHistoryDelete(order_no, operation_no, getClientIP(request))
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
     data = {
@@ -655,7 +656,9 @@ def validate_new_operation(request):
         if operationList[i].ProcessStart != None and new_operation_no < operationList[i].OperationNo:
             canAdd = False
             break
-    #3 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    #3
+    if isExistDeletedOperation(order_no, new_operation_no):
+        canAdd = False
     data = {
         'canAdd': canAdd,
     }
@@ -715,6 +718,7 @@ def reset_all(request):
             DELETE FROM HistoryConfirm
             DELETE FROM HistoryOperate
             DELETE FROM HistoryJoin
+            DELETE FROM HistoryDelete
             DELETE FROM OrderControl
             DELETE FROM OperationControl
             """
@@ -1028,6 +1032,12 @@ def isLastOperation(order_no, operation_no):
     result = cursor.fetchall()
     return (result[0].OperationNo.strip() == operation_no)
 
+def isExistDeletedOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryDelete] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 #--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
@@ -1226,6 +1236,15 @@ def insertHistoryJoin(order_no, operation_no, join_order_no, join_operation_no, 
     cursor.execute(sql)
     conn.commit()
     return
+
+def insertHistoryDelete(order_no, operation_no, ip):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[HistoryDelete] ([OrderNo],[OperationNo],[ClientIP],[DeleteDateTime])"
+    sql += " VALUES ('" + str(order_no) + "','" + str(operation_no) + "','" + str(ip) + "',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -1350,3 +1369,11 @@ def FourDigitOperationNo(operationNo):
     while len(result) < 4:
         result = "0" + result
     return result
+
+def getClientIP(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
