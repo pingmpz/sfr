@@ -29,6 +29,7 @@ def transaction(request, orderoprno):
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
     operationList = []
     operationStatusList = []
+    modList = []
     joinList = []
     historyOperateList = []
     historyConfirmList = []
@@ -80,6 +81,8 @@ def transaction(request, orderoprno):
                             operationBefore = operationList[i-1].OperationNo
                         if i != len(operationList) - 1:
                             operationAfter = operationList[i+1].OperationNo
+                #-- MOD LIST
+                modList = getModList(orderNo)
                 #-- GET JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
@@ -110,6 +113,7 @@ def transaction(request, orderoprno):
         'remainQty' : remainQty,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
+        'modList' : modList,
         'joinList' : joinList,
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
@@ -891,6 +895,12 @@ def getCurrencyList():
 def getOperationList(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getModList(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryModifier] WHERE OrderNo = '" + order_no + "' ORDER BY ModifyDateTime DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 

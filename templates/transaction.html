@@ -118,6 +118,9 @@
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#structure-tab" role="tab">Structure ({{operationList|length}})</a></li>
+                            {% if modList|length > 0 %}
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
+                            {% endif %}
                           </ul>
                           <div class="tab-content">
                             <!-- Operation Tab -->
@@ -384,6 +387,31 @@
                                       {% elif operation.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
                                       {% endif %}
                                     </td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                            <!-- Mod Tab -->
+                            <div class="tab-pane small" id="mod-tab" role="tabpanel">
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th>Action</th>
+                                    <th>Operation No</th>
+                                    <!-- <th>ClientIP</th> -->
+                                    <th>DateTimeStamp</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for mod in modList %}
+                                  <tr>
+                                    <td class="{% if mod.Type == 'ADD' %}text-success{% elif mod.Type == 'CHANGE' %}text-warning{% elif mod.Type == 'DELETE' %}text-danger{% endif %}">
+                                      <strong>{{mod.Type}}</strong>
+                                    </td>
+                                    <td>{{mod.OperationNo}}</td>
+                                    <!-- <td>{{mod.ClientIP}}</td> -->
+                                    <td>{{mod.ModifyDateTime}}</td>
                                   </tr>
                                   {% endfor %}
                                 </tbody>
