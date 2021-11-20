@@ -28,6 +28,11 @@
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <style>
+      .mypassword {
+        -webkit-text-security: disc;
+      }
+    </style>
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -435,7 +440,7 @@
                             ">?
                             </a>
                             <div class="card-header-actions">
-                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" disabled><del>Manual Report</del></button>
+                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()">Manual Report</button>
                             </div>
                           </div>
                           <div class="card-body">
@@ -1119,7 +1124,7 @@
                     <div class="form-group row">
                       <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-10">
-                        <input class="form-control" type="password" id="mp_password" autocomplete="off">
+                        <input class="form-control mypassword" type="text" id="mp_password" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -1144,7 +1149,7 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="text" id="mp_workcenter_no" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
+                        <input class="form-control" type="text" id="mp_workcenter_no" autocomplete="off" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -1643,6 +1648,24 @@
         });
       }
 
+      function break_join(){
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        $.ajax({
+          url: '/break_join/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+    </script>
+    <!-- CONFIRM & MANUAL REPORT -->
+    <script>
       function prepare_confirm(id){
         $('#confirm_button').prop('disabled', true);
         $.ajax({
@@ -1659,24 +1682,27 @@
             $('#confirm_stop_time').val(data.stop_time);
             $('#confirm_button').prop('disabled', false);
             $('#good_qty').focus();
+            timeleft = 300;
           }
         });
       }
 
-      function break_join(){
-        var order_no = $('#order_no').val();
-        var operation_no = $('#operation_no').val();
-        $.ajax({
-          url: '/break_join/',
-          data: {
-            'order_no': order_no,
-            'operation_no': operation_no,
-          },
-          dataType: 'json',
-          success: function (data) {
-            location.reload();
-          }
-        });
+      function prepare_mp(){
+        remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
+        $('#mp_password').val("");
+        $('#mp_emp_id').val("");
+        $('#mp_workcenter_no').val("");
+        $('#mp_labor_time').val("");
+        $('#mp_operate_time').val("");
+        $('#mp_setup_time').val("");
+        $('#mp_start_time').val("");
+        $('#mp_stop_time').val("");
+        $('#mp_good_qty').val("");
+        $('#mp_reject_qty').val("");
+        $('#mp_reject_reason').val(-1);
+        $('#mp_other_reason').val("");
+        $('#mp_password').focus();
+        timeleft = 300;
       }
 
       function confirm(){
@@ -1715,7 +1741,7 @@
       }
 
       function manual_report(){
-        $("#mp_invalid_text").text("");
+        $('#mp_button').prop('disabled', true);
         if($('#mp_labor_time').val() == "") $('#mp_labor_time').val("0");
         if($('#mp_setup_time').val() == "") $('#mp_setup_time').val("0");
         if($('#mp_operate_time').val() == "") $('#mp_operate_time').val("0");
@@ -1728,7 +1754,6 @@
         var labor_time = parseFloat($('#mp_labor_time').val());
         var operate_time = parseFloat($('#mp_operate_time').val());
         var setup_time = parseFloat($('#mp_setup_time').val());
-        var good_qty = parseFloat($('#mp_good_qty').val());
         var start_time = new Date($('#mp_start_time').val());
         var stop_time = new Date($('#mp_stop_time').val());
         var remain_qty = parseFloat($('#remain_qty').val());
@@ -1736,27 +1761,130 @@
         var reject_qty = parseFloat($('#mp_reject_qty').val());
         var reject_reason = $('#mp_reject_reason').val();
         var other_reason = $('#mp_other_reason').val();
-        if(password == "") $("#mp_invalid_text").text("Please fill password.");
-        else if(emp_id == "") $("#mp_invalid_text").text("Please fill Employee ID.");
-        else if(workcenter_no == "") $("#mp_invalid_text").text("Please fill WorkCenter.");
-        else if($('#mp_start_time').val() == "") $("#mp_invalid_text").text("Please fill Start Time.");
-        else if($('#mp_stop_time').val() == "") $("#mp_invalid_text").text("Please fill Stop Time.");
-        else if(start_time >= stop_time) $("#mp_invalid_text").text("Start Time >= Stop Time");
-        else if(remain_qty < good_qty + reject_qty) $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
-        else if(reject_qty > 0 && reject_reason == -1) $("#mp_invalid_text").text("Please select reject reason.");
-        else if(reject_reason == "OTHER" && other_reason == "") $("#mp_invalid_text").text("Please fill reason in other reason field.");
-        else if(other_reason.includes("|")) $("#mp_invalid_text").text("character | is not allow to use.");
-        else if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0) $("#mp_invalid_text").text("At least one value need to be more than 0.");
-        // Validate Password
-        // Validate EmpID
-        // Validate WorkCenter
-        else {
-          // REPORT !!
-        }
+        var isReportable = false;
+        $("#mp_invalid_text").text("");
+        remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
+        validate_password(password, function(isCorrect, inValidText1) {
+          if(!isCorrect){
+            invalid("mp_password");
+            $("#mp_invalid_text").text(inValidText1);
+            $('#mp_button').prop('disabled', false);
+          } else{
+            valid("mp_password");
+            validate_operator(emp_id, function(isExist, inValidText2) {
+              if(!isExist){
+                invalid("mp_emp_id");
+                $("#mp_invalid_text").text(inValidText2);
+                $('#mp_button').prop('disabled', false);
+              } else{
+                valid("mp_emp_id");
+                validate_work_center(workcenter_no, function(canUse, inValidText3) {
+                  if(!canUse && workcenter_type != "Labor"){
+                    invalid("mp_workcenter_no");
+                    $("#mp_invalid_text").text(inValidText3);
+                  } else{
+                    valid("mp_workcenter_no");
+                    if($('#mp_start_time').val() == ""){
+                      invalid("mp_start_time");
+                      $("#mp_invalid_text").text("Please fill Start Time.");
+                    } else {
+                      valid("mp_start_time");
+                      if($('#mp_stop_time').val() == ""){
+                        invalid("mp_stop_time");
+                        $("#mp_invalid_text").text("Please fill Stop Time.");
+                      } else {
+                        valid("mp_stop_time");
+                        if(start_time >= stop_time){
+                          invalid_many(["mp_start_time","mp_stop_time"]);
+                          $("#mp_invalid_text").text("Start Time >= Stop Time.");
+                        } else {
+                          valid_many(["mp_start_time","mp_stop_time"]);
+                          if(remain_qty < good_qty + reject_qty){
+                            invalid_many(["mp_good_qty","mp_reject_qty"]);
+                            $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+                          } else {
+                            valid_many(["mp_good_qty","mp_reject_qty"]);
+                            if(reject_qty > 0 && reject_reason == -1){
+                              invalid("mp_reject_reason");
+                              $("#mp_invalid_text").text("Please select reject reason.");
+                            } else {
+                              valid("mp_reject_reason");
+                              if(reject_reason == "OTHER" && other_reason == ""){
+                                invalid("mp_other_reason");
+                                $("#mp_invalid_text").text("Please fill reason in other reason field.");
+                              } else {
+                                valid("mp_other_reason");
+                                if(other_reason.includes("|")){
+                                  invalid("mp_other_reason");
+                                  $("#mp_invalid_text").text("character | is not allow to use.");
+                                } else {
+                                  valid("mp_other_reason");
+                                  if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0){
+                                    invalid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                    $("#mp_invalid_text").text("At least one value need to be more than 0.");
+                                  } else {
+                                    valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                    isReportable = true;
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  if(isReportable){
+
+                  } else {
+                    $('#mp_button').prop('disabled', false);
+                  }
+                });
+              }
+            });
+          }
+        });
       }
     </script>
     <!-- MODIFIER -->
     <script>
+      function prepare_add(){
+        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        $("#add_new_operation_no").val("");
+        $("#add_work_center_no").val("");
+        $("#add_est_setup_time").val("");
+        $("#add_est_operate_time").val("");
+        $("#add_est_labor_time").val("");
+        $("#add_price_unit").val("");
+        $("#add_price").val("");
+        $("#add_new_operation_no").focus();
+        timeleft = 300;
+      }
+
+      function prepare_change(){
+        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        // $("#change_work_center_no").val($("#work_center").val());
+        // $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
+        // $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
+        // $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
+        $("#change_work_center_no").val("");
+        $("#change_est_setup_time").val("");
+        $("#change_est_operate_time").val("");
+        $("#change_est_labor_time").val("");
+        $("#change_price_unit").val("");
+        $("#change_price").val("");
+        $("#change_work_center_no").focus();
+        timeleft = 300;
+      }
+
+      function prepare_delete(){
+        $("#del_text").text(generateRandomCode(4));
+        remove_valid("del_code");
+        $("#del_code").val("");
+        $("#del_code").focus();
+        timeleft = 300;
+      }
+
       function add(){
         $('#add_confirm_button').prop('disabled', true);
         // a
@@ -1972,43 +2100,6 @@
           });
         }
       }
-
-      function prepare_add(){
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
-        $("#add_new_operation_no").val("");
-        $("#add_work_center_no").val("");
-        $("#add_est_setup_time").val("");
-        $("#add_est_operate_time").val("");
-        $("#add_est_labor_time").val("");
-        $("#add_price_unit").val("");
-        $("#add_price").val("");
-        $("#add_new_operation_no").focus();
-        timeleft = 300;
-      }
-
-      function prepare_change(){
-        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
-        // $("#change_work_center_no").val($("#work_center").val());
-        // $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
-        // $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
-        // $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
-        $("#change_work_center_no").val("");
-        $("#change_est_setup_time").val("");
-        $("#change_est_operate_time").val("");
-        $("#change_est_labor_time").val("");
-        $("#change_price_unit").val("");
-        $("#change_price").val("");
-        $("#change_work_center_no").focus();
-        timeleft = 300;
-      }
-
-      function prepare_delete(){
-        $("#del_text").text(generateRandomCode(4));
-        remove_valid("del_code");
-        $("#del_code").val("");
-        $("#del_code").focus();
-        timeleft = 300;
-      }
     </script>
     <!-- VALIDATION AND SHORTCUT SEARCH -->
     <script>
@@ -2047,6 +2138,59 @@
         }
       }
 
+      function validate_work_center(work_center_no, _callback){
+        var work_center_group = $("#work_center_group").val();
+        if(work_center_no.length == 0) _callback(false, "Please fill Work Center.");
+        else if(work_center_no.length < 2) _callback(false, "WorkCenter Not Found.");
+        else {
+          $.ajax({
+            url: '/validate_work_center/',
+            data: {
+              'work_center_no': work_center_no,
+              'work_center_group': work_center_group,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.canUse)? _callback(true, ""):_callback(false, data.invalidText);
+            }
+          });
+        }
+      }
+
+      function validate_operator(emp_id, _callback){
+        if(emp_id.length == 0) _callback(false, "Please fill Emplyee ID.");
+        else if(emp_id.length < 4) _callback(false, "Employee Not Found.");
+        else {
+          $.ajax({
+            url: '/validate_operator/',
+            data: {
+              'emp_id': emp_id,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isExist)? _callback(true, ""):_callback(false, "Employee Not Found.");
+            }
+          });
+        }
+      }
+
+      function validate_password(password, _callback){
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
+        else {
+          $.ajax({
+            url: '/validate_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+            }
+          });
+        }
+      }
+
       //-- SHORTCUT SEARCH
       document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
             if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
@@ -2074,6 +2218,7 @@
       //-- VALIDATE CONTROL
       remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
       valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
+      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
 
       function remove_valid(input_id){
         $("#"+input_id).removeClass("is-invalid");

@@ -42,10 +42,14 @@ urlpatterns = [
     path('break_join/', views.break_join, name='break_join'),
     #-- MODIFIER
     path('delete_operation/', views.delete_operation, name='delete_operation'),
-    path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
-    path('validate_routing/', views.validate_routing, name='validate_routing'),
     path('add_operation/', views.add_operation, name='add_operation'),
     path('change_operation/', views.change_operation, name='change_operation'),
+    #-- VALIDATION
+    path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
+    path('validate_routing/', views.validate_routing, name='validate_routing'),
+    path('validate_work_center/', views.validate_work_center, name='validate_work_center'),
+    path('validate_operator/', views.validate_operator, name='validate_operator'),
+    path('validate_password/', views.validate_password, name='validate_password'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

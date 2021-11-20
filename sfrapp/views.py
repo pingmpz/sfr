@@ -57,7 +57,6 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
-                print(operation)
                 IsOperating = isOperatingOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 for i in range(len(operationList)):
@@ -643,40 +642,6 @@ def delete_operation(request):
     }
     return JsonResponse(data)
 
-def validate_new_operation(request):
-    order_no = request.GET.get('order_no')
-    new_operation_no = request.GET.get('new_operation_no')
-    canAdd = True
-    #1
-    if isExistOperation(order_no, new_operation_no):
-        canAdd = False
-    #2
-    operationList = getOperationList(order_no)
-    for i in range(len(operationList)):
-        if operationList[i].ProcessStart != None and new_operation_no < operationList[i].OperationNo:
-            canAdd = False
-            break
-    #3
-    if isExistDeletedOperation(order_no, new_operation_no):
-        canAdd = False
-    data = {
-        'canAdd': canAdd,
-    }
-    return JsonResponse(data)
-
-def validate_routing(request):
-    work_center_no = request.GET.get('work_center_no')
-    canUse = True
-    work_center = getWorkCenter(work_center_no)
-    if work_center == None:
-        canUse = False
-    elif work_center.IsRouting == False:
-        canUse = False
-    data = {
-        'canUse': canUse,
-    }
-    return JsonResponse(data)
-
 def add_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('new_operation_no')
@@ -742,6 +707,78 @@ def change_operation(request):
     }
     return JsonResponse(data)
 
+#-------------------------------------------------------------------- VALIDATION
+def validate_new_operation(request):
+    order_no = request.GET.get('order_no')
+    new_operation_no = request.GET.get('new_operation_no')
+    canAdd = True
+    #1
+    if isExistOperation(order_no, new_operation_no):
+        canAdd = False
+    #2
+    operationList = getOperationList(order_no)
+    for i in range(len(operationList)):
+        if operationList[i].ProcessStart != None and new_operation_no < operationList[i].OperationNo:
+            canAdd = False
+            break
+    #3
+    if isExistDeletedOperation(order_no, new_operation_no):
+        canAdd = False
+    data = {
+        'canAdd': canAdd,
+    }
+    return JsonResponse(data)
+
+def validate_routing(request):
+    work_center_no = request.GET.get('work_center_no')
+    canUse = True
+    work_center = getWorkCenter(work_center_no)
+    if work_center == None:
+        canUse = False
+    elif work_center.IsRouting == False:
+        canUse = False
+    data = {
+        'canUse': canUse,
+    }
+    return JsonResponse(data)
+
+def validate_work_center(request):
+    work_center_no = request.GET.get('work_center_no')
+    work_center_group = request.GET.get('work_center_group')
+    canUse = True
+    invalidText = ''
+    work_center = getWorkCenter(work_center_no)
+    if work_center == None:
+        canUse = False
+        invalidText = 'Work Center Not Found.'
+    elif work_center.IsRouting:
+        canUse = False
+        invalidText = 'Routing can not be used.'
+    elif work_center.WorkCenterGroup != work_center_group:
+        canUse = False
+        invalidText = 'This Work Center is not in the same Work Center Group.'
+    data = {
+        'canUse': canUse,
+        'invalidText': invalidText,
+    }
+    return JsonResponse(data)
+
+def validate_operator(request):
+    emp_id = request.GET.get('emp_id')
+    isExist = isExistOperator(emp_id)
+    data = {
+        'isExist': isExist,
+    }
+    return JsonResponse(data)
+
+def validate_password(request):
+    password = request.GET.get('password')
+    isCorrect = (password == "1234")
+    data = {
+        'isCorrect': isCorrect,
+    }
+    return JsonResponse(data)
+
 def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()
@@ -762,6 +799,7 @@ def reset_all(request):
     data = {
     }
     return JsonResponse(data)
+
 
 ################################################################################
 ################################### DATABASE ###################################
