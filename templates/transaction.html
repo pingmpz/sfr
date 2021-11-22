@@ -349,6 +349,7 @@
                                       <strong class='text-warning'>WORKING</strong><br>
                                       <strong class='text-info'>READY</strong><br>
                                       <strong class='text-danger'>ERROR</strong><br>
+                                      <strong class='text-dark'>CLOSED</strong><br>
                                       ">?
                                       </a>
                                     </th>
@@ -366,6 +367,7 @@
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
                                       {% endif %}
                                     </td>
                                     <td>
@@ -1887,7 +1889,25 @@
                                     $("#mp_invalid_text").text("At least one value need to be more than 0.");
                                   } else {
                                     valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                    isReportable = true;
+                                    if(labor_time > 9999){
+                                      invalid("mp_labor_time");
+                                      $("#mp_invalid_text").text("Labor Time is too large.");
+                                    } else {
+                                      valid("mp_labor_time");
+                                      if(setup_time > 9999){
+                                        invalid("mp_setup_time");
+                                        $("#mp_invalid_text").text("Setup Time is too large.");
+                                      } else {
+                                        valid("mp_setup_time");
+                                        if(oper_time > 9999){
+                                          invalid("mp_operate_time");
+                                          $("#mp_invalid_text").text("Operate Time is too large.");
+                                        } else {
+                                          valid("mp_operate_time");
+                                          isReportable = true;
+                                        }
+                                      }
+                                    }
                                   }
                                 }
                               }
@@ -1898,7 +1918,7 @@
                     }
                   }
                   if(isReportable){
-
+                    //-- REPORT !!
                   } else {
                     $('#mp_button').prop('disabled', false);
                   }

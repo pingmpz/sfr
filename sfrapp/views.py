@@ -60,10 +60,19 @@ def transaction(request, orderoprno):
                 operation = getOperation(orderNo, operationNo)
                 IsOperating = isOperatingOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+                #-- CHECK CLOSED
+                hasNoMoreQty = True
+                for i in range(len(operationList)):
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if tempRemainQty > 0:
+                        hasNoMoreQty = False
+                        break
                 for i in range(len(operationList)):
                     #-- GET STATUS OF OPERATION LIST
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                    if operationList[i].ProcessQty == 0:
+                    if operationList[i].ProcessQty == 0 and hasNoMoreQty:
+                        operationStatusList.append("CLOSED")
+                    elif operationList[i].ProcessQty == 0:
                         operationStatusList.append("WAITING")
                     elif tempRemainQty == 0:
                         operationStatusList.append("COMPLETED")
@@ -569,8 +578,15 @@ def confirm(request):
             deleteAllOperatingData(orderNo, operationNo)
             #-- STOP OPERATION
             updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
-            #-- IF LAST OPERATION IN ORDER
-            if isLastOperation(orderNo, operationNo):
+            #-- IF LAST OPERATION IN ORDER or IF NO MORE REMAINING QTY IN ORDER
+            hasNoMoreQty = True
+            operationList = getOperationList(orderNo)
+            for i in range(len(operationList)):
+                tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                if tempRemainQty > 0:
+                    hasNoMoreQty = False
+                    break
+            if isLastOperation(orderNo, operationNo) or hasNoMoreQty:
                 #-- ORDER : STOP
                 updateOrderControl(orderNo, "STOP")
     data = {
