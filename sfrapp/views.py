@@ -831,9 +831,9 @@ def getSAPRoutingList(fdate, fhour):
     cursor = get_connection().cursor()
     sql = ""
     if fhour == "ALLDAY":
-        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT TOP(3000) * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
     else:
-        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT TOP(3000) * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 

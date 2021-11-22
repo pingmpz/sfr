@@ -30,6 +30,11 @@
   width: 18px;
   height: 18px;
 }
+
+.my-password {
+  -webkit-text-security: disc;
+}
+
 .blink {
   animation: blinker 1s step-start infinite;
 }

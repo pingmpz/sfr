@@ -28,11 +28,6 @@
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
-    <style>
-      .mypassword {
-        -webkit-text-security: disc;
-      }
-    </style>
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -468,7 +463,7 @@
                             ">?
                             </a>
                             <div class="card-header-actions">
-                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()">Manual Report</button>
+                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
                             </div>
                           </div>
                           <div class="card-body">
@@ -1152,7 +1147,7 @@
                     <div class="form-group row">
                       <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
                       <div class="col-md-10">
-                        <input class="form-control mypassword" type="text" id="mp_password" autocomplete="off">
+                        <input class="form-control my-password" type="text" id="mp_password" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -2357,6 +2352,11 @@
           $("#join_main_button").prop("hidden", false);
         } else {
           $("#join_main_button").prop("hidden", true);
+        }
+        if($("#join_list_length").val() == 0){
+          $("#mp_main_button").removeClass("disabled");
+        } else {
+          $("#mp_main_button").addClass("disabled");
         }
       }
 
