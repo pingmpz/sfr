@@ -1895,7 +1895,7 @@
                                         $("#mp_invalid_text").text("Setup Time is too large.");
                                       } else {
                                         valid("mp_setup_time");
-                                        if(oper_time > 9999){
+                                        if(operate_time > 9999){
                                           invalid("mp_operate_time");
                                           $("#mp_invalid_text").text("Operate Time is too large.");
                                         } else {
@@ -1914,18 +1914,21 @@
                     }
                   }
                   if(isReportable){
+                    var order_no = $("#order_no").val();
+                    var operation_no = $("#operation_no").val();
                     $('#mp_button').prop('disabled', true);
                     $.ajax({
                       url: '/manual_report/',
                       data: {
+                        'order_no': order_no,
+                        'operation_no': operation_no,
                         'emp_id': emp_id,
-                        'workcenter_type': workcenter_type,
                         'workcenter_no': workcenter_no,
                         'labor_time': labor_time,
                         'operate_time': operate_time,
                         'setup_time': setup_time,
-                        'start_time': start_time,
-                        'stop_time': stop_time,
+                        'start_time': new Date(start_time).toISOString(),
+                        'stop_time': new Date(stop_time).toISOString(),
                         'good_qty': good_qty,
                         'reject_qty': reject_qty,
                         'reject_reason': reject_reason,
