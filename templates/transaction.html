@@ -115,11 +115,11 @@
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#structure-tab" role="tab">Structure ({{operationList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#structure-tab" role="tab">Structure ({{operationList|length}})</a></li>
                             {% if modList|length > 0 %}
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
                             {% endif %}
                           </ul>
                           <div class="tab-content">
@@ -1913,6 +1913,18 @@
           }
         });
       }
+
+      // document.getElementById("good_qty").addEventListener("keydown", function (e) {
+      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
+      // });
+      //
+      // document.getElementById("reject_qty").addEventListener("keydown", function (e) {
+      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
+      // });
+      //
+      // document.getElementById("other_reason").addEventListener("keydown", function (e) {
+      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
+      // });
     </script>
     <!-- MODIFIER -->
     <script>
@@ -2168,6 +2180,10 @@
           });
         }
       }
+
+      document.getElementById("del_code").addEventListener("keydown", function (e) {
+        if (e.code === "Enter" || e.code == "NumpadEnter") trash();
+      });
     </script>
     <!-- VALIDATION AND SHORTCUT SEARCH -->
     <script>
@@ -2261,16 +2277,16 @@
 
       //-- SHORTCUT SEARCH
       document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
-            if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
-        });
+        if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+      });
 
       document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
-            if ($("#sc_order_no").val().length == 12) $("#sc_operation_no").focus();
-        });
+        if ($("#sc_order_no").val().length == 12) $("#sc_operation_no").focus();
+      });
 
       document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
-            if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
-        });
+        if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+      });
 
       function shortcut_search(){
           var order_no =  $("#sc_order_no").val();
