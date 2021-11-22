@@ -37,6 +37,7 @@ urlpatterns = [
     #-- CONFIRMATION
     path('get_data_for_confirm/', views.get_data_for_confirm, name='get_data_for_confirm'),
     path('confirm/', views.confirm, name='confirm'),
+    path('manual_report/', views.manual_report, name='manual_report'),
     #-- JOIN
     path('join/', views.join, name='join'),
     path('break_join/', views.break_join, name='break_join'),

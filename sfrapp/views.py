@@ -530,6 +530,76 @@ def confirm(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
+    if reject_reason == "-1" or reject_qty == 0:
+        reject_reason = ""
+    elif reject_reason == "OTHER":
+        reject_reason = other_reason
+    #-- RECHECK QTY
+    oopr = getOperatorOperatingByID(confirm_id)
+    orderNo = oopr.OperatorOrderNo
+    operationNo = oopr.OperatorOperationNo
+    workcenter = oopr.WorkCenterNo
+    operation = getOperation(orderNo, operationNo)
+    remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+    if remainQty >= (int(good_qty) + int(reject_qty)):
+        #-- SAP : CONFIRM
+        if oopr.WorkCenterNo == None:
+            workcenter = getOperation(orderNo, operationNo).WorkCenterNo
+        #-- SPECIAL CASE **
+        sap_reject_qty = reject_qty
+        if reject_reason == "MATERIAL DEFECT":
+            sap_reject_qty = 0
+        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- CONFIRM : LOG
+        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
+        #-- UPDATE QTY OF CURRENT OPERATION
+        updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
+        #-- UPDATE PROCESS QTY OF NEXT OPERATION
+        nextOperation = getNextOperation(orderNo,operationNo)
+        if nextOperation != None:
+            updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
+        #-- NO MORE REMAINING QTY
+        operation = getOperation(orderNo, operationNo)
+        remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+        if remainQty == 0:
+            #-- IF AUTO MACHINE(S) STILL WORKING
+            owcList = getOperatingWorkCenterList(orderNo, operationNo)
+            for owc in owcList:
+                if owc.Status == 'WORKING':
+                    #-- WORKCENTER : STOP
+                    updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
+                    #-- SAP : WORKING TIME
+                    owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
+                    worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+                    insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
+                    #-- WORKCENTER : OPERATING TIME LOG
+                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+            #-- CLEAR ALL CONTROL DATA
+            deleteAllOperatingData(orderNo, operationNo)
+            #-- STOP OPERATION
+            updateOperationControl(orderNo, operationNo, 0, 0, "STOP")
+            #-- IF LAST OPERATION IN ORDER or IF NO MORE REMAINING QTY IN ORDER
+            hasNoMoreQty = True
+            operationList = getOperationList(orderNo)
+            for i in range(len(operationList)):
+                tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                if tempRemainQty > 0:
+                    hasNoMoreQty = False
+                    break
+            if isLastOperation(orderNo, operationNo) or hasNoMoreQty:
+                #-- ORDER : STOP
+                updateOrderControl(orderNo, "STOP")
+    data = {
+    }
+    return JsonResponse(data)
+
+#-- NEED FIX !!
+def manual_report(request):
+    confirm_id = request.GET.get('confirm_id')
+    good_qty = request.GET.get('good_qty')
+    reject_qty = request.GET.get('reject_qty')
+    reject_reason = request.GET.get('reject_reason')
+    other_reason = request.GET.get('other_reason')
     if reject_reason == "-1":
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -837,9 +907,9 @@ def getSAPOrderList(fdate, fhour):
     cursor = get_connection().cursor()
     sql = ""
     if fhour == "ALLDAY":
-        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT TOP(3000) * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
     else:
-        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT TOP(3000) * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 

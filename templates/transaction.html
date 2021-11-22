@@ -1787,7 +1787,6 @@
         }
         if(canConfirm) {
           $('#confirm_button').prop('disabled', true);
-          if (reject_qty == 0) reject_reason = "";
           $.ajax({
             url: '/confirm/',
             data: {
@@ -1806,7 +1805,6 @@
       }
 
       function manual_report(){
-        $('#mp_button').prop('disabled', true);
         if($('#mp_labor_time').val() == "") $('#mp_labor_time').val("0");
         if($('#mp_setup_time').val() == "") $('#mp_setup_time').val("0");
         if($('#mp_operate_time').val() == "") $('#mp_operate_time').val("0");
@@ -1833,14 +1831,12 @@
           if(!isCorrect){
             invalid("mp_password");
             $("#mp_invalid_text").text(inValidText1);
-            $('#mp_button').prop('disabled', false);
           } else{
             valid("mp_password");
             validate_operator(emp_id, function(isExist, inValidText2) {
               if(!isExist){
                 invalid("mp_emp_id");
                 $("#mp_invalid_text").text(inValidText2);
-                $('#mp_button').prop('disabled', false);
               } else{
                 valid("mp_emp_id");
                 validate_work_center(workcenter_no, function(canUse, inValidText3) {
@@ -1918,9 +1914,28 @@
                     }
                   }
                   if(isReportable){
-                    //-- REPORT !!
-                  } else {
-                    $('#mp_button').prop('disabled', false);
+                    $('#mp_button').prop('disabled', true);
+                    $.ajax({
+                      url: '/manual_report/',
+                      data: {
+                        'emp_id': emp_id,
+                        'workcenter_type': workcenter_type,
+                        'workcenter_no': workcenter_no,
+                        'labor_time': labor_time,
+                        'operate_time': operate_time,
+                        'setup_time': setup_time,
+                        'start_time': start_time,
+                        'stop_time': stop_time,
+                        'good_qty': good_qty,
+                        'reject_qty': reject_qty,
+                        'reject_reason': reject_reason,
+                        'other_reason': other_reason,
+                      },
+                      dataType: 'json',
+                      success: function (data) {
+                        location.reload();
+                      }
+                    });
                   }
                 });
               }
