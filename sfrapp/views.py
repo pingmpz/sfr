@@ -199,10 +199,13 @@ def curr_master(request):
 
 #--------------------------------------------------------------------- DATA PAGE
 
-def wc(request, wcno):
+def wc(request, wcno, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%m-%Y')
     workCenter = getWorkCenter(wcno)
     context = {
         'workCenter': workCenter,
+        'fmonth': fmonth,
     }
     return render(request, 'wc.html', context)
 
