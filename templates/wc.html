@@ -207,9 +207,9 @@
         dataTable.addColumn({ type: 'date', id: 'End' });
         createEmptyRows(dataTable, 11, 2021);
         dataTable.addRows([
-          [ '01', '5000123456-0010', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-3d"></i>&nbsp;<strong>5000123456-0010</strong><br>AIR-SP01<br>10:00 AM - 17:19 AM</div>', '#4656e9', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 17, 19, 0)],
-          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>10:00 AM - 10:23 AM</div>', '#e74c3c', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 10, 23, 0)],
-          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>15:46 AM - 17:19 AM</div>', '#e74c3c', new Date(0, 0, 0, 15, 46, 0), new Date(0, 0, 0, 17, 19, 0)],
+          [ '01', '5000123456-0010', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-3d"></i>&nbsp;<strong>5000123456-0010</strong><br>AIR-SP01<br>10:00 AM - 17:19 AM<br>439 minutes</div>', '#4656e9', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 17, 19, 0)],
+          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>10:00 AM - 10:23 AM<br>23 minutes</div>', '#e74c3c', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 10, 23, 0)],
+          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>15:46 AM - 17:19 AM<br>93 minutes</div>', '#e74c3c', new Date(0, 0, 0, 15, 46, 0), new Date(0, 0, 0, 17, 19, 0)],
         ]);
         chart.draw(dataTable, options);
       }
