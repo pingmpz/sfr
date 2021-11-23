@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Work Center | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Work Center</li>
+            <!-- Breadcrumb Menu-->
+            <li class="breadcrumb-item active">
+              {{workCenter.WorkCenterNo}}
+            </li>
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="card">
+                    <div class="card-header"><strong>Infomation</strong></div>
+                    <div class="card-body">
+                      <div class="small">
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterNo}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Name</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterName}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Work Center Group</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterGroup}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Routing</strong></label>
+                          <div class="col-md-8">
+                            {% if workCenter.IsRouting %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
+                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>External Process</strong></label>
+                          <div class="col-md-8">
+                            {% if workCenter.IsExternalProcess %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
+                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Work Center Type</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterType}}" readonly>
+                          </div>
+                        </div>
+                        {% if workCenter.WorkCenterType == 'Machine' %}
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Machine Type</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.MachineType|default_if_none:""}}" readonly>
+                          </div>
+                        </div>
+                        {% endif %}
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Hourly Rate</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.HourlyRate}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Noted</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.Noted|default_if_none:""}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Active</strong></label>
+                          <div class="col-md-8">
+                            {% if workCenter.IsActive %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
+                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <div class="card">
+                    <div class="card-header">
+                      <strong>Timeline</strong>
+                      <div class="card-header-actions">
+                        <input type="month" class="form-control form-control-sm" id="fmonth" onkeydown="return false">
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6 text-left">
+                          <strong>November 2021</strong>
+                        </div>
+                        <div class="col-md-6 text-right">
+                          <span class="text-primary"><i class="c-icon cil-3d"></i> Operation</span>
+                          <span class="text-danger"><i class="c-icon cil-user"></i> Employee</span>
+                        </div>
+                      </div>
+                      <div id="timeline"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+      var graph_coef = 0.675;
+
+      google.charts.load('current', {'packages':['timeline']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+        var options = {
+          hAxis: {
+            minValue: new Date(0, 0, 0, 0, 0, 0),
+            maxValue: new Date(0, 0, 0, 23, 59, 59)
+          },
+          tooltip: { isHtml: true },
+          timeline: { rowLabelStyle: { fontSize: 12 }, barLabelStyle: { fontSize: 8 } },
+          width: $(window).width() * graph_coef,
+          height: $(window).height(),
+        };
+        // opacity: 0
+        dataTable.addColumn({ type: 'string', id: 'Date' });
+        dataTable.addColumn({ type: 'string', id: 'Title' });
+        dataTable.addColumn({type: 'string', role: 'tooltip'});
+        dataTable.addColumn({ type: 'string', role: 'style' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
+        createEmptyRows(dataTable, 11, 2021);
+        dataTable.addRows([
+          [ '01', '5000123456-0010', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-3d"></i>&nbsp;<strong>5000123456-0010</strong><br>AIR-SP01<br>10:00 AM - 17:19 AM</div>', '#4656e9', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 17, 19, 0)],
+          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>10:00 AM - 10:23 AM</div>', '#e74c3c', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 10, 23, 0)],
+          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>15:46 AM - 17:19 AM</div>', '#e74c3c', new Date(0, 0, 0, 15, 46, 0), new Date(0, 0, 0, 17, 19, 0)],
+        ]);
+        chart.draw(dataTable, options);
+      }
+
+      function createEmptyRows(dataTable, month, year){
+        for (var i = 1; i < 31; i++) {
+          var text = year + "-" + month + "-" + frontZero(i.toString(), 2);
+          var text = frontZero(i.toString(), 2);
+          dataTable.addRows([[ text, '', '', 'opacity: 0', new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 0, 0, 0)]]);
+        }
+      }
+
+      $(window).resize(function() {
+        drawChart();
+      });
+
+//redraw graph when window resize is completed
+$(window).on('resizeEnd', function() {
+    drawChart(data);
+});
+
+      function frontZero(str, len){
+        var result = str;
+        for(var i = str.length;i < len;i++) result = "0" + result;
+        return result;
+      }
+    </script>
+  </body>
+</html>

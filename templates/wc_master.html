@@ -74,7 +74,7 @@
                         <tbody>
                           {% for workCenter in workCenterList %}
                           <tr class="{% if workCenter.IsActive == False %}text-danger{% endif %}">
-                            <td>{{workCenter.WorkCenterNo}}</td>
+                            <td><a href="/wc/{{workCenter.WorkCenterNo}}">{{workCenter.WorkCenterNo}}</a></td>
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
                             <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>

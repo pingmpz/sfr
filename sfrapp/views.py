@@ -57,6 +57,7 @@ def transaction(request, orderoprno):
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
             if isExistOperation(orderNo, operationNo):
+                printString(orderNo + "-" + operationNo)
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
                 IsOperating = isOperatingOperation(orderNo, operationNo)
@@ -195,6 +196,15 @@ def curr_master(request):
         'currencyList' : currencyList,
     }
     return render(request, 'curr_master.html', context)
+
+#--------------------------------------------------------------------- DATA PAGE
+
+def wc(request, wcno):
+    workCenter = getWorkCenter(wcno)
+    context = {
+        'workCenter': workCenter,
+    }
+    return render(request, 'wc.html', context)
 
 #--------------------------------------------------------------------------- SAP
 
@@ -1605,3 +1615,9 @@ def getClientIP(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+def printString(str):
+    print("################################################################################")
+    print(str)
+    print("################################################################################")
+    return
