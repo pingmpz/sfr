@@ -231,6 +231,7 @@ def lot_traveller(request, orderno):
         'orderNo' : orderNo,
         'order' : order,
         'state' : state,
+        'operationList' : operationList,
     }
     return render(request, 'lot_traveller.html', context)
 
