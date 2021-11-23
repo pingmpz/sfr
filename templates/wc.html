@@ -139,8 +139,8 @@
                       <strong>Timeline</strong>
                       <div class="card-header-actions">
                         <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
-                        <input type="text" id="month" value="{{fmonth|slice:'0:4'}}" hidden>
-                        <input type="text" id="year" value="{{fmonth|slice:'5:7'}}" hidden>
+                        <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
+                        <input type="text" id="month" value="{{fmonth|slice:'5:7'}}" hidden>
                       </div>
                     </div>
                     <div class="card-body">
@@ -183,6 +183,8 @@
         }, 2000);
       });
       var graph_coef = 0.675;
+      var month = $("#month").val();
+      var year = $("#year").val();
 
       google.charts.load('current', {'packages':['timeline']});
       google.charts.setOnLoadCallback(drawChart);
@@ -207,13 +209,26 @@
         dataTable.addColumn({ type: 'string', role: 'style' });
         dataTable.addColumn({ type: 'date', id: 'Start' });
         dataTable.addColumn({ type: 'date', id: 'End' });
-        createEmptyRows(dataTable, 11, 2021);
+        createEmptyRows(dataTable, month, year);
+        createDataRows(dataTable, month, year);
+        chart.draw(dataTable, options);
+      }
+
+      function createDataRows(dataTable, month, year){
+
         dataTable.addRows([
           [ '01', '5000123456-0010', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-3d"></i>&nbsp;<strong>5000123456-0010</strong><br>AIR-SP01<br>10:00 AM - 17:19 AM<br>439 minutes</div>', '#4656e9', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 17, 19, 0)],
           [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>10:00 AM - 10:23 AM<br>23 minutes</div>', '#e74c3c', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 10, 23, 0)],
           [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>15:46 AM - 17:19 AM<br>93 minutes</div>', '#e74c3c', new Date(0, 0, 0, 15, 46, 0), new Date(0, 0, 0, 17, 19, 0)],
         ]);
-        chart.draw(dataTable, options);
+      }
+
+      function tooltipOperation(orderoprno, work_center_no, start_time, end_time, mins){
+        return;
+      }
+
+      function tooltipEmployee(emp_id, emp_name, start_time, end_time, mins){
+        return;
       }
 
       function createEmptyRows(dataTable, month, year){
