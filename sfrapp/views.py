@@ -209,6 +209,31 @@ def wc(request, wcno, fmonth):
     }
     return render(request, 'wc.html', context)
 
+#------------------------------------------------------------------------ REPORT
+
+def lot_traveller(request, orderno):
+    orderNo = ""
+    order = None
+    state = ""
+    #--
+    if orderno == "0":
+        state = "FIRSTPAGE"
+    else:
+        orderNo = orderno
+        if isExistOrder(orderNo) == False:
+            state = "NODATAFOUND"
+        else:
+            state = "DATAFOUND"
+            order = getOrder(orderNo)
+            operationList = getOperationList(orderNo)
+            #-- DO SOMETHING
+    context = {
+        'orderNo' : orderNo,
+        'order' : order,
+        'state' : state,
+    }
+    return render(request, 'lot_traveller.html', context)
+
 #--------------------------------------------------------------------------- SAP
 
 def sap_order(request, fdate, fhour):
@@ -1605,11 +1630,6 @@ def deleteOperationControl(order_no, operation_no):
 ################################################################################
 ################################################################################
 ################################################################################
-def FourDigitOperationNo(operationNo):
-    result = str(operationNo)
-    while len(result) < 4:
-        result = "0" + result
-    return result
 
 def getClientIP(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

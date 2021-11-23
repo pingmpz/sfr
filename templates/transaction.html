@@ -48,7 +48,6 @@
               {% if operationAfter != -1 %}&nbsp;<a href="/transaction/{{orderNo}}{{operationAfter}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
             </li>
             {% endif %}
-            <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
@@ -601,7 +600,7 @@
                   <h1><strong>OPERATION NOT FOUND</strong></h1>
                   {% endif %}
                   <p>
-                    <strong>PRODUCTION NO</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
+                    <strong>PRODUCTION ORDER NO</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
                     <br>
                     <strong>OPERATION NO</strong><br><span class="text-danger"><strong><span id="nf_operation_no">{{operationNo}}</span></strong></span>
                   </p>
