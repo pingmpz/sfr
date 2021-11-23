@@ -64,7 +64,7 @@
                         <div class="form-group row">
                           <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
                           <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterNo}}" readonly>
+                            <input class="form-control form-control-sm" type="text" id="work_center_no" value="{{workCenter.WorkCenterNo}}" readonly>
                           </div>
                         </div>
                         <div class="form-group row">
@@ -138,7 +138,9 @@
                     <div class="card-header">
                       <strong>Timeline</strong>
                       <div class="card-header-actions">
-                        <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false">
+                        <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+                        <input type="text" id="month" value="{{fmonth|slice:'0:4'}}" hidden>
+                        <input type="text" id="year" value="{{fmonth|slice:'5:7'}}" hidden>
                       </div>
                     </div>
                     <div class="card-body">
@@ -215,7 +217,11 @@
       }
 
       function createEmptyRows(dataTable, month, year){
-        for (var i = 1; i < 31; i++) {
+        var days = 30;
+        if(month == 2 && year%4 == 0) days = 29;
+        else if(month == 2) days = 28;
+        else if(month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) days = 31;
+        for (var i = 1; i <= days; i++) {
           var text = year + "-" + month + "-" + frontZero(i.toString(), 2);
           var text = frontZero(i.toString(), 2);
           dataTable.addRows([[ text, '', '', 'opacity: 0', new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 0, 0, 0)]]);
@@ -226,16 +232,19 @@
         drawChart();
       });
 
-//redraw graph when window resize is completed
-$(window).on('resizeEnd', function() {
-    drawChart(data);
-});
+      $(window).on('resizeEnd', function() {
+          drawChart(data);
+      });
 
       function frontZero(str, len){
         var result = str;
         for(var i = str.length;i < len;i++) result = "0" + result;
         return result;
       }
+
+      $('#fmonth').change(function() {
+        window.location.href =  "/wc/" + ($("#work_center_no").val() + "&" + $("#fmonth").val());
+      });
     </script>
   </body>
 </html>

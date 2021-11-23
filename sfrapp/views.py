@@ -201,7 +201,7 @@ def curr_master(request):
 
 def wc(request, wcno, fmonth):
     if fmonth == "NOW":
-        fmonth = datetime.today().strftime('%m-%Y')
+        fmonth = datetime.today().strftime('%Y-%m')
     workCenter = getWorkCenter(wcno)
     context = {
         'workCenter': workCenter,
