@@ -216,6 +216,7 @@ def lot_traveller(request, orderno):
     order = None
     state = ""
     operationList = []
+    startShow = 0
     planStartDateList = []
     planFinishDateList = []
     planDayCountList = []
@@ -230,6 +231,10 @@ def lot_traveller(request, orderno):
             state = "DATAFOUND"
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
+            for operation in operationList:
+                if(operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty) > 0):
+                    startShow = operation.OperationNo
+                    break
             for operation in operationList:
                 routing = getSAPRouting(orderNo, operation.OperationNo)
                 if routing != None:
@@ -249,6 +254,7 @@ def lot_traveller(request, orderno):
         'order' : order,
         'state' : state,
         'operationList' : operationList,
+        'startShow' : startShow,
         'planStartDateList': planStartDateList,
         'planFinishDateList': planFinishDateList,
         'planDayCountList': planDayCountList,

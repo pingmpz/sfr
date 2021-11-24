@@ -227,7 +227,7 @@
                               <td class="title bottable"><strong>Operator<br>ID / Stamp</strong></td>
                             </tr>
                             {% for operation in operationList %}
-
+                              {% if operation.OperationNo >= startShow %}
                               <tr>
                                 <td>{{operation.OperationNo}}</td>
                                 <td>{{operation.WorkCenterNo}}</td>
@@ -243,6 +243,7 @@
                                 <td style="font-size: 18px">*{{operation.OperationNo}}*</td>
                                 <td></td>
                               </tr>
+                              {% endif %}
                             {% endfor %}
                           </tbody>
                         </table>
