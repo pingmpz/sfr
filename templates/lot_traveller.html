@@ -231,9 +231,17 @@
                               <tr>
                                 <td>{{operation.OperationNo}}</td>
                                 <td>{{operation.WorkCenterNo}}</td>
-                                <td>{{planStartDateList|index:forloop.counter0}}</td>
+                                <td>
+                                  {% if operation.PlanStartDate != None %}
+                                  {{operation.PlanStartDate|slice:"8:10"}}-{{operation.PlanStartDate|slice:"5:7"}}-{{operation.PlanStartDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
                                 <td>{{planDayCountList|index:forloop.counter0}}</td>
-                                <td>{{planFinishDateList|index:forloop.counter0}}</td>
+                                <td>
+                                  {% if operation.PlanFinishDate != None %}
+                                  {{operation.PlanFinishDate|slice:"8:10"}}-{{operation.PlanFinishDate|slice:"5:7"}}-{{operation.PlanFinishDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
                                 <td>{{operation.EstSetupTime|floatformat}}</td>
                                 <td>{{operation.EstOperationTime|floatformat}}</td>
                                 <td>{{operation.EstLaborTime|floatformat}}</td>

@@ -217,8 +217,6 @@ def lot_traveller(request, orderno):
     state = ""
     operationList = []
     startShow = 0
-    planStartDateList = []
-    planFinishDateList = []
     planDayCountList = []
     #--
     if orderno == "0":
@@ -236,27 +234,16 @@ def lot_traveller(request, orderno):
                     startShow = operation.OperationNo
                     break
             for operation in operationList:
-                routing = getSAPRouting(orderNo, operation.OperationNo)
-                if routing != None:
-                    start_date = datetime.strptime(routing.PlanStartDate, '%Y-%m-%d')
-                    stop_date = datetime.strptime(routing.PlanFinishDate, '%Y-%m-%d')
-                    days = stop_date - start_date
-                    planStartDateList.append(start_date.strftime("%d-%m-%Y"))
-                    planFinishDateList.append(stop_date.strftime("%d-%m-%Y"))
-                    planDayCountList.append(days.days)
-
-                else:
-                    planStartDateList.append("")
-                    planDayCountList.append("")
-                    planFinishDateList.append("")
+                start_date = datetime.strptime(operation.PlanStartDate, '%Y-%m-%d')
+                stop_date = datetime.strptime(operation.PlanFinishDate, '%Y-%m-%d')
+                days = stop_date - start_date
+                planDayCountList.append(days.days)
     context = {
         'orderNo' : orderNo,
         'order' : order,
         'state' : state,
         'operationList' : operationList,
         'startShow' : startShow,
-        'planStartDateList': planStartDateList,
-        'planFinishDateList': planFinishDateList,
         'planDayCountList': planDayCountList,
     }
     return render(request, 'lot_traveller.html', context)
@@ -1137,13 +1124,6 @@ def getHistoryJoinList(order_no, operation_no):
     return cursor.fetchall()
 
 #-------------------------------------------------------------------------- ITEM
-
-def getSAPRouting(order_no, operation_no):
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
-    cursor.execute(sql)
-    return cursor.fetchone()
-
 def getOrder(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OrderControl] as ORD"
@@ -1156,7 +1136,7 @@ def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] as OPT"
     sql += " INNER JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
-    sql += " LEFT JOIN [SAP_Routing] as SAPRT ON OPT.OrderNo = SAPRT.ProductionOrderNo AND OPT.OperationNo = SAPRT.OperationNumber"
+    # sql += " LEFT JOIN [SAP_Routing] as SAPRT ON OPT.OrderNo = SAPRT.ProductionOrderNo AND OPT.OperationNo = SAPRT.OperationNumber"
     sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return cursor.fetchone()
@@ -1321,11 +1301,13 @@ def setOperationControlFromSAP(order_no):
     cursor.execute(sql)
     operations = cursor.fetchall()
     for i in range(len(operations)):
-        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[EstSetupTime],[EstOperationTime],[EstLaborTime])"
+        date_get_from_sap = str(operations[i].DateGetFromSAP)
+        date_get_from_sap = date_get_from_sap[0:len(date_get_from_sap) - 7]
+        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
         if i == 0:
-            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', " + str(order.ProductionOrderQuatity) + ", 0, 0," + str(operations[i].EstimateSetTime) + "," + str(operations[i].EstimateOperationTime) + "," + str(operations[i].EstimateLaborTime) + ")"
+            sql += " VALUES ('"+order_no+"','"+operations[i].OperationNumber+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,'"+str(operations[i].PlanStartDate)+"','"+str(operations[i].PlanFinishDate)+"',"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
         else:
-            sql += " VALUES ('" + order_no + "', '" + operations[i].OperationNumber + "', '" + operations[i].WorkCenter + "', 0, 0, 0," + str(operations[i].EstimateSetTime) + "," + str(operations[i].EstimateOperationTime) + "," + str(operations[i].EstimateLaborTime) + ")"
+            sql += " VALUES ('"+order_no+"','"+operations[i].OperationNumber+"','"+operations[i].WorkCenter+"',0,0,0,'"+str(operations[i].PlanStartDate)+"','"+str(operations[i].PlanFinishDate)+"',"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
         cursor.execute(sql)
         conn.commit()
     return
