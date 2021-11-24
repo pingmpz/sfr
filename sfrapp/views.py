@@ -215,6 +215,9 @@ def lot_traveller(request, orderno):
     orderNo = ""
     order = None
     state = ""
+    planStartDateList = []
+    planFinishDateList = []
+    planDayCountList = []
     #--
     if orderno == "0":
         state = "FIRSTPAGE"
@@ -226,12 +229,28 @@ def lot_traveller(request, orderno):
             state = "DATAFOUND"
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
-            #-- DO SOMETHING
+            for operation in operationList:
+                routing = getSAPRouting(orderNo, operation.OperationNo)
+                if routing != None:
+                    start_date = datetime.strptime(routing.PlanStartDate, '%Y-%m-%d')
+                    stop_date = datetime.strptime(routing.PlanFinishDate, '%Y-%m-%d')
+                    days = stop_date - start_date
+                    planStartDateList.append(start_date.strftime("%d-%m-%Y"))
+                    planFinishDateList.append(stop_date.strftime("%d-%m-%Y"))
+                    planDayCountList.append(days.days)
+
+                else:
+                    planStartDateList.append("")
+                    planDayCountList.append("")
+                    planFinishDateList.append("")
     context = {
         'orderNo' : orderNo,
         'order' : order,
         'state' : state,
         'operationList' : operationList,
+        'planStartDateList': planStartDateList,
+        'planFinishDateList': planFinishDateList,
+        'planDayCountList': planDayCountList,
     }
     return render(request, 'lot_traveller.html', context)
 
@@ -1032,7 +1051,9 @@ def getCurrencyList():
 
 def getOperationList(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperationControl] as OC INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
+    sql = "SELECT * FROM [OperationControl] as OC"
+    sql += " INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1106,6 +1127,12 @@ def getHistoryJoinList(order_no, operation_no):
     return cursor.fetchall()
 
 #-------------------------------------------------------------------------- ITEM
+
+def getSAPRouting(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' AND OperationNumber = '" + operation_no + "'"
+    cursor.execute(sql)
+    return cursor.fetchone()
 
 def getOrder(order_no):
     cursor = get_connection().cursor()
