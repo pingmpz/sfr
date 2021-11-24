@@ -26,32 +26,6 @@
     <!-- Select CSS -->
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
-    <style media="screen">
-      table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-      table {
-        margin-bottom: 0px !important;
-      }
-      td {
-        height: 10px !important;
-        overflow:hidden;
-        vertical-align: inherit !important;
-      }
-      .toprow {
-        border-top-color: #000000 !important;
-      }
-      .title {
-        background-color:#e1e4e7;
-      }
-      .toptable {
-        width: 11.11%;
-      }
-      .bottable {
-        width: 7.69%;
-      }
-    </style>
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -72,6 +46,9 @@
             {% endif %}
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            {% if state == "DATAFOUND" %}
+            <button type="button" class="btn btn-sm btn-pill btn-outline-success" onclick="printDiv()">Print</button>
+            {% endif %}
             &nbsp;&nbsp;<div>Prod. Order No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="shortcut_search()">Go !</button></div>
@@ -116,6 +93,49 @@
                   <div class="card">
                     <div class="card-body">
                       <div id="print-area">
+                        <style>
+                          table, th, td {
+                            border: 1px solid black;
+                            border-collapse: collapse;
+                          }
+                          table {
+                            margin-bottom: 0px !important;
+                          }
+                          td {
+                            height: 30px !important;
+                            padding: 1px !important;
+                            font-size: 10px;
+                            overflow:hidden;
+                            vertical-align: inherit !important;
+                          }
+                          .toprow {
+                            border-top-color: #000000 !important;
+                          }
+                          .title {
+                            background-color:#e1e4e7 !important;
+                          }
+                          .toptable {
+                            width: 11.11%;
+                          }
+                          .bottable {
+                            width: 7.69%;
+                          }
+                        </style>
+                        <div class="row">
+                          <div class="col-2"></div>
+                          <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
+                          <div class="col-4" style="padding-top: 3px">
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                              <h5 class="form-check-label">Non-ASM</h5>
+                            </div>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                              <h5 class="form-check-label">ASM</h5>
+                            </div>
+                          </div>
+                        </div>
                         <table class="table small">
                           <tbody>
                             <tr>
@@ -126,7 +146,7 @@
                               <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
                               <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
                               <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
-                              <td class="toprow toptable" colspan="2"></td>
+                              <td class="toprow toptable" colspan="2"><input type="text" class="text-center" style="border: none; width: 100%"></td>
                             </tr>
                             <tr>
                               <td class="title"><strong>Release Date</strong></td>
@@ -173,7 +193,7 @@
                                 {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
                                 {% endif %}
                               </td>
-                              <td class="text-center" colspan="3" rowspan="2" style="font-size: 32px">*{{orderNo}}*</td>
+                              <td class="text-center" colspan="3" rowspan="2" style="font-size: 28px">*{{orderNo}}*</td>
                             </tr>
                             <tr>
                               <td class="title"><strong>Part Name</strong></td>
@@ -220,13 +240,20 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td style="font-size: 28px">*{{operation.OperationNo}}*</td>
+                                <td style="font-size: 18px">*{{operation.OperationNo}}*</td>
                                 <td></td>
                               </tr>
-
                             {% endfor %}
                           </tbody>
                         </table>
+                        <div class="row" style="font-size: 10px;">
+                          <div class="col-10">
+                            Effective Date : ## ## 2021, retention for ISO 9001 3 years, IATF 16949 15 years, AS9100 10 years except special requirements defined in the announcement "Retention of Quality Records"
+                          </div>
+                          <div class="col-2 text-right">
+                            FM-GEN-PC-084 Rev.1
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -238,7 +265,7 @@
         </main>
       </div>
       <!-- *** FOOTER *** -->
-      {% include 'footer.html' %}
+
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -247,6 +274,7 @@
     <!--<![endif]-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <script src="{% static "vendors/printThis/printThis.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>
@@ -256,6 +284,9 @@
         }, 2000);
       });
 
+      function printDiv(){
+        $('#print-area').printThis();
+      }
     </script>
 
     <!-- SHORTCUT SEARCH -->

@@ -215,6 +215,7 @@ def lot_traveller(request, orderno):
     orderNo = ""
     order = None
     state = ""
+    operationList = []
     planStartDateList = []
     planFinishDateList = []
     planDayCountList = []

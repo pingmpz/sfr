@@ -22940,7 +22940,7 @@ button.bg-gray-900:focus {
   display: none !important;
 }
 
-@media print {
+/* @media print {
   .d-print-none {
     display: none !important;
   }
@@ -22970,7 +22970,7 @@ button.bg-gray-900:focus {
     display: -ms-inline-flexbox !important;
     display: inline-flex !important;
   }
-}
+} */
 
 .c-elevation-0 {
   border: 0;
@@ -27621,7 +27621,7 @@ html:not([dir="rtl"]) .c-email-app .c-message-headers-date {
   breakpoint-xxl: 1400px;
 }
 
-@media print {
+/* @media print {
   *,
   *::before,
   *::after {
@@ -27694,7 +27694,7 @@ html:not([dir="rtl"]) .c-email-app .c-message-headers-date {
   .table .thead-dark th {
     color: inherit;
   }
-}
+} */
 
 /*
  *  Usage:
