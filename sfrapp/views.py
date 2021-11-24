@@ -673,6 +673,7 @@ def manual_report(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
+    chief_id = request.GET.get('chief_id') # NONE USE FOR NOW
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -787,6 +788,8 @@ def break_join(request):
 def delete_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
+    emp_id = request.GET.get('emp_id')
+    chief_id = request.GET.get('chief_id')
     operation = getOperation(order_no, operation_no)
     nextlink = "0"
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
@@ -802,7 +805,7 @@ def delete_operation(request):
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
     #-- HISTORY : DELETE OPERATION
-    insertHistoryModifier("DELETE", order_no, operation_no, getClientIP(request))
+    insertHistoryModifier("DELETE", order_no, operation_no, emp_id, chief_id)
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
     data = {
@@ -834,7 +837,7 @@ def add_operation(request):
     #-- SAP : ADD OPERATION
     insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : ADD OPERATION
-    insertHistoryModifier("ADD", order_no, operation_no, getClientIP(request))
+    insertHistoryModifier("ADD", order_no, operation_no, "8888", "8888")
     #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
@@ -870,7 +873,7 @@ def change_operation(request):
     #-- SAP : CHANGE OPERATION
     insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : CHANGE OPERATION
-    insertHistoryModifier("CHANGE", order_no, operation_no, getClientIP(request))
+    insertHistoryModifier("CHANGE", order_no, operation_no, "8888", "8888")
     data = {
     }
     return JsonResponse(data)
@@ -1530,11 +1533,11 @@ def insertHistoryJoin(order_no, operation_no, join_order_no, join_operation_no, 
     conn.commit()
     return
 
-def insertHistoryModifier(type, order_no, operation_no, ip):
+def insertHistoryModifier(type, order_no, operation_no, emp_id, chief_id):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[HistoryModifier] ([Type],[OrderNo],[OperationNo],[ClientIP],[ModifyDateTime])"
-    sql += " VALUES ('" + str(type) + "','" + str(order_no) + "','" + str(operation_no) + "','" + str(ip) + "',CURRENT_TIMESTAMP)"
+    sql = "INSERT INTO [dbo].[HistoryModifier] ([Type],[OrderNo],[OperationNo],[EmpID],[ChiefID],[ModifyDateTime])"
+    sql += " VALUES ('" + str(type) + "','" + str(order_no) + "','" + str(operation_no) + "','" + str(emp_id) + "','" + str(chief_id) + "',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return

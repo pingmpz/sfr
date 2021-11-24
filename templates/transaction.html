@@ -395,7 +395,8 @@
                                   <tr>
                                     <th>Action</th>
                                     <th>Operation No</th>
-                                    <!-- <th>ClientIP</th> -->
+                                    <th>EmpID</th>
+                                    <th>ChiefID</th>
                                     <th>DateTimeStamp</th>
                                   </tr>
                                 </thead>
@@ -406,7 +407,8 @@
                                       <strong>{{mod.Type}}</strong>
                                     </td>
                                     <td>{{mod.OperationNo}}</td>
-                                    <!-- <td>{{mod.ClientIP}}</td> -->
+                                    <td>{{mod.EmpID}}</td>
+                                    <td>{{mod.ChiefID}}</td>
                                     <td>{{mod.ModifyDateTime}}</td>
                                   </tr>
                                   {% endfor %}
@@ -631,122 +633,152 @@
       {% include 'footer.html' %}
       <!-- *** MODAL *** -->
       <div class="modal" id="add_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-success" role="document">
+        <div class="modal-dialog modal-xl modal-success" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title"><i class="c-icon cil-plus"></i> Add Operation</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <br><h3 class="text-center">Are you sure to add new operation ?</h3><br>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small">
-                  <strong>New Operation No</strong>
-                  <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
-                  data-content="
-                  1) Not Exist Number.<br>
-                  2) Only After Working/Completed Operation.<br>
-                  3) Never Deleted Number.<br>
-                  ">!
-                  </a>
-                </label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_new_operation_no" autocomplete="off" maxlength="4" value="">
+              <br>
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="text" id="add_emp_id" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Section Chief Password</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm my-password" type="text" id="add_password" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small">
+                      <strong>New Operation No</strong>
+                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
+                      data-content="
+                      1) Not Exist Number.<br>
+                      2) Only After Working/Completed Operation.<br>
+                      3) Never Deleted Number.<br>
+                      ">!
+                      </a>
+                    </label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="text" id="add_new_operation_no" autocomplete="off" maxlength="4" value="">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="text" id="add_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Plan Start Date</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="date" id="add_plan_start_date" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Plan Finish Date</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="date" id="add_plan_finish_date" autocomplete="off">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
+                    <div class="col-md-8">
+                      <select class="form-control form-control-sm" id="add_control_key">
+                        <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
+                        <option value="PP02">Routing/Ref. op. set - external proc.</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="add_pp01">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="add_est_setup_time" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="add_est_operate_time" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div id="add_pp02" hidden>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="add_pdt" autocomplete="off" value="7" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="add_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="add_cost_element" autocomplete="off" value="51202101" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control form-control-sm" id="add_mat_group">
+                          {% for materialGroup in materialGroupList %}
+                          <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control form-control-sm" id="add_purchasing_group">
+                          {% for purchaseGroup in purchaseGroupList %}
+                          <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="add_price_unit" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
+                      <div class="col-md-5">
+                        <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off">
+                      </div>
+                      <div class="col-md-3">
+                        <select class="form-control form-control-sm" id="add_currency">
+                          {% for currency in currencyList %}
+                          <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
                 </div>
               </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="add_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
-                <div class="col-md-8">
-                  <select class="form-control form-control-sm" id="add_control_key">
-                    <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
-                    <option value="PP02">Routing/Ref. op. set - external proc.</option>
-                  </select>
-                </div>
-              </div>
-              <div id="add_pp01">
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_setup_time" autocomplete="off">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_operate_time" autocomplete="off">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off">
-                  </div>
-                </div>
-              </div>
-              <div id="add_pp02" hidden>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_pdt" autocomplete="off" value="7" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="add_cost_element" autocomplete="off" value="51202101" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
-                  <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="add_mat_group">
-                      {% for materialGroup in materialGroupList %}
-                      <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
-                  <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="add_purchasing_group">
-                      {% for purchaseGroup in purchaseGroupList %}
-                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="add_price_unit" autocomplete="off">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
-                  <div class="col-md-5">
-                    <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off">
-                  </div>
-                  <div class="col-md-3">
-                    <select class="form-control form-control-sm" id="add_currency">
-                      {% for currency in currencyList %}
-                      <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
               </div>
             </div>
             <div class="modal-footer">
@@ -757,105 +789,135 @@
         </div>
       </div>
       <div class="modal" id="change_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-warning" role="document">
+        <div class="modal-dialog modal-xl modal-warning" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title"><i class="c-icon cil-transfer"></i> Change Operation</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <br><h3 class="text-center">Are you sure to change this operation ?</h3><br>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
-                <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="change_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
-                <div class="col-md-8">
-                  <select class="form-control form-control-sm" id="change_control_key">
-                    <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
-                    <option value="PP02">Routing/Ref. op. set - external proc.</option>
-                  </select>
-                </div>
-              </div>
-              <div id="change_pp01">
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_setup_time" autocomplete="off">
+              <br>
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="text" id="change_emp_id" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Section Chief Password</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm my-password" type="text" id="change_password" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Work Center</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="text" id="change_work_center_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Plan Start Date</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="date" id="change_plan_start_date" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Plan Finish Date</strong></label>
+                    <div class="col-md-8">
+                      <input class="form-control form-control-sm" type="date" id="change_plan_finish_date" autocomplete="off">
+                    </div>
                   </div>
                 </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_operate_time" autocomplete="off">
+                <div class="col-6">
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right small"><strong>Control Key</strong></label>
+                    <div class="col-md-8">
+                      <select class="form-control form-control-sm" id="change_control_key">
+                        <option value="PP01" selected>Routing/Ref. op. set - internal proc.</option>
+                        <option value="PP02">Routing/Ref. op. set - external proc.</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off">
+                  <div id="change_pp01">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Setup Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="change_est_setup_time" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Operation Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="change_est_operate_time" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Est. Labor Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off">
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div id="change_pp02" hidden>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_pdt" autocomplete="off" value="7" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="text" id="change_cost_element" autocomplete="off" value="51202101" readonly>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
-                  <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="change_mat_group">
-                      {% for materialGroup in materialGroupList %}
-                      <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
-                  <div class="col-md-8">
-                    <select class="form-control form-control-sm" id="change_purchasing_group">
-                      {% for purchaseGroup in purchaseGroupList %}
-                      <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
-                  <div class="col-md-8">
-                    <input class="form-control form-control-sm" type="number" id="change_price_unit" autocomplete="off">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
-                  <div class="col-md-5">
-                    <input class="form-control form-control-sm" type="number" id="change_price" autocomplete="off">
-                  </div>
-                  <div class="col-md-3">
-                    <select class="form-control form-control-sm" id="change_currency">
-                      {% for currency in currencyList %}
-                      <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
-                      {% endfor %}
-                    </select>
+                  <div id="change_pp02" hidden>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Planned Delivery Time</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="change_pdt" autocomplete="off" value="7" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Org</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="change_purchasing_org" autocomplete="off" value="{{order.Plant}}" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Cost Element</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="text" id="change_cost_element" autocomplete="off" value="51202101" readonly>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Material Group</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control form-control-sm" id="change_mat_group">
+                          {% for materialGroup in materialGroupList %}
+                          <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Purchasing Group</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control form-control-sm" id="change_purchasing_group">
+                          {% for purchaseGroup in purchaseGroupList %}
+                          <option value="{{purchaseGroup.ID}}" {% if purchaseGroup.IsDefault %}selected{% endif %}>{{purchaseGroup.ID}} | {{purchaseGroup.Name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control form-control-sm" type="number" id="change_price_unit" autocomplete="off">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
+                      <div class="col-md-5">
+                        <input class="form-control form-control-sm" type="number" id="change_price" autocomplete="off">
+                      </div>
+                      <div class="col-md-3">
+                        <select class="form-control form-control-sm" id="change_currency">
+                          {% for currency in currencyList %}
+                          <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -876,10 +938,18 @@
             </div>
             <div class="modal-body">
               <br><h3 class="text-center">Are you sure to delete this operation ?</h3><br>
-              <h1 class="text-center text-danger" id="del_text"></h1>
-              <br>
-              <p class="text-center"><small>Please fill the above code to the input field below.</small></p>
-              <input type="text" class="form-control text-center" maxlength="4" id="del_code" autocomplete="off">
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="del_emp_id" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Section Chief Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="del_password" autocomplete="off">
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <button class="btn btn-danger" type="button" id="trash_confirm_button" onclick="trash()">Confirm</button>
@@ -1146,32 +1216,16 @@
                 <div class="row">
                   <div class="col-md-12">
                     <div class="form-group row">
-                      <label class="col-md-2 col-form-label text-right"><strong>Password</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-2 col-form-label text-right"><strong>Section Chief Password</strong></label>
                       <div class="col-md-10">
                         <input class="form-control my-password" type="text" id="mp_password" autocomplete="off">
                       </div>
                     </div>
                   </div>
                   <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Work Time</strong></div><div class="col-md-5"><hr></div>
-                  <div class="col-md-6">
-                    <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong> <span class="text-danger">*</span></label>
-                      <div class="col-md-8">
-                        <input class="form-control" type="text" id="mp_emp_id" autocomplete="off">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Labor (min)</strong></label>
-                      <div class="col-md-8">
-                        <input class="form-control" type="number" id="mp_labor_time" autocomplete="off">
-                      </div>
-                    </div>
-                  </div>
                   <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="text" id="mp_workcenter_no" autocomplete="off" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
                       </div>
@@ -1196,7 +1250,23 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="text" id="mp_emp_id" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Labor (min)</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="mp_labor_time" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Start Time</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="datetime-local" id="mp_start_time">
                       </div>
@@ -1204,7 +1274,7 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong> <span class="text-danger">*</span></label>
+                      <label class="col-md-4 col-form-label text-right"><strong>Stop Time</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="datetime-local" id="mp_stop_time">
                       </div>
@@ -1804,11 +1874,15 @@
       }
 
       function manual_report(){
+        //a
         if($('#mp_labor_time').val() == "") $('#mp_labor_time').val("0");
         if($('#mp_setup_time').val() == "") $('#mp_setup_time').val("0");
         if($('#mp_operate_time').val() == "") $('#mp_operate_time').val("0");
         if($('#mp_good_qty').val() == "") $('#mp_good_qty').val("0");
         if($('#mp_reject_qty').val() == "") $('#mp_reject_qty').val("0");
+        //b
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
         var workcenter_type = $('#workcenter_type').val();
         var password = $('#mp_password').val();
         var emp_id = $('#mp_emp_id').val();
@@ -1824,24 +1898,27 @@
         var reject_reason = $('#mp_reject_reason').val();
         var other_reason = $('#mp_other_reason').val();
         var isReportable = false;
+        var chief_id = "";
         $("#mp_invalid_text").text("");
         remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
-        validate_password(password, function(isCorrect, inValidText1) {
+        //c
+        validate_password(password, function(isCorrect, invalid_text1) {
           if(!isCorrect){
             invalid("mp_password");
-            $("#mp_invalid_text").text(inValidText1);
+            $("#mp_invalid_text").text(invalid_text1);
           } else{
             valid("mp_password");
-            validate_operator(emp_id, function(isExist, inValidText2) {
+            validate_operator(emp_id, function(isExist, invalid_text2, temp_chief_id) {
+              chief_id = temp_chief_id;
               if(!isExist){
                 invalid("mp_emp_id");
-                $("#mp_invalid_text").text(inValidText2);
+                $("#mp_invalid_text").text(invalid_text2);
               } else{
                 valid("mp_emp_id");
-                validate_work_center(workcenter_no, function(canUse, inValidText3) {
+                validate_work_center(workcenter_no, function(canUse, invalid_text3) {
                   if(!canUse && workcenter_type != "Labor"){
                     invalid("mp_workcenter_no");
-                    $("#mp_invalid_text").text(inValidText3);
+                    $("#mp_invalid_text").text(invalid_text3);
                   } else{
                     valid("mp_workcenter_no");
                     if($('#mp_start_time').val() == ""){
@@ -1913,8 +1990,6 @@
                     }
                   }
                   if(isReportable){
-                    var order_no = $("#order_no").val();
-                    var operation_no = $("#operation_no").val();
                     $('#mp_button').prop('disabled', true);
                     $.ajax({
                       url: '/manual_report/',
@@ -1932,6 +2007,7 @@
                         'reject_qty': reject_qty,
                         'reject_reason': reject_reason,
                         'other_reason': other_reason,
+                        'chief_id': chief_id,
                       },
                       dataType: 'json',
                       success: function (data) {
@@ -1945,23 +2021,13 @@
           }
         });
       }
-
-      // document.getElementById("good_qty").addEventListener("keydown", function (e) {
-      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
-      // });
-      //
-      // document.getElementById("reject_qty").addEventListener("keydown", function (e) {
-      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
-      // });
-      //
-      // document.getElementById("other_reason").addEventListener("keydown", function (e) {
-      //   if (e.code === "Enter" || e.code == "NumpadEnter") confirm();
-      // });
     </script>
     <!-- MODIFIER -->
     <script>
       function prepare_add(){
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        remove_valid_many(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        $("#add_emp_id").val("");
+        $("#add_password").val("");
         $("#add_new_operation_no").val("");
         $("#add_work_center_no").val("");
         $("#add_est_setup_time").val("");
@@ -1969,36 +2035,33 @@
         $("#add_est_labor_time").val("");
         $("#add_price_unit").val("");
         $("#add_price").val("");
-        $("#add_new_operation_no").focus();
+        $("#add_emp_id").focus();
         timeleft = 300;
       }
 
       function prepare_change(){
-        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
-        // $("#change_work_center_no").val($("#work_center").val());
-        // $("#change_est_setup_time").val(parseFloat($("#est_setup_time").val()));
-        // $("#change_est_operate_time").val(parseFloat($("#est_operate_time").val()));
-        // $("#change_est_labor_time").val(parseFloat($("#est_labor_time").val()));
+        remove_valid_many(["change_emp_id","change_password","change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        $("#change_emp_id").val("");
+        $("#change_password").val("");
         $("#change_work_center_no").val("");
         $("#change_est_setup_time").val("");
         $("#change_est_operate_time").val("");
         $("#change_est_labor_time").val("");
         $("#change_price_unit").val("");
         $("#change_price").val("");
-        $("#change_work_center_no").focus();
+        $("#change_emp_id").focus();
         timeleft = 300;
       }
 
       function prepare_delete(){
-        $("#del_text").text(generateRandomCode(4));
-        remove_valid("del_code");
-        $("#del_code").val("");
-        $("#del_code").focus();
+        remove_valid_many(["del_emp_id","del_password"]);
+        $("#del_emp_id").val("");
+        $("#del_password").val("");
+        $("#del_emp_id").focus();
         timeleft = 300;
       }
 
       function add(){
-        $('#add_confirm_button').prop('disabled', true);
         // a
         $("#add_new_operation_no").val(frontZero($("#add_new_operation_no").val(), 4));
         if($('#add_est_setup_time').val() == "") $('#add_est_setup_time').val("0");
@@ -2024,7 +2087,7 @@
         var price = parseFloat($('#add_price').val());
         var currency = $('#add_currency').val();
         var isAddable = false;
-        remove_valid_many(["add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        remove_valid_many(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
         // c
         validate_new_operation(new_operation_no, function(canAdd) {
           if(!canAdd) {
@@ -2064,6 +2127,7 @@
                   }
                 }
                 if(isAddable){
+                  $('#add_confirm_button').prop('disabled', true);
                   $.ajax({
                     url: '/add_operation/',
                     data: {
@@ -2089,7 +2153,6 @@
                     }
                   });
                 } else {
-                  $('#add_confirm_button').prop('disabled', false);
                 }
               }
             });
@@ -2098,7 +2161,6 @@
       }
 
       function change(){
-        $('#change_confirm_button').prop('disabled', true);
         // a
         if($('#change_est_setup_time').val() == "") $('#change_est_setup_time').val("0");
         if($('#change_est_operate_time').val() == "") $('#change_est_operate_time').val("0");
@@ -2123,7 +2185,7 @@
         var price = parseFloat($('#change_price').val());
         var currency = $('#change_currency').val();
         var isChangable = false;
-        remove_valid_many(["change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        remove_valid_many(["change_emp_id","change_password","change_work_center_no","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
         // c
         validate_routing(work_center_no, function(canUse) {
           if(!canUse) {
@@ -2157,6 +2219,7 @@
               }
             }
             if(isChangable){
+              $('#change_confirm_button').prop('disabled', true);
               $.ajax({
                 url: '/change_operation/',
                 data: {
@@ -2181,43 +2244,49 @@
                   location.reload();
                 }
               });
-            } else {
-              $('#change_confirm_button').prop('disabled', false);
             }
           }
         });
       }
 
       function trash(){
-        remove_valid("del_code");
-        var del_text = $("#del_text").text();
-        var del_code = $("#del_code").val();
-        if(del_text != del_code){
-          invalid("del_code");
-        } else {
-          valid("del_code");
-          $('#trash_confirm_button').prop('disabled', true);
-          var order_no = $('#order_no').val();
-          var operation_no = $('#operation_no').val();
-          $.ajax({
-            url: '/delete_operation/',
-            data: {
-              'order_no': order_no,
-              'operation_no': operation_no,
-            },
-            dataType: 'json',
-            success: function (data) {
-              window.location.href = '/transaction/' + data.nextlink;
-            }
-          });
-        }
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        var emp_id = $("#del_emp_id").val();
+        var password = $("#del_password").val();
+        remove_valid_many(["del_emp_id","del_password"]);
+        validate_operator(emp_id, function(isCorrect, invalid_text1) {
+          if(!isCorrect){
+            invalid("del_emp_id");
+          } else {
+            valid("del_emp_id");
+            validate_password(password, function(isCorrect, invalid_text2, chief_id) {
+              if(!isCorrect){
+                invalid("del_password");
+              } else {
+                valid("del_password");
+                $('#trash_confirm_button').prop('disabled', true);
+                console.log(chief_id)
+                $.ajax({
+                  url: '/delete_operation/',
+                  data: {
+                    'order_no': order_no,
+                    'operation_no': operation_no,
+                    'emp_id' : emp_id,
+                    'chief_id' : chief_id,
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                    window.location.href = '/transaction/' + data.nextlink;
+                  }
+                });
+              }
+            });
+          }
+        });
       }
-
-      document.getElementById("del_code").addEventListener("keydown", function (e) {
-        if (e.code === "Enter" || e.code == "NumpadEnter") trash();
-      });
     </script>
-    <!-- VALIDATION AND SHORTCUT SEARCH -->
+    <!-- VALIDATION -->
     <script>
       //-- VALIDATION
       function validate_new_operation(new_operation_no, _callback){
@@ -2291,8 +2360,8 @@
       }
 
       function validate_password(password, _callback){
-        if(password.length == 0) _callback(false, "Please fill Password.");
-        else if(password.length < 4) _callback(false, "Password is not correct.");
+        if(password.length == 0) _callback(false, "Please fill Password.", "");
+        else if(password.length < 4) _callback(false, "Password is not correct.", "");
         else {
           $.ajax({
             url: '/validate_password/',
@@ -2301,13 +2370,34 @@
             },
             dataType: 'json',
             success: function (data) {
-              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+              (data.isCorrect)? _callback(true, "", "5731"):_callback(false, "Password is not correct.", "");
             }
           });
         }
       }
 
-      //-- SHORTCUT SEARCH
+      //-- VALIDATE CONTROL
+      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
+      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
+      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
+
+      function remove_valid(input_id){
+        $("#"+input_id).removeClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
+      }
+
+      function valid(input_id){
+        $("#"+input_id).addClass("is-valid");
+        $("#"+input_id).removeClass("is-invalid");
+      }
+
+      function invalid(input_id){
+        $("#"+input_id).addClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
+      }
+    </script>
+    <!-- SHORTCUT SEARCH -->
+    <script>
       document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
         if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
       });
@@ -2330,26 +2420,6 @@
             window.open('/transaction/' + order_no + operation_no, '_self');
           }
         }
-
-      //-- VALIDATE CONTROL
-      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
-      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
-      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
-
-      function remove_valid(input_id){
-        $("#"+input_id).removeClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
-
-      function valid(input_id){
-        $("#"+input_id).addClass("is-valid");
-        $("#"+input_id).removeClass("is-invalid");
-      }
-
-      function invalid(input_id){
-        $("#"+input_id).addClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
     </script>
     <!-- DYNAMIC INPUT -->
     <script>
@@ -2432,6 +2502,11 @@
     </script>
     <!-- KET RESTRICT -->
     <script>
+      $("#add_emp_id").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#add_new_operation_no").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -2462,6 +2537,11 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
+      $("#change_emp_id").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#change_est_setup_time").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -2478,6 +2558,11 @@
       });
 
       $("#change_pdt").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#del_emp_id").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
