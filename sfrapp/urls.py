@@ -16,6 +16,7 @@ urlpatterns = [
     path('curr_master/', views.curr_master, name='curr_master'),
     #-- DATA PAGE
     path('wc/<str:wcno>&<str:fmonth>', views.wc, name='wc'),
+    path('emp/<str:empid>&<str:fmonth>', views.emp, name='emp'),
     #-- RERORT
     path('lot_traveller/<str:orderno>', views.lot_traveller, name='lot_traveller'),
     #-- SAP
@@ -55,8 +56,9 @@ urlpatterns = [
     path('validate_work_center/', views.validate_work_center, name='validate_work_center'),
     path('validate_operator/', views.validate_operator, name='validate_operator'),
     path('validate_password/', views.validate_password, name='validate_password'),
-    #-- WC
+    #-- TIMELINE
     path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
+    path('get_emp_timeline/', views.get_emp_timeline, name='get_emp_timeline'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

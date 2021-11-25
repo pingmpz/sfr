@@ -209,6 +209,16 @@ def wc(request, wcno, fmonth):
     }
     return render(request, 'wc.html', context)
 
+def emp(request, empid, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    employee = getOperator(empid)
+    context = {
+        'employee': employee,
+        'fmonth': fmonth,
+    }
+    return render(request, 'emp.html', context)
+
 #------------------------------------------------------------------------ REPORT
 
 def lot_traveller(request, orderno):
@@ -991,7 +1001,7 @@ def reset_all(request):
     }
     return JsonResponse(data)
 
-#---------------------------------------------------------------------------- WC
+#---------------------------------------------------------------------- TIMELINE
 
 def get_wc_timeline(request):
     work_center_no = request.GET.get('work_center_no')
@@ -1003,6 +1013,15 @@ def get_wc_timeline(request):
     }
     return JsonResponse(data)
 
+def get_emp_timeline(request):
+    emp_id = request.GET.get('emp_id')
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    empOperateList = [list(i) for i in getEmployeeTimeLine(emp_id, month, year)]
+    data = {
+        'empOperateList': empOperateList,
+    }
+    return JsonResponse(data)
 
 ################################################################################
 ################################### DATABASE ###################################
@@ -1173,8 +1192,17 @@ def getWorkCenterTimeLine(work_center_no, month, year):
     sql = "SELECT * FROM [HistoryOperate] as HO"
     sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
     sql += " LEFT JOIN [Employee] AS EMP ON HO.EmpID = EMP.EmpID"
-    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
-    print(sql)
+    sql += " WHERE HO.WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getEmployeeTimeLine(emp_id, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryOperate] as HO"
+    sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
+    sql += " INNER JOIN [Employee] AS EMP ON HO.EmpID = EMP.EmpID"
+    sql += " INNER JOIN [WorkCenter] AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE HO.EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 

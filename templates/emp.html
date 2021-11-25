@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Work Center | Shopfloor Reporting Application</title>
+    <title>Employee | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -39,10 +39,10 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Work Center</li>
+            <li class="breadcrumb-item">Employee</li>
             <!-- Breadcrumb Menu-->
             <li class="breadcrumb-item active">
-              {{workCenter.WorkCenterNo}}
+              {{employee.EmpID}}
             </li>
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -62,71 +62,21 @@
                     <div class="card-body">
                       <div class="small">
                         <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
+                          <label class="col-md-4 col-form-label text-right"><strong>Employee ID</strong></label>
                           <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" id="work_center_no" value="{{workCenter.WorkCenterNo}}" readonly>
+                            <input class="form-control form-control-sm" type="text" id="emp_id" value="{{employee.EmpID}}" readonly>
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Name</strong></label>
+                          <label class="col-md-4 col-form-label text-right"><strong>Employee Name</strong></label>
                           <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterName}}" readonly>
+                            <input class="form-control form-control-sm" type="text" value="{{employee.EmpName}}" readonly>
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Work Center Group</strong></label>
+                          <label class="col-md-4 col-form-label text-right"><strong>Section</strong></label>
                           <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterGroup}}" readonly>
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Routing</strong></label>
-                          <div class="col-md-8">
-                            {% if workCenter.IsRouting %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
-                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
-                            {% endif %}
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>External Process</strong></label>
-                          <div class="col-md-8">
-                            {% if workCenter.IsExternalProcess %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
-                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
-                            {% endif %}
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Work Center Type</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterType}}" readonly>
-                          </div>
-                        </div>
-                        {% if workCenter.WorkCenterType == 'Machine' %}
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Machine Type</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.MachineType|default_if_none:""}}" readonly>
-                          </div>
-                        </div>
-                        {% endif %}
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Hourly Rate</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.HourlyRate}}" readonly>
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Noted</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" value="{{workCenter.Noted|default_if_none:""}}" readonly>
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Active</strong></label>
-                          <div class="col-md-8">
-                            {% if workCenter.IsActive %}<i class="c-icon cil-check text-success" style="padding-top: 7px"></i>
-                            {% else %}<i class="c-icon cil-x text-danger" style="padding-top: 6px"></i>
-                            {% endif %}
+                            <input class="form-control form-control-sm" type="text" value="{{employee.Section}}" readonly>
                           </div>
                         </div>
                       </div>
@@ -149,8 +99,8 @@
                           <strong></strong>
                         </div>
                         <div class="col-md-6 text-right">
-                          <span class="text-primary"><i class="c-icon cil-gauge"></i> Auto Machine</span>
-                          <span class="text-danger"><i class="c-icon cil-user"></i> Employee</span>
+                          <span class="text-primary"><i class="c-icon cil-gauge"></i> Machine</span>
+                          <span class="text-danger"><i class="c-icon cil-user"></i> Labor</span>
                         </div>
                       </div>
                       <div id="timeline"></div>
@@ -185,7 +135,7 @@
       var graph_coef = 0.675;
       var month = $("#month").val();
       var year = $("#year").val();
-      var work_center_no = $("#work_center_no").val();
+      var emp_id = $("#emp_id").val();
 
       google.charts.load('current', {'packages':['timeline']});
       google.charts.setOnLoadCallback(drawChart);
@@ -216,25 +166,27 @@
 
       function createDataRows(chart, dataTable, options, month, year){
         $.ajax({
-          url: '/get_wc_timeline/',
+          url: '/get_emp_timeline/',
           data: {
-            'work_center_no': work_center_no,
+            'emp_id': emp_id,
             'month': month,
             'year': year,
           },
           dataType: 'json',
           success: function (data) {
             var rows = [];
-            for (var i = 0; i < data.wcOperateList.length; i++) {
-              console.log(data.wcOperateList[i]);
-              var orderoprno = data.wcOperateList[i][0]+"-"+data.wcOperateList[i][1];
-              var work_center_no = data.wcOperateList[i][9];
-              var emp_id = data.wcOperateList[i][2];
-              var emp_name = data.wcOperateList[i][25];
-              var start_date_time = new Date(data.wcOperateList[i][5]);
-              var stop_date_time = new Date(data.wcOperateList[i][6]);
-              var color = (emp_id != null)? '#e74c3c':'#4f88db';
-              var tooltip = tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+            for (var i = 0; i < data.empOperateList.length; i++) {
+              console.log(data.empOperateList[i]);
+              var orderoprno = data.empOperateList[i][0]+"-"+data.empOperateList[i][1];
+              var work_center_no = data.empOperateList[i][9];
+              var work_center_type = data.empOperateList[i][31];
+              var work_center_no_machine = data.empOperateList[i][27];
+              var emp_id = data.empOperateList[i][2];
+              var emp_name = data.empOperateList[i][25];
+              var start_date_time = new Date(data.empOperateList[i][5]);
+              var stop_date_time = new Date(data.empOperateList[i][6]);
+              var color = (work_center_type == "Labor")? '#e74c3c':'#4f88db';
+              var tooltip = tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
               rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
             }
             dataTable.addRows(rows);
@@ -243,11 +195,11 @@
         });
       }
 
-      function tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, start_time, end_time, mins){
+      function tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, start_time, end_time, mins){
         str = '<div style="width: 200px; padding: 5px;" class="text-center">';
-        if(emp_id != null) str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
+        if(work_center_type == "Labor") str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
         else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
-        if(emp_id != null) str += ''+emp_id+'<br>'+emp_name+'<br>';
+        if(work_center_type == "Machine") str += ''+work_center_no_machine+'<br>';
         str += '<strong>'+orderoprno+'</strong><br>';
         str += ''+work_center_no+'<br>';
         str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes';
@@ -297,7 +249,7 @@
       }
 
       $('#fmonth').change(function() {
-        window.location.href =  "/wc/" + ($("#work_center_no").val() + "&" + $("#fmonth").val());
+        window.location.href =  "/emp/" + ($("#emp_id").val() + "&" + $("#fmonth").val());
       });
 
 
