@@ -55,6 +55,8 @@ urlpatterns = [
     path('validate_work_center/', views.validate_work_center, name='validate_work_center'),
     path('validate_operator/', views.validate_operator, name='validate_operator'),
     path('validate_password/', views.validate_password, name='validate_password'),
+    #-- WC
+    path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
     ## ADMIN
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

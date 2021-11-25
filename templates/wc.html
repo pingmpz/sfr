@@ -149,7 +149,7 @@
                           <strong>November 2021</strong>
                         </div>
                         <div class="col-md-6 text-right">
-                          <span class="text-primary"><i class="c-icon cil-3d"></i> Operation</span>
+                          <span class="text-primary"><i class="c-icon cil-gauge"></i> Auto Machine</span>
                           <span class="text-danger"><i class="c-icon cil-user"></i> Employee</span>
                         </div>
                       </div>
@@ -185,6 +185,7 @@
       var graph_coef = 0.675;
       var month = $("#month").val();
       var year = $("#year").val();
+      var work_center_no = $("#work_center_no").val();
 
       google.charts.load('current', {'packages':['timeline']});
       google.charts.setOnLoadCallback(drawChart);
@@ -210,25 +211,48 @@
         dataTable.addColumn({ type: 'date', id: 'Start' });
         dataTable.addColumn({ type: 'date', id: 'End' });
         createEmptyRows(dataTable, month, year);
-        createDataRows(dataTable, month, year);
-        chart.draw(dataTable, options);
+        createDataRows(chart, dataTable, options, month, year);
       }
 
-      function createDataRows(dataTable, month, year){
-
-        dataTable.addRows([
-          [ '01', '5000123456-0010', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-3d"></i>&nbsp;<strong>5000123456-0010</strong><br>AIR-SP01<br>10:00 AM - 17:19 AM<br>439 minutes</div>', '#4656e9', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 17, 19, 0)],
-          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>10:00 AM - 10:23 AM<br>23 minutes</div>', '#e74c3c', new Date(0, 0, 0, 10, 0, 0), new Date(0, 0, 0, 10, 23, 0)],
-          [ '01', '5731', '<div style="width: 200px; padding: 5px;" class="text-center"><i class="c-icon c-icon-sm cil-user"></i>&nbsp;<strong>5731</strong><br>Yashawantatul Mangalmurti<br>15:46 AM - 17:19 AM<br>93 minutes</div>', '#e74c3c', new Date(0, 0, 0, 15, 46, 0), new Date(0, 0, 0, 17, 19, 0)],
-        ]);
+      function createDataRows(chart, dataTable, options, month, year){
+        $.ajax({
+          url: '/get_wc_timeline/',
+          data: {
+            'work_center_no': work_center_no,
+            'month': month,
+            'year': year,
+          },
+          dataType: 'json',
+          success: function (data) {
+            var rows = [];
+            for (var i = 0; i < data.wcOperateList.length; i++) {
+              console.log(data.wcOperateList[i]);
+              var orderoprno = data.wcOperateList[i][0]+"-"+data.wcOperateList[i][1];
+              var work_center_no = data.wcOperateList[i][9];
+              var emp_id = data.wcOperateList[i][2];
+              var emp_name = data.wcOperateList[i][25];
+              var start_date_time = new Date(data.wcOperateList[i][5]);
+              var stop_date_time = new Date(data.wcOperateList[i][6]);
+              var color = (emp_id != null)? '#e74c3c':'#4f88db';
+              var tooltip = tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+              rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+            }
+            dataTable.addRows(rows);
+            chart.draw(dataTable, options);
+          }
+        });
       }
 
-      function tooltipOperation(orderoprno, work_center_no, start_time, end_time, mins){
-        return;
-      }
-
-      function tooltipEmployee(emp_id, emp_name, start_time, end_time, mins){
-        return;
+      function tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, start_time, end_time, mins){
+        str = '<div style="width: 200px; padding: 5px;" class="text-center">';
+        if(emp_id != null) str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
+        else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
+        if(emp_id != null) str += ''+emp_id+'<br>'+emp_name+'<br>';
+        str += '<strong>'+orderoprno+'</strong><br>';
+        str += ''+work_center_no+'<br>';
+        str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes';
+        str += '</div>';
+        return str;
       }
 
       function createEmptyRows(dataTable, month, year){
@@ -257,9 +281,26 @@
         return result;
       }
 
+      function getTime(datetime) {
+         var result = "";
+         var hour = frontZero(datetime.getHours().toString(), 2);
+         var minute = frontZero(datetime.getMinutes().toString(), 2);
+         var second = frontZero(datetime.getSeconds().toString(), 2);
+         result = hour+":"+minute+":"+second;
+         return result
+      }
+
+      function getDiffMin(start_date_time, stop_date_time){
+        var diff = Math.abs(stop_date_time - start_date_time);
+        var minutes = Math.floor((diff/1000)/60);
+        return minutes;
+      }
+
       $('#fmonth').change(function() {
         window.location.href =  "/wc/" + ($("#work_center_no").val() + "&" + $("#fmonth").val());
       });
+
+
     </script>
   </body>
 </html>

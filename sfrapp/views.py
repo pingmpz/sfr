@@ -991,6 +991,18 @@ def reset_all(request):
     }
     return JsonResponse(data)
 
+#---------------------------------------------------------------------------- WC
+
+def get_wc_timeline(request):
+    work_center_no = request.GET.get('work_center_no')
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    wcOperateList = [list(i) for i in getWorkCenterTimeLine(work_center_no, month, year)]
+    data = {
+        'wcOperateList': wcOperateList,
+    }
+    return JsonResponse(data)
+
 
 ################################################################################
 ################################### DATABASE ###################################
@@ -1153,6 +1165,16 @@ def getHistoryJoinList(order_no, operation_no):
     sql = "SELECT * FROM [HistoryJoin] "
     sql += " WHERE (JoinToOrderNo = '" + order_no + "' AND JoinToOperationNo = '" + operation_no + "')"
     sql += " OR (JoinByOrderNo = '" + order_no + "' AND JoinByOperationNo = '" + operation_no + "')"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterTimeLine(work_center_no, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryOperate] as HO"
+    sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
+    sql += " LEFT JOIN [Employee] AS EMP ON HO.EmpID = EMP.EmpID"
+    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    print(sql)
     cursor.execute(sql)
     return cursor.fetchall()
 
