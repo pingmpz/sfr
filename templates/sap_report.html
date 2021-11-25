@@ -125,7 +125,7 @@
                           {% for report in sapReportList %}
                           <tr>
                             <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|default_if_none:""}}</td>
-                            <td>{{report.WorkCenter|default_if_none:""}}</td>
+                            <td><a href="/wc/{{report.WorkCenter}}&NOW">{{report.WorkCenter|default_if_none:""}}</a></td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
                             <td>{{report.OperationNumber|default_if_none:""}}</td>
                             <td>{{report.Yiled|default_if_none:""}}</td>
@@ -137,7 +137,13 @@
                             <td>{{report.StartTime|default_if_none:""}}</td>
                             <td>{{report.FinishDate|default_if_none:""}}</td>
                             <td>{{report.FinishTime|default_if_none:""}}</td>
-                            <td>{{report.EmployeeID|default_if_none:""}}</td>
+                            <td>
+                              {% if report.EmployeeID.strip != '9999' %}
+                              <a href="/emp/{{report.EmployeeID}}&NOW">{{report.EmployeeID|default_if_none:""}}</a>
+                              {% else %}
+                              {{report.EmployeeID|default_if_none:""}}
+                              {% endif %}
+                            </td>
                           </tr>
                           {% endfor %}
                         </tbody>
