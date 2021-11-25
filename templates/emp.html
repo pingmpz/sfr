@@ -217,10 +217,10 @@
       }
 
       function tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, start_time, end_time, mins){
-        str = '<div style="width: 200px; padding: 5px;" class="text-center">';
+        str = '<div style="width: 200px; padding: 5px;" class="text-center small">';
         if(work_center_type == "Labor") str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
         else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
-        if(work_center_type == "Machine") str += ''+operate_type+' : '+work_center_no_machine+'<br>';
+        if(work_center_type == "Machine") str += ''+operate_type+' ON '+work_center_no_machine+'<br>';
         str += '<strong>'+orderoprno+'</strong><br>';
         str += ''+work_center_no+'<br>';
         str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes';
