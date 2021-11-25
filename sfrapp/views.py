@@ -216,8 +216,13 @@ def lot_traveller(request, orderno):
     order = None
     state = ""
     operationList = []
-    startShow = 0
-    planDayCountList = []
+    operationList1 = []
+    operationList2 = []
+    planDayCountList1 = []
+    planDayCountList2 = []
+    pageCount = 1
+    maxRows = 13
+    counter = 0
     #--
     if orderno == "0":
         state = "FIRSTPAGE"
@@ -234,17 +239,29 @@ def lot_traveller(request, orderno):
                     startShow = operation.OperationNo
                     break
             for operation in operationList:
-                start_date = datetime.strptime(operation.PlanStartDate, '%Y-%m-%d')
-                stop_date = datetime.strptime(operation.PlanFinishDate, '%Y-%m-%d')
-                days = stop_date - start_date
-                planDayCountList.append(days.days)
+                if operation.OperationNo >= startShow:
+                    if counter == maxRows:
+                        pageCount += 1
+                        counter = 0
+                    start_date = datetime.strptime(operation.PlanStartDate, '%Y-%m-%d')
+                    stop_date = datetime.strptime(operation.PlanFinishDate, '%Y-%m-%d')
+                    days = stop_date - start_date
+                    if pageCount == 1:
+                        operationList1.append(operation)
+                        planDayCountList1.append(days.days)
+                    else:
+                        operationList2.append(operation)
+                        planDayCountList2.append(days.days)
+                    counter += 1
     context = {
         'orderNo' : orderNo,
         'order' : order,
         'state' : state,
-        'operationList' : operationList,
-        'startShow' : startShow,
-        'planDayCountList': planDayCountList,
+        'operationList1' : operationList1,
+        'operationList2' : operationList2,
+        'planDayCountList1': planDayCountList1,
+        'planDayCountList2': planDayCountList2,
+        'pageCount': pageCount,
     }
     return render(request, 'lot_traveller.html', context)
 

@@ -46,9 +46,6 @@
             {% endif %}
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            {% if state == "DATAFOUND" %}
-            <button type="button" class="btn btn-sm btn-pill btn-outline-success" onclick="printDiv()">Print</button>
-            {% endif %}
             &nbsp;&nbsp;<div>Prod. Order No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="shortcut_search()">Go !</button></div>
@@ -91,6 +88,11 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="card">
+                    <div class="card-header">
+                      <div class="card-header-actions">
+                        <button class="btn btn-sm btn-link small" onclick="printDiv()"> <i class="c-icon c-icon-sm cil-print"></i></button>
+                      </div>
+                    </div>
                     <div class="card-body">
                       <div id="print-area">
                         <style>
@@ -121,148 +123,339 @@
                             width: 7.69%;
                           }
                         </style>
-                        <div class="row">
-                          <div class="col-2"></div>
-                          <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
-                          <div class="col-4" style="padding-top: 3px">
-                            <div class="form-check form-check-inline mr-1">
-                              <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
-                              <h5 class="form-check-label">Non-ASM</h5>
+                        <script src="{% static "vendors/jsbarcode/js/jsbarcode.all.min.js" %}"></script>
+                        <div id="page_1">
+                          <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
+                            <div class="col-4" style="padding-top: 3px">
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">Non-ASM</h5>
+                              </div>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">ASM</h5>
+                              </div>
                             </div>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <div class="form-check form-check-inline mr-1">
-                              <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
-                              <h5 class="form-check-label">ASM</h5>
-                            </div>
+                            <div class="col-1 text-right" style="padding-top: 3px">1/{{pageCount}}</div>
                           </div>
-                        </div>
-                        <table class="table small">
-                          <tbody>
-                            <tr>
-                              <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                              <td class="toprow toptable">{{orderNo}}</td>
-                              <td class="toprow title toptable"><strong>Sales order No.</strong></td>
-                              <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
-                              <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
-                              <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
-                              <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
-                              <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%"></td>
-                            </tr>
-                            <tr>
-                              <td class="title"><strong>Release Date</strong></td>
-                              <td>
-                                {% if order.ReleaseDate != None %}
-                                {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
-                                {% endif %}
-                              </td>
-                              <td class="title"><strong>Request Date</strong></td>
-                              <td>
-                                {% if order.RequestDate != None %}
-                                {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
-                                {% endif %}
-                              </td>
-                              <td class="title"><strong>Prod. Order Qty</strong></td>
-                              <td>{{order.ProductionOrderQuatity|floatformat|default_if_none:""}}</td>
-                              <td rowspan="2"></td>
-                              <td rowspan="2"></td>
-                              <td rowspan="2"></td>
-                            </tr>
-                            <tr>
-                              <td class="title"><strong>FG. Mat. Code. No.</strong></td>
-                              <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
-                              <td class="title"><strong>RM Mat'l Code No.</strong></td>
-                              <td>{{order.RM_MaterialCode|default_if_none:""}}</td>
-                              <td class="title"><strong>MRP Controller</strong></td>
-                              <td>{{order.MRP_Controller|default_if_none:""}}</td>
-                            </tr>
-                            <tr>
-                              <td class="title"><strong>Drawing No./Rev.</strong></td>
-                              <td colspan="3">{{order.DrawingNo|default_if_none:""}}</td>
-                              <td class="title"><strong>PO No. (Customer)</strong></td>
-                              <td>{{order.CustomerPONo|default_if_none:""}}</td>
-                              <td class="title"><strong>Mgr/Eng'r/MRP</strong></td>
-                              <td class="title"><strong>QA</strong></td>
-                              <td class="title"><strong>CS</strong></td>
-                            </tr>
-                            <tr>
-                              <td class="title"><strong>Part No./Rev.</strong></td>
-                              <td colspan="3">{{order.PartNo|default_if_none:""}}</td>
-                              <td class="title"><strong>Sale Create Date</strong></td>
-                              <td>
-                                {% if order.SalesCreateDate != None %}
-                                {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
-                                {% endif %}
-                              </td>
-                              <td class="text-center" colspan="3" rowspan="2" style="font-size: 28px">*{{orderNo}}*</td>
-                            </tr>
-                            <tr>
-                              <td class="title"><strong>Part Name</strong></td>
-                              <td colspan="3">{{order.PartName|default_if_none:""}}</td>
-                              <td class="title"><strong>Printed Date</strong></td>
-                              <td>{% now 'd-m-Y' %}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        <table class="table text-center table-sm small">
-                          <tbody>
-                            <tr>
-                              <td class="title bottable" rowspan="2" colspan="2"><strong>Routing<br>กระบวนการผลิต<br>Operation Number<br>Group/Grp.Counter</strong></td>
-                              <td class="title bottable" colspan="3"><strong>Planning</strong></td>
-                              <td class="title bottable" colspan="3"><strong>Estimate Time</strong></td>
-                              <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
-                              <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
-                              <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
-                              <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
-                              <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
-                            </tr>
-                            <tr>
-                              <td class="title bottable"><strong>วันที่เริ่มผลิต<br>Start Date</strong></td>
-                              <td class="title bottable"><strong>แผนการผลิต<br>Planning<br>(Day)</strong></td>
-                              <td class="title bottable"><strong>วันที่ผลิตเสร็จ<br>Planned Finish<br>Date</strong></td>
-                              <td class="title bottable"><strong>Setup<br>Time<br>(Min)</strong></td>
-                              <td class="title bottable"><strong>Operation<br>Time<br>(Min)</strong></td>
-                              <td class="title bottable"><strong>Labor<br>Time<br>(Min)</strong></td>
-                              <td class="title bottable"><strong>(Qty)</strong></td>
-                              <td class="title bottable"><strong>(Qty)</strong></td>
-                              <td class="title bottable"><strong>Operator<br>ID / Stamp</strong></td>
-                            </tr>
-                            {% for operation in operationList %}
-                              {% if operation.OperationNo >= startShow %}
+                          <table class="table small">
+                            <tbody>
                               <tr>
-                                <td>{{operation.OperationNo}}</td>
-                                <td>{{operation.WorkCenterNo}}</td>
-                                <td>
-                                  {% if operation.PlanStartDate != None %}
-                                  {{operation.PlanStartDate|slice:"8:10"}}-{{operation.PlanStartDate|slice:"5:7"}}-{{operation.PlanStartDate|slice:"0:4"}}
-                                  {% endif %}
-                                </td>
-                                <td>{{planDayCountList|index:forloop.counter0}}</td>
-                                <td>
-                                  {% if operation.PlanFinishDate != None %}
-                                  {{operation.PlanFinishDate|slice:"8:10"}}-{{operation.PlanFinishDate|slice:"5:7"}}-{{operation.PlanFinishDate|slice:"0:4"}}
-                                  {% endif %}
-                                </td>
-                                <td>{{operation.EstSetupTime|floatformat}}</td>
-                                <td>{{operation.EstOperationTime|floatformat}}</td>
-                                <td>{{operation.EstLaborTime|floatformat}}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td style="font-size: 18px">*{{operation.OperationNo}}*</td>
-                                <td></td>
+                                <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
+                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow title toptable"><strong>Sales order No.</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
+                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_1"></td>
                               </tr>
-                              {% endif %}
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                        <div class="row" style="font-size: 10px;">
-                          <div class="col-10">
-                            Effective Date : ## ## 2021, retention for ISO 9001 3 years, IATF 16949 15 years, AS9100 10 years except special requirements defined in the announcement "Retention of Quality Records"
-                          </div>
-                          <div class="col-2 text-right">
-                            FM-GEN-PC-084 Rev.1
+                              <tr>
+                                <td class="title"><strong>Release Date</strong></td>
+                                <td>
+                                  {% if order.ReleaseDate != None %}
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Request Date</strong></td>
+                                <td>
+                                  {% if order.RequestDate != None %}
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Prod. Order Qty</strong></td>
+                                <td>{{order.ProductionOrderQuatity|floatformat|default_if_none:""}}</td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>FG. Mat. Code. No.</strong></td>
+                                <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>RM Mat'l Code No.</strong></td>
+                                <td>{{order.RM_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>MRP Controller</strong></td>
+                                <td>{{order.MRP_Controller|default_if_none:""}}</td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Drawing No./Rev.</strong></td>
+                                <td colspan="3">{{order.DrawingNo|default_if_none:""}}</td>
+                                <td class="title"><strong>PO No. (Customer)</strong></td>
+                                <td>{{order.CustomerPONo|default_if_none:""}}</td>
+                                <td class="title"><strong>Mgr/Eng'r/MRP</strong></td>
+                                <td class="title"><strong>QA</strong></td>
+                                <td class="title"><strong>CS</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part No./Rev.</strong></td>
+                                <td colspan="3">{{order.PartNo|default_if_none:""}}</td>
+                                <td class="title"><strong>Sale Create Date</strong></td>
+                                <td>
+                                  {% if order.SalesCreateDate != None %}
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="text-center" colspan="3" rowspan="2">
+                                  <svg id="barcode_1"></svg>
+                                  <script>
+                                  JsBarcode("#barcode_1", "{{orderNo}}", {
+                                    format: "CODE39",
+                                    displayValue: false,
+                                    width: 1,
+                                    height: 40,
+                                    margin: 0,
+                                  });
+                                  </script>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part Name</strong></td>
+                                <td colspan="3">{{order.PartName|default_if_none:""}}</td>
+                                <td class="title"><strong>Printed Date</strong></td>
+                                <td>{% now 'd-m-Y' %}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table class="table text-center table-sm">
+                            <tbody>
+                              <tr>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Routing<br>กระบวนการผลิต<br>Operation Number<br>Group/Grp.Counter</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Planning</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Estimate Time</strong></td>
+                                <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
+                                <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
+                                <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title bottable"><strong>วันที่เริ่มผลิต<br>Start Date</strong></td>
+                                <td class="title bottable"><strong>แผนการผลิต<br>Planning<br>(Day)</strong></td>
+                                <td class="title bottable"><strong>วันที่ผลิตเสร็จ<br>Planned Finish<br>Date</strong></td>
+                                <td class="title bottable"><strong>Setup<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Operation<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Labor<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>Operator<br>ID / Stamp</strong></td>
+                              </tr>
+                              {% for operation in operationList1 %}
+                                <tr>
+                                  <td>{{operation.OperationNo}}</td>
+                                  <td>{{operation.WorkCenterNo}}</td>
+                                  <td>
+                                    {% if operation.PlanStartDate != None %}
+                                    {{operation.PlanStartDate|slice:"8:10"}}-{{operation.PlanStartDate|slice:"5:7"}}-{{operation.PlanStartDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{planDayCountList1|index:forloop.counter0}}</td>
+                                  <td>
+                                    {% if operation.PlanFinishDate != None %}
+                                    {{operation.PlanFinishDate|slice:"8:10"}}-{{operation.PlanFinishDate|slice:"5:7"}}-{{operation.PlanFinishDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{operation.EstSetupTime|floatformat}}</td>
+                                  <td>{{operation.EstOperationTime|floatformat}}</td>
+                                  <td>{{operation.EstLaborTime|floatformat}}</td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td>
+                                    <svg id="barcode_1_{{forloop.counter}}"></svg>
+                                    <script>
+                                    JsBarcode("#barcode_1_{{forloop.counter}}", "{{operation.OperationNo}}", {
+                                      format: "CODE39",
+                                      displayValue: false,
+                                      width: 1,
+                                      height: 20,
+                                      margin: 0,
+                                    });
+                                    </script>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          <div class="row" style="font-size: 10px;">
+                            <div class="col-10">
+                              Effective Date : ## ## 2021, retention for ISO 9001 3 years, IATF 16949 15 years, AS9100 10 years except special requirements defined in the announcement "Retention of Quality Records"
+                            </div>
+                            <div class="col-2 text-right">
+                              FM-GEN-PC-084 Rev.1
+                            </div>
                           </div>
                         </div>
+                        {% if pageCount >= 2 %}
+                        <div id="page_2">
+                          <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
+                            <div class="col-4" style="padding-top: 3px">
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">Non-ASM</h5>
+                              </div>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">ASM</h5>
+                              </div>
+                            </div>
+                            <div class="col-1 text-right" style="padding-top: 3px">2/{{pageCount}}</div>
+                          </div>
+                          <table class="table small">
+                            <tbody>
+                              <tr>
+                                <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
+                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow title toptable"><strong>Sales order No.</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
+                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_2"></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Release Date</strong></td>
+                                <td>
+                                  {% if order.ReleaseDate != None %}
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Request Date</strong></td>
+                                <td>
+                                  {% if order.RequestDate != None %}
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Prod. Order Qty</strong></td>
+                                <td>{{order.ProductionOrderQuatity|floatformat|default_if_none:""}}</td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>FG. Mat. Code. No.</strong></td>
+                                <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>RM Mat'l Code No.</strong></td>
+                                <td>{{order.RM_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>MRP Controller</strong></td>
+                                <td>{{order.MRP_Controller|default_if_none:""}}</td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Drawing No./Rev.</strong></td>
+                                <td colspan="3">{{order.DrawingNo|default_if_none:""}}</td>
+                                <td class="title"><strong>PO No. (Customer)</strong></td>
+                                <td>{{order.CustomerPONo|default_if_none:""}}</td>
+                                <td class="title"><strong>Mgr/Eng'r/MRP</strong></td>
+                                <td class="title"><strong>QA</strong></td>
+                                <td class="title"><strong>CS</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part No./Rev.</strong></td>
+                                <td colspan="3">{{order.PartNo|default_if_none:""}}</td>
+                                <td class="title"><strong>Sale Create Date</strong></td>
+                                <td>
+                                  {% if order.SalesCreateDate != None %}
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="text-center" colspan="3" rowspan="2">
+                                  <svg id="barcode_2"></svg>
+                                  <script>
+                                  JsBarcode("#barcode_2", "{{orderNo}}", {
+                                    format: "CODE39",
+                                    displayValue: false,
+                                    width: 1,
+                                    height: 40,
+                                    margin: 0,
+                                  });
+                                  </script>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part Name</strong></td>
+                                <td colspan="3">{{order.PartName|default_if_none:""}}</td>
+                                <td class="title"><strong>Printed Date</strong></td>
+                                <td>{% now 'd-m-Y' %}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table class="table text-center table-sm">
+                            <tbody>
+                              <tr>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Routing<br>กระบวนการผลิต<br>Operation Number<br>Group/Grp.Counter</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Planning</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Estimate Time</strong></td>
+                                <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
+                                <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
+                                <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title bottable"><strong>วันที่เริ่มผลิต<br>Start Date</strong></td>
+                                <td class="title bottable"><strong>แผนการผลิต<br>Planning<br>(Day)</strong></td>
+                                <td class="title bottable"><strong>วันที่ผลิตเสร็จ<br>Planned Finish<br>Date</strong></td>
+                                <td class="title bottable"><strong>Setup<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Operation<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Labor<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>Operator<br>ID / Stamp</strong></td>
+                              </tr>
+                              {% for operation in operationList2 %}
+                                <tr>
+                                  <td>{{operation.OperationNo}}</td>
+                                  <td>{{operation.WorkCenterNo}}</td>
+                                  <td>
+                                    {% if operation.PlanStartDate != None %}
+                                    {{operation.PlanStartDate|slice:"8:10"}}-{{operation.PlanStartDate|slice:"5:7"}}-{{operation.PlanStartDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{planDayCountList2|index:forloop.counter0}}</td>
+                                  <td>
+                                    {% if operation.PlanFinishDate != None %}
+                                    {{operation.PlanFinishDate|slice:"8:10"}}-{{operation.PlanFinishDate|slice:"5:7"}}-{{operation.PlanFinishDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{operation.EstSetupTime|floatformat}}</td>
+                                  <td>{{operation.EstOperationTime|floatformat}}</td>
+                                  <td>{{operation.EstLaborTime|floatformat}}</td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td>
+                                    <svg id="barcode_2_{{forloop.counter}}"></svg>
+                                    <script>
+                                    JsBarcode("#barcode_2_{{forloop.counter}}", "{{operation.OperationNo}}", {
+                                      format: "CODE39",
+                                      displayValue: false,
+                                      width: 1,
+                                      height: 20,
+                                      margin: 0,
+                                    });
+                                    </script>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          <div class="row" style="font-size: 10px;">
+                            <div class="col-10">
+                              Effective Date : ## ## 2021, retention for ISO 9001 3 years, IATF 16949 15 years, AS9100 10 years except special requirements defined in the announcement "Retention of Quality Records"
+                            </div>
+                            <div class="col-2 text-right">
+                              FM-GEN-PC-084 Rev.1
+                            </div>
+                          </div>
+                        </div>
+                        {% endif %}
                       </div>
                     </div>
                   </div>
@@ -296,6 +489,24 @@
       function printDiv(){
         $('#print-area').printThis();
       }
+
+      $("#pl_qty_1").on("keypress keyup blur",function (event) {
+          $("#pl_qty_2").val($("#pl_qty_1").val());
+      });
+
+      $("#pl_qty_2").on("keypress keyup blur",function (event) {
+          $("#pl_qty_1").val($("#pl_qty_2").val());
+      });
+
+      $("#pl_qty_1").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#pl_qty_2").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
     </script>
 
     <!-- SHORTCUT SEARCH -->
@@ -306,13 +517,13 @@
       });
 
       function shortcut_search(){
-          var order_no =  $("#sc_order_no").val();
-          (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
-          if(order_no.length >= 6){
-            remove_valid_many(["sc_order_no","sc_operation_no"]);
-            window.open('/lot_traveller/' + order_no, '_self');
-          }
+        var order_no =  $("#sc_order_no").val();
+        (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
+        if(order_no.length >= 6){
+          remove_valid_many(["sc_order_no","sc_operation_no"]);
+          window.open('/lot_traveller/' + order_no, '_self');
         }
+      }
 
       //-- VALIDATE CONTROL
       remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
