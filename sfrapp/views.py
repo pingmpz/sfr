@@ -803,7 +803,10 @@ def delete_operation(request):
 def add_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('new_operation_no')
+    emp_id = request.GET.get('emp_id')
     work_center_no = request.GET.get('work_center_no')
+    plan_start_date = request.GET.get('plan_start_date')
+    plan_finish_date = request.GET.get('plan_finish_date')
     control_key = request.GET.get('control_key')
     est_setup_time = request.GET.get('est_setup_time')
     est_operate_time = request.GET.get('est_operate_time')
@@ -816,15 +819,16 @@ def add_operation(request):
     price_unit = request.GET.get('price_unit')
     price = request.GET.get('price')
     currency = request.GET.get('currency')
+    chief_id = request.GET.get('chief_id')
     #-- ADD OPERATION CONTROL
     if control_key == "PP01":
-        insertOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time)
+        insertOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time)
     else:
-        insertOperationControl(order_no, operation_no, work_center_no, 0, 0, 0)
+        insertOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, 0, 0, 0)
     #-- SAP : ADD OPERATION
     insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : ADD OPERATION
-    insertHistoryModifier("ADD", order_no, operation_no, "8888", "8888")
+    insertHistoryModifier("ADD", order_no, operation_no, emp_id, chief_id)
     #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
@@ -837,7 +841,10 @@ def add_operation(request):
 def change_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
+    emp_id = request.GET.get('emp_id')
     work_center_no = request.GET.get('work_center_no')
+    plan_start_date = request.GET.get('plan_start_date')
+    plan_finish_date = request.GET.get('plan_finish_date')
     control_key = request.GET.get('control_key')
     est_setup_time = request.GET.get('est_setup_time')
     est_operate_time = request.GET.get('est_operate_time')
@@ -850,17 +857,18 @@ def change_operation(request):
     price_unit = request.GET.get('price_unit')
     price = request.GET.get('price')
     currency = request.GET.get('currency')
+    chief_id = request.GET.get('chief_id')
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
     deleteAllOperatingData(order_no, operation_no)
     #-- CHANGE OPERATION CONTROL
     if control_key == "PP01":
-        changeOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time)
+        changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time)
     else:
-        changeOperationControl(order_no, operation_no, work_center_no, 0, 0, 0)
+        changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, 0, 0, 0)
     #-- SAP : CHANGE OPERATION
     insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : CHANGE OPERATION
-    insertHistoryModifier("CHANGE", order_no, operation_no, "8888", "8888")
+    insertHistoryModifier("CHANGE", order_no, operation_no, emp_id, chief_id)
     data = {
     }
     return JsonResponse(data)
@@ -890,13 +898,21 @@ def validate_new_operation(request):
 def validate_routing(request):
     work_center_no = request.GET.get('work_center_no')
     canUse = True
+    invalidText = ""
+    isExt = False
     work_center = getWorkCenter(work_center_no)
     if work_center == None:
         canUse = False
+        invalidText = "Routing not found."
     elif work_center.IsRouting == False:
         canUse = False
+        invalidText = "This Work Center is not a routing."
+    else:
+        isExt = work_center.IsExternalProcess
     data = {
         'canUse': canUse,
+        'invalidText': invalidText,
+        'isExt': isExt,
     }
     return JsonResponse(data)
 
@@ -1476,11 +1492,11 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
     conn.commit()
     return
 
-def insertOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time):
+def insertOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[EstSetupTime],[EstOperationTime],[EstLaborTime])"
-    sql += " VALUES ('" + str(order_no) + "', '" + str(operation_no) + "', '" + str(work_center_no) + "', 0, 0, 0," + str(est_setup_time) + "," + str(est_operate_time) + "," + str(est_labor_time) + ")"
+    sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime])"
+    sql += " VALUES ('" + str(order_no) + "', '" + str(operation_no) + "', '" + str(work_center_no) + "', 0, 0, 0,'" + str(plan_start_date) + "','" + str(plan_finish_date) + "'," + str(est_setup_time) + "," + str(est_operate_time) + "," + str(est_labor_time) + ")"
     cursor.execute(sql)
     conn.commit()
     return
@@ -1584,10 +1600,10 @@ def updateOperationControl(order_no, operation_no, accept, reject, status):
     conn.commit()
     return
 
-def changeOperationControl(order_no, operation_no, work_center_no, est_setup_time, est_operate_time, est_labor_time):
+def changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [OperationControl] SET WorkCenterNo = '"+ str(work_center_no) + "', EstSetupTime = '" + str(est_setup_time) + "', EstOperationTime = '" + str(est_operate_time) + "', EstLaborTime = '" + str(est_labor_time) + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    sql = "UPDATE [OperationControl] SET WorkCenterNo = '"+ str(work_center_no) + "', PlanStartDate = '" + str(plan_start_date) + "', PlanFinishDate = '" + str(plan_finish_date) + "', EstSetupTime = '" + str(est_setup_time) + "', EstOperationTime = '" + str(est_operate_time) + "', EstLaborTime = '" + str(est_labor_time) + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
