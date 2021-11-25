@@ -156,6 +156,9 @@
       var year = $("#year").val();
       var emp_id = $("#emp_id").val();
 
+      var rows = [];
+      createDataRows(month, year);
+
       google.charts.load('current', {'packages':['timeline']});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
@@ -180,10 +183,11 @@
         dataTable.addColumn({ type: 'date', id: 'Start' });
         dataTable.addColumn({ type: 'date', id: 'End' });
         createEmptyRows(dataTable, month, year);
-        createDataRows(chart, dataTable, options, month, year);
+        dataTable.addRows(rows);
+        chart.draw(dataTable, options);
       }
 
-      function createDataRows(chart, dataTable, options, month, year){
+      function createDataRows(month, year){
         $.ajax({
           url: '/get_emp_timeline/',
           data: {
@@ -193,7 +197,6 @@
           },
           dataType: 'json',
           success: function (data) {
-            var rows = [];
             for (var i = 0; i < data.empOperateList.length; i++) {
               console.log(data.empOperateList[i]);
               var orderoprno = data.empOperateList[i][0]+"-"+data.empOperateList[i][1];
@@ -210,8 +213,6 @@
               var tooltip = tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
               rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
             }
-            dataTable.addRows(rows);
-            chart.draw(dataTable, options);
           }
         });
       }
