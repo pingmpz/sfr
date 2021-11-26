@@ -751,7 +751,9 @@
                       <div class="col-md-8">
                         <select class="form-control form-control-sm" id="add_mat_group">
                           {% for materialGroup in materialGroupList %}
+                          {% if materialGroup.Code.strip == 'ZEXTERNAL' %}
                           <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
+                          {% endif %}
                           {% endfor %}
                         </select>
                       </div>
@@ -901,7 +903,9 @@
                       <div class="col-md-8">
                         <select class="form-control form-control-sm" id="change_mat_group">
                           {% for materialGroup in materialGroupList %}
+                          {% if materialGroup.Code.strip == 'ZEXTERNAL' %}
                           <option value="{{materialGroup.Code}}">{{materialGroup.Code}} | {{materialGroup.Description}}</option>
+                          {% endif %}
                           {% endfor %}
                         </select>
                       </div>

@@ -60,7 +60,7 @@
                       <div class="form-group row">
                         <label class="col-md-4 col-form-label text-right"><strong>Admin Password</strong></label>
                         <div class="col-md-8">
-                          <input class="form-control my-password" type="text" value="">
+                          <input class="form-control my-password" type="text" id="admin_password">
                         </div>
                       </div>
                       <div class="nav-tabs-boxed">
@@ -75,13 +75,13 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>User ID</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control" type="text" value="">
+                                <input class="form-control" type="text" id="new_user_id">
                               </div>
                             </div>
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>User Role</strong></label>
                               <div class="col-md-8">
-                                <select class="form-control">
+                                <select class="form-control" id="new_user_role">
                                   <option value="SECTIONCHIEF" selected>Section Chief</option>
                                   <option value="ADMIN">Administrator</option>
                                 </select>
@@ -90,12 +90,12 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>Password</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control my-password" type="text" value="">
+                                <input class="form-control my-password" type="text" id="new_user_password">
                               </div>
                             </div>
                             <div class="form-group row">
                               <div class="col-md-12 text-center">
-                                <button type="button" class="btn btn-pill btn-success">&nbsp;Confirm&nbsp;</button>
+                                <button type="button" class="btn btn-pill btn-success" id="new_confirm_button" onclick="new_user()">&nbsp;Confirm&nbsp;</button>
                               </div>
                             </div>
                             <small>Permission : Administrator+</small>
@@ -107,7 +107,7 @@
                               <div class="col-md-8">
                                 <select class="form-control">
                                   {% for user in userList %}
-                                  <option value="{{user.UserID}}">
+                                  <option value="{{user.UserID}}" id="change_user_id">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
@@ -121,12 +121,12 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>New Password</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control my-password" type="text" value="">
+                                <input class="form-control my-password" type="text" id="change_user_password">
                               </div>
                             </div>
                             <div class="form-group row">
                               <div class="col-md-12 text-center">
-                                <button type="button" class="btn btn-pill btn-warning text-white">&nbsp;Confirm&nbsp;</button>
+                                <button type="button" class="btn btn-pill btn-warning text-white" id="change_confirm_button" onclick="change_password()">&nbsp;Confirm&nbsp;</button>
                               </div>
                             </div>
                             <small>Permission : Administrator+</small>
@@ -138,7 +138,7 @@
                               <div class="col-md-8">
                                 <select class="form-control">
                                   {% for user in userList %}
-                                  <option value="{{user.UserID}}">
+                                  <option value="{{user.UserID}}" id="delete_user_id">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
@@ -151,7 +151,7 @@
                             </div>
                             <div class="form-group row">
                               <div class="col-md-12 text-center">
-                                <button type="button" class="btn btn-pill btn-danger">&nbsp;Confirm&nbsp;</button>
+                                <button type="button" class="btn btn-pill btn-danger" id="delete_confirm_button" onclick="delete_user()">&nbsp;Confirm&nbsp;</button>
                               </div>
                             </div>
                             <small>Permission : Super Administrator</small>
@@ -164,7 +164,7 @@
                 <div class="col-md-8">
                   <div class="card">
                     <div class="card-header">
-                      User Table ({{userList|length}})
+                      <strong>User Table ({{userList|length}})</strong>
                     </div>
                     <div class="card-body">
                       <table class="table table-sm table-striped small">
@@ -215,6 +215,81 @@
         }, 2000);
       });
 
+      function new_user(){
+        var admin_password = $("#admin_password").val();
+        var user_id = $("#new_user_id").val();
+        var user_role = $("#new_user_role").val();
+        var user_password = $("#new_user_password").val();
+        validate_password(admin_password, function() {
+
+        });
+      }
+
+      function change_password(){
+        var admin_password = $("#admin_password").val();
+        var user_id = $("#change_user_id").val();
+        var user_password = $("#change_user_password").val();
+        validate_password(admin_password, function() {
+
+        });
+      }
+
+      function delete_user(){
+        var admin_password = $("#admin_password").val();
+        var user_id = $("#delete_user_id").val();
+        validate_password(admin_password, function() {
+
+        });
+      }
+
+      function clear_all(){
+        remove_valid_many(["new_user_id","new_user_password", "change_user_password"]);
+        empty_many(["new_user_id","new_user_password", "change_user_password"]);
+      }
+
+    </script>
+    <!-- VALIDATION -->
+    <script>
+      //-- VALIDATION
+      function validate_admin_password(password, _callback){
+        $.ajax({
+          url: '/validate_admin_password/',
+          data: {
+            'password': password,
+          },
+          dataType: 'json',
+          success: function (data) {
+            
+          }
+        });
+      }
+
+      //-- VALIDATE CONTROL
+      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
+      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
+      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
+
+      function remove_valid(input_id){
+        $("#"+input_id).removeClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
+      }
+
+      function valid(input_id){
+        $("#"+input_id).addClass("is-valid");
+        $("#"+input_id).removeClass("is-invalid");
+      }
+
+      function invalid(input_id){
+        $("#"+input_id).addClass("is-invalid");
+        $("#"+input_id).removeClass("is-valid");
+      }
+
+      //-- EMPTY INPUT
+      empty_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) empty(input_ids[i]); }
+
+      function empty(input_id){
+        $("#"+input_id).val("");
+      }
     </script>
   </body>
 </html>
