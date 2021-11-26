@@ -82,25 +82,6 @@
                       </div>
                     </div>
                   </div>
-                  <div class="card">
-                    <div class="card-header"><strong>Performance (Month)</strong></div>
-                    <div class="card-body">
-                      <div class="small">
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Setup Time</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" id="setup_time" value="0" readonly>
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label class="col-md-4 col-form-label text-right"><strong>Oper Time</strong></label>
-                          <div class="col-md-8">
-                            <input class="form-control form-control-sm" type="text" id="oper_time" value="0" readonly>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 <div class="col-md-9">
                   <div class="card">
@@ -209,22 +190,31 @@
               var start_date_time = new Date(data.empOperateList[i][5]);
               var stop_date_time = new Date(data.empOperateList[i][6]);
               var color = (work_center_type == "Labor")? '#e74c3c':'#4f88db';
-              addPerformance(operate_type, getDiffMin(start_date_time, stop_date_time));
-              var tooltip = tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-              rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+              if (start_date_time.getDate() == stop_date_time.getDate()){
+                var tooltip = tooltipEmployee("SAMEDAY", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+              } else {
+                var tooltip = tooltipEmployee("HEAD", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, 23, 59, 59)]);
+                if(stop_date_time.getDate() > start_date_time.getDate()){
+                  var tooltip = tooltipEmployee("TAIL", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                  rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+                }
+              }
             }
           }
         });
       }
 
-      function tooltipEmployee(orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, start_time, end_time, mins){
-        str = '<div style="width: 200px; padding: 5px;" class="text-center small">';
+      function tooltipEmployee(type, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, start_time, end_time, mins){
+        str = '<div style="width: 300px; padding: 5px;" class="text-center small">';
         if(work_center_type == "Labor") str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
         else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
         if(work_center_type == "Machine") str += ''+operate_type+' ON '+work_center_no_machine+'<br>';
-        str += '<strong>'+orderoprno+'</strong><br>';
-        str += ''+work_center_no+'<br>';
-        str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes';
+        str += '<strong>'+orderoprno+' ( ' + work_center_no + ' )</strong><br>';
+        str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes<br>';
+        if(type == "HEAD") str += '* this is a first part. next part is on is the next day.<br>';
+        else if(type == "TAIL") str += '* this is a second part. previous part is on the previous day.<br>';
         str += '</div>';
         return str;
       }
@@ -238,14 +228,6 @@
           var text = year + "-" + month + "-" + frontZero(i.toString(), 2);
           var text = frontZero(i.toString(), 2);
           dataTable.addRows([[ text, '', '', 'opacity: 0', new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 0, 0, 0)]]);
-        }
-      }
-
-      function addPerformance(operate_type, time){
-        if(operate_type.trim() == "OPERATE"){
-          $("#oper_time").val(parseFloat($("#oper_time").val()) + time);
-        } else if(operate_type.trim() == "SETUP"){
-          $("#setup_time").val(parseFloat($("#setup_time").val()) + time);
         }
       }
 
@@ -263,12 +245,14 @@
         return result;
       }
 
-      function getTime(datetime) {
-         var result = "";
+      function getDateTimeString(datetime) {
+         var year = datetime.getFullYear();
+         var month = frontZero((datetime.getMonth() + 1).toString(), 2);
+         var date = frontZero(datetime.getDate().toString(), 2);
          var hour = frontZero(datetime.getHours().toString(), 2);
          var minute = frontZero(datetime.getMinutes().toString(), 2);
          var second = frontZero(datetime.getSeconds().toString(), 2);
-         result = hour+":"+minute+":"+second;
+         result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
          return result
       }
 
