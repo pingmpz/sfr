@@ -989,9 +989,19 @@ def validate_operator(request):
 
 def validate_password(request):
     password = request.GET.get('password')
-    isCorrect = (password == "1234")
+    isCorrect = False
+    userID = ""
+    userRole = ""
+    user = getUser(password)
+    if user != None:
+        isCorrect = True
+        userID = user.UserID
+        userRole = user.UserRole
+    print(userID)
     data = {
         'isCorrect': isCorrect,
+        'userID': userID,
+        'userRole': userRole,
     }
     return JsonResponse(data)
 
@@ -1286,6 +1296,12 @@ def getOperatorOperatingByID(id):
 def getNextOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo > '" + operation_no + "' ORDER BY OperationNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getUser(password):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[User] WHERE PasswordHash = HASHBYTES('SHA2_512', '"+ password + "')"
     cursor.execute(sql)
     return cursor.fetchone()
 

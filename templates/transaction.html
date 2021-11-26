@@ -2548,7 +2548,7 @@
             },
             dataType: 'json',
             success: function (data) {
-              (data.isCorrect)? _callback(true, "", "5731"):_callback(false, "Password is not correct.", "");
+              (data.isCorrect)? _callback(true, "", data.userID):_callback(false, "Password is not correct.", "");
             }
           });
         }
