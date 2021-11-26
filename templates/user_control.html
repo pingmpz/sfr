@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+{% load static %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>User Control | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">User Control</li>
+            <!-- Breadcrumb Menu-->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header"><strong>Controller</strong></div>
+                    <div class="card-body">
+                      <div class="form-group row">
+                        <label class="col-md-4 col-form-label text-right"><strong>Admin Password</strong></label>
+                        <div class="col-md-8">
+                          <input class="form-control my-password" type="text" value="">
+                        </div>
+                      </div>
+                      <div class="nav-tabs-boxed">
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#new-user-tab" role="tab">New User</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#change-password-tab" role="tab">Change Password</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#delete-user-tab" role="tab">Delete User</a></li>
+                        </ul>
+                        <div class="tab-content">
+                          <!-- New User Tab -->
+                          <div class="tab-pane active" id="new-user-tab" role="tabpanel">
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>User ID</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" value="">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>User Role</strong></label>
+                              <div class="col-md-8">
+                                <select class="form-control">
+                                  <option value="SECTIONCHIEF" selected>Section Chief</option>
+                                  <option value="ADMIN">Administrator</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Password</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control my-password" type="text" value="">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Password</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control my-password" type="text" value="">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-pill btn-success">&nbsp;Confirm&nbsp;</button>
+                              </div>
+                            </div>
+                            <small>Permission : Administrator+</small>
+                          </div>
+                          <!-- Change Password Tab -->
+                          <div class="tab-pane" id="change-password-tab" role="tabpanel">
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>User</strong></label>
+                              <div class="col-md-8">
+                                <select class="form-control">
+                                  {% for user in userList %}
+                                  <option value="{{user.UserID}}">
+                                    {{user.UserID}} |
+                                    {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
+                                    {% elif user.UserRole == 'ADMIN' %}Administrator
+                                    {% elif user.UserRole == 'ADMIN' %}Section Chief
+                                    {% endif %}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>New Password</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control my-password" type="text" value="">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-pill btn-warning text-white">&nbsp;Confirm&nbsp;</button>
+                              </div>
+                            </div>
+                            <small>Permission : Administrator+</small>
+                          </div>
+                          <!-- Delete Tab -->
+                          <div class="tab-pane" id="delete-user-tab" role="tabpanel">
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>User</strong></label>
+                              <div class="col-md-8">
+                                <select class="form-control">
+                                  {% for user in userList %}
+                                  <option value="{{user.UserID}}">
+                                    {{user.UserID}} |
+                                    {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
+                                    {% elif user.UserRole == 'ADMIN' %}Administrator
+                                    {% elif user.UserRole == 'ADMIN' %}Section Chief
+                                    {% endif %}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-pill btn-danger">&nbsp;Confirm&nbsp;</button>
+                              </div>
+                            </div>
+                            <small>Permission : Super Administrator+</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="card">
+                    <div class="card-header">
+                      User Table ({{userList|length}})
+                    </div>
+                    <div class="card-body">
+                      <table class="table table-sm table-striped small">
+                        <thead>
+                          <tr>
+                            <th>User ID</th>
+                            <th>Role</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for user in userList %}
+                          <tr>
+                            <td>{{user.UserID}}</td>
+                            <td>
+                              {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
+                              {% elif user.UserRole == 'ADMIN' %}Administrator
+                              {% elif user.UserRole == 'ADMIN' %}Section Chief
+                              {% endif %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+    </script>
+  </body>
+</html>

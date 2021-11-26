@@ -25,6 +25,8 @@ urlpatterns = [
     path('sap_report/<str:fdate>&<str:fhour>', views.sap_report, name='sap_report'),
     path('sap_mod/<str:fdate>&<str:fhour>', views.sap_mod, name='sap_mod'),
     path('blank/', views.blank, name='blank'),
+    #-- ADMIN PANEL
+    path('user_control/', views.user_control, name='user_control'),
     ### REQUEST
     #-- MAIN TABLE
     path('get_workcenter_data/', views.get_workcenter_data, name='get_workcenter_data'),

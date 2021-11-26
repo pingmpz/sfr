@@ -344,6 +344,15 @@ def sap_mod(request, fdate, fhour):
     }
     return render(request, 'sap_mod.html', context)
 
+#------------------------------------------------------------------- ADMIN PANEL
+
+def user_control(request):
+    userList = getUserList()
+    context = {
+        'userList': userList,
+    }
+    return render(request, 'user_control.html', context)
+
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################
@@ -1146,6 +1155,12 @@ def getOperationList(order_no):
 def getModList(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryModifier] WHERE OrderNo = '" + order_no + "' ORDER BY ModifyDateTime DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getUserList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [User]"
     cursor.execute(sql)
     return cursor.fetchall()
 
