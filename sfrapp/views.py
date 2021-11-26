@@ -221,10 +221,13 @@ def emp(request, empid, fmonth):
 
 #------------------------------------------------------------------------ REPORT
 
-def lot_traveller(request, orderno):
+def lot_traveller(request, orderoprno):
     orderNo = ""
+    operationNo = ""
     order = None
+    operation = None
     state = ""
+    currentOperation = -1
     operationList = []
     operationList1 = []
     operationList2 = []
@@ -234,39 +237,51 @@ def lot_traveller(request, orderno):
     maxRows = 13
     counter = 0
     #--
-    if orderno == "0":
+    if orderoprno == "0":
         state = "FIRSTPAGE"
     else:
-        orderNo = orderno
+        orderNo = orderoprno[0:len(orderoprno) - 4]
+        operationNo = orderoprno[len(orderoprno) - 4:len(orderoprno)]
         if isExistOrder(orderNo) == False:
             state = "NODATAFOUND"
         else:
-            state = "DATAFOUND"
+            state = "NOOPERATIONFOUND"
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
-            for operation in operationList:
-                if(operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty) > 0):
-                    startShow = operation.OperationNo
-                    break
-            for operation in operationList:
-                if operation.OperationNo >= startShow:
-                    if counter == maxRows:
-                        pageCount += 1
-                        counter = 0
-                    start_date = datetime.strptime(operation.PlanStartDate, '%Y-%m-%d')
-                    stop_date = datetime.strptime(operation.PlanFinishDate, '%Y-%m-%d')
-                    days = stop_date - start_date
-                    if pageCount == 1:
-                        operationList1.append(operation)
-                        planDayCountList1.append(days.days)
-                    else:
-                        operationList2.append(operation)
-                        planDayCountList2.append(days.days)
-                    counter += 1
+            if isExistOperation(orderNo, operationNo):
+                state = "DATAFOUND"
+                operation = getOperation(orderNo, operationNo)
+                for opr in operationList:
+                    if opr.OperationNo >= operationNo:
+                        if counter == maxRows:
+                            pageCount += 1
+                            counter = 0
+                        start_date = datetime.strptime(opr.PlanStartDate, '%Y-%m-%d')
+                        stop_date = datetime.strptime(opr.PlanFinishDate, '%Y-%m-%d')
+                        days = stop_date - start_date
+                        if pageCount == 1:
+                            operationList1.append(opr)
+                            planDayCountList1.append(days.days)
+                        else:
+                            operationList2.append(opr)
+                            planDayCountList2.append(days.days)
+                        counter += 1
+            else:
+                #-- GET OPERATION WITH REMAINING QTY > 0
+                if len(operationList) > 0:
+                    currentOperation = operationList[0].OperationNo
+                    for i in range(len(operationList)):
+                        tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                        if tempRemainQty > 0:
+                            currentOperation = operationList[i].OperationNo
+                            break
     context = {
         'orderNo' : orderNo,
+        'operationNo' : operationNo,
         'order' : order,
+        'operation' : operation,
         'state' : state,
+        'currentOperation': currentOperation,
         'operationList1' : operationList1,
         'operationList2' : operationList2,
         'planDayCountList1': planDayCountList1,

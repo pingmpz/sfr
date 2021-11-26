@@ -41,15 +41,17 @@
             <li class="breadcrumb-item">Partial Lot Traveller</li>
             {% if state != "FIRSTPAGE" %}
             <li class="breadcrumb-item active">
-              <span id="bc_order_no">{{orderNo}}</span>
+              <span id="bc_order_no">{{orderNo}}</span>&nbsp;-&nbsp;<span id="bc_operation_no">{{operationNo}}</span>
             </li>
             {% endif %}
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            &nbsp;&nbsp;<div>Prod. Order No</div>
+            <input type="password" hidden> <!-- Prevent Auto fill Password -->
+            &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
+            &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
+            <div style="width:15%"><input type="text" class="form-control form-control-sm" maxlength="4" id="sc_operation_no" autocomplete="off" value="{{operationNo}}"></div>
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="shortcut_search()">Go !</button></div>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           </div>
         </div>
       </header>
@@ -70,7 +72,7 @@
               </div>
               {% endif %}
               <!-- Not Found -->
-              {% if state == "NODATAFOUND" %}
+              {% if state != "FIRSTPAGE" and state != "DATAFOUND" %}
               <div class="row">
                 <div class="col-md-12 text-center">
                   <br><br><br><br><br><br><br><br>
@@ -78,11 +80,22 @@
                   <br>
                   {% if state == "NODATAFOUND" %}
                   <h1><strong>PRODUCTION ORDER NOT FOUND</strong></h1>
+                  {% elif state == "NOOPERATIONFOUND" %}
+                  <h1><strong>OPERATION NOT FOUND</strong></h1>
                   {% endif %}
-                  <p><strong>PRODUCTION ORDER NO</strong><br><span class="text-danger"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span></p>
+                  <p>
+                    <strong>PRODUCTION ORDER NO</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
+                    <br>
+                    <strong>OPERATION NO</strong><br><span class="text-danger"><strong><span id="nf_operation_no">{{operationNo}}</span></strong></span>
+                  </p>
+                  {% if state == "NOOPERATIONFOUND" and currentOperation != -1 %}
+                  <a href="/lot_traveller/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                  {% elif state == "NOOPERATIONFOUND" %}
+                  <p class="text-danger">*** THIS PRODUCTION ORDER HAS ONLY HEADER PLEASE CONTACT ADMIN ***</p>
+                  {% endif %}
                 </div>
               </div>
-              {% endif %}
+              {% endif%}
               <!-- Found -->
               {% if state == "DATAFOUND" %}
               <div class="row">
@@ -511,19 +524,28 @@
 
     <!-- SHORTCUT SEARCH -->
     <script>
-      //-- SHORTCUT SEARCH
       document.getElementById("sc_order_no").addEventListener("keydown", function (e) {
         if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
       });
 
+      document.getElementById("sc_order_no").addEventListener("keyup", function (e) {
+        if ($("#sc_order_no").val().length == 12) $("#sc_operation_no").focus();
+      });
+
+      document.getElementById("sc_operation_no").addEventListener("keydown", function (e) {
+        if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+      });
+
       function shortcut_search(){
-        var order_no =  $("#sc_order_no").val();
-        (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
-        if(order_no.length >= 6){
-          remove_valid_many(["sc_order_no","sc_operation_no"]);
-          window.open('/lot_traveller/' + order_no, '_self');
+          var order_no =  $("#sc_order_no").val();
+          var operation_no =  frontZero($("#sc_operation_no").val(), 4);
+          (order_no.length < 6)? invalid("sc_order_no"): valid("sc_order_no");
+          (operation_no.length < 4)? invalid("sc_operation_no"): valid("sc_operation_no");
+          if(order_no.length >= 6 && operation_no.length == 4){
+            remove_valid_many(["sc_order_no","sc_operation_no"]);
+            window.open('/lot_traveller/' + order_no + operation_no, '_self');
+          }
         }
-      }
 
       //-- VALIDATE CONTROL
       remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
@@ -543,6 +565,12 @@
       function invalid(input_id){
         $("#"+input_id).addClass("is-invalid");
         $("#"+input_id).removeClass("is-valid");
+      }
+
+      function frontZero(str, len){
+        var result = str;
+        for(var i = str.length;i < len;i++) result = "0" + result;
+        return result;
       }
     </script>
   </body>

@@ -18,7 +18,7 @@ urlpatterns = [
     path('wc/<str:wcno>&<str:fmonth>', views.wc, name='wc'),
     path('emp/<str:empid>&<str:fmonth>', views.emp, name='emp'),
     #-- RERORT
-    path('lot_traveller/<str:orderno>', views.lot_traveller, name='lot_traveller'),
+    path('lot_traveller/<str:orderoprno>', views.lot_traveller, name='lot_traveller'),
     #-- SAP
     path('sap_order/<str:fdate>&<str:fhour>', views.sap_order, name='sap_order'),
     path('sap_routing/<str:fdate>&<str:fhour>', views.sap_routing, name='sap_routing'),

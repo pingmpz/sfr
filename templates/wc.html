@@ -229,7 +229,7 @@
           dataType: 'json',
           success: function (data) {
             for (var i = 0; i < data.wcOperateList.length; i++) {
-              console.log(data.wcOperateList[i]);
+              // console.log(data.wcOperateList[i]);
               var orderoprno = data.wcOperateList[i][0]+"-"+data.wcOperateList[i][1];
               var work_center_no = data.wcOperateList[i][9];
               var emp_id = data.wcOperateList[i][2];
@@ -238,8 +238,12 @@
               var start_date_time = new Date(data.wcOperateList[i][5]);
               var stop_date_time = new Date(data.wcOperateList[i][6]);
               var color = (emp_id != null)? '#e74c3c':'#4f88db';
-              var tooltip = tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, operate_type, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-              rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+              if (start_date_time.getDate() == stop_date_time.getDate()){
+                var tooltip = tooltipEmployee(orderoprno, work_center_no, emp_id, emp_name, operate_type, getTime(start_date_time), getTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+              } else {
+                console.log('AAA');
+              }
             }
           }
         });
@@ -249,7 +253,7 @@
         str = '<div style="width: 200px; padding: 5px;" class="text-center small">';
         if(emp_id != null) str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
         else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
-        if(emp_id != null) str += ''+operate_type+' BY<br>'+emp_id+'<br>'+emp_name+'<br>';
+        if(emp_id != null) str += ''+operate_type+' BY '+emp_id+'<br>'+emp_name+'<br>';
         str += '<strong>'+orderoprno+'</strong><br>';
         str += ''+work_center_no+'<br>';
         str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes';
