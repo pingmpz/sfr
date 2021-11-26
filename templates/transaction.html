@@ -2180,7 +2180,14 @@
                                       }
                                       else {
                                         valid("add_est_labor_time");
-                                        isAddable = true;
+                                        if(est_setup_time == 0 && est_operate_time == 0 && est_labor_time == 0){
+                                          invalid_many(["add_est_setup_time","add_est_operate_time","add_est_labor_time"]);
+                                          $("#add_invalid_text").text("Estimate Setup/Operate/Labor can not be all 0.");
+                                        }
+                                        else {
+                                          valid_many(["add_est_setup_time","add_est_operate_time","add_est_labor_time"]);
+                                          isAddable = true;
+                                        }
                                       }
                                     }
                                   }
@@ -2343,7 +2350,14 @@
                                   }
                                   else {
                                     valid("change_est_labor_time");
-                                    isChangable = true;
+                                    if(est_setup_time == 0 && est_operate_time == 0 && est_labor_time == 0){
+                                      invalid_many(["change_est_setup_time","change_est_operate_time","change_est_labor_time"]);
+                                      $("#change_invalid_text").text("Estimate Setup/Operate/Labor can not be all 0.");
+                                    }
+                                    else {
+                                      valid_many(["change_est_setup_time","change_est_operate_time","change_est_labor_time"]);
+                                      isChangable = true;
+                                    }
                                   }
                                 }
                               }
