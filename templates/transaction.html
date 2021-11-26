@@ -1056,8 +1056,8 @@
                         {% for operate in historyOperateList %}
                         {% if operate.EmpID != None %}
                         <tr>
-                          <td>{{operate.EmpID}}</td>
-                          <td>{{operate.WorkCenterNo}}</td>
+                          <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
+                          <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
                           <td>{{operate.Type}}</td>
                           <td>{{operate.StartDateTime}}</td>
                           <td>{{operate.StopDateTime}}</td>
@@ -1083,8 +1083,8 @@
                       <tbody>
                         {% for confirm in historyConfirmList %}
                         <tr>
-                          <td>{{confirm.EmpID}}</td>
-                          <td>{{confirm.WorkCenterNo}}</td>
+                          <td><a href="/emp/{{confirm.EmpID}}&NOW">{{confirm.EmpID}}</a></td>
+                          <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
                           <td>{{confirm.AcceptedQty}}</td>
                           <td>{{confirm.RejectedQty}}</td>
                           <td>{{confirm.RejectReason}}</td>
