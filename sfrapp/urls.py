@@ -60,9 +60,14 @@ urlpatterns = [
     path('validate_password/', views.validate_password, name='validate_password'),
     path('validate_admin_password/', views.validate_admin_password, name='validate_admin_password'),
     path('validate_super_admin_password/', views.validate_super_admin_password, name='validate_super_admin_password'),
+    path('validate_new_user_id/', views.validate_new_user_id, name='validate_new_user_id'),
+    path('validate_new_password/', views.validate_new_password, name='validate_new_password'),
     #-- TIMELINE
     path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
     path('get_emp_timeline/', views.get_emp_timeline, name='get_emp_timeline'),
-    ## ADMIN
+    ## ADMIN PANEL
+    path('add_new_user/', views.add_new_user, name='add_new_user'),
+    path('delete_user/', views.delete_user, name='delete_user'),
+    path('change_user_password/', views.change_user_password, name='change_user_password'),
     path('reset_all/', views.reset_all, name='reset_all'),
 ]

@@ -1008,7 +1008,7 @@ def validate_password(request):
     isCorrect = False
     userID = ""
     userRole = ""
-    user = getUser(password)
+    user = getUserByPassword(password)
     if user != None:
         isCorrect = True
         userID = user.UserID
@@ -1023,7 +1023,7 @@ def validate_password(request):
 def validate_admin_password(request):
     password = request.GET.get('password')
     isCorrect = False
-    user = getUser(password)
+    user = getUserByPassword(password)
     if user != None and (user.UserRole.strip() == 'ADMIN' or user.UserRole.strip() == 'SUPERADMIN'):
         isCorrect = True
     print(isCorrect)
@@ -1035,11 +1035,58 @@ def validate_admin_password(request):
 def validate_super_admin_password(request):
     password = request.GET.get('password')
     isCorrect = False
-    user = getUser(password)
+    user = getUserByPassword(password)
     if user != None and user.UserRole.strip() == 'SUPERADMIN':
         isCorrect = True
     data = {
         'isCorrect': isCorrect,
+    }
+    return JsonResponse(data)
+
+def validate_new_user_id(request):
+    user_id = request.GET.get('user_id')
+    canUse = False
+    user = getUserByUserID(user_id)
+    if user == None:
+        canUse = True
+    data = {
+        'canUse': canUse,
+    }
+    return JsonResponse(data)
+
+def validate_new_password(request):
+    password = request.GET.get('password')
+    canUse = False
+    user = getUserByPassword(password)
+    if user == None:
+        canUse = True
+    data = {
+        'canUse': canUse,
+    }
+    return JsonResponse(data)
+
+#------------------------------------------------------------------- ADMIN PANEL
+def add_new_user(request):
+    user_id = request.GET.get('user_id')
+    user_password = request.GET.get('user_password')
+    user_role = request.GET.get('user_role')
+    insertUser(user_id, user_password, user_role)
+    data = {
+    }
+    return JsonResponse(data)
+
+def delete_user(request):
+    user_id = request.GET.get('user_id')
+    deleteUser(user_id)
+    data = {
+    }
+    return JsonResponse(data)
+
+def change_user_password(request):
+    user_id = request.GET.get('user_id')
+    user_password = request.GET.get('user_password')
+    changeUserPassword(user_id, user_password)
+    data = {
     }
     return JsonResponse(data)
 
@@ -1343,9 +1390,15 @@ def getNextOperation(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchone()
 
-def getUser(password):
+def getUserByPassword(password):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [dbo].[User] WHERE PasswordHash = HASHBYTES('SHA2_512', '"+ password + "')"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getUserByUserID(user_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[User] WHERE UserID = '"+ user_id + "'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -1681,6 +1734,14 @@ def insertHistoryModifier(type, order_no, operation_no, emp_id, chief_id):
     cursor.execute(sql)
     conn.commit()
     return
+
+def insertUser(user_id, user_password, user_role):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO dbo.[User] (UserID, PasswordHash, UserRole) VALUES('"+user_id+"', HASHBYTES('SHA2_512', '"+user_password+"'), '"+user_role+"')"
+    cursor.execute(sql)
+    conn.commit()
+    return
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -1767,6 +1828,14 @@ def joinProcessRemove(order_no, operation_no):
     conn.commit()
     return
 
+def changeUserPassword(user_id, user_password):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [User] SET [PasswordHash] = HASHBYTES('SHA2_512', '"+user_password+"') WHERE UserID = '"+user_id+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 #------------------------------------------------------------------------ DELETE
 
 def deleteOperatingWorkCenter(id):
@@ -1801,6 +1870,14 @@ def deleteOperationControl(order_no, operation_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteUser(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [User] WHERE UserID = '"+user_id+"'"
     cursor.execute(sql)
     conn.commit()
     return

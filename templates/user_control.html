@@ -60,7 +60,7 @@
                       <div class="form-group row">
                         <label class="col-md-4 col-form-label text-right"><strong>Admin Password</strong></label>
                         <div class="col-md-8">
-                          <input class="form-control my-password" type="text" id="admin_password">
+                          <input class="form-control my-password" type="text" id="admin_password" autocomplete="off">
                         </div>
                       </div>
                       <div class="nav-tabs-boxed">
@@ -75,7 +75,13 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>User ID</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control" type="text" id="new_user_id">
+                                <input class="form-control" type="text" id="new_user_id"autocomplete="off">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Password</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control my-password" type="text" id="new_user_password" autocomplete="off">
                               </div>
                             </div>
                             <div class="form-group row">
@@ -85,12 +91,6 @@
                                   <option value="SECTIONCHIEF" selected>Section Chief</option>
                                   <option value="ADMIN">Administrator</option>
                                 </select>
-                              </div>
-                            </div>
-                            <div class="form-group row">
-                              <label class="col-md-4 col-form-label text-right"><strong>Password</strong></label>
-                              <div class="col-md-8">
-                                <input class="form-control my-password" type="text" id="new_user_password">
                               </div>
                             </div>
                             <div class="form-group row">
@@ -105,13 +105,14 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>User</strong></label>
                               <div class="col-md-8">
-                                <select class="form-control">
+                                <select class="form-control" id="change_user_id">
+                                  <option value="-1" selected>-</option>
                                   {% for user in userList %}
-                                  <option value="{{user.UserID}}" id="change_user_id">
+                                  <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
-                                    {% elif user.UserRole == 'ADMIN' %}Section Chief
+                                    {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
                                     {% endif %}
                                   </option>
                                   {% endfor %}
@@ -121,7 +122,7 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>New Password</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control my-password" type="text" id="change_user_password">
+                                <input class="form-control my-password" type="text" id="change_user_password" autocomplete="off">
                               </div>
                             </div>
                             <div class="form-group row">
@@ -136,13 +137,14 @@
                             <div class="form-group row">
                               <label class="col-md-4 col-form-label text-right"><strong>User</strong></label>
                               <div class="col-md-8">
-                                <select class="form-control">
+                                <select class="form-control" id="delete_user_id">
+                                  <option value="-1" selected>-</option>
                                   {% for user in userList %}
-                                  <option value="{{user.UserID}}" id="delete_user_id">
+                                  <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
-                                    {% elif user.UserRole == 'ADMIN' %}Section Chief
+                                    {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
                                     {% endif %}
                                   </option>
                                   {% endfor %}
@@ -181,7 +183,7 @@
                             <td>
                               {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                               {% elif user.UserRole == 'ADMIN' %}Administrator
-                              {% elif user.UserRole == 'ADMIN' %}Section Chief
+                              {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
                               {% endif %}
                             </td>
                           </tr>
@@ -218,14 +220,40 @@
       function new_user(){
         var admin_password = $("#admin_password").val();
         var user_id = $("#new_user_id").val();
-        var user_role = $("#new_user_role").val();
         var user_password = $("#new_user_password").val();
+        var user_role = $("#new_user_role").val();
         remove_valid_many(["admin_password","new_user_id","new_user_password"]);
         validate_admin_password(admin_password, function(isCorrect) {
           if(!isCorrect){
             invalid("admin_password");
           } else {
             valid("admin_password");
+            validate_new_user_id(user_id, function(canUse) {
+              if(!canUse){
+                invalid("new_user_id");
+              } else {
+                valid("new_user_id");
+                validate_new_password(user_password, function(canUse) {
+                  if(!canUse){
+                    invalid("new_user_password");
+                  } else {
+                    valid("new_user_password");
+                    $.ajax({
+                      url: '/add_new_user/',
+                      data: {
+                        'user_id': user_id,
+                        'user_password': user_password,
+                        'user_role': user_role,
+                      },
+                      dataType: 'json',
+                      success: function (data) {
+                        location.reload();
+                      }
+                    });
+                  }
+                });
+              }
+            });
           }
         });
       }
@@ -234,11 +262,30 @@
         var admin_password = $("#admin_password").val();
         var user_id = $("#change_user_id").val();
         var user_password = $("#change_user_password").val();
+        if (user_id == "-1") return;
         validate_admin_password(admin_password, function(isCorrect) {
           if(!isCorrect){
             invalid("admin_password");
           } else {
             valid("admin_password");
+            validate_new_password(user_password, function(canUse) {
+              if(!canUse){
+                invalid("change_user_password");
+              } else {
+                valid("change_user_password");
+                $.ajax({
+                  url: '/change_user_password/',
+                  data: {
+                    'user_id': user_id,
+                    'user_password': user_password,
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                    location.reload();
+                  }
+                });
+              }
+            });
           }
         });
       }
@@ -246,11 +293,22 @@
       function delete_user(){
         var admin_password = $("#admin_password").val();
         var user_id = $("#delete_user_id").val();
+        if (user_id == "-1") return;
         validate_super_admin_password(admin_password, function(isCorrect) {
           if(!isCorrect){
             invalid("admin_password");
           } else {
             valid("admin_password");
+            $.ajax({
+              url: '/delete_user/',
+              data: {
+                'user_id': user_id,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
           }
         });
       }
@@ -298,17 +356,35 @@
         }
       }
 
-      function validate_user(user_id, _callback){
+      function validate_new_user_id(user_id, _callback){
         if(user_id.length < 4) _callback(false);
         else {
           $.ajax({
-            url: '/validate_user/',
+            url: '/validate_new_user_id/',
             data: {
               'user_id': user_id,
             },
             dataType: 'json',
             success: function (data) {
-              (data.isExist)? _callback(true):_callback(false);
+              if(data.canUse) _callback(true);
+              else _callback(false);
+            }
+          });
+        }
+      }
+
+      function validate_new_password(password, _callback){
+        if(password.length < 4) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_new_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.canUse) _callback(true);
+              else _callback(false);
             }
           });
         }
