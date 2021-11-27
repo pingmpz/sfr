@@ -231,8 +231,10 @@ def lot_traveller(request, orderoprno):
     operationList = []
     operationList1 = []
     operationList2 = []
+    operationList3 = []
     planDayCountList1 = []
     planDayCountList2 = []
+    planDayCountList3 = []
     pageCount = 1
     maxRows = 13
     counter = 0
@@ -262,9 +264,12 @@ def lot_traveller(request, orderoprno):
                         if pageCount == 1:
                             operationList1.append(opr)
                             planDayCountList1.append(days.days)
-                        else:
+                        elif pageCount == 2:
                             operationList2.append(opr)
                             planDayCountList2.append(days.days)
+                        else:
+                            operationList3.append(opr)
+                            planDayCountList3.append(days.days)
                         counter += 1
             else:
                 #-- GET OPERATION WITH REMAINING QTY > 0
@@ -284,8 +289,10 @@ def lot_traveller(request, orderoprno):
         'currentOperation': currentOperation,
         'operationList1' : operationList1,
         'operationList2' : operationList2,
+        'operationList3' : operationList3,
         'planDayCountList1': planDayCountList1,
         'planDayCountList2': planDayCountList2,
+        'planDayCountList3': planDayCountList3,
         'pageCount': pageCount,
     }
     return render(request, 'lot_traveller.html', context)

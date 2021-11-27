@@ -469,6 +469,173 @@
                           </div>
                         </div>
                         {% endif %}
+                        {% if pageCount >= 3 %}
+                        <div id="page_3">
+                          <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
+                            <div class="col-4" style="padding-top: 3px">
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" id="non_asm_3" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">Non-ASM</h5>
+                              </div>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <div class="form-check form-check-inline mr-1">
+                                <input class="form-check-input" type="checkbox" id="asm_3" style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <h5 class="form-check-label">ASM</h5>
+                              </div>
+                            </div>
+                            <div class="col-1 text-right" style="padding-top: 3px">3/{{pageCount}}</div>
+                          </div>
+                          <table class="table small">
+                            <tbody>
+                              <tr>
+                                <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
+                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow title toptable"><strong>Sales order No.</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
+                                <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
+                                <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
+                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_3"></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Release Date</strong></td>
+                                <td>
+                                  {% if order.ReleaseDate != None %}
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Request Date</strong></td>
+                                <td>
+                                  {% if order.RequestDate != None %}
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="title"><strong>Prod. Order Qty</strong></td>
+                                <td>{{order.ProductionOrderQuatity|floatformat|default_if_none:""}}</td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                                <td rowspan="2"></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>FG. Mat. Code. No.</strong></td>
+                                <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>RM Mat'l Code No.</strong></td>
+                                <td>{{order.RM_MaterialCode|default_if_none:""}}</td>
+                                <td class="title"><strong>MRP Controller</strong></td>
+                                <td>{{order.MRP_Controller|default_if_none:""}}</td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Drawing No./Rev.</strong></td>
+                                <td colspan="3">{{order.DrawingNo|default_if_none:""}}</td>
+                                <td class="title"><strong>PO No. (Customer)</strong></td>
+                                <td>{{order.CustomerPONo|default_if_none:""}}</td>
+                                <td class="title"><strong>Mgr/Eng'r/MRP</strong></td>
+                                <td class="title"><strong>QA</strong></td>
+                                <td class="title"><strong>CS</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part No./Rev.</strong></td>
+                                <td colspan="3">{{order.PartNo|default_if_none:""}}</td>
+                                <td class="title"><strong>Sale Create Date</strong></td>
+                                <td>
+                                  {% if order.SalesCreateDate != None %}
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
+                                  {% endif %}
+                                </td>
+                                <td class="text-center" colspan="3" rowspan="2">
+                                  <svg id="barcode_3"></svg>
+                                  <script>
+                                  JsBarcode("#barcode_3", "{{orderNo}}", {
+                                    format: "CODE39",
+                                    displayValue: false,
+                                    width: 1,
+                                    height: 40,
+                                    margin: 0,
+                                  });
+                                  </script>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="title"><strong>Part Name</strong></td>
+                                <td colspan="3">{{order.PartName|default_if_none:""}}</td>
+                                <td class="title"><strong>Printed Date</strong></td>
+                                <td>{% now 'd-m-Y' %}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table class="table text-center table-sm">
+                            <tbody>
+                              <tr>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Routing<br>กระบวนการผลิต<br>Operation Number<br>Group/Grp.Counter</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Planning</strong></td>
+                                <td class="title bottable" colspan="3"><strong>Estimate Time</strong></td>
+                                <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
+                                <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
+                                <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="title bottable"><strong>วันที่เริ่มผลิต<br>Start Date</strong></td>
+                                <td class="title bottable"><strong>แผนการผลิต<br>Planning<br>(Day)</strong></td>
+                                <td class="title bottable"><strong>วันที่ผลิตเสร็จ<br>Planned Finish<br>Date</strong></td>
+                                <td class="title bottable"><strong>Setup<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Operation<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>Labor<br>Time<br>(Min)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>(Qty)</strong></td>
+                                <td class="title bottable"><strong>Operator<br>ID / Stamp</strong></td>
+                              </tr>
+                              {% for operation in operationList3 %}
+                                <tr>
+                                  <td>{{operation.OperationNo}}</td>
+                                  <td>{{operation.WorkCenterNo}}</td>
+                                  <td>
+                                    {% if operation.PlanStartDate != None %}
+                                    {{operation.PlanStartDate|slice:"8:10"}}-{{operation.PlanStartDate|slice:"5:7"}}-{{operation.PlanStartDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{planDayCountList2|index:forloop.counter0}}</td>
+                                  <td>
+                                    {% if operation.PlanFinishDate != None %}
+                                    {{operation.PlanFinishDate|slice:"8:10"}}-{{operation.PlanFinishDate|slice:"5:7"}}-{{operation.PlanFinishDate|slice:"0:4"}}
+                                    {% endif %}
+                                  </td>
+                                  <td>{{operation.EstSetupTime|floatformat}}</td>
+                                  <td>{{operation.EstOperationTime|floatformat}}</td>
+                                  <td>{{operation.EstLaborTime|floatformat}}</td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td>
+                                    <svg id="barcode_3_{{forloop.counter}}"></svg>
+                                    <script>
+                                    JsBarcode("#barcode_3_{{forloop.counter}}", "{{operation.OperationNo}}", {
+                                      format: "CODE39",
+                                      displayValue: false,
+                                      width: 1,
+                                      height: 20,
+                                      margin: 0,
+                                    });
+                                    </script>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          <div class="row" style="font-size: 10px;">
+                            <div class="col-10">
+                              Effective Date : 15 December 2021, retention for ISO 9001 3 years, IATF 16949 15 years, AS9100 10 years except special requirements defined in the announcement "Retention of Quality Records"
+                            </div>
+                            <div class="col-2 text-right">
+                              FM-GEN-PC-084 Rev.1
+                            </div>
+                          </div>
+                        </div>
+                        {% endif %}
                       </div>
                     </div>
                   </div>
@@ -505,10 +672,18 @@
 
       $("#pl_qty_1").on("keypress keyup blur",function (event) {
           $("#pl_qty_2").val($("#pl_qty_1").val());
+          $("#pl_qty_3").val($("#pl_qty_1").val());
       });
+
 
       $("#pl_qty_2").on("keypress keyup blur",function (event) {
           $("#pl_qty_1").val($("#pl_qty_2").val());
+          $("#pl_qty_3").val($("#pl_qty_2").val());
+      });
+
+      $("#pl_qty_3").on("keypress keyup blur",function (event) {
+          $("#pl_qty_1").val($("#pl_qty_3").val());
+          $("#pl_qty_2").val($("#pl_qty_3").val());
       });
 
       $("#pl_qty_1").on("keypress keyup blur",function (event) {
@@ -521,39 +696,98 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
+      $("#pl_qty_3").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#non_asm_1").on("change",function (event) {
-          if ($("#non_asm_1").is(':checked')) $("#non_asm_2").prop("checked", true);
-          else $("#non_asm_2").prop("checked", false);
+          if ($("#non_asm_1").is(':checked')){
+            $("#non_asm_2").prop("checked", true);
+            $("#non_asm_3").prop("checked", true);
+          } else {
+            $("#non_asm_2").prop("checked", false);
+            $("#non_asm_3").prop("checked", false);
+          }
           if ($("#non_asm_1").is(':checked')){
             $("#asm_1").prop("checked", false);
             $("#asm_2").prop("checked", false);
+            $("#asm_3").prop("checked", false);
           }
       });
 
       $("#non_asm_2").on("change",function (event) {
-          if ($("#non_asm_2").is(':checked')) $("#non_asm_1").prop("checked", true);
-          else $("#non_asm_1").prop("checked", false);
-          if ($("#non_asm_1").is(':checked')){
-            $("#asm_1").prop("checked", false);
-            $("#asm_2").prop("checked", false);
-          }
+        if ($("#non_asm_2").is(':checked')){
+          $("#non_asm_1").prop("checked", true);
+          $("#non_asm_3").prop("checked", true);
+        } else {
+          $("#non_asm_1").prop("checked", false);
+          $("#non_asm_3").prop("checked", false);
+        }
+        if ($("#non_asm_1").is(':checked')){
+          $("#asm_1").prop("checked", false);
+          $("#asm_2").prop("checked", false);
+          $("#asm_3").prop("checked", false);
+        }
+      });
+
+      $("#non_asm_3").on("change",function (event) {
+        if ($("#non_asm_3").is(':checked')){
+          $("#non_asm_1").prop("checked", true);
+          $("#non_asm_2").prop("checked", true);
+        } else {
+          $("#non_asm_1").prop("checked", false);
+          $("#non_asm_2").prop("checked", false);
+        }
+        if ($("#non_asm_1").is(':checked')){
+          $("#asm_1").prop("checked", false);
+          $("#asm_2").prop("checked", false);
+          $("#asm_3").prop("checked", false);
+        }
       });
 
       $("#asm_1").on("change",function (event) {
-          if ($("#asm_1").is(':checked')) $("#asm_2").prop("checked", true);
-          else $("#asm_2").prop("checked", false);
+          if ($("#asm_1").is(':checked')){
+            $("#asm_2").prop("checked", true);
+            $("#asm_3").prop("checked", true);
+          } else {
+            $("#asm_2").prop("checked", false);
+            $("#asm_3").prop("checked", false);
+          }
           if ($("#asm_1").is(':checked')){
             $("#non_asm_1").prop("checked", false);
             $("#non_asm_2").prop("checked", false);
+            $("#non_asm_3").prop("checked", false);
           }
       });
 
       $("#asm_2").on("change",function (event) {
-          if ($("#asm_2").is(':checked')) $("#asm_1").prop("checked", true);
-          else $("#asm_1").prop("checked", false);
+          if ($("#asm_2").is(':checked')){
+            $("#asm_1").prop("checked", true);
+            $("#asm_3").prop("checked", true);
+          } else {
+            $("#asm_1").prop("checked", false);
+            $("#asm_3").prop("checked", false);
+          }
           if ($("#asm_1").is(':checked')){
             $("#non_asm_1").prop("checked", false);
             $("#non_asm_2").prop("checked", false);
+            $("#non_asm_3").prop("checked", false);
+          }
+      });
+
+      $("#asm_3").on("change",function (event) {
+          if ($("#asm_3").is(':checked')){
+            $("#asm_1").prop("checked", true);
+            $("#asm_2").prop("checked", true);
+          } else {
+            $("#asm_1").prop("checked", false);
+            $("#asm_2").prop("checked", false);
+          }
+          if ($("#asm_1").is(':checked')){
+            $("#non_asm_1").prop("checked", false);
+            $("#non_asm_2").prop("checked", false);
+            $("#non_asm_3").prop("checked", false);
           }
       });
     </script>
