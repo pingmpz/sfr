@@ -120,6 +120,7 @@
                           }
                           table {
                             margin-bottom: 0px !important;
+                            table-layout: fixed;
                           }
                           td {
                             height: 30px !important;
@@ -135,10 +136,10 @@
                             background-color:#e1e4e7 !important;
                           }
                           .toptable {
-                            width: 11.11%;
+                            /* width: 11.11%; */
                           }
                           .bottable {
-                            width: 7.69%;
+                            /* width: 7.69%; */
                           }
                         </style>
                         <script src="{% static "vendors/jsbarcode/js/jsbarcode.all.min.js" %}"></script>
@@ -246,7 +247,7 @@
                                 <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
                                 <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
                                 <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
-                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Barcode</strong></td>
                                 <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
                               </tr>
                               <tr>
@@ -281,7 +282,7 @@
                                   <td></td>
                                   <td></td>
                                   <td></td>
-                                  <td>
+                                  <td colspan="2">
                                     <svg id="barcode_1_{{forloop.counter}}"></svg>
                                     <script>
                                     JsBarcode("#barcode_1_{{forloop.counter}}", "{{operation.OperationNo}}", {
@@ -412,7 +413,7 @@
                                 <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
                                 <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
                                 <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
-                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Barcode</strong></td>
                                 <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
                               </tr>
                               <tr>
@@ -447,7 +448,7 @@
                                   <td></td>
                                   <td></td>
                                   <td></td>
-                                  <td>
+                                  <td colspan="2">
                                     <svg id="barcode_2_{{forloop.counter}}"></svg>
                                     <script>
                                     JsBarcode("#barcode_2_{{forloop.counter}}", "{{operation.OperationNo}}", {
@@ -579,7 +580,7 @@
                                 <td class="title bottable"><strong>งานดี<br>Accept</strong></td>
                                 <td class="title bottable"><strong>งานเสีย<br>Reject</strong></td>
                                 <td class="title bottable"><strong>ผู้ผลิต<br>ID / ประทับตรา</strong></td>
-                                <td class="title bottable" rowspan="2"><strong>Barcode</strong></td>
+                                <td class="title bottable" rowspan="2" colspan="2"><strong>Barcode</strong></td>
                                 <td class="title bottable" rowspan="2"><strong>Operation Short Text</strong></td>
                               </tr>
                               <tr>
@@ -614,7 +615,7 @@
                                   <td></td>
                                   <td></td>
                                   <td></td>
-                                  <td>
+                                  <td colspan="2">
                                     <svg id="barcode_3_{{forloop.counter}}"></svg>
                                     <script>
                                     JsBarcode("#barcode_3_{{forloop.counter}}", "{{operation.OperationNo}}", {
