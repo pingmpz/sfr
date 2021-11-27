@@ -41,12 +41,15 @@
             <li class="breadcrumb-item">Partial Lot Traveller</li>
             {% if state != "FIRSTPAGE" %}
             <li class="breadcrumb-item active">
-              {% if operationBefore != -1 %}<a href="/transaction/{{orderNo}}{{operationBefore}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
               <span id="bc_order_no">{{orderNo}}</span>&nbsp;-&nbsp;<span id="bc_operation_no">{{operationNo}}</span>
-              {% if operationAfter != -1 %}&nbsp;<a href="/transaction/{{orderNo}}{{operationAfter}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
             </li>
             {% endif %}
           </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2 small">
+            {% if state == "DATAFOUND" %}
+            <a href="/transaction/{{orderNo}}{{operationNo}}" class="btn btn-sm btn-pill btn-ghost-dark">Transaction</a>&nbsp;
+            {% endif %}
+          </div>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
