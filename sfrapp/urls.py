@@ -58,6 +58,8 @@ urlpatterns = [
     path('validate_work_center/', views.validate_work_center, name='validate_work_center'),
     path('validate_operator/', views.validate_operator, name='validate_operator'),
     path('validate_password/', views.validate_password, name='validate_password'),
+    path('validate_admin_password/', views.validate_admin_password, name='validate_admin_password'),
+    path('validate_super_admin_password/', views.validate_super_admin_password, name='validate_super_admin_password'),
     #-- TIMELINE
     path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
     path('get_emp_timeline/', views.get_emp_timeline, name='get_emp_timeline'),

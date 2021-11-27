@@ -1006,11 +1006,33 @@ def validate_password(request):
         isCorrect = True
         userID = user.UserID
         userRole = user.UserRole
-    print(userID)
     data = {
         'isCorrect': isCorrect,
         'userID': userID,
         'userRole': userRole,
+    }
+    return JsonResponse(data)
+
+def validate_admin_password(request):
+    password = request.GET.get('password')
+    isCorrect = False
+    user = getUser(password)
+    if user != None and (user.UserRole.strip() == 'ADMIN' or user.UserRole.strip() == 'SUPERADMIN'):
+        isCorrect = True
+    print(isCorrect)
+    data = {
+        'isCorrect': isCorrect,
+    }
+    return JsonResponse(data)
+
+def validate_super_admin_password(request):
+    password = request.GET.get('password')
+    isCorrect = False
+    user = getUser(password)
+    if user != None and user.UserRole.strip() == 'SUPERADMIN':
+        isCorrect = True
+    data = {
+        'isCorrect': isCorrect,
     }
     return JsonResponse(data)
 

@@ -220,8 +220,13 @@
         var user_id = $("#new_user_id").val();
         var user_role = $("#new_user_role").val();
         var user_password = $("#new_user_password").val();
-        validate_password(admin_password, function() {
-
+        remove_valid_many(["admin_password","new_user_id","new_user_password"]);
+        validate_admin_password(admin_password, function(isCorrect) {
+          if(!isCorrect){
+            invalid("admin_password");
+          } else {
+            valid("admin_password");
+          }
         });
       }
 
@@ -229,16 +234,24 @@
         var admin_password = $("#admin_password").val();
         var user_id = $("#change_user_id").val();
         var user_password = $("#change_user_password").val();
-        validate_password(admin_password, function() {
-
+        validate_admin_password(admin_password, function(isCorrect) {
+          if(!isCorrect){
+            invalid("admin_password");
+          } else {
+            valid("admin_password");
+          }
         });
       }
 
       function delete_user(){
         var admin_password = $("#admin_password").val();
         var user_id = $("#delete_user_id").val();
-        validate_password(admin_password, function() {
-
+        validate_super_admin_password(admin_password, function(isCorrect) {
+          if(!isCorrect){
+            invalid("admin_password");
+          } else {
+            valid("admin_password");
+          }
         });
       }
 
@@ -252,16 +265,53 @@
     <script>
       //-- VALIDATION
       function validate_admin_password(password, _callback){
-        $.ajax({
-          url: '/validate_admin_password/',
-          data: {
-            'password': password,
-          },
-          dataType: 'json',
-          success: function (data) {
-            
-          }
-        });
+        if(password.length < 4) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_admin_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.isCorrect) _callback(true);
+              else _callback(false);
+            }
+          });
+        }
+      }
+
+      function validate_super_admin_password(password, _callback){
+        if(password.length < 4) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_super_admin_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.isCorrect) _callback(true);
+              else _callback(false);
+            }
+          });
+        }
+      }
+
+      function validate_user(user_id, _callback){
+        if(user_id.length < 4) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_user/',
+            data: {
+              'user_id': user_id,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isExist)? _callback(true):_callback(false);
+            }
+          });
+        }
       }
 
       //-- VALIDATE CONTROL
