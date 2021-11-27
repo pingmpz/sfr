@@ -1510,10 +1510,15 @@ def setOperationControlFromSAP(order_no):
     order = cursor.fetchall()[0]
     sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY OperationNumber ASC"
     cursor.execute(sql)
+    print(str(datetime.now()))
     operations = cursor.fetchall()
     for i in range(len(operations)):
-        date_get_from_sap = str(operations[i].DateGetFromSAP)
-        date_get_from_sap = date_get_from_sap[0:len(date_get_from_sap) - 7]
+        date_get_from_sap = ""
+        if operations[i].DateGetFromSAP != None:
+            date_get_from_sap = operations[i].DateGetFromSAP
+        else:
+            date_get_from_sap = str(datetime.now())
+        date_get_from_sap = str(date_get_from_sap[0:len(date_get_from_sap) - 7])
         sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
         if i == 0:
             sql += " VALUES ('"+order_no+"','"+operations[i].OperationNumber+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,'"+str(operations[i].PlanStartDate)+"','"+str(operations[i].PlanFinishDate)+"',"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"

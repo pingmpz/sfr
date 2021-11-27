@@ -108,6 +108,7 @@
                                 <select class="form-control" id="change_user_id">
                                   <option value="-1" selected>-</option>
                                   {% for user in userList %}
+                                  {% if user.UserRole != 'SUPERADMIN' %}
                                   <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
@@ -115,6 +116,7 @@
                                     {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
                                     {% endif %}
                                   </option>
+                                  {% endif %}
                                   {% endfor %}
                                 </select>
                               </div>
@@ -140,6 +142,7 @@
                                 <select class="form-control" id="delete_user_id">
                                   <option value="-1" selected>-</option>
                                   {% for user in userList %}
+                                  {% if user.UserRole != 'SUPERADMIN' %}
                                   <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
@@ -147,6 +150,7 @@
                                     {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
                                     {% endif %}
                                   </option>
+                                  {% endif %}
                                   {% endfor %}
                                 </select>
                               </div>
