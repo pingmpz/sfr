@@ -159,18 +159,7 @@
                               <p class="mb-3 small">
                                 {% if sapReportList|length == 0 %}<i>No data available</i>{% endif %}
                                 {% for report in sapReportList %}
-                                  {{report.ProductionOrderNo|default_if_none:""}}|
-                                  {{report.OperationNumber|default_if_none:""}}|
-                                  {{report.Yiled|default_if_none:""}}|
-                                  {{report.Scrap|default_if_none:""}}|
-                                  {{report.SetupTime|default_if_none:""}}|
-                                  {{report.OperTime|default_if_none:""}}|
-                                  {{report.LaborTime|default_if_none:""}}|
-                                  {{report.StartDate|default_if_none:""}}|
-                                  {{report.StartTime|default_if_none:""}}|
-                                  {{report.FinishDate|default_if_none:""}}|
-                                  {{report.FinishTime|default_if_none:""}}|
-                                  |<br>
+                                  {{report.WorkCenter.strip|default_if_none:""}}|{{report.ProductionOrderNo.strip|default_if_none:""}}|{{report.OperationNumber.strip|default_if_none:""}}|{{report.Yiled|default_if_none:""}}|{{report.Scrap|default_if_none:""}}|{{report.SetupTime|default_if_none:""}}|{{report.OperTime|default_if_none:""}}|{{report.LaborTime|default_if_none:""}}|{{report.StartDate|default_if_none:""}}|{{report.StartTime|default_if_none:""}}|{{report.FinishDate|default_if_none:""}}|{{report.FinishTime|default_if_none:""}}|<br>
                                 {% endfor %}
                               </p>
                             </div>
