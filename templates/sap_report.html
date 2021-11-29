@@ -156,7 +156,7 @@
                           </div>
                           <div class="collapse" id="collapse-1" role="tabpanel">
                             <div class="card-body">
-                              <p class="mb-3">
+                              <p class="mb-3 small">
                                 {% if sapReportList|length == 0 %}<i>No data available</i>{% endif %}
                                 {% for report in sapReportList %}
                                   {{report.ProductionOrderNo|default_if_none:""}}|
