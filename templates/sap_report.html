@@ -150,14 +150,14 @@
                       </table>
                       <br>
                       <div class="accordion" id="accordion" role="tablist">
-                        <div class="card mb-0">
+                        <div class="card border-danger mb-0">
                           <div class="card-header" role="tab">
-                            <h6 class="mb-0"><a data-toggle="collapse" href="#collapse-1">Text File View</a></h6>
+                            <h6 class="mb-0"><a data-toggle="collapse" class="text-danger" href="#collapse-1">Text File View</a></h6>
                           </div>
                           <div class="collapse" id="collapse-1" role="tabpanel">
                             <div class="card-body">
-                              <p class="mb-3 text-dark">
-                                {% if sapReportList|length == 0 %}<strong>NO DATA</strong>{% endif %}
+                              <p class="mb-3">
+                                {% if sapReportList|length == 0 %}<i>No data available</i>{% endif %}
                                 {% for report in sapReportList %}
                                   {{report.ProductionOrderNo|default_if_none:""}}|
                                   {{report.OperationNumber|default_if_none:""}}|
