@@ -148,6 +148,35 @@
                           {% endfor %}
                         </tbody>
                       </table>
+                      <br>
+                      <div class="accordion" id="accordion" role="tablist">
+                        <div class="card mb-0">
+                          <div class="card-header" role="tab">
+                            <h6 class="mb-0"><a data-toggle="collapse" href="#collapse-1">Text File View</a></h6>
+                          </div>
+                          <div class="collapse" id="collapse-1" role="tabpanel">
+                            <div class="card-body">
+                              <p class="mb-3 text-dark">
+                                {% if sapReportList|length == 0 %}<strong>NO DATA</strong>{% endif %}
+                                {% for report in sapReportList %}
+                                  {{report.ProductionOrderNo|default_if_none:""}}|
+                                  {{report.OperationNumber|default_if_none:""}}|
+                                  {{report.Yiled|default_if_none:""}}|
+                                  {{report.Scrap|default_if_none:""}}|
+                                  {{report.SetupTime|default_if_none:""}}|
+                                  {{report.OperTime|default_if_none:""}}|
+                                  {{report.LaborTime|default_if_none:""}}|
+                                  {{report.StartDate|default_if_none:""}}|
+                                  {{report.StartTime|default_if_none:""}}|
+                                  {{report.FinishDate|default_if_none:""}}|
+                                  {{report.FinishTime|default_if_none:""}}|
+                                  |<br>
+                                {% endfor %}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
