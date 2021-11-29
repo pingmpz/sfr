@@ -16,7 +16,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Work Center Master | Shopfloor Reporting Application</title>
+    <title>Working Work Center | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -27,6 +27,8 @@
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Data Table CSS -->
     <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -39,7 +41,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Work Center ({{workCenterList|length}})</li>
+            <li class="breadcrumb-item">Working Work Center ({{workingWorkCenterList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -57,32 +59,32 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-striped small" id="wc_master_table">
+                      <table class="table table-sm table-striped small" id="working_wc_table">
                         <thead>
                           <tr>
                             <th>Work Center</th>
                             <th>Work Center Name</th>
                             <th>Work Center Group</th>
-                            <th>Routing</th>
-                            <th>External Process</th>
-                            <th>Work Center Type</th>
                             <th>Machine Type</th>
-                            <th>Hourly Rate</th>
-                            <th>Noted</th>
+                            <th>Status</th>
+                            <th>Prod. Order - Oper. No</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for workCenter in workCenterList %}
-                          <tr class="{% if workCenter.IsActive == False %}text-danger{% endif %}">
-                            <td>{% if workCenter.IsActive %}<a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a>{% else %}{{workCenter.WorkCenterNo}}{% endif %}</td>
+                          {% for workCenter in workingWorkCenterList %}
+                          <tr>
+                            <td><a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a></td>
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
-                            <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{{workCenter.WorkCenterType}}</td>
                             <td>{{workCenter.MachineType|default_if_none:""}}</td>
-                            <td>{{workCenter.HourlyRate|floatformat:"0"}}</td>
-                            <td>{{workCenter.Noted|default_if_none:""}}</td>
+                            <td>
+                              <strong>
+                              {% if workCenter.Status == 'WORKING' %}<span class="text-success">Working</span>
+                              {% elif workCenter.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
+                              {% else %}{{workCenter.Status}}{% endif %}
+                              </strong>
+                            </td>
+                            <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -118,7 +120,7 @@
       });
 
       $(document).ready(function() {
-        $('#wc_master_table').DataTable( {
+        $('#working_wc_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });

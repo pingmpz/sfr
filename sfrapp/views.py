@@ -221,6 +221,20 @@ def emp(request, empid, fmonth):
 
 #------------------------------------------------------------------------ REPORT
 
+def working_wc(request):
+    workingWorkCenterList = getWorkingWorkCenterList()
+    context = {
+        'workingWorkCenterList': workingWorkCenterList,
+    }
+    return render(request, 'working_wc.html', context)
+
+def working_emp(request):
+    workingOperatorList = getWorkingOperatorList()
+    context = {
+        'workingOperatorList': workingOperatorList,
+    }
+    return render(request, 'working_emp.html', context)
+
 def lot_traveller(request, orderoprno):
     orderNo = ""
     operationNo = ""
@@ -1251,6 +1265,20 @@ def getModList(order_no):
 def getUserList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [User]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkingWorkCenterList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE Status <> 'COMPLETED' ORDER BY OWC.OperatingWorkCenterID ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkingOperatorList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
+    sql += " WHERE Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
