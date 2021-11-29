@@ -171,7 +171,7 @@
                               <p class="mb-3 small">
                                 {% if sapModifierList|length == 0 %}<i>No data available</i>{% endif %}
                                 {% for mod in sapModifierList %}
-                                  {{mod.Mode}}|{{mod.OrderNo}}|{{mod.OperationNo}}|{{mod.ControlKey|default_if_none:""}}|{{mod.WorkCenter.strip|default_if_none:""}}|{{mod.PlannedDeliveryTime|default_if_none:""}}|{{mod.CostElement|default_if_none:""}}|{{mod.PriceUnit|default_if_none:""}}|{{mod.Price|default_if_none:""}}|{{mod.Currency.strip|default_if_none:""}}|{{mod.MaterialGroup|default_if_none:""}}|{{mod.PurchasingGroup|default_if_none:""}}|{{mod.PurchasingOrg|default_if_none:""}}|{{mod.SetupTime|default_if_none:""}}|{{mod.OperTime|default_if_none:""}}|{{mod.LaborTime|default_if_none:""}}|<br>
+                                  {{mod.Mode}}|{{mod.OrderNo}}|{{mod.OperationNo}}|{{mod.ControlKey|default_if_none:""}}|{{mod.WorkCenter.strip|default_if_none:""}}|{{mod.PlannedDeliveryTime|default_if_none:""}}|{{mod.CostElement.strip|default_if_none:""}}|{{mod.PriceUnit|default_if_none:""}}|{{mod.Price|default_if_none:""}}|{{mod.Currency.strip|default_if_none:""}}|{{mod.MaterialGroup|default_if_none:""}}|{{mod.PurchasingGroup|default_if_none:""}}|{{mod.PurchasingOrg|default_if_none:""}}|{{mod.SetupTime|default_if_none:""}}|{{mod.OperTime|default_if_none:""}}|{{mod.LaborTime|default_if_none:""}}|<br>
                                 {% endfor %}
                               </p>
                             </div>
