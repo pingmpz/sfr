@@ -403,6 +403,8 @@ def get_workcenter_data(request):
             invalid_text = WorkCenterNo + " is a rounting."
         elif workcenter.WorkCenterGroup != work_center_group:
             invalid_text = WorkCenterNo + " is in " + workcenter.WorkCenterGroup + " Group."
+        elif workcenter.IsActive == False:
+            invalid_text = WorkCenterNo + " is In-Active."
         elif isWorkCenterOperating(workcenter_no):
             owc = getWorkCenterOperatingByWorkCenterNo(workcenter_no)
             invalid_text = WorkCenterNo + " is working at " + owc.OrderNo + "-" + owc.OperationNo + "."
@@ -992,6 +994,9 @@ def validate_work_center(request):
     elif work_center.WorkCenterGroup != work_center_group:
         canUse = False
         invalidText = 'This Work Center is not in the same Work Center Group.'
+    elif work_center.IsActive == False:
+        canUse = False
+        invalidText = 'This Work Center is In-Active.'
     data = {
         'canUse': canUse,
         'invalidText': invalidText,
