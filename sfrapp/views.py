@@ -718,7 +718,7 @@ def manual_report(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
-    chief_id = request.GET.get('chief_id') # NONE USE FOR NOW
+    password = request.GET.get('password')
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -834,7 +834,7 @@ def delete_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
     emp_id = request.GET.get('emp_id')
-    chief_id = request.GET.get('chief_id')
+    password = request.GET.get('password')
     operation = getOperation(order_no, operation_no)
     nextlink = "0"
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
@@ -850,7 +850,8 @@ def delete_operation(request):
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
     #-- HISTORY : DELETE OPERATION
-    insertHistoryModifier("DELETE", order_no, operation_no, emp_id, chief_id)
+    user = getUserByPassword(password)
+    insertHistoryModifier("DELETE", order_no, operation_no, emp_id, user.UserID)
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
     data = {
@@ -877,7 +878,7 @@ def add_operation(request):
     price_unit = request.GET.get('price_unit')
     price = request.GET.get('price')
     currency = request.GET.get('currency')
-    chief_id = request.GET.get('chief_id')
+    password = request.GET.get('password')
     #-- ADD OPERATION CONTROL
     if control_key == "PP01":
         insertOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time)
@@ -886,7 +887,8 @@ def add_operation(request):
     #-- SAP : ADD OPERATION
     insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : ADD OPERATION
-    insertHistoryModifier("ADD", order_no, operation_no, emp_id, chief_id)
+    user = getUserByPassword(password)
+    insertHistoryModifier("ADD", order_no, operation_no, emp_id, user.UserID)
     #-- IF NEXT OPERATION HAS PROCESS QTY TRANSFER TO NEW OPERATION
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
@@ -915,7 +917,7 @@ def change_operation(request):
     price_unit = request.GET.get('price_unit')
     price = request.GET.get('price')
     currency = request.GET.get('currency')
-    chief_id = request.GET.get('chief_id')
+    password = request.GET.get('password')
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
     deleteAllOperatingData(order_no, operation_no)
     #-- CHANGE OPERATION CONTROL
@@ -926,7 +928,8 @@ def change_operation(request):
     #-- SAP : CHANGE OPERATION
     insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
     #-- HISTORY : CHANGE OPERATION
-    insertHistoryModifier("CHANGE", order_no, operation_no, emp_id, chief_id)
+    user = getUserByPassword(password)
+    insertHistoryModifier("CHANGE", order_no, operation_no, emp_id, user.UserID)
     data = {
     }
     return JsonResponse(data)
@@ -1006,17 +1009,23 @@ def validate_operator(request):
 def validate_password(request):
     password = request.GET.get('password')
     isCorrect = False
-    userID = ""
-    userRole = ""
     user = getUserByPassword(password)
     if user != None:
         isCorrect = True
-        userID = user.UserID
-        userRole = user.UserRole
     data = {
         'isCorrect': isCorrect,
-        'userID': userID,
-        'userRole': userRole,
+    }
+    return JsonResponse(data)
+
+def validate_section_chief_password(request):
+    password = request.GET.get('password')
+    isCorrect = False
+    user = getUserByPassword(password)
+    if user != None and (user.UserRole.strip() == 'SECTIONCHIEF' or user.UserRole.strip() == 'ADMIN' or user.UserRole.strip() == 'SUPERADMIN'):
+        isCorrect = True
+    print(isCorrect)
+    data = {
+        'isCorrect': isCorrect,
     }
     return JsonResponse(data)
 

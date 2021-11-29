@@ -58,6 +58,7 @@ urlpatterns = [
     path('validate_work_center/', views.validate_work_center, name='validate_work_center'),
     path('validate_operator/', views.validate_operator, name='validate_operator'),
     path('validate_password/', views.validate_password, name='validate_password'),
+    path('validate_section_chief_password/', views.validate_section_chief_password, name='validate_section_chief_password'),
     path('validate_admin_password/', views.validate_admin_password, name='validate_admin_password'),
     path('validate_super_admin_password/', views.validate_super_admin_password, name='validate_super_admin_password'),
     path('validate_new_user_id/', views.validate_new_user_id, name='validate_new_user_id'),

@@ -1372,6 +1372,7 @@
     <!-- Popover JS -->
     <script src="{% static "js/popovers.js" %}"></script>
     <!-- Custom JS -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
     <!-- MAIN -->
     <script>
@@ -1514,9 +1515,9 @@
                   var owc_id = owc[0];
                   var owc_workcenter_name = owc[7]+" | "+owc[8];
                   var owc_startdatetime = owc[4];
-                  var startdatetime = (owc_startdatetime == null)?"-":getFullDateTime(owc_startdatetime);
+                  var startdatetime = (owc_startdatetime == null)?"-":getFullDateTimeFromString(owc_startdatetime);
                   var owc_stopdatetime = owc[5];
-                  var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTime(owc_stopdatetime);
+                  var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTimeFromString(owc_stopdatetime);
                   var owc_status = $.trim(owc[6]);
                   var mc_type = $.trim(owc[13]);
                   if(owc_status == "COMPLETED") {
@@ -1585,9 +1586,9 @@
                   var oopr_workcenter_name = (oopr[18] == null)?null:oopr[18]+" | "+oopr[19];
                   var oopr_operator_name = oopr[8]+" | "+oopr[9];
                   var oopr_startdatetime = oopr[5];
-                  var startdatetime = (oopr_startdatetime == null)?"-":getFullDateTime(oopr_startdatetime);
+                  var startdatetime = (oopr_startdatetime == null)?"-":getFullDateTimeFromString(oopr_startdatetime);
                   var oopr_stopdatetime = oopr[6];
-                  var stopdatetime = (oopr_stopdatetime == null)?"-":getFullDateTime(oopr_stopdatetime);
+                  var stopdatetime = (oopr_stopdatetime == null)?"-":getFullDateTimeFromString(oopr_stopdatetime);
                   var oopr_status = $.trim(oopr[7]);
                   row = "";
                   row += "<tr id='operator_row_"+oopr_id+"'>";
@@ -1927,7 +1928,6 @@
         var reject_reason = $('#mp_reject_reason').val();
         var other_reason = $('#mp_other_reason').val();
         var isReportable = false;
-        var chief_id = "";
         $("#mp_invalid_text").text("");
         remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
         //c
@@ -1937,8 +1937,7 @@
             $("#mp_invalid_text").text(invalid_text1);
           } else{
             valid("mp_password");
-            validate_operator(emp_id, function(isExist, invalid_text2, temp_chief_id) {
-              chief_id = temp_chief_id;
+            validate_operator(emp_id, function(isExist, invalid_text2) {
               if(!isExist){
                 invalid("mp_emp_id");
                 $("#mp_invalid_text").text(invalid_text2);
@@ -2036,7 +2035,7 @@
                         'reject_qty': reject_qty,
                         'reject_reason': reject_reason,
                         'other_reason': other_reason,
-                        'chief_id': chief_id,
+                        'password': password,
                       },
                       dataType: 'json',
                       success: function (data) {
@@ -2070,21 +2069,21 @@
 
       function prepare_add(){
         clear_validate_add();
-        empty_many(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_plan_start_date","add_plan_finish_date","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
+        emptyInputs(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_plan_start_date","add_plan_finish_date","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
         $("#add_emp_id").focus();
         timeleft = 300;
       }
 
       function prepare_change(){
         clear_validate_change();
-        empty_many(["change_emp_id","change_password","change_new_operation_no","change_work_center_no","change_plan_start_date","change_plan_finish_date","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
+        emptyInputs(["change_emp_id","change_password","change_new_operation_no","change_work_center_no","change_plan_start_date","change_plan_finish_date","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
         $("#change_emp_id").focus();
         timeleft = 300;
       }
 
       function prepare_delete(){
         clear_validate_delete();
-        empty_many(["del_emp_id","del_password"]);
+        emptyInputs(["del_emp_id","del_password"]);
         $("#del_emp_id").focus();
         timeleft = 300;
       }
@@ -2092,11 +2091,7 @@
       function add(){
         // a
         $("#add_new_operation_no").val(frontZero($("#add_new_operation_no").val(), 4));
-        if($('#add_est_setup_time').val() == "") $('#add_est_setup_time').val("0");
-        if($('#add_est_operate_time').val() == "") $('#add_est_operate_time').val("0");
-        if($('#add_est_labor_time').val() == "") $('#add_est_labor_time').val("0");
-        if($('#add_price_unit').val() == "") $('#add_price_unit').val("0");
-        if($('#add_price').val() == "") $('#add_price').val("0");
+        setZeroInputs(['add_est_setup_time','add_est_operate_time','add_est_labor_time','add_price_unit','add_price']);
         $('#add_price').val(roundToTwo($('#add_price').val()));
         // b
         var order_no = $("#order_no").val();
@@ -2118,7 +2113,6 @@
         var price_unit = parseFloat($('#add_price_unit').val());
         var price = parseFloat($('#add_price').val());
         var currency = $('#add_currency').val();
-        var chief_id = "";
         var isAddable = false;
         var isExternalProcess = false;
         clear_validate_add();
@@ -2129,8 +2123,7 @@
             $("#add_invalid_text").text(invalid_text);
           } else {
             valid("add_emp_id");
-            validate_password(password, function(isCorrect, invalid_text, temp_chief_id) {
-              chief_id = temp_chief_id;
+            validate_section_chief_password(password, function(isCorrect, invalid_text) {
               if(!isCorrect){
                 invalid("add_password");
                 $("#add_invalid_text").text(invalid_text);
@@ -2233,6 +2226,7 @@
                               'order_no': order_no,
                               'new_operation_no': new_operation_no,
                               'emp_id': emp_id,
+                              'password': password,
                               'work_center_no': work_center_no,
                               'control_key': control_key,
                               'plan_start_date': plan_start_date,
@@ -2269,11 +2263,7 @@
 
       function change(){
         // a
-        if($('#change_est_setup_time').val() == "") $('#change_est_setup_time').val("0");
-        if($('#change_est_operate_time').val() == "") $('#change_est_operate_time').val("0");
-        if($('#change_est_labor_time').val() == "") $('#change_est_labor_time').val("0");
-        if($('#change_price_unit').val() == "") $('#change_price_unit').val("0");
-        if($('#change_price').val() == "") $('#change_price').val("0");
+        setZeroInputs(['change_est_setup_time','change_est_operate_time','change_est_labor_time','change_price_unit','change_price']);
         $('#change_price').val(roundToTwo($('#change_price').val()));
         // b
         var order_no = $("#order_no").val();
@@ -2295,7 +2285,6 @@
         var price_unit = parseFloat($('#change_price_unit').val());
         var price = parseFloat($('#change_price').val());
         var currency = $('#change_currency').val();
-        var chief_id = "";
         var isChangable = false;
         clear_validate_change();
         // c
@@ -2305,8 +2294,7 @@
             $("#change_invalid_text").text(invalid_text);
           } else {
             valid("change_emp_id");
-            validate_password(password, function(isCorrect, invalid_text, temp_chief_id) {
-              chief_id = temp_chief_id;
+            validate_section_chief_password(password, function(isCorrect, invalid_text) {
               if(!isCorrect){
                 invalid("change_password");
                 $("#change_invalid_text").text(invalid_text);
@@ -2403,6 +2391,7 @@
                           'order_no': order_no,
                           'operation_no': operation_no,
                           'emp_id': emp_id,
+                          'password': password,
                           'work_center_no': work_center_no,
                           'control_key': control_key,
                           'plan_start_date': plan_start_date,
@@ -2447,7 +2436,7 @@
             $("#del_invalid_text").text(invalid_text);
           } else {
             valid("del_emp_id");
-            validate_password(password, function(isCorrect, invalid_text, chief_id) {
+            validate_section_chief_password(password, function(isCorrect, invalid_text) {
               if(!isCorrect){
                 invalid("del_password");
                 $("#del_invalid_text").text(invalid_text);
@@ -2460,7 +2449,7 @@
                     'order_no': order_no,
                     'operation_no': operation_no,
                     'emp_id' : emp_id,
-                    'chief_id' : chief_id,
+                    'password': password,
                   },
                   dataType: 'json',
                   success: function (data) {
@@ -2547,8 +2536,8 @@
       }
 
       function validate_password(password, _callback){
-        if(password.length == 0) _callback(false, "Please fill Password.", "");
-        else if(password.length < 4) _callback(false, "Password is not correct.", "");
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
         else {
           $.ajax({
             url: '/validate_password/',
@@ -2557,37 +2546,27 @@
             },
             dataType: 'json',
             success: function (data) {
-              (data.isCorrect)? _callback(true, "", data.userID):_callback(false, "Password is not correct.", "");
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
             }
           });
         }
       }
 
-      //-- VALIDATE CONTROL
-      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
-      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
-      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
-
-      function remove_valid(input_id){
-        $("#"+input_id).removeClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
-
-      function valid(input_id){
-        $("#"+input_id).addClass("is-valid");
-        $("#"+input_id).removeClass("is-invalid");
-      }
-
-      function invalid(input_id){
-        $("#"+input_id).addClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
-
-      //-- EMPTY INPUT
-      empty_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) empty(input_ids[i]); }
-
-      function empty(input_id){
-        $("#"+input_id).val("");
+      function validate_section_chief_password(password, _callback){
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
+        else {
+          $.ajax({
+            url: '/validate_section_chief_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+            }
+          });
+        }
       }
     </script>
     <!-- SHORTCUT SEARCH -->
@@ -2815,42 +2794,6 @@
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
-    </script>
-    <!-- ETC -->
-    <script>
-      function capitalizeFirstLetter(str) {
-         return str.charAt(0).toUpperCase() + str.slice(1);
-      }
-
-      function getFullDateTime(str) {
-         var result = "";
-         var year = new Date(str).getFullYear();
-         var month = frontZero((new Date(str).getMonth() + 1).toString(), 2);
-         var date = frontZero(new Date(str).getDate().toString(), 2);
-         var hour = frontZero(new Date(str).getHours().toString(), 2);
-         var minute = frontZero(new Date(str).getMinutes().toString(), 2);
-         var second = frontZero(new Date(str).getSeconds().toString(), 2);
-         result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
-         return result
-      }
-
-      function frontZero(str, len){
-        var result = str;
-        for(var i = str.length;i < len;i++) result = "0" + result;
-        return result;
-      }
-
-      function generateRandomCode(length) {
-        var result = '';
-        var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'; // remove i l o 0
-        // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for ( var i = 0; i < length; i++ ) result += characters.charAt(Math.floor(Math.random() * characters.length));
-        return result;
-      }
-
-      function roundToTwo(num) {
-        return +(Math.round(num + "e+2")  + "e-2");
-      }
     </script>
   </body>
 </html>

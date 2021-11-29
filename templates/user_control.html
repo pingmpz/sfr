@@ -281,6 +281,7 @@
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function(event) {
@@ -387,7 +388,7 @@
 
       function clear_all(){
         remove_valid_many(["new_user_id","new_user_password", "change_user_password"]);
-        empty_many(["new_user_id","new_user_password", "change_user_password"]);
+        emptyInputs(["new_user_id","new_user_password", "change_user_password"]);
       }
 
     </script>
@@ -460,33 +461,6 @@
             }
           });
         }
-      }
-
-      //-- VALIDATE CONTROL
-      remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
-      valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
-      invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
-
-      function remove_valid(input_id){
-        $("#"+input_id).removeClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
-
-      function valid(input_id){
-        $("#"+input_id).addClass("is-valid");
-        $("#"+input_id).removeClass("is-invalid");
-      }
-
-      function invalid(input_id){
-        $("#"+input_id).addClass("is-invalid");
-        $("#"+input_id).removeClass("is-valid");
-      }
-
-      //-- EMPTY INPUT
-      empty_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) empty(input_ids[i]); }
-
-      function empty(input_id){
-        $("#"+input_id).val("");
       }
     </script>
   </body>
