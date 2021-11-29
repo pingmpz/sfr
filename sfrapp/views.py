@@ -56,6 +56,16 @@ def transaction(request, orderoprno):
                 setDataFromSAP(orderNo)
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
+            #-- GET OPERATION WITH REMAINING QTY > 0
+            if len(operationList) > 0:
+                currentOperation = operationList[0].OperationNo
+                for i in range(len(operationList)):
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if tempRemainQty > 0:
+                        currentOperation = operationList[i].OperationNo
+                        break
+                if operationNo == '0000':
+                    return redirect('/transaction/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
                 printString(orderNo + "-" + operationNo)
                 state = "DATAFOUND"
@@ -106,14 +116,6 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
-            #-- GET OPERATION WITH REMAINING QTY > 0
-            if len(operationList) > 0:
-                currentOperation = operationList[0].OperationNo
-                for i in range(len(operationList)):
-                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                    if tempRemainQty > 0:
-                        currentOperation = operationList[i].OperationNo
-                        break
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
