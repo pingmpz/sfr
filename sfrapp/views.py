@@ -80,6 +80,9 @@ def transaction(request, orderoprno):
                     if tempRemainQty > 0:
                         hasNoMoreQty = False
                         break
+                #-- IF CLOSED NOT SHOW CURRENT OPERATION
+                if hasNoMoreQty:
+                    currentOperation = -1
                 for i in range(len(operationList)):
                     #-- GET STATUS OF OPERATION LIST
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
