@@ -212,6 +212,12 @@
               'csvHtml5',
             ]
         });
+        var button_list = document.getElementsByClassName("buttons-html5");
+        for (var i = 0; i < button_list.length; i++) {
+          button_list[i].classList.add("btn");
+          button_list[i].classList.add("btn-sm");
+          button_list[i].classList.add("btn-outline-success");
+        }
       });
 
       $('a.toggle-vis').on( 'click', function (e) {
