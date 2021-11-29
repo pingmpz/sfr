@@ -1515,7 +1515,7 @@ def setOperationControlFromSAP(order_no):
     for i in range(len(operations)):
         date_get_from_sap = ""
         if operations[i].DateGetFromSAP != None:
-            date_get_from_sap = operations[i].DateGetFromSAP
+            date_get_from_sap = str(operations[i].DateGetFromSAP)
         else:
             date_get_from_sap = str(datetime.now())
         date_get_from_sap = str(date_get_from_sap[0:len(date_get_from_sap) - 7])

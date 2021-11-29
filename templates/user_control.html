@@ -88,7 +88,8 @@
                               <label class="col-md-4 col-form-label text-right"><strong>User Role</strong></label>
                               <div class="col-md-8">
                                 <select class="form-control" id="new_user_role">
-                                  <option value="SECTIONCHIEF" selected>Section Chief</option>
+                                  <option value="OFFICER" selected>Document Officer</option>
+                                  <option value="SECTIONCHIEF">Section Chief</option>
                                   <option value="ADMIN">Administrator</option>
                                 </select>
                               </div>
@@ -108,15 +109,14 @@
                                 <select class="form-control" id="change_user_id">
                                   <option value="-1" selected>-</option>
                                   {% for user in userList %}
-                                  {% if user.UserRole != 'SUPERADMIN' %}
                                   <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
                                     {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
+                                    {% elif user.UserRole == 'OFFICER' %}Document Officer
                                     {% endif %}
                                   </option>
-                                  {% endif %}
                                   {% endfor %}
                                 </select>
                               </div>
@@ -142,15 +142,14 @@
                                 <select class="form-control" id="delete_user_id">
                                   <option value="-1" selected>-</option>
                                   {% for user in userList %}
-                                  {% if user.UserRole != 'SUPERADMIN' %}
                                   <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                                     {% elif user.UserRole == 'ADMIN' %}Administrator
                                     {% elif user.UserRole == 'SECTIONCHIEF' %}Section Chief
+                                    {% elif user.UserRole == 'OFFICER' %}Document Officer
                                     {% endif %}
                                   </option>
-                                  {% endif %}
                                   {% endfor %}
                                 </select>
                               </div>
@@ -168,6 +167,75 @@
                   </div>
                 </div>
                 <div class="col-md-8">
+                  <div class="card">
+                    <div class="card-header">
+                      <strong>User Permission</strong>
+                    </div>
+                    <div class="card-body">
+                      <table class="table table-sm table-striped small">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Document Officer</th>
+                            <th>Section Chief</th>
+                            <th>Administrator</th>
+                            <th>Super Administrator</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>Manual Report</td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Add Operation</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Change Operation</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Delete Operation</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Add New User</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Change User Password</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                          <tr>
+                            <td>Delete User</td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-x text-danger"></i></td>
+                            <td><i class="c-icon cil-check text-success"></i></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                   <div class="card">
                     <div class="card-header">
                       <strong>User Table ({{userList|length}})</strong>
