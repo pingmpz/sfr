@@ -64,6 +64,7 @@ def transaction(request, orderoprno):
                     if tempRemainQty > 0:
                         currentOperation = operationList[i].OperationNo
                         break
+                #-- IF NO OPERATION INPUT (0000), WILL AUTO REDIRECT TO CURRENT PAGE
                 if operationNo == '0000':
                     return redirect('/transaction/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
