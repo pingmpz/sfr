@@ -1021,7 +1021,7 @@ def validate_section_chief_password(request):
     password = request.GET.get('password')
     isCorrect = False
     user = getUserByPassword(password)
-    if user != None and (user.UserRole.strip() == 'SECTIONCHIEF' or user.UserRole.strip() == 'ADMIN' or user.UserRole.strip() == 'SUPERADMIN'):
+    if user != None and (user.UserRole.strip() == 'CHIEF' or user.UserRole.strip() == 'ADMIN' or user.UserRole.strip() == 'SUPERADMIN'):
         isCorrect = True
     print(isCorrect)
     data = {
