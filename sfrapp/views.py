@@ -544,7 +544,9 @@ def start_work_operating_operator(request):
         #-- SAP : SETUP TIME
         oopr = getOperatorOperatingByID(id)
         setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
-        insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
+        if int(setuptime > 0):
+            insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- WORKCENTER : WORKING
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WORKING")
     #-- OPERATOR : WORKING
@@ -566,7 +568,7 @@ def stop_setup_operating_operator(request):
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
     #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if setuptime > 0:
+    if int(setuptime > 0):
         insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- WORKCENTER : WAITING
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
@@ -598,7 +600,7 @@ def stop_work_operating_operator(request):
         worktimeMachine = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if status != "EXT-WORK" or worktimeMachine > 0 or worktimeOperator > 0:
+    if status != "EXT-WORK" and (int(worktimeMachine) > 0 or int(worktimeOperator) > 0):
         insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,0,0,0,worktimeMachine,worktimeOperator,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- OPERATOR : OPERATING TIME LOG
     insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
@@ -620,9 +622,9 @@ def stop_operating_workcenter(request):
     updateOperatingWorkCenter(id, "COMPLETED")
     #-- SAP : WORKING TIME
     owc = getWorkCenterOperatingByID(id)
-    worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+    worktimeMachine = int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60)
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if worktimeMachine > 0:
+    if int(worktimeMachine > 0):
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
@@ -1659,7 +1661,14 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     cursor = conn.cursor()
     mode = ""
     sql = ""
+    print(est_setup_time, est_operate_time, est_labor_time)
     if control_key == "PP01":
+        if int(est_setup_time) == 0:
+            est_setup_time = 'NULL'
+        if int(est_operate_time) == 0:
+            est_operate_time = 'NULL'
+        if int(est_labor_time) == 0:
+            est_labor_time = 'NULL'
         mode = "11"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
@@ -1700,6 +1709,12 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
     mode = ""
     sql = ""
     if control_key == "PP01":
+        if int(est_setup_time) == 0:
+            est_setup_time = 'NULL'
+        if int(est_operate_time) == 0:
+            est_operate_time = 'NULL'
+        if int(est_labor_time) == 0:
+            est_labor_time = 'NULL'
         mode = "21"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
