@@ -566,7 +566,7 @@ def stop_setup_operating_operator(request):
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
     #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if True: # if setuptime != 0:
+    if setuptime > 0:
         insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- WORKCENTER : WAITING
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
@@ -596,13 +596,9 @@ def stop_work_operating_operator(request):
         worktimeMachine = 0
     elif oopr.MachineType.strip() == 'Auto':
         worktimeMachine = 0
-    #-- IF EXTERNAL PROCESS NEED TO SEND
-    # if status == "EXT-WORK":
-    #     worktimeOperator = 0
-    #     type = "EXT-WORK"
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if status != "EXT-WORK": # if status != "EXT-WORK" or worktimeMachine != 0 or worktimeOperator != 0:
+    if status != "EXT-WORK" or worktimeMachine > 0 or worktimeOperator > 0:
         insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,0,0,0,worktimeMachine,worktimeOperator,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- OPERATOR : OPERATING TIME LOG
     insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
@@ -626,7 +622,7 @@ def stop_operating_workcenter(request):
     owc = getWorkCenterOperatingByID(id)
     worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if True: # if worktimeMachine != 0:
+    if worktimeMachine > 0:
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
