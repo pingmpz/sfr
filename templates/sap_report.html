@@ -148,16 +148,19 @@
                           {% endfor %}
                         </tbody>
                       </table>
+                      {% if sapReportList|length > 0 %}
                       <br>
                       <div class="accordion" id="accordion" role="tablist">
                         <div class="card border-danger mb-0">
                           <div class="card-header" role="tab">
-                            <h6 class="mb-0"><a data-toggle="collapse" class="text-danger small" href="#collapse-1">SFR2SAP_CON.txt</a></h6>
+                            <a data-toggle="collapse" class="text-danger" href="#collapse-1">SFR2SAP_CON.txt</a>
+                            <div class="card-header-actions">
+                              <button class="btn btn-sm btn-danger" onclick="download_txt()"><i class="c-icon c-icon-sm cil-arrow-thick-to-bottom"></i></button>
+                            </div>
                           </div>
                           <div class="collapse" id="collapse-1" role="tabpanel">
                             <div class="card-body">
-                              <p class="mb-3 small">
-                                {% if sapReportList|length == 0 %}<i>No data available</i>{% endif %}
+                              <p class="mb-3 small" id="text_area">
                                 {% for report in sapReportList reversed %}
                                   {{report.WorkCenter.strip|default_if_none:""}}|{{report.ProductionOrderNo.strip|default_if_none:""}}|{{report.OperationNumber.strip|default_if_none:""}}|{{report.Yiled|default_if_none:""}}|{{report.Scrap|default_if_none:""}}|{{report.SetupTime|default_if_none:""}}|{{report.OperTime|default_if_none:""}}|{{report.LaborTime|default_if_none:""}}|{{report.StartDate|default_if_none:""}}|{{report.StartTime|default_if_none:""}}|{{report.FinishDate|default_if_none:""}}|{{report.FinishTime|default_if_none:""}}|<br>
                                 {% endfor %}
@@ -166,6 +169,7 @@
                           </div>
                         </div>
                       </div>
+                      {% endif %}
                     </div>
                   </div>
                 </div>
@@ -228,6 +232,11 @@
         column.visible( ! column.visible() );
         (column.visible())? $(this).removeClass("text-danger"): $(this).addClass("text-danger");
       });
+
+      function download_txt(){
+        var blob = new Blob([$("#text_area").text().replace(/^(?=\n)$|^\s*|\s*$|\n\n+/gm, "").trim()], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "/SFR2SAP_CON.txt");
+      }
 
       $('#fdate').change(function() {
         window.location.href =  "/sap_report/" + ($("#fdate").val() + "&" + $("#fhour").val());
