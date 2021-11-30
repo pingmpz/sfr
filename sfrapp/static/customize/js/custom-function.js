@@ -64,3 +64,8 @@ function getDiffMin(start_date_time, stop_date_time){
   var minutes = Math.floor((diff/1000)/60);
   return minutes;
 }
+
+Date.prototype.addHours= function(h){
+    this.setHours(this.getHours()+h);
+    return this;
+}
