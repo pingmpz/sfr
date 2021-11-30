@@ -175,6 +175,7 @@
     <!-- Google Timeline JS -->
     <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
     <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function(event) {
@@ -241,13 +242,13 @@
               var stop_date_time = new Date(data.wcOperateList[i][6]);
               var color = (emp_id != null)? '#e74c3c':'#4f88db';
               if (start_date_time.getDate() == stop_date_time.getDate()){
-                var tooltip = tooltipEmployee("SAMEDAY", orderoprno, work_center_no, emp_id, emp_name, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                var tooltip = tooltipEmployee("SAMEDAY", orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
                 rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
               } else {
-                var tooltip = tooltipEmployee("HEAD", orderoprno, work_center_no, emp_id, emp_name, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                var tooltip = tooltipEmployee("HEAD", orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
                 rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, 23, 59, 59)]);
                 if(stop_date_time.getDate() > start_date_time.getDate()){
-                  var tooltip = tooltipEmployee("TAIL", orderoprno, work_center_no, emp_id, emp_name, operate_type, getDateTimeString(start_date_time), getDateTimeString(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                  var tooltip = tooltipEmployee("TAIL", orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
                   rows.push([ stop_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
                 }
               }
@@ -289,29 +290,6 @@
       $(window).on('resizeEnd', function() {
           drawChart(data);
       });
-
-      function frontZero(str, len){
-        var result = str;
-        for(var i = str.length;i < len;i++) result = "0" + result;
-        return result;
-      }
-
-      function getDateTimeString(datetime) {
-         var year = datetime.getFullYear();
-         var month = frontZero((datetime.getMonth() + 1).toString(), 2);
-         var date = frontZero(datetime.getDate().toString(), 2);
-         var hour = frontZero(datetime.getHours().toString(), 2);
-         var minute = frontZero(datetime.getMinutes().toString(), 2);
-         var second = frontZero(datetime.getSeconds().toString(), 2);
-         result = date+"-"+month+"-"+year+", "+hour+":"+minute+":"+second;
-         return result
-      }
-
-      function getDiffMin(start_date_time, stop_date_time){
-        var diff = Math.abs(stop_date_time - start_date_time);
-        var minutes = Math.floor((diff/1000)/60);
-        return minutes;
-      }
 
       $('#fmonth').change(function() {
         window.location.href =  "/wc/" + ($("#work_center_no").val() + "&" + $("#fmonth").val());
