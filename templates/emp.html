@@ -136,12 +136,14 @@
       var month = $("#month").val();
       var year = $("#year").val();
       var emp_id = $("#emp_id").val();
-
       var rows = [];
-      createDataRows(month, year);
 
-      google.charts.load('current', {'packages':['timeline']});
-      google.charts.setOnLoadCallback(drawChart);
+      $(document).ready(function() {
+        createDataRows(month, year);
+        google.charts.load('current', {'packages':['timeline']});
+        google.charts.setOnLoadCallback(drawChart);
+      });
+
       function drawChart() {
         var container = document.getElementById('timeline');
         var chart = new google.visualization.Timeline(container);
@@ -213,6 +215,7 @@
         if(work_center_type == "Machine") str += ''+operate_type+' ON '+work_center_no_machine+'<br>';
         str += '<strong>'+orderoprno+' ( ' + work_center_no + ' )</strong><br>';
         str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes<br>';
+        if(operate_type.trim() == "MANUAL") str += '* this is a manual report, working time may not accurate.<br>';
         if(type == "HEAD") str += '* this is a first part. next part is on is the next day.<br>';
         else if(type == "TAIL") str += '* this is a second part. previous part is on the previous day.<br>';
         str += '</div>';

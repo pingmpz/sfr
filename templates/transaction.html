@@ -1254,11 +1254,11 @@
                     </div>
                   </div>
                   <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Work Time</strong></div><div class="col-md-5"><hr></div>
-                  <div class="col-md-6" {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
+                  <div class="col-md-6"  {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Work Center</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="text" id="mp_workcenter_no" autocomplete="off" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);" {% if operation.WorkCenterType == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
+                        <input class="form-control" type="text" id="mp_workcenter_no" autocomplete="off" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);" {% if operation.WorkCenterType.strip == 'Labor' %}value="{{operation.WorkCenterNo}}" readonly{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -1826,7 +1826,7 @@
         remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
         $('#mp_password').val("");
         $('#mp_emp_id').val("");
-        $('#mp_workcenter_no').val("");
+        if ($("#work_center_type") == 'Machine') $('#mp_workcenter_no').val("");
         $('#mp_labor_time').val("");
         $('#mp_operate_time').val("");
         $('#mp_setup_time').val("");
