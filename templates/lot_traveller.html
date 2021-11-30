@@ -26,6 +26,8 @@
     <!-- Select CSS -->
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -108,10 +110,14 @@
                   <div class="card">
                     <div class="card-header">
                       <div class="card-header-actions">
+                        <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#split_lot_modal" onclick="prepare_split_lot()"> <i class="c-icon c-icon-sm cil-fork" style="transform: rotateZ(180deg); transform: scaleY(-1);"></i></button>
                         <button class="btn btn-sm btn-link small" onclick="printDiv()"> <i class="c-icon c-icon-sm cil-print"></i></button>
                       </div>
                     </div>
                     <div class="card-body">
+                      <input type="text" id="order_no" value="{{orderNo}}" hidden>
+                      <input type="text" id="operation_no" value="{{operationNo}}" hidden>
+                      <input type="text" id="split_lot_no" value="{{order.SplitLotNo}}" hidden>
                       <div id="print-area">
                         <style>
                           table, th, td {
@@ -164,7 +170,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_1" value="{{order.SplitLotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -330,7 +336,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_2" value="{{order.SplitLotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -497,7 +503,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}</td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_3" value="{{order.SplitLotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -653,7 +659,42 @@
         </main>
       </div>
       <!-- *** FOOTER *** -->
-
+      <div class="modal" id="split_lot_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-fork" style="transform: rotateZ(180deg); transform: scaleY(-1);"></i> Split Lot</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to split lot ?</h3><br>
+              <div class="row">
+                <div class="col-5 text-right">
+                  <h1 style="font-size: 72px">{{order.SplitLotNo}}</h1>
+                </div>
+                <div class="col-2 text-center">
+                  <i class="c-icon c-icon-xl cil-arrow-right" style="padding-top: 40px"></i>
+                </div>
+                <div class="col-5 text-left">
+                  <h1 style="font-size: 72px">{{order.SplitLotNo|add:1}}</h1>
+                </div>
+              </div>
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="sl_password" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-danger" type="button" id="trash_confirm_button" onclick="split_lot()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -674,6 +715,50 @@
 
       function printDiv(){
         $('#print-area').printThis();
+      }
+
+      function prepare_split_lot(){
+        $("#sl_password").val("");
+        remove_valid("sl_password");
+      }
+
+      function split_lot(){
+        var order_no = $("#order_no").val();
+        var password = $("#sl_password").val();
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("sl_password");
+          } else {
+            valid("sl_password");
+            $.ajax({
+              url: '/split_lot/',
+              data: {
+                'order_no': order_no,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+          }
+        });
+      }
+
+      function validate_section_chief_password(password, _callback){
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
+        else {
+          $.ajax({
+            url: '/validate_section_chief_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+            }
+          });
+        }
       }
 
       $("#pl_qty_1").on("keypress keyup blur",function (event) {

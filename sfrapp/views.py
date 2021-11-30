@@ -270,6 +270,17 @@ def lot_traveller(request, orderoprno):
             state = "NOOPERATIONFOUND"
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
+            #-- GET OPERATION WITH REMAINING QTY > 0
+            if len(operationList) > 0:
+                currentOperation = operationList[0].OperationNo
+                for i in range(len(operationList)):
+                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if tempRemainQty > 0:
+                        currentOperation = operationList[i].OperationNo
+                        break
+                #-- IF NO OPERATION INPUT (0000), WILL AUTO REDIRECT TO CURRENT PAGE
+                if operationNo == '0000':
+                    return redirect('/lot_traveller/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
@@ -291,15 +302,6 @@ def lot_traveller(request, orderoprno):
                             operationList3.append(opr)
                             planDayCountList3.append(days.days)
                         counter += 1
-            else:
-                #-- GET OPERATION WITH REMAINING QTY > 0
-                if len(operationList) > 0:
-                    currentOperation = operationList[0].OperationNo
-                    for i in range(len(operationList)):
-                        tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                        if tempRemainQty > 0:
-                            currentOperation = operationList[i].OperationNo
-                            break
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
@@ -1163,6 +1165,15 @@ def get_emp_timeline(request):
     }
     return JsonResponse(data)
 
+#--------------------------------------------------------------------------- ETC
+
+def split_lot(request):
+    order_no = request.GET.get('order_no')
+    updateSplitLot(order_no)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -1541,7 +1552,7 @@ def setDataFromSAP(order_no):
 def setOrderControlFromSAP(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [OrderControl] ([OrderNo]) VALUES ('" + order_no + "')"
+    sql = "INSERT INTO [OrderControl] ([OrderNo],[SplitLotNo]) VALUES ('" + order_no + "',1)"
     cursor.execute(sql)
     conn.commit()
     return
@@ -1894,6 +1905,14 @@ def changeUserPassword(user_id, user_password):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [User] SET [PasswordHash] = HASHBYTES('SHA2_512', '"+user_password+"') WHERE UserID = '"+user_id+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateSplitLot(order_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET [SplitLotNo] += 1 WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
