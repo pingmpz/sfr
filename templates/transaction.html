@@ -1826,7 +1826,6 @@
       function prepare_mp(){
         remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
         $('#mp_password').val("");
-        $("#mp_password").val('9999');
         $('#mp_emp_id').val("");
         if ($("#work_center_type") == 'Machine') $('#mp_workcenter_no').val("");
         $('#mp_labor_time').val("");
@@ -2076,7 +2075,6 @@
       function prepare_add(){
         clear_validate_add();
         emptyInputs(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_plan_start_date","add_plan_finish_date","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
-        $("#add_password").val('9999');
         $("#add_emp_id").focus();
         timeleft = 300;
       }
@@ -2084,7 +2082,6 @@
       function prepare_change(){
         clear_validate_change();
         emptyInputs(["change_emp_id","change_password","change_new_operation_no","change_work_center_no","change_plan_start_date","change_plan_finish_date","change_est_setup_time","change_est_operate_time","change_est_labor_time","change_price_unit","change_price"]);
-        $("#change_password").val('9999');
         $("#change_emp_id").focus();
         timeleft = 300;
       }
@@ -2092,7 +2089,6 @@
       function prepare_delete(){
         clear_validate_delete();
         emptyInputs(["del_emp_id","del_password"]);
-        $("#del_password").val('9999');
         $("#del_emp_id").focus();
         timeleft = 300;
       }

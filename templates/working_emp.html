@@ -81,6 +81,7 @@
                               <strong>
                               {% if operator.Status == 'WORKING' %}<span class="text-success">Working</span>
                               {% elif operator.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
+                              {% elif operator.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
                               {% else %}{{operator.OOPRStatus}}{% endif %}
                               </strong>
                             </td>
