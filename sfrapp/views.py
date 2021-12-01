@@ -225,7 +225,28 @@ def emp(request, empid, fmonth):
     }
     return render(request, 'emp.html', context)
 
-#------------------------------------------------------------------------ REPORT
+#-------------------------------------------------------------------- MONITORING
+
+def working_order(request):
+    workingOrderList = getWorkingOrderList()
+    currentOperationNoList = []
+    for order in workingOrderList:
+        operationList = getOperationList(order.OrderNo)
+        #-- GET OPERATION WITH REMAINING QTY > 0
+        if len(operationList) > 0:
+            currentOperation = operationList[0].OperationNo
+            for i in range(len(operationList)):
+                tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                if tempRemainQty > 0:
+                    currentOperationNoList.append(operationList[i].OperationNo)
+                    break
+        else:
+            currentOperationNoList.append("ERROR")
+    context = {
+        'workingOrderList': workingOrderList,
+        'currentOperationNoList': currentOperationNoList,
+    }
+    return render(request, 'working_order.html', context)
 
 def working_wc(request):
     workingWorkCenterList = getWorkingWorkCenterList()
@@ -240,6 +261,8 @@ def working_emp(request):
         'workingOperatorList': workingOperatorList,
     }
     return render(request, 'working_emp.html', context)
+
+#------------------------------------------------------------------------ REPORT
 
 def lot_traveller(request, orderoprno):
     orderNo = ""
@@ -1282,6 +1305,12 @@ def getModList(order_no):
 def getUserList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [User]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkingOrderList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OrderControl] WHERE ProcessStart IS NOT NULL AND ProcessStop IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 
