@@ -25,6 +25,8 @@
     <!-- Select CSS -->
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
   </head>
@@ -248,7 +250,7 @@
                       <strong>User Table ({{userList|length}})</strong>
                     </div>
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" style="table-layout: fixed;">
+                      <table class="table table-sm table-outline small" id="user_master_table" style="table-layout: fixed;">
                         <thead class="thead-light">
                           <tr>
                             <th>User ID</th>
@@ -287,6 +289,9 @@
     <!--<![endif]-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -295,6 +300,13 @@
         setTimeout(function() {
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
+      });
+
+      $(document).ready(function() {
+        $('#user_master_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 25,
+        });
       });
 
       function new_user(){

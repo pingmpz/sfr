@@ -229,22 +229,21 @@ def emp(request, empid, fmonth):
 
 def working_order(request):
     workingOrderList = getWorkingOrderList()
-    currentOperationNoList = []
+    currentOperationList = []
     for order in workingOrderList:
         operationList = getOperationList(order.OrderNo)
         #-- GET OPERATION WITH REMAINING QTY > 0
         if len(operationList) > 0:
-            currentOperation = operationList[0].OperationNo
             for i in range(len(operationList)):
                 tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
                 if tempRemainQty > 0:
-                    currentOperationNoList.append(operationList[i].OperationNo)
+                    currentOperationList.append(operationList[i])
                     break
         else:
-            currentOperationNoList.append("ERROR")
+            currentOperationList.append(None)
     context = {
         'workingOrderList': workingOrderList,
-        'currentOperationNoList': currentOperationNoList,
+        'currentOperationList': currentOperationList,
     }
     return render(request, 'working_order.html', context)
 
