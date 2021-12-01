@@ -1194,7 +1194,7 @@ def get_emp_timeline(request):
 
 #--------------------------------------------------------------------------- ETC
 
-def split_lot(request):
+def increase_lot_no(request):
     order_no = request.GET.get('order_no')
     updateLotNo(order_no)
     data = {
