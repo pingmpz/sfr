@@ -1196,7 +1196,7 @@ def get_emp_timeline(request):
 
 def split_lot(request):
     order_no = request.GET.get('order_no')
-    updateSplitLot(order_no)
+    updateLotNo(order_no)
     data = {
     }
     return JsonResponse(data)
@@ -1588,7 +1588,7 @@ def setDataFromSAP(order_no):
 def setOrderControlFromSAP(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [OrderControl] ([OrderNo],[SplitLotNo]) VALUES ('" + order_no + "',1)"
+    sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo]) VALUES ('" + order_no + "',1)"
     cursor.execute(sql)
     conn.commit()
     return
@@ -1945,10 +1945,10 @@ def changeUserPassword(user_id, user_password):
     conn.commit()
     return
 
-def updateSplitLot(order_no):
+def updateLotNo(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [OrderControl] SET [SplitLotNo] += 1 WHERE OrderNo = '" + order_no + "'"
+    sql = "UPDATE [OrderControl] SET [LotNo] += 1 WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     conn.commit()
     return

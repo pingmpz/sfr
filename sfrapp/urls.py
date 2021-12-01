@@ -68,7 +68,7 @@ urlpatterns = [
     path('validate_new_user_id/', views.validate_new_user_id, name='validate_new_user_id'),
     path('validate_new_password/', views.validate_new_password, name='validate_new_password'),
     #-- ETC
-    path('split_lot/', views.split_lot, name='split_lot'),
+    path('increase_lot_no/', views.increase_lot_no, name='increase_lot_no'),
     #-- TIMELINE
     path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
     path('get_emp_timeline/', views.get_emp_timeline, name='get_emp_timeline'),
