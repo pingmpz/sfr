@@ -1323,8 +1323,11 @@ def getWorkingWorkCenterList():
 
 def getWorkingOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
-    sql += " WHERE Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
+    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo "
+    sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
+    sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
+    sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OOPR.Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 

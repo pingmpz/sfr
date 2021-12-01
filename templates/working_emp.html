@@ -59,7 +59,7 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="working_emp_table">
+                      <table class="table table-sm table-outline small" id="working_emp_table" style="table-layout: fixed;">
                         <thead class="thead-light">
                           <tr>
                             <th>EmpID</th>
@@ -67,6 +67,8 @@
                             <th>Section</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
+                            <th>Start Date Time</th>
+                            <th>Working On..</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -79,10 +81,12 @@
                               <strong>
                               {% if operator.Status == 'WORKING' %}<span class="text-success">Working</span>
                               {% elif operator.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
-                              {% else %}{{operator.Status}}{% endif %}
+                              {% else %}{{operator.OOPRStatus}}{% endif %}
                               </strong>
                             </td>
                             <td><a href="/transaction/{{operator.OrderNo}}{{operator.OperationNo}}">{{operator.OrderNo}}-{{operator.OperationNo}}</a></td>
+                            <td>{{operator.StartDateTime}}</td>
+                            <td><a href="/wc/{{operator.WorkCenterNo}}&NOW">{{operator.WorkCenterNo|default_if_none:""}}</a></td>
                           </tr>
                           {% endfor %}
                         </tbody>
