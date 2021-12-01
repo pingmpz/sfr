@@ -170,7 +170,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_1" value="{{order.LotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_1" value="{{order.LotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -336,7 +336,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_2" value="{{order.LotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_2" value="{{order.LotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -503,7 +503,7 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="sl_no_3" value="{{order.tLotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_3" value="{{order.tLotNo}}"></td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
@@ -761,11 +761,42 @@
         }
       }
 
+      //-- LOT NO SYNC
+      $("#lot_no_1").on("keypress keyup blur",function (event) {
+          $("#lot_no_2").val($("#lot_no_1").val());
+          $("#lot_no_3").val($("#lot_no_1").val());
+      });
+
+      $("#lot_no_2").on("keypress keyup blur",function (event) {
+          $("#lot_no_1").val($("#lot_no_2").val());
+          $("#lot_no_3").val($("#lot_no_2").val());
+      });
+
+      $("#lot_no_3").on("keypress keyup blur",function (event) {
+          $("#lot_no_1").val($("#lot_no_3").val());
+          $("#lot_no_2").val($("#lot_no_3").val());
+      });
+
+      $("#lot_no_1").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#lot_no_2").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#lot_no_3").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      //-- PARTIAL QTY SYNC
       $("#pl_qty_1").on("keypress keyup blur",function (event) {
           $("#pl_qty_2").val($("#pl_qty_1").val());
           $("#pl_qty_3").val($("#pl_qty_1").val());
       });
-
 
       $("#pl_qty_2").on("keypress keyup blur",function (event) {
           $("#pl_qty_1").val($("#pl_qty_2").val());
@@ -792,6 +823,7 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
+      //-- Non-ASM , ASM CHECKBOX SYNC
       $("#non_asm_1").on("change",function (event) {
           if ($("#non_asm_1").is(':checked')){
             $("#non_asm_2").prop("checked", true);
