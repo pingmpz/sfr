@@ -1602,18 +1602,20 @@ def setOperationControlFromSAP(order_no):
     cursor.execute(sql)
     operations = cursor.fetchall()
     for i in range(len(operations)):
+        operationNo = frontZero(operations[i].OperationNumber.strip(), 4)
+        #--
         date_get_from_sap = ""
         if operations[i].DateGetFromSAP != None:
             date_get_from_sap = str(operations[i].DateGetFromSAP)
         else:
             date_get_from_sap = str(datetime.now())
         date_get_from_sap = str(date_get_from_sap[0:len(date_get_from_sap) - 7])
-        operationNo = frontZero(operations[i].OperationNumber.strip(), 4)
+        #--
         sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
         if i == 0:
-            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,'"+str(operations[i].PlanStartDate)+"','"+str(operations[i].PlanFinishDate)+"',"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
         else:
-            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,'"+str(operations[i].PlanStartDate)+"','"+str(operations[i].PlanFinishDate)+"',"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
         cursor.execute(sql)
         conn.commit()
     return
