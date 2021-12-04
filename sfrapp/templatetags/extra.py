@@ -19,3 +19,11 @@ def divide(value, arg):
 @register.filter
 def multiple(value, arg):
     return int(value) * int(arg)
+
+@register.filter
+def replace(value, arg):
+    if len(arg.split('|')) != 2:
+        return value
+
+    what, to = arg.split('|')
+    return value.replace(what, to)
