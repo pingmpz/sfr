@@ -648,7 +648,7 @@ def stop_operating_workcenter(request):
     owc = getWorkCenterOperatingByID(id)
     worktimeMachine = int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60)
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-    if int(worktimeMachine > 0):
+    if int(worktimeMachine) > 0:
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
@@ -727,7 +727,7 @@ def confirm(request):
                     owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
                     worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
                     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-                    if int(worktimeMachine > 0):
+                    if int(worktimeMachine) > 0:
                         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                     #-- WORKCENTER : OPERATING TIME LOG
                     insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
@@ -812,7 +812,7 @@ def manual_report(request):
                         owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
                         worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
                         #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
-                        if int(worktimeMachine > 0):
+                        if int(worktimeMachine) > 0:
                             insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                         #-- WORKCENTER : OPERATING TIME LOG
                         insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
