@@ -1,4 +1,4 @@
-//-- VALIDATE CONTROL
+//-------------------------------------------------------------- VALIDATE CONTROL
 remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }
 valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) valid(input_ids[i]); }
 invalid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) invalid(input_ids[i]); }
@@ -18,12 +18,26 @@ function invalid(input_id){
   $("#"+input_id).removeClass("is-valid");
 }
 
-//-- INPUT CONTROL
+//---------------------------------------------------------------- INPUT CONTROL
 setZeroInputs = (input_ids) => { for(var i = 0;i < input_ids.length;i++) if($("#"+input_ids[i]).val() == "") $("#"+input_ids[i]).val("0"); }
 
 emptyInputs = (input_ids) => { for(var i = 0;i < input_ids.length;i++) $("#"+input_ids[i]).val(""); }
 
-//-- USEFUL FUNCTION
+//------------------------------------------------------------- GENERAL VALIDATE
+
+function fullValidateNumber(num, max_length, max_digit, enable_zero, enable_less_than_zero){
+  if(num == 0 && !enable_zero) return false;
+  if(num < 0 && !enable_less_than_zero) return false;
+  return true;
+}
+
+//----------------------------------------------------------------------- NUMBER
+
+function roundToTwo(num) {
+  return +(Math.round(num + "e+2")  + "e-2");
+}
+
+//------------------------------------------------------------------------- TEXT
 capitalizeFirstLetter = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 function frontZero(str, length){
@@ -32,19 +46,7 @@ function frontZero(str, length){
   return result;
 }
 
-function generateRandomCode(length) {
-  var result = '';
-  var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'; // remove i l o 0
-  // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for ( var i = 0; i < length; i++ ) result += characters.charAt(Math.floor(Math.random() * characters.length));
-  return result;
-}
-
-function roundToTwo(num) {
-  return +(Math.round(num + "e+2")  + "e-2");
-}
-
-//-- DATE & TIME
+//------------------------------------------------------------------ DATE & TIME
 function getFullDateTime(datetime) {
    var result = "";
    var year = datetime.getFullYear();
@@ -68,4 +70,14 @@ function getDiffMin(start_date_time, stop_date_time){
 Date.prototype.addHours= function(h){
     this.setHours(this.getHours()+h);
     return this;
+}
+
+//-------------------------------------------------------------------------- ETC
+
+function generateRandomCode(length) {
+  var result = '';
+  var characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789'; // remove i l o 0
+  // var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for ( var i = 0; i < length; i++ ) result += characters.charAt(Math.floor(Math.random() * characters.length));
+  return result;
 }
