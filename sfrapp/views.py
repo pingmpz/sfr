@@ -560,10 +560,8 @@ def start_work_operating_operator(request):
     if oopr.WorkCenterStatus.strip() == "SETUP":
         #-- OPERATOR : SAVE SETUP TIME
         updateOperatingOperator(id, "COMPLETED")
-        #-- OPERATOR : SETUP TIME LOG
-        oopr = getOperatorOperatingByID(id)
-        insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
         #-- WORKCENTER : SAVE SETUP TIME
+        oopr = getOperatorOperatingByID(id)
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
         #-- SAP : SETUP TIME
         oopr = getOperatorOperatingByID(id)
@@ -571,6 +569,8 @@ def start_work_operating_operator(request):
         #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
         if int(setuptime > 0):
             insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- OPERATOR : SETUP TIME LOG
+        insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
         #-- WORKCENTER : WORKING
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WORKING")
     #-- OPERATOR : WORKING
@@ -584,16 +584,16 @@ def stop_setup_operating_operator(request):
     id = request.GET.get('id')
     #-- OPERATOR : SAVE SETUP TIME
     updateOperatingOperator(id, "COMPLETED")
-    #-- OPERATOR : SETUP TIME LOG
-    oopr = getOperatorOperatingByID(id)
-    insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
     #-- WORKCENTER : SAVE SETUP TIME
+    oopr = getOperatorOperatingByID(id)
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
     #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
     if int(setuptime > 0):
         insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+    #-- OPERATOR : SETUP TIME LOG
+    insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
     #-- WORKCENTER : WAITING
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
     #-- OPERATOR : EXIT
@@ -627,7 +627,7 @@ def stop_work_operating_operator(request):
     if status != "EXT-WORK" and (int(worktimeMachine) > 0 or int(worktimeOperator) > 0):
         insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,0,0,0,worktimeMachine,worktimeOperator,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- OPERATOR : OPERATING TIME LOG
-    insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
+    insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, 0, worktimeMachine, worktimeOperator, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & WORKCENTER IS MANUAL
     if oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual':
         #-- WORKCENTER : STOP
@@ -651,7 +651,7 @@ def stop_operating_workcenter(request):
     if int(worktimeMachine) > 0:
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
-    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", 0, worktimeMachine, 0, owc.StartDateTime, owc.StopDateTime)
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(owc.OrderNo, owc.OperationNo)
     data = {
@@ -730,7 +730,7 @@ def confirm(request):
                     if int(worktimeMachine) > 0:
                         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                     #-- WORKCENTER : OPERATING TIME LOG
-                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
             #-- CLEAR ALL CONTROL DATA
             deleteAllOperatingData(orderNo, operationNo)
             #-- STOP OPERATION
@@ -815,7 +815,7 @@ def manual_report(request):
                         if int(worktimeMachine) > 0:
                             insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                         #-- WORKCENTER : OPERATING TIME LOG
-                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", owc.StartDateTime, owc.StopDateTime)
+                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
                 #-- CLEAR ALL CONTROL DATA
                 deleteAllOperatingData(order_no, operation_no)
                 #-- STOP OPERATION
@@ -1806,13 +1806,13 @@ def insertOperationControl(order_no, operation_no, work_center_no, plan_start_da
     conn.commit()
     return
 
-def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, start_date_time, stop_date_time):
+def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, setup, oper, labor, start_date_time, stop_date_time):
     startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
     stopDateTime = stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [HistoryOperate] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[StartDateTime],[StopDateTime])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "'," + str(operator_id) + ",'" + workcenter_no + "','" + type + "','" + startDateTime + "','" + stopDateTime + "')"
+    sql = "INSERT INTO [HistoryOperate] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[Setup],[Oper],[Labor],[StartDateTime],[StopDateTime])"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "'," + str(operator_id) + ",'" + workcenter_no + "','" + type + "','" + setup + "','" + oper + "','" + labor + "','" + startDateTime + "','" + stopDateTime + "')"
     cursor.execute(sql)
     conn.commit()
     return
