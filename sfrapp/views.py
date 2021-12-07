@@ -68,7 +68,6 @@ def transaction(request, orderoprno):
                 if operationNo == '0000':
                     return redirect('/transaction/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
-                printString(orderNo + "-" + operationNo)
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
                 IsOperating = isOperatingOperation(orderNo, operationNo)
@@ -120,6 +119,7 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
+    printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
         'orderNo' : orderNo,
         'operationNo' : operationNo,
@@ -1812,7 +1812,7 @@ def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, typ
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [HistoryOperate] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[Setup],[Oper],[Labor],[StartDateTime],[StopDateTime])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "'," + str(operator_id) + ",'" + workcenter_no + "','" + type + "','" + setup + "','" + oper + "','" + labor + "','" + startDateTime + "','" + stopDateTime + "')"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "'," + str(operator_id) + ",'" + workcenter_no + "','" + type + "'," + str(setup) + "," + str(oper) + "," + str(labor) + ",'" + startDateTime + "','" + stopDateTime + "')"
     cursor.execute(sql)
     conn.commit()
     return
