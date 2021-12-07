@@ -61,12 +61,14 @@
                         <thead class="thead-light">
                           <tr>
                             <th>Reject Reason</th>
+                            <th>Description</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for rejectReason in rejectReasonList %}
                           <tr>
                             <td>{{rejectReason.Name}}</td>
+                            <td>{{rejectReason.Description|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
