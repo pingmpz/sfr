@@ -772,15 +772,15 @@ def manual_report(request):
     #-- RECHECK QTY
     operation = getOperation(order_no, operation_no)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
-    #-- IF NOT START OPERATION YET
-    if hasNotStartOperation(order_no, operation_no):
-        #-- OPERATION : START
-        updateOperationControl(order_no, operation_no, 0, 0, "START")
-        #-- IF NOT START ORDER YET
-        if hasNotStartOrder(order_no):
-            #-- ORDER : START
-            updateOrderControl(order_no, "START")
     if remainQty >= (int(good_qty) + int(reject_qty)):
+        #-- IF NOT START OPERATION YET
+        if hasNotStartOperation(order_no, operation_no):
+            #-- OPERATION : START
+            updateOperationControl(order_no, operation_no, 0, 0, "START")
+            #-- IF NOT START ORDER YET
+            if hasNotStartOrder(order_no):
+                #-- ORDER : START
+                updateOrderControl(order_no, "START")
         #-- SPECIAL CASE **
         sap_reject_qty = reject_qty
         if reject_reason == "MATERIAL DEFECT":

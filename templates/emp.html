@@ -95,12 +95,14 @@
                     </div>
                     <div class="card-body">
                       <div class="row">
-                        <div class="col-md-6 text-left">
-                          <strong></strong>
+                        <div class="col-md-6 text-left small">
+                          <i class="c-icon c-icon-sm cil-gauge"></i> Machine
+                          <i class="c-icon c-icon-sm cil-user"></i> Labor
                         </div>
-                        <div class="col-md-6 text-right">
-                          <span class="text-primary"><i class="c-icon cil-gauge"></i> Machine</span>
-                          <span class="text-danger"><i class="c-icon cil-user"></i> Labor</span>
+                        <div class="col-md-6 text-right small">
+                          <i class="c-icon c-icon-sm cib-discover" style="color:#9dd04d;"></i> Setup
+                          <i class="c-icon c-icon-sm cib-discover" style="color:#2eb85c;"></i> Operate
+                          <i class="c-icon c-icon-sm cib-discover" style="color:#4f88db;"></i> Manual Report
                         </div>
                       </div>
                       <div id="timeline"></div>
@@ -189,19 +191,19 @@
               var work_center_no_machine = data.empOperateList[i][27];
               var emp_id = data.empOperateList[i][2];
               var emp_name = data.empOperateList[i][25];
-              var operate_type = data.empOperateList[i][4];
+              var operate_type = data.empOperateList[i][4].trim();
               var start_date_time = new Date(data.empOperateList[i][5]);
               var stop_date_time = new Date(data.empOperateList[i][6]);
-              var color = (work_center_type == "Labor")? '#e74c3c':'#4f88db';
+              var color = (operate_type == "MANUAL")? '#4f88db':((operate_type == "SETUP")? '#9dd04d':'#2eb85c');
               if (start_date_time.getDate() == stop_date_time.getDate()){
-                var tooltip = tooltipEmployee("SAMEDAY", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+                var tooltip = tooltipEmployee("SAMEDAY", color, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                rows.push([ frontZero(start_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
               } else {
-                var tooltip = tooltipEmployee("HEAD", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, 23, 59, 59)]);
+                var tooltip = tooltipEmployee("HEAD", color, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                rows.push([ frontZero(start_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, 23, 59, 59)]);
                 if(stop_date_time.getDate() > start_date_time.getDate()){
-                  var tooltip = tooltipEmployee("TAIL", orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                  rows.push([ start_date_time.getDate().toString(), '', tooltip, color, new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
+                  var tooltip = tooltipEmployee("TAIL", color, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
+                  rows.push([ frontZero(stop_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
                 }
               }
             }
@@ -209,14 +211,15 @@
         });
       }
 
-      function tooltipEmployee(type, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, start_time, end_time, mins){
-        str = '<div style="width: 300px; padding: 5px;" class="text-center small">';
+      function tooltipEmployee(type, color, orderoprno, work_center_no, work_center_no_machine, work_center_type, operate_type, start_time, end_time, mins){
+        str = '<div style="width: 300px; padding: 5px; border-style: solid; border-color: '+color+';" class="text-center small">';
         if(work_center_type == "Labor") str += '<i class="c-icon c-icon-sm cil-user"></i>&nbsp;<br>';
         else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
-        if(work_center_type == "Machine") str += ''+operate_type+' ON '+work_center_no_machine+'<br>';
+        if(work_center_type == "Machine") str += ''+((operate_type == "MANUAL")?"MANUAL REPORT":operate_type)+' ON '+work_center_no_machine+'<br>';
         str += '<strong>'+orderoprno+' ( ' + work_center_no + ' )</strong><br>';
-        str += ''+start_time+' - '+end_time+'<br>'+mins+' minutes<br>';
-        if(operate_type.trim() == "MANUAL") str += '* this is a manual report, working time may not accurate.<br>';
+        str += ''+start_time+' - '+end_time+'<br>';
+        if(operate_type == "MANUAL") str += '* this is a manual report, working time may not accurate.<br>';
+        else str += ''+mins+' minutes<br>';
         if(type == "HEAD") str += '* this is a first part. next part is on is the next day.<br>';
         else if(type == "TAIL") str += '* this is a second part. previous part is on the previous day.<br>';
         str += '</div>';
