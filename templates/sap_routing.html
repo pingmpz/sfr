@@ -43,6 +43,7 @@
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            <a href="/sap_order/{{fdate}}&{{fhour}}"><i class="c-icon c-icon-sm cil-swap-horizontal"></i></a>&nbsp;&nbsp;&nbsp;
             <select class="form-control" id="fhour">
               <option value="ALLDAY" {% if fhour == 'ALLDAY' %}selected{% endif %}>All Day</option>
               <option value="00" {% if fhour == '00' %}selected{% endif %}>00:00 - 01:59</option>
