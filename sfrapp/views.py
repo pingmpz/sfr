@@ -1290,7 +1290,7 @@ def getCurrencyList():
 def getOperationList(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] as OC"
-    sql += " INNER JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [WorkCenter] as WC ON OC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -1424,7 +1424,7 @@ def getOrder(order_no):
 def getOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperationControl] as OPT"
-    sql += " INNER JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [WorkCenter] as WC ON OPT.WorkCenterNo = WC.WorkCenterNo"
     # sql += " LEFT JOIN [SAP_Routing] as SAPRT ON OPT.OrderNo = SAPRT.ProductionOrderNo AND OPT.OperationNo = SAPRT.OperationNumber"
     sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)

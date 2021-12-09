@@ -176,13 +176,13 @@
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup|default_if_none:""}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
@@ -363,8 +363,8 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {% for operation in operationList %}
-                                  <tr {% if operation.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                  {% for item in operationList %}
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
@@ -375,17 +375,17 @@
                                       {% endif %}
                                     </td>
                                     <td>
-                                      {% if operation.OperationNo != operationNo %}
-                                      <a href="/transaction/{{orderNo}}{{operation.OperationNo}}">{{operation.OperationNo}}</a>
+                                      {% if item.OperationNo != operationNo %}
+                                      <a href="/transaction/{{orderNo}}{{item.OperationNo}}">{{item.OperationNo}}</a>
                                       {% else %}
-                                      {{operation.OperationNo}}
+                                      {{item.OperationNo}}
                                       {% endif %}
                                     </td>
-                                    <td>{{operation.WorkCenterNo}}</td>
+                                    <td>{{item.WorkCenterNo|default_if_none:""}}</td>
                                     <td>
-                                      {% if operation.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
-                                      {% elif operation.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
-                                      {% elif operation.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
+                                      {% if item.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
+                                      {% elif item.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
+                                      {% elif item.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
                                       {% endif %}
                                     </td>
                                   </tr>
@@ -454,8 +454,8 @@
                         <a href="/transaction/0" class="btn btn-xs btn-dark my-btn small"><i class="c-icon c-icon-xs cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
-                      {% if remainQty > 0 %} <!-- *** START CONDITION 1 *** -->
-                      {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %} <!-- *** START CONDITION 2 *** -->
+                      {% if remainQty > 0 %}
+                      {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
                       <!-- WorkCenter/Operator -->
                       <div class="col-md-12">
                         <div class="card border-secondary">
@@ -533,8 +533,8 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %} <!-- *** END CONDITION 2 *** -->
-                      {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %} <!-- *** START CONDITION 2 *** -->
+                      {% endif %}
+                      {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %}
                       <!-- Joining -->
                       <div class="col-md-12">
                         <div class="card text-white bg-primary text-center">
@@ -549,9 +549,24 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %} <!-- *** END CONDITION 2 *** -->
-                      {% else %}<!-- *** ELSE CONDITION 1 *** -->
-                      {% if operation.ProcessQty != 0 %} <!-- *** START CONDITION 2 *** -->
+                      {% endif %}
+                      {% if operation.WorkCenterNo == None %}
+                      <!-- Work Center Error -->
+                      <div class="col-md-12">
+                        <div class="card text-white bg-danger text-center">
+                          <div class="card-body text-center">
+                            <br><br><br><br><br>
+                            <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
+                            <br>
+                            <h3><strong>ERROR</strong></h3>
+                            <h6>*** THIS OPERATION WORKCENTER HAS NOT DEFINED PLEASE CONTACT ADMIN ***</h6>
+                            <br><br><br><br><br><br><br>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+                      {% else %}
+                      {% if operation.ProcessQty != 0 %}
                       <!-- Completed Operation -->
                       <div class="col-md-12">
                         <div class="card text-white bg-success text-center">
@@ -570,8 +585,8 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %} <!-- *** END CONDITION 2 *** -->
-                      {% if operation.ProcessQty == 0 %} <!-- *** START CONDITION 2 *** -->
+                      {% endif %}
+                      {% if operation.ProcessQty == 0 %}
                       <!-- Waiting Operation -->
                       <div class="col-md-12">
                         <div class="card text-white bg-dark text-center">
@@ -588,8 +603,8 @@
                           </div>
                         </div>
                       </div>
-                      {% endif %} <!-- *** END CONDITION 2 *** -->
-                      {% endif %} <!-- *** END CONDITION 1 *** -->
+                      {% endif %}
+                      {% endif %}
                     </div>
                   </div>
                 </div>
