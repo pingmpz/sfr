@@ -455,163 +455,163 @@
                         <p></p>
                       </div>
                       {% if remainQty > 0 %}
-                      {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
-                      <!-- WorkCenter/Operator -->
-                      <div class="col-md-12">
-                        <div class="card border-secondary">
-                          <div class="card-header">
-                            <strong>Work Center/Operator</strong>
-                            <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
-                            data-content="
-                            - <strong class='text-danger'>Stop Working</strong> on manual workcenter will automatically stop workcenter.<br>
-                            - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
-                            - Employee working on <strong class='text-plum'>External Process</strong> can still work on other operations.<br>
-                            - <strong class='text-plum'>External Process</strong> only keep startdatetime and stopdatetime, but not working time.<br>
-                            - Be Careful !, <strong class='text-primary'>Confirm</strong> all remaining quantity will terminate all working operator and workcenter.<br>
-                            ">?
-                            </a>
-                            <div class="card-header-actions">
-                              <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
-                            </div>
-                          </div>
-                          <div class="card-body">
-                            {% if operation.WorkCenterType == 'Machine' %}
-                            <div class="form-group row">
-                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
-                              <div class="col-md-2">
-                                <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                        <!-- WorkCenter/Operator -->
+                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
+                          <div class="col-md-12">
+                            <div class="card border-secondary">
+                              <div class="card-header">
+                                <strong>Work Center/Operator</strong>
+                                <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                                data-content="
+                                - <strong class='text-danger'>Stop Working</strong> on manual workcenter will automatically stop workcenter.<br>
+                                - You can ignore <strong class='text-primary'>Confirm</strong> and let operator after you confirm all quantity.<br>
+                                - Employee working on <strong class='text-plum'>External Process</strong> can still work on other operations.<br>
+                                - <strong class='text-plum'>External Process</strong> only keep startdatetime and stopdatetime, but not working time.<br>
+                                - Be Careful !, <strong class='text-primary'>Confirm</strong> all remaining quantity will terminate all working operator and workcenter.<br>
+                                ">?
+                                </a>
+                                <div class="card-header-actions">
+                                  <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
+                                </div>
                               </div>
-                              <div class="col-md-5">
-                                <input class="form-control" type="text" id="workcenter_name" value="" readonly>
-                              </div>
-                              <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='workcenter_add_button' onclick="add_operating_workcenter()" disabled>Add</button></div>
-                            </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="workcenter_table">
-                              <thead class="bg-darkslategray">
-                                <tr>
-                                  <th></th>
-                                  <th>Work Center</th>
-                                  <th>Status</th>
-                                  <th>Start Time</th>
-                                  <th></th>
-                                </tr>
-                              </thead>
-                              <tbody id="workcenter_table_body">
-
-                              </tbody>
-                            </table>
-                            {% endif %}
-                            <div class="form-group row">
-                              <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Operator</strong></label>
-                              <div class="col-md-2">
-                                <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
-                              </div>
-                              <div class="col-md-5">
-                                <input class="form-control" type="text" id="operator_name" value="" readonly>
-                              </div>
-                              <div class="col-md-3">
-                                <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
+                              <div class="card-body">
                                 {% if operation.WorkCenterType == 'Machine' %}
-                                <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled>Start Setup</button>
+                                <div class="form-group row">
+                                  <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
+                                  <div class="col-md-2">
+                                    <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                                  </div>
+                                  <div class="col-md-5">
+                                    <input class="form-control" type="text" id="workcenter_name" value="" readonly>
+                                  </div>
+                                  <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='workcenter_add_button' onclick="add_operating_workcenter()" disabled>Add</button></div>
+                                </div>
+                                <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="workcenter_table">
+                                  <thead class="bg-darkslategray">
+                                    <tr>
+                                      <th></th>
+                                      <th>Work Center</th>
+                                      <th>Status</th>
+                                      <th>Start Time</th>
+                                      <th></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="workcenter_table_body">
+
+                                  </tbody>
+                                </table>
                                 {% endif %}
+                                <div class="form-group row">
+                                  <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Operator</strong></label>
+                                  <div class="col-md-2">
+                                    <input class="form-control" type="text" id="operator_id" autocomplete="off" value="">
+                                  </div>
+                                  <div class="col-md-5">
+                                    <input class="form-control" type="text" id="operator_name" value="" readonly>
+                                  </div>
+                                  <div class="col-md-3">
+                                    <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
+                                    {% if operation.WorkCenterType == 'Machine' %}
+                                    <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled>Start Setup</button>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                                <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
+                                  <thead class="bg-darkslategray">
+                                    <tr>
+                                      {% if operation.WorkCenterType == 'Machine' %}<th>Work Center</th>{% endif %}
+                                      <th>Operator</th>
+                                      <th>Status</th>
+                                      <th>Start-Stop Time</th>
+                                      <th></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="operator_table_body">
+
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
-                            <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
-                              <thead class="bg-darkslategray">
-                                <tr>
-                                  {% if operation.WorkCenterType == 'Machine' %}<th>Work Center</th>{% endif %}
-                                  <th>Operator</th>
-                                  <th>Status</th>
-                                  <th>Start-Stop Time</th>
-                                  <th></th>
-                                </tr>
-                              </thead>
-                              <tbody id="operator_table_body">
-
-                              </tbody>
-                            </table>
                           </div>
-                        </div>
-                      </div>
-                      {% endif %}
-                      {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %}
-                      <!-- Joining -->
-                      <div class="col-md-12">
-                        <div class="card text-white bg-primary text-center">
-                          <div class="card-body text-center">
-                            <br><br><br><br><br>
-                            <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>THIS OPERATION IS JOINING</strong></h3>
-                            <br>
-                            <a href="/transaction/{{operation.JoinToOrderNo}}{{operation.JoinToOperationNo}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO JOIN OPERATION #{{operation.JoinToOrderNo}}-{{operation.JoinToOperationNo}}&nbsp;&nbsp;&nbsp;</strong></a>
-                            <br><br><br><br><br>
+                        {% endif %}
+                        <!-- Joining -->
+                        {% if operation.JoinToOrderNo != None and operation.JoinToOperationNo != None %}
+                          <div class="col-md-12">
+                            <div class="card text-white bg-primary text-center">
+                              <div class="card-body text-center">
+                                <br><br><br><br><br>
+                                <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <br>
+                                <h3><strong>THIS OPERATION IS JOINING</strong></h3>
+                                <br>
+                                <a href="/transaction/{{operation.JoinToOrderNo}}{{operation.JoinToOperationNo}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO JOIN OPERATION #{{operation.JoinToOrderNo}}-{{operation.JoinToOperationNo}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                <br><br><br><br><br>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      {% endif %}
-                      {% if operation.WorkCenterNo == None %}
-                      <!-- Work Center Error -->
-                      <div class="col-md-12">
-                        <div class="card text-white bg-danger text-center">
-                          <div class="card-body text-center">
-                            <br><br><br><br><br>
-                            <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>ERROR</strong></h3>
-                            <br>
-                            <h6>*** THIS OPERATION WORKCENTER HAS NOT DEFINED PLEASE CONTACT ADMIN ***</h6>
-                            <br><br><br><br><br><br>
+                        {% endif %}
+                        <!-- Work Center Error -->
+                        {% if operation.WorkCenterNo == None %}
+                          <div class="col-md-12">
+                            <div class="card text-white bg-danger text-center">
+                              <div class="card-body text-center">
+                                <br><br><br><br><br>
+                                <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <br>
+                                <h3><strong>ERROR</strong></h3>
+                                <br>
+                                <h6>*** THIS OPERATION WORKCENTER HAS NOT DEFINED PLEASE CONTACT ADMIN ***</h6>
+                                <br><br><br><br><br><br>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      {% endif %}
+                        {% endif %}
                       {% else %}
-                      {% if operation.ProcessQty != 0 %}
-                      <!-- Completed Operation -->
-                      <div class="col-md-12">
-                        <div class="card text-white bg-success text-center">
-                          <div class="card-body text-center">
-                            <br><br><br><br><br>
-                            <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
-                            <h6>Start Process : {{operation.ProcessStart}}</h6>
-                            <h6>Stop Process : {{operation.ProcessStop}}</h6>
-                            <br>
-                            {% if currentOperation != -1 %}
-                            <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
-                            {% endif %}
-                            <br><br><br><br>
+                        <!-- Completed Operation -->
+                        {% if operation.ProcessQty != 0 %}
+                          <div class="col-md-12">
+                            <div class="card text-white bg-success text-center">
+                              <div class="card-body text-center">
+                                <br><br><br><br><br>
+                                <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <br>
+                                <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
+                                <h6>Start Process : {{operation.ProcessStart}}</h6>
+                                <h6>Stop Process : {{operation.ProcessStop}}</h6>
+                                <br>
+                                {% if currentOperation != -1 %}
+                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                {% endif %}
+                                <br><br><br><br>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      {% endif %}
-                      {% if operation.ProcessQty == 0 %}
-                      <!-- Waiting Operation -->
-                      <div class="col-md-12">
-                        <div class="card text-white bg-dark text-center">
-                          <div class="card-body text-center">
-                            <br><br><br><br><br>
-                            <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
-                            <br>
-                            <h3><strong>THIS OPERATION IS WAITING</strong></h3>
-                            <br>
-                            {% if currentOperation != -1 %}
-                            <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
-                            {% endif %}
-                            <br><br><br><br><br>
+                        {% endif %}
+                        <!-- Waiting Operation -->
+                        {% if operation.ProcessQty == 0 %}
+                          <div class="col-md-12">
+                            <div class="card text-white bg-dark text-center">
+                              <div class="card-body text-center">
+                                <br><br><br><br><br>
+                                <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <br>
+                                <h3><strong>THIS OPERATION IS WAITING</strong></h3>
+                                <br>
+                                {% if currentOperation != -1 %}
+                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                {% endif %}
+                                <br><br><br><br><br>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      {% endif %}
+                        {% endif %}
                       {% endif %}
                     </div>
                   </div>
                 </div>
               {% endif%}
               <!-- Not Found -->
-              {% if state != "FIRSTPAGE" and state != "DATAFOUND" %}
+              {% if state == "NODATAFOUND" or state == "NOOPERATIONFOUND" %}
               <div class="row">
                 <div class="col-md-12 text-center">
                   <br><br><br><br><br><br><br><br>
