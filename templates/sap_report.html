@@ -163,7 +163,7 @@
                             <div class="card-body">
                               <p class="mb-3 small" id="text_area">
                                 {% for report in sapReportList reversed %}
-                                  {{report.WorkCenter.strip|default_if_none:""}}|{{report.ProductionOrderNo.strip|default_if_none:""}}|{{report.OperationNumber.strip|default_if_none:""}}|{{report.Yiled|default_if_none:""}}|{{report.Scrap|default_if_none:""}}|{{report.SetupTime|default_if_none:""}}|{{report.OperTime|default_if_none:""}}|{{report.LaborTime|default_if_none:""}}|{{report.StartDate|default_if_none:""}}|{{report.StartTime|default_if_none:""}}|{{report.FinishDate|default_if_none:""}}|{{report.FinishTime|default_if_none:""}}|<br>
+                                  {{report.WorkCenter.strip|default_if_none:""}},{{report.ProductionOrderNo.strip|default_if_none:""}},{{report.OperationNumber.strip|default_if_none:""}},{{report.Yiled.normalize|default_if_none:""}},{{report.Scrap.normalize|default_if_none:""}},{{report.SetupTime.normalize|default_if_none:""}},{{report.OperTime.normalize|default_if_none:""}},{{report.LaborTime.normalize|default_if_none:""}},{{report.StartDate|default_if_none:""}},{{report.StartTime|default_if_none:""}},{{report.FinishDate|default_if_none:""}},{{report.FinishTime|default_if_none:""}},{{report.EmployeeID.strip|default_if_none:""}}<br>
                                 {% endfor %}
                               </p>
                             </div>
