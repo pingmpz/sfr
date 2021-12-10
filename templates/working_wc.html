@@ -81,6 +81,7 @@
                               <strong>
                               {% if workCenter.Status == 'WORKING' %}<span class="text-success">Working</span>
                               {% elif workCenter.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
+                              {% elif workCenter.Status == 'WAITING' %}<span class="text-dark">Waiting</span>
                               {% else %}{{workCenter.Status}}{% endif %}
                               </strong>
                             </td>
