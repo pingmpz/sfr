@@ -25,6 +25,8 @@
     <!-- Select CSS -->
     <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
   </head>
@@ -136,7 +138,7 @@
                 <div class="col-md-9">
                   <div class="card">
                     <div class="card-header">
-                      <strong>Timeline</strong>
+                      <strong>History Transaction</strong>
                       <div class="card-header-actions">
                         <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
                         <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
@@ -144,18 +146,34 @@
                       </div>
                     </div>
                     <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-6 text-left small">
-                          <i class="c-icon c-icon-sm cil-gauge"></i> Auto Machine
-                          <i class="c-icon c-icon-sm cil-user"></i> Operator
-                        </div>
-                        <div class="col-md-6 text-right small">
-                          <i class="c-icon c-icon-sm cib-discover" style="color:#9dd04d;"></i> Setup
-                          <i class="c-icon c-icon-sm cib-discover" style="color:#2eb85c;"></i> Operate
-                          <i class="c-icon c-icon-sm cib-discover" style="color:#4f88db;"></i> Manual Report
-                        </div>
-                      </div>
-                      <div id="timeline"></div>
+                      <table class="table table-sm table-outline small" id="wc_trans_table">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>StartDateTime</th>
+                            <th>EndDateTime</th>
+                            <th>Setup</th>
+                            <th>Oper</th>
+                            <th>Labor</th>
+                            <th>Type</th>
+                            <th>EmpID</th>
+                            <th>Order No</th>
+                            <th>Operation No</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -174,8 +192,9 @@
     <!--<![endif]-->
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
-    <!-- Google Timeline JS -->
-    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -185,119 +204,17 @@
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
       });
-      var graph_coef = 0.675;
-      var month = $("#month").val();
-      var year = $("#year").val();
-      var work_center_no = $("#work_center_no").val();
-      var rows = [];
 
       $(document).ready(function() {
-        createDataRows(month, year);
-        google.charts.load('current', {'packages':['timeline']});
-        google.charts.setOnLoadCallback(drawChart);
-      });
-
-      function drawChart() {
-        var container = document.getElementById('timeline');
-        var chart = new google.visualization.Timeline(container);
-        var dataTable = new google.visualization.DataTable();
-        var options = {
-          hAxis: {
-            minValue: new Date(0, 0, 0, 0, 0, 0),
-            maxValue: new Date(0, 0, 0, 23, 59, 59)
-          },
-          tooltip: { isHtml: true },
-          timeline: { rowLabelStyle: { fontSize: 12 }, barLabelStyle: { fontSize: 8 } },
-          width: $(window).width() * graph_coef,
-          height: $(window).height(),
-        };
-        // opacity: 0
-        dataTable.addColumn({ type: 'string', id: 'Date' });
-        dataTable.addColumn({ type: 'string', id: 'Title' });
-        dataTable.addColumn({type: 'string', role: 'tooltip'});
-        dataTable.addColumn({ type: 'string', role: 'style' });
-        dataTable.addColumn({ type: 'date', id: 'Start' });
-        dataTable.addColumn({ type: 'date', id: 'End' });
-        createEmptyRows(dataTable, month, year);
-        dataTable.addRows(rows);
-        chart.draw(dataTable, options);
-      }
-
-      function createDataRows(month, year){
-        $.ajax({
-          url: '/get_wc_timeline/',
-          data: {
-            'work_center_no': work_center_no,
-            'month': month,
-            'year': year,
-          },
-          dataType: 'json',
-          success: function (data) {
-            for (var i = 0; i < data.wcOperateList.length; i++) {
-              // console.log(data.wcOperateList[i]);
-              var orderoprno = data.wcOperateList[i][0]+"-"+data.wcOperateList[i][1];
-              var work_center_no = data.wcOperateList[i][9];
-              var emp_id = data.wcOperateList[i][2];
-              var emp_name = data.wcOperateList[i][25];
-              var operate_type = data.wcOperateList[i][4].trim();
-              var start_date_time = new Date(data.wcOperateList[i][5]);
-              var stop_date_time = new Date(data.wcOperateList[i][6]);
-              var color = (operate_type == "MANUAL")? '#4f88db':((operate_type == "SETUP")? '#9dd04d':'#2eb85c');
-              if (start_date_time.getDate() == stop_date_time.getDate()){
-                var tooltip = tooltipEmployee("SAMEDAY", color, orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                rows.push([ frontZero(start_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
-              } else {
-                var tooltip = tooltipEmployee("HEAD", color, orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                rows.push([ frontZero(start_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, start_date_time.getHours(), start_date_time.getMinutes(), start_date_time.getSeconds()), new Date(0, 0, 0, 23, 59, 59)]);
-                if(stop_date_time.getDate() > start_date_time.getDate()){
-                  var tooltip = tooltipEmployee("TAIL", color, orderoprno, work_center_no, emp_id, emp_name, operate_type, getFullDateTime(start_date_time), getFullDateTime(stop_date_time), getDiffMin(start_date_time, stop_date_time));
-                  rows.push([ frontZero(stop_date_time.getDate().toString(), 2), '', tooltip, color, new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, stop_date_time.getHours(), stop_date_time.getMinutes(), stop_date_time.getSeconds())]);
-                }
-              }
-            }
-          }
+        $('#wc_trans_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 100,
         });
-      }
-
-      function tooltipEmployee(type, color, orderoprno, work_center_no, emp_id, emp_name, operate_type, start_time, end_time, mins){
-        str = '<div style="width: 300px; padding: 5px; border-style: solid; border-color: '+color+';" class="text-center small">';
-        if(emp_id != null) str += '<i class="c-icon c-icon-sm cil-user"></i><br>';
-        else str += '<i class="c-icon c-icon-sm cil-gauge"></i>&nbsp;<br>';
-        if(emp_id != null) str += ''+((operate_type == "MANUAL")?"MANUAL REPORT":operate_type)+' BY '+emp_id+' ( '+emp_name+' )<br>';
-        str += '<strong>'+orderoprno+' ( ' + work_center_no + ' )</strong><br>';
-        str += ''+start_time+' - '+end_time+'<br>';
-        if(operate_type == "MANUAL") str += '* this is a manual report, working time may not accurate.<br>';
-        else str += ''+mins+' minutes<br>';
-        if(type == "HEAD") str += '* this is a first part. next part is on is the next day.<br>';
-        else if(type == "TAIL") str += '* this is a second part. previous part is on the previous day.<br>';
-        str += '</div>';
-        return str;
-      }
-
-      function createEmptyRows(dataTable, month, year){
-        var days = 30;
-        if(month == 2 && year%4 == 0) days = 29;
-        else if(month == 2) days = 28;
-        else if(month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) days = 31;
-        for (var i = 1; i <= days; i++) {
-          var text = year + "-" + month + "-" + frontZero(i.toString(), 2);
-          var text = frontZero(i.toString(), 2);
-          dataTable.addRows([[ text, '', '', 'opacity: 0', new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 0, 0, 0)]]);
-        }
-      }
-
-      $(window).resize(function() {
-        drawChart();
-      });
-
-      $(window).on('resizeEnd', function() {
-          drawChart(data);
       });
 
       $('#fmonth').change(function() {
         window.location.href =  "/wc/" + ($("#work_center_no").val() + "&" + $("#fmonth").val());
       });
-
 
     </script>
   </body>

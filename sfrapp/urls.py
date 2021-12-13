@@ -69,9 +69,6 @@ urlpatterns = [
     path('validate_new_password/', views.validate_new_password, name='validate_new_password'),
     #-- ETC
     path('increase_lot_no/', views.increase_lot_no, name='increase_lot_no'),
-    #-- TIMELINE
-    path('get_wc_timeline/', views.get_wc_timeline, name='get_wc_timeline'),
-    path('get_emp_timeline/', views.get_emp_timeline, name='get_emp_timeline'),
     ## ADMIN PANEL
     path('add_new_user/', views.add_new_user, name='add_new_user'),
     path('delete_user/', views.delete_user, name='delete_user'),

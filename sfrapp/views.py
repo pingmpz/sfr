@@ -1169,28 +1169,6 @@ def reset_all(request):
     }
     return JsonResponse(data)
 
-#---------------------------------------------------------------------- TIMELINE
-
-def get_wc_timeline(request):
-    work_center_no = request.GET.get('work_center_no')
-    month = request.GET.get('month')
-    year = request.GET.get('year')
-    wcOperateList = [list(i) for i in getWorkCenterTimeLine(work_center_no, month, year)]
-    data = {
-        'wcOperateList': wcOperateList,
-    }
-    return JsonResponse(data)
-
-def get_emp_timeline(request):
-    emp_id = request.GET.get('emp_id')
-    month = request.GET.get('month')
-    year = request.GET.get('year')
-    empOperateList = [list(i) for i in getEmployeeTimeLine(emp_id, month, year)]
-    data = {
-        'empOperateList': empOperateList,
-    }
-    return JsonResponse(data)
-
 #--------------------------------------------------------------------------- ETC
 
 def increase_lot_no(request):
