@@ -209,9 +209,13 @@ def wc(request, wcno, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     workCenter = getWorkCenter(wcno)
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    historyTransList = getWorkCenterHistoryTransactionList(wcno, month, year)
     context = {
         'workCenter': workCenter,
         'fmonth': fmonth,
+        'historyTransList': historyTransList,
     }
     return render(request, 'wc.html', context)
 
@@ -219,9 +223,13 @@ def emp(request, empid, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     employee = getOperator(empid)
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    historyTransList = getEmployeeHistoryTransactionList(empid, month, year)
     context = {
         'employee': employee,
         'fmonth': fmonth,
+        'historyTransList': historyTransList,
     }
     return render(request, 'emp.html', context)
 
@@ -1371,7 +1379,7 @@ def getHistoryJoinList(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterTimeLine(work_center_no, month, year):
+def getWorkCenterHistoryTransactionList(work_center_no, month, year):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] as HO"
     sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
@@ -1380,7 +1388,7 @@ def getWorkCenterTimeLine(work_center_no, month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmployeeTimeLine(emp_id, month, year):
+def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] as HO"
     sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"

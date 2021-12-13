@@ -138,7 +138,7 @@
                 <div class="col-md-9">
                   <div class="card">
                     <div class="card-header">
-                      <strong>History Transaction</strong>
+                      <strong>History Transactions</strong>
                       <div class="card-header-actions">
                         <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
                         <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
@@ -146,7 +146,7 @@
                       </div>
                     </div>
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="wc_trans_table">
+                      <table class="table table-sm table-outline small" id="wc_trans_table" style="table-layout: fixed;">
                         <thead class="thead-light">
                           <tr>
                             <th>StartDateTime</th>
@@ -155,23 +155,23 @@
                             <th>Oper</th>
                             <th>Labor</th>
                             <th>Type</th>
-                            <th>EmpID</th>
-                            <th>Order No</th>
-                            <th>Operation No</th>
+                            <th>By EmpID</th>
+                            <th>Prod. Order - Oper.No</th>
                           </tr>
                         </thead>
                         <tbody>
+                          {% for ht in historyTransList %}
                           <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ht.StartDateTime}}</td>
+                            <td>{{ht.StopDateTime}}</td>
+                            <td>{{ht.Setup}}</td>
+                            <td>{{ht.Oper}}</td>
+                            <td>{{ht.Labor}}</td>
+                            <td>{{ht.Type}}</td>
+                            <td><a href="/emp/{{ht.EmpID}}&NOW">{{ht.EmpID|default_if_none:""}}</a></td>
+                            <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                           </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
