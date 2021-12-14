@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
+{% load humanize %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -68,6 +70,8 @@
                             <th>Machine Type</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
+                            <th>Start Date Time</th>
+                            <th>Duration</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -86,6 +90,8 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
+                            <td>{{workCenter.StartDateTime}}</td>
+                            <td>{{workCenter.StartDateTime|naturaltime}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
