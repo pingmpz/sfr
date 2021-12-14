@@ -67,3 +67,9 @@
 .ui-widget-danger { position:relative; display:inline-block; width:70px; height: 70px; border:10px solid #e55353; border-radius:150px; text-align:center; font-family: Arial, sans-serif; }
 .ui-value { position:absolute; left:0; right:0; top:18px; font-size:18px; }
 .ui-label { position:absolute; left:0; bottom:-32px; width:100%; text-transform:uppercase; font-size:10px; color:#888; font-weight:600 }
+
+select[readonly] {
+  background: #eee; /*Simular campo inativo - Sugestão @GabrielRodrigues*/
+  pointer-events: none;
+  touch-action: none;
+}
