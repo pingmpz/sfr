@@ -1695,7 +1695,6 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     cursor = conn.cursor()
     mode = ""
     sql = ""
-    print(est_setup_time, est_operate_time, est_labor_time)
     if control_key == "PP01":
         if int(est_setup_time) == 0:
             est_setup_time = 'NULL'
