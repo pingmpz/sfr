@@ -111,6 +111,7 @@
                                 <select class="form-control" id="change_user_id">
                                   <option value="-1" selected>-</option>
                                   {% for user in userList %}
+                                  {% if user.UserRole != 'SUPERADMIN' %}
                                   <option value="{{user.UserID}}">
                                     {{user.UserID}} |
                                     {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
@@ -119,6 +120,7 @@
                                     {% elif user.UserRole == 'OFFICER' %}Officer
                                     {% endif %}
                                   </option>
+                                  {% endif %}
                                   {% endfor %}
                                 </select>
                               </div>
