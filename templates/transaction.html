@@ -49,11 +49,6 @@
             </li>
             {% endif %}
           </ol>
-          <div class="c-subheader-nav d-md-down-none mfe-2 small">
-            {% if state == "DATAFOUND" %}
-            <a href="/lot_traveller/{{orderNo}}{{operationNo}}" class="btn btn-sm btn-pill btn-ghost-dark">Partial Lot Traveller</a>&nbsp;
-            {% endif %}
-          </div>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button>

@@ -271,13 +271,13 @@ def working_emp(request):
 
 #------------------------------------------------------------------------ REPORT
 
-def lot_traveller(request, orderoprno):
+def lot_traveller(request, orderno, lotno):
     orderNo = ""
-    operationNo = ""
+    LotNo = ""
     order = None
-    operation = None
     state = ""
-    currentOperation = -1
+    pltList = []
+    plt = None
     operationList = []
     operationList1 = []
     operationList2 = []
@@ -289,33 +289,37 @@ def lot_traveller(request, orderoprno):
     maxRows = 13
     counter = 0
     #--
-    if orderoprno == "0":
+    if orderno == "0":
         state = "FIRSTPAGE"
     else:
-        orderNo = orderoprno[0:len(orderoprno) - 4]
-        operationNo = orderoprno[len(orderoprno) - 4:len(orderoprno)]
+        orderNo = orderno
+        LotNo = lotno
         if isExistOrder(orderNo) == False:
             state = "NODATAFOUND"
         else:
-            state = "NOOPERATIONFOUND"
+            state = "DATAFOUND"
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
-            #-- GET OPERATION WITH REMAINING QTY > 0
-            if len(operationList) > 0:
-                currentOperation = operationList[0].OperationNo
-                for i in range(len(operationList)):
-                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                    if tempRemainQty > 0:
-                        currentOperation = operationList[i].OperationNo
-                        break
-                #-- IF NO OPERATION INPUT (0000), WILL AUTO REDIRECT TO CURRENT PAGE
-                if operationNo == '0000':
-                    return redirect('/lot_traveller/' + orderNo + currentOperation)
-            if isExistOperation(orderNo, operationNo):
-                state = "DATAFOUND"
-                operation = getOperation(orderNo, operationNo)
+            pltList = getPTLList(orderNo)
+            #-- IF COME FROM FIRST PAGE
+            if LotNo == "-1":
+                #-- IF NEVER DO PLT GO TO 0
+                if pltList == []:
+                    return redirect('/lot_traveller/' + orderNo + "&0")
+                #-- IF EVER DO PLT GO TO LASTEST PLT
+                else:
+                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
+            #-- IF TRY TO GO TO 0 AFTER EVER DONE PLT, WILL KICK TO LASTEST PLT
+            elif LotNo == "0":
+                if pltList != []:
+                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
+            else:
+                #-- IF TRY TO GO TO # AFTER NEVER DONE PLT, WILL KICK TO 0
+                if pltList == []:
+                    return redirect('/lot_traveller/' + orderNo + "&0")
+                plt = getPTL(orderNo, LotNo)
                 for opr in operationList:
-                    if opr.OperationNo >= operationNo:
+                    if opr.OperationNo >= plt.StartOperationNo:
                         if counter == maxRows:
                             pageCount += 1
                             counter = 0
@@ -332,13 +336,14 @@ def lot_traveller(request, orderoprno):
                             operationList3.append(opr)
                             planDayCountList3.append(days.days)
                         counter += 1
+    print(pltList)
     context = {
         'orderNo' : orderNo,
-        'operationNo' : operationNo,
+        'LotNo' : LotNo,
         'order' : order,
-        'operation' : operation,
         'state' : state,
-        'currentOperation': currentOperation,
+        'pltList' : pltList,
+        'plt' : plt,
         'operationList1' : operationList1,
         'operationList2' : operationList2,
         'operationList3' : operationList3,
@@ -1398,6 +1403,11 @@ def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getPTLList(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [PartialLotTraveller] WHERE OrderNo = '" + order_no + "' ORDER BY LotNo DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
@@ -1475,6 +1485,12 @@ def getUserByPassword(password):
 def getUserByUserID(user_id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [dbo].[User] WHERE UserID = '"+ user_id + "'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getPTL(order_no, lot_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [PartialLotTraveller] WHERE OrderNo = '" + order_no + "' AND LotNo = " + lot_no
     cursor.execute(sql)
     return cursor.fetchone()
 
