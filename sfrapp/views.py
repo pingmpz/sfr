@@ -1175,6 +1175,7 @@ def reset_all(request):
             DELETE FROM HistoryModifier
             DELETE FROM OrderControl
             DELETE FROM OperationControl
+            DELETE FROM PartialLotTraveller
             """
     cursor.execute(sql)
     conn.commit()
