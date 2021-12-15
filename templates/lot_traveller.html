@@ -104,15 +104,21 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-header">
+                      {% if LotNo == '0' %}
+                      Please Do Partail Lot First.
+                      {% endif %}
                       <div class="card-header-actions">
                         <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#increase_lot_no_modal" onclick="prepare_increase_lot_no()"> <i class="c-icon c-icon-sm cil-fork" style="transform: rotateZ(180deg); transform: scaleY(-1);"></i></button>
+                        {% if LotNo != '0' %}
                         <button class="btn btn-sm btn-link small" onclick="printDiv()"> <i class="c-icon c-icon-sm cil-print"></i></button>
+                        {% endif %}
                       </div>
                     </div>
+                    {% if LotNo != '0' %}
                     <div class="card-body">
                       <input type="text" id="order_no" value="{{orderNo}}" hidden>
                       <input type="text" id="operation_no" value="{{operationNo}}" hidden>
-                      <input type="text" id="increase_lot_no_no" value="{{order.LotNo}}" hidden>
+                      <input type="text" id="final_lot_no" value="{{order.LotNo}}" hidden>
                       <div id="print-area">
                         <style>
                           table, th, td {
@@ -655,6 +661,7 @@
                         {% endif %}
                       </div>
                     </div>
+                    {% endif %}
                   </div>
                 </div>
               </div>
@@ -691,6 +698,31 @@
                   <input class="form-control form-control-sm my-password" type="text" id="sl_password" autocomplete="off">
                 </div>
               </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Start At Operation</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="sl_start_operation_no">
+                    {% for opr in operationList %}
+                    <option value="{{opr.OperationNo}}">{{opr.OperationNo}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Lot Qty</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="sl_lot_qty" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Type</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="sl_type">
+                    <option value="NONASM">NON-ASM</option>
+                    <option value="ASM">ASM</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <small>Permission: Section Chief+</small>
@@ -718,33 +750,54 @@
         }, 2000);
       });
 
+      $("#sl_lot_qty").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       function printDiv(){
         $('#print-area').printThis();
       }
 
       function prepare_increase_lot_no(){
         $("#sl_password").val("");
-        remove_valid("sl_password");
+        $("#sl_lot_qty").val("");
+        remove_valid_many(["sl_password","sl_lot_qty"]);
       }
 
       function increase_lot_no(){
+        if($('#sl_lot_qty').val() == "") $('#sl_lot_qty').val("0");
         var order_no = $("#order_no").val();
         var password = $("#sl_password").val();
+        var start_operation_no = $("#sl_start_operation_no").val();
+        var lot_qty = $("#sl_lot_qty").val();
+        var type = $("#sl_type").val();
+        var final_lot_no = $("#final_lot_no").val();
+        remove_valid_many(["sl_password","sl_lot_qty"]);
         validate_section_chief_password(password, function(isCorrect, invalid_text) {
           if(!isCorrect){
             invalid("sl_password");
           } else {
-            valid("sl_password");
-            $.ajax({
-              url: '/increase_lot_no/',
-              data: {
-                'order_no': order_no,
-              },
-              dataType: 'json',
-              success: function (data) {
-                location.reload();
-              }
-            });
+            if(lot_qty <= 0){
+              invalid("sl_lot_qty");
+            } else {
+              valid("sl_lot_qty");
+              $.ajax({
+                url: '/increase_lot_no/',
+                data: {
+                  'order_no': order_no,
+                  'password': password,
+                  'start_operation_no': start_operation_no,
+                  'lot_qty': lot_qty,
+                  'type': type,
+                  'final_lot_no': final_lot_no,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
           }
         });
       }
@@ -765,159 +818,6 @@
           });
         }
       }
-
-      //-- LOT NO SYNC
-      $("#lot_no_1").on("keypress keyup blur",function (event) {
-          $("#lot_no_2").val($("#lot_no_1").val());
-          $("#lot_no_3").val($("#lot_no_1").val());
-      });
-
-      $("#lot_no_2").on("keypress keyup blur",function (event) {
-          $("#lot_no_1").val($("#lot_no_2").val());
-          $("#lot_no_3").val($("#lot_no_2").val());
-      });
-
-      $("#lot_no_3").on("keypress keyup blur",function (event) {
-          $("#lot_no_1").val($("#lot_no_3").val());
-          $("#lot_no_2").val($("#lot_no_3").val());
-      });
-
-      $("#lot_no_1").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#lot_no_2").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#lot_no_3").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      //-- PARTIAL QTY SYNC
-      $("#pl_qty_1").on("keypress keyup blur",function (event) {
-          $("#pl_qty_2").val($("#pl_qty_1").val());
-          $("#pl_qty_3").val($("#pl_qty_1").val());
-      });
-
-      $("#pl_qty_2").on("keypress keyup blur",function (event) {
-          $("#pl_qty_1").val($("#pl_qty_2").val());
-          $("#pl_qty_3").val($("#pl_qty_2").val());
-      });
-
-      $("#pl_qty_3").on("keypress keyup blur",function (event) {
-          $("#pl_qty_1").val($("#pl_qty_3").val());
-          $("#pl_qty_2").val($("#pl_qty_3").val());
-      });
-
-      $("#pl_qty_1").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#pl_qty_2").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      $("#pl_qty_3").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
-
-      //-- Non-ASM , ASM CHECKBOX SYNC
-      $("#non_asm_1").on("change",function (event) {
-          if ($("#non_asm_1").is(':checked')){
-            $("#non_asm_2").prop("checked", true);
-            $("#non_asm_3").prop("checked", true);
-          } else {
-            $("#non_asm_2").prop("checked", false);
-            $("#non_asm_3").prop("checked", false);
-          }
-          if ($("#non_asm_1").is(':checked')){
-            $("#asm_1").prop("checked", false);
-            $("#asm_2").prop("checked", false);
-            $("#asm_3").prop("checked", false);
-          }
-      });
-
-      $("#non_asm_2").on("change",function (event) {
-        if ($("#non_asm_2").is(':checked')){
-          $("#non_asm_1").prop("checked", true);
-          $("#non_asm_3").prop("checked", true);
-        } else {
-          $("#non_asm_1").prop("checked", false);
-          $("#non_asm_3").prop("checked", false);
-        }
-        if ($("#non_asm_1").is(':checked')){
-          $("#asm_1").prop("checked", false);
-          $("#asm_2").prop("checked", false);
-          $("#asm_3").prop("checked", false);
-        }
-      });
-
-      $("#non_asm_3").on("change",function (event) {
-        if ($("#non_asm_3").is(':checked')){
-          $("#non_asm_1").prop("checked", true);
-          $("#non_asm_2").prop("checked", true);
-        } else {
-          $("#non_asm_1").prop("checked", false);
-          $("#non_asm_2").prop("checked", false);
-        }
-        if ($("#non_asm_1").is(':checked')){
-          $("#asm_1").prop("checked", false);
-          $("#asm_2").prop("checked", false);
-          $("#asm_3").prop("checked", false);
-        }
-      });
-
-      $("#asm_1").on("change",function (event) {
-          if ($("#asm_1").is(':checked')){
-            $("#asm_2").prop("checked", true);
-            $("#asm_3").prop("checked", true);
-          } else {
-            $("#asm_2").prop("checked", false);
-            $("#asm_3").prop("checked", false);
-          }
-          if ($("#asm_1").is(':checked')){
-            $("#non_asm_1").prop("checked", false);
-            $("#non_asm_2").prop("checked", false);
-            $("#non_asm_3").prop("checked", false);
-          }
-      });
-
-      $("#asm_2").on("change",function (event) {
-          if ($("#asm_2").is(':checked')){
-            $("#asm_1").prop("checked", true);
-            $("#asm_3").prop("checked", true);
-          } else {
-            $("#asm_1").prop("checked", false);
-            $("#asm_3").prop("checked", false);
-          }
-          if ($("#asm_1").is(':checked')){
-            $("#non_asm_1").prop("checked", false);
-            $("#non_asm_2").prop("checked", false);
-            $("#non_asm_3").prop("checked", false);
-          }
-      });
-
-      $("#asm_3").on("change",function (event) {
-          if ($("#asm_3").is(':checked')){
-            $("#asm_1").prop("checked", true);
-            $("#asm_2").prop("checked", true);
-          } else {
-            $("#asm_1").prop("checked", false);
-            $("#asm_2").prop("checked", false);
-          }
-          if ($("#asm_1").is(':checked')){
-            $("#non_asm_1").prop("checked", false);
-            $("#non_asm_2").prop("checked", false);
-            $("#non_asm_3").prop("checked", false);
-          }
-      });
     </script>
 
     <!-- SHORTCUT SEARCH -->
@@ -939,6 +839,11 @@
             window.open('/lot_traveller/' + order_no + "&" + lot_no, '_self');
           }
         }
+
+      $("#sc_order_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
 
       //-- VALIDATE CONTROL
       remove_valid_many = (input_ids) => { for(var i = 0;i < input_ids.length;i++) remove_valid(input_ids[i]); }

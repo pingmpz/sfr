@@ -336,7 +336,6 @@ def lot_traveller(request, orderno, lotno):
                             operationList3.append(opr)
                             planDayCountList3.append(days.days)
                         counter += 1
-    print(pltList)
     context = {
         'orderNo' : orderNo,
         'LotNo' : LotNo,
@@ -344,6 +343,7 @@ def lot_traveller(request, orderno, lotno):
         'state' : state,
         'pltList' : pltList,
         'plt' : plt,
+        'operationList' : operationList,
         'operationList1' : operationList1,
         'operationList2' : operationList2,
         'operationList3' : operationList3,
@@ -801,7 +801,7 @@ def manual_report(request):
         # SAP : CONFIRM TIME & QTY
         insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
         #-- MANUAL REPORT : LOG
-        insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", start_time, stop_time)
+        insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
         #-- CONFIRM : LOG
         if int(good_qty) > 0 or int(reject_qty) > 0:
             insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason)
@@ -1186,7 +1186,15 @@ def reset_all(request):
 
 def increase_lot_no(request):
     order_no = request.GET.get('order_no')
-    updateLotNo(order_no)
+    start_operation_no = request.GET.get('start_operation_no')
+    final_lot_no = request.GET.get('final_lot_no')
+    lot_qty = request.GET.get('lot_qty')
+    type = request.GET.get('type')
+    password = request.GET.get('password')
+    lot_no = int(final_lot_no) + 1
+    chief_id = getUserByPassword(password).UserID
+    updateOrderLotNo(order_no)
+    insertPLT(order_no, start_operation_no, lot_no, lot_qty, type, chief_id)
     data = {
     }
     return JsonResponse(data)
@@ -1853,6 +1861,15 @@ def insertUser(user_id, user_password, user_role):
     cursor.execute(sql)
     conn.commit()
     return
+
+def insertPLT(order_no, operation_no, lot_no, lot_qty, type, chief_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[PartialLotTraveller] ([OrderNo],[StartOperationNo],[LotNo],[LotQty],[Type],[ChiefID],[StartDateTime]) VALUES "
+    sql += " ('"+order_no+"','"+operation_no+"',"+str(lot_no)+","+str(lot_qty)+",'"+type+"','"+chief_id+"',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -1947,7 +1964,7 @@ def changeUserPassword(user_id, user_password):
     conn.commit()
     return
 
-def updateLotNo(order_no):
+def updateOrderLotNo(order_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [OrderControl] SET [LotNo] += 1 WHERE OrderNo = '" + order_no + "'"
