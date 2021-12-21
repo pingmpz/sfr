@@ -163,7 +163,9 @@
                             <div class="card-body">
                               <p class="mb-3 small" id="text_area">
                                 {% for report in sapReportList reversed %}
-                                  {{report.WorkCenter.strip|default_if_none:""}},{{report.ProductionOrderNo.strip|default_if_none:""}},{{report.OperationNumber.strip|default_if_none:""}},{{report.Yiled.normalize|default_if_none:""}},{{report.Scrap.normalize|default_if_none:""}},{{report.SetupTime.normalize|default_if_none:""}},{{report.OperTime.normalize|default_if_none:""}},{{report.LaborTime.normalize|default_if_none:""}},{{report.StartDate|default_if_none:""}},{{report.StartTime|default_if_none:""}},{{report.FinishDate|default_if_none:""}},{{report.FinishTime|default_if_none:""}},{{report.EmployeeID.strip|default_if_none:""}}<br>
+                                  <span id="text_item_{{forloop.counter}}"><button class="btn btn-sm btn-ghost text-danger" onclick="delete_text_item({{forloop.counter}})"><i class="c-icon c-icon-sm cil-x"></i></button>
+                                    {{report.WorkCenter.strip|default_if_none:""}},{{report.ProductionOrderNo.strip|default_if_none:""}},{{report.OperationNumber.strip|default_if_none:""}},{{report.Yiled.normalize|default_if_none:""}},{{report.Scrap.normalize|default_if_none:""}},{{report.SetupTime.normalize|default_if_none:""}},{{report.OperTime.normalize|default_if_none:""}},{{report.LaborTime.normalize|default_if_none:""}},{{report.StartDate|default_if_none:""}},{{report.StartTime|default_if_none:""}},{{report.FinishDate|default_if_none:""}},{{report.FinishTime|default_if_none:""}},{{report.EmployeeID.strip|default_if_none:""}}<br>
+                                  </span>
                                 {% endfor %}
                               </p>
                             </div>
@@ -233,6 +235,10 @@
         column.visible( ! column.visible() );
         (column.visible())? $(this).removeClass("text-danger"): $(this).addClass("text-danger");
       });
+
+      function delete_text_item(id){
+        $("#text_item_" + id).remove();
+      }
 
       function download_txt(){
         var blob = new Blob([$("#text_area").text().replace(/^(?=\n)$|^\s*|\s*$|\n\n+/gm, "").trim()], {type: "text/plain;charset=utf-8"});

@@ -175,7 +175,9 @@
                             <div class="card-body">
                               <p class="mb-3 small" id="text_area">
                                 {% for mod in sapModifierList reversed %}
-                                  {{mod.Mode}}|{{mod.OrderNo}}|{{mod.OperationNo}}|{{mod.ControlKey|default_if_none:""}}|{{mod.WorkCenter.strip|default_if_none:""}}|{{mod.PlannedDeliveryTime|default_if_none:""}}|{{mod.CostElement.strip|default_if_none:""}}|{{mod.PriceUnit|default_if_none:""}}|{{mod.Price|default_if_none:""}}|{{mod.Currency.strip|default_if_none:""}}|{{mod.MaterialGroup|default_if_none:""}}|{{mod.PurchasingGroup|default_if_none:""}}|{{mod.PurchasingOrg|default_if_none:""}}|{{mod.SetupTime|default_if_none:""}}|{{mod.OperTime|default_if_none:""}}|{{mod.LaborTime|default_if_none:""}}|<br>
+                                  <span id="text_item_{{forloop.counter}}"><button class="btn btn-sm btn-ghost text-danger" onclick="delete_text_item({{forloop.counter}})"><i class="c-icon c-icon-sm cil-x"></i></button>
+                                    {{mod.Mode}}|{{mod.OrderNo}}|{{mod.OperationNo}}|{{mod.ControlKey|default_if_none:""}}|{{mod.WorkCenter.strip|default_if_none:""}}|{{mod.PlannedDeliveryTime|default_if_none:""}}|{{mod.CostElement.strip|default_if_none:""}}|{{mod.PriceUnit|default_if_none:""}}|{{mod.Price|default_if_none:""}}|{{mod.Currency.strip|default_if_none:""}}|{{mod.MaterialGroup|default_if_none:""}}|{{mod.PurchasingGroup|default_if_none:""}}|{{mod.PurchasingOrg|default_if_none:""}}|{{mod.SetupTime|default_if_none:""}}|{{mod.OperTime|default_if_none:""}}|{{mod.LaborTime|default_if_none:""}}|<br>
+                                  </span>
                                 {% endfor %}
                               </p>
                             </div>
@@ -247,6 +249,10 @@
         column.visible( ! column.visible() );
         (column.visible())? $(this).removeClass("text-danger"): $(this).addClass("text-danger");
       });
+
+      function delete_text_item(id){
+        $("#text_item_" + id).remove();
+      }
 
       function download_txt(){
         var blob = new Blob([$("#text_area").text().replace(/^(?=\n)$|^\s*|\s*$|\n\n+/gm, "").trim()], {type: "text/plain;charset=utf-8"});
