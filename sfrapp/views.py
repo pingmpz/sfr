@@ -1175,7 +1175,6 @@ def reset_all(request):
             DELETE FROM HistoryModifier
             DELETE FROM OrderControl
             DELETE FROM OperationControl
-            DELETE FROM PartialLotTraveller
             """
     cursor.execute(sql)
     conn.commit()
@@ -1420,9 +1419,7 @@ def getPTLList(order_no):
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OrderControl] as ORD"
-    sql += " INNER JOIN [SAP_Order] as SAPORD ON ORD.OrderNo = SAPORD.ProductionOrderNo"
-    sql += " WHERE OrderNo = '" + order_no + "'"
+    sql = "SELECT * FROM [OrderControl] WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -1598,7 +1595,31 @@ def setDataFromSAP(order_no):
 def setOrderControlFromSAP(order_no):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo]) VALUES ('" + order_no + "',1)"
+    sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    order = cursor.fetchone()
+    SalesOrderNo = ""
+    RequestDate = ""
+    ReleaseDate = ""
+    DateGetFromSAP = order.DateGetFromSAP.strftime("%Y-%m-%d %H:%M:%S")
+    if order.SalesCreateDate == "00.00.0000":
+        SalesOrderNo = "NULL"
+    else:
+        SalesOrderNo = "CONVERT(DATETIME,'"+order.SalesCreateDate+"',104)"
+    if order.RequestDate == "00.00.0000":
+        RequestDate = "NULL"
+    else:
+        RequestDate = "CONVERT(DATETIME,'"+order.RequestDate+"',104)"
+    if order.ReleaseDate == "00.00.0000":
+        ReleaseDate = "NULL"
+    else:
+        ReleaseDate = "CONVERT(DATETIME,'"+order.ReleaseDate+"',104)"
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP]) VALUES "
+    sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName+"','"+order.SalesOrderNo+"',"
+    sql += SalesOrderNo+","+str(order.SalesOrderQuantity)+","+str(order.ProductionOrderQuatity)+",'"+order.FG_MaterialCode+"','"+order.RM_MaterialCode+"',"
+    sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+order.AeroSpace+"',"
+    sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"')"
     cursor.execute(sql)
     conn.commit()
     return
@@ -1608,7 +1629,7 @@ def setOperationControlFromSAP(order_no):
     cursor = conn.cursor()
     sql = "SELECT * FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
-    order = cursor.fetchall()[0]
+    order = cursor.fetchone()
     sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY OperationNumber ASC"
     cursor.execute(sql)
     operations = cursor.fetchall()
