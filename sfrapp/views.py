@@ -426,7 +426,7 @@ def user_control(request):
 def get_operating_workcenter_list(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
-    OWCList = [list(i) for i in getOperatingWorkCenterList(order_no, operation_no)]
+    OWCList = [list(i) for i in getOperatingWorkCenterListForTable(order_no, operation_no)]
     hasOperatorOperatingList = []
     for owc in OWCList:
         hasOperatorOperatingList.append(hasOperatorOperating(owc[0]))
@@ -439,7 +439,7 @@ def get_operating_workcenter_list(request):
 def get_operating_operator_list(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
-    OOPRList = [list(i) for i in getOperatingOperatorList(order_no, operation_no)]
+    OOPRList = [list(i) for i in getOperatingOperatorListForTable(order_no, operation_no)]
     data = {
         'OOPRList': OOPRList,
     }
@@ -1336,9 +1336,27 @@ def getOperatingWorkCenterList(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getOperatingWorkCenterListForTable(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT OWC.OperatingWorkCenterID, OWC.WorkCenterNo, WC.WorkCenterName, OWC.StartDateTime, OWC.StopDateTime, OWC.Status, WC.MachineType, *"
+    sql += " FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY OWC.OperatingWorkCenterID ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getOperatingOperatorList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
+    sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
+    sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOperatingOperatorListForTable(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT OOPR.OperatingOperatorID, WC.WorkCenterNo, WC.WorkCenterName, OOPR.EmpID, EMP.EmpName, OOPR.StartDateTime, OOPR.StopDateTime, OOPR.Status,*"
+    sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID ASC"

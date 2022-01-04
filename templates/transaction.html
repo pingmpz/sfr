@@ -1535,13 +1535,13 @@
                 // console.log(owc);
                 for(var j = 0;j < owc.length;j++){
                   var owc_id = owc[0];
-                  var owc_workcenter_name = owc[7]+" | "+owc[8];
-                  var owc_startdatetime = owc[4];
+                  var owc_workcenter_name = owc[1]+" | "+owc[2];
+                  var owc_startdatetime = owc[3];
                   var startdatetime = (owc_startdatetime == null)?"-":getFullDateTimeFromString(owc_startdatetime);
-                  var owc_stopdatetime = owc[5];
+                  var owc_stopdatetime = owc[4];
                   var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTimeFromString(owc_stopdatetime);
-                  var owc_status = $.trim(owc[6]);
-                  var mc_type = $.trim(owc[13]);
+                  var owc_status = $.trim(owc[5]);
+                  var mc_type = $.trim(owc[6]);
                   if(owc_status == "COMPLETED") {
                     completed_count++;
                     break;
@@ -1605,8 +1605,8 @@
                 // console.log(oopr);
                 for(var j = 0;j < oopr.length;j++){
                   var oopr_id = oopr[0];
-                  var oopr_workcenter_name = (oopr[18] == null)?null:oopr[18]+" | "+oopr[19];
-                  var oopr_operator_name = oopr[8]+" | "+oopr[9];
+                  var oopr_workcenter_name = (oopr[1] == null)?null:oopr[1]+" | "+oopr[2];
+                  var oopr_operator_name = oopr[3]+" | "+oopr[4];
                   var oopr_startdatetime = oopr[5];
                   var startdatetime = (oopr_startdatetime == null)?"-":getFullDateTimeFromString(oopr_startdatetime);
                   var oopr_stopdatetime = oopr[6];
