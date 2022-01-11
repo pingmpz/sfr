@@ -1175,6 +1175,7 @@ def reset_all(request):
             DELETE FROM HistoryModifier
             DELETE FROM OrderControl
             DELETE FROM OperationControl
+            DELETE FROM PartialLotTraveller
             """
     cursor.execute(sql)
     conn.commit()
@@ -1722,10 +1723,13 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     start_time = start_date_time.strftime("%H%M%S")
     stop_date = stop_date_time.strftime("%Y%m%d")
     stop_time = stop_date_time.strftime("%H%M%S")
+    DateTimeStamp = "CURRENT_TIMESTAMP"
+    if datetime.now().hour == 23:
+        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
-    sql += " VALUES (CURRENT_TIMESTAMP,"
+    sql += " VALUES ("+DateTimeStamp+","
     sql += "'" + str(workcenter) + "',"
     sql += "'" + str(order_no) + "',"
     sql += "'" + str(operation_no) + "',"
@@ -1744,10 +1748,13 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     return
 
 def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
+    DateTimeStamp = "CURRENT_TIMESTAMP"
+    if datetime.now().hour == 23:
+        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Modifier] ([DateTimeStamp],[Mode],[OrderNo],[OperationNo])"
-    sql += " VALUES (CURRENT_TIMESTAMP,'31',"
+    sql += " VALUES ("+DateTimeStamp+",'31',"
     sql += "'" + str(order_no) + "',"
     sql += "'" + str(operation_no) + "')"
     cursor.execute(sql)
@@ -1755,6 +1762,9 @@ def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
     return
 
 def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
+    DateTimeStamp = "CURRENT_TIMESTAMP"
+    if datetime.now().hour == 23:
+        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
@@ -1769,7 +1779,7 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
         mode = "11"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
-        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += " VALUES ("+DateTimeStamp+","
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1782,7 +1792,7 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
         mode = "12"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[PlannedDeliveryTime],[CostElement],[PriceUnit],[Price],[Currency],[MaterialGroup],[PurchasingGroup],[PurchasingOrg])"
-        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += " VALUES ("+DateTimeStamp+","
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1801,6 +1811,9 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     return
 
 def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
+    DateTimeStamp = "CURRENT_TIMESTAMP"
+    if datetime.now().hour == 23:
+        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
@@ -1815,7 +1828,7 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
         mode = "21"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
-        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += " VALUES ("+DateTimeStamp+","
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1828,7 +1841,7 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
         mode = "22"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[PlannedDeliveryTime],[CostElement],[PriceUnit],[Price],[Currency],[MaterialGroup],[PurchasingGroup],[PurchasingOrg])"
-        sql += " VALUES (CURRENT_TIMESTAMP,"
+        sql += " VALUES ("+DateTimeStamp+","
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"

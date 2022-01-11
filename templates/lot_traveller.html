@@ -180,15 +180,15 @@
                                 <td class="title"><strong>Release Date</strong></td>
                                 <td>
                                   {% if order.ReleaseDate != None %}
-                                  {{order.ReleaseDate|replace:".|-" }}
-                                  <!-- {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}} -->
+                                  <!-- {{order.ReleaseDate|replace:".|-" }} -->
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Request Date</strong></td>
                                 <td>
                                   {% if order.RequestDate != None %}
-                                  {{order.RequestDate|replace:".|-" }}
-                                  <!-- {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}} -->
+                                  <!-- {{order.RequestDate|replace:".|-" }} -->
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Prod. Order Qty</strong></td>
@@ -220,8 +220,8 @@
                                 <td class="title"><strong>Sale Create Date</strong></td>
                                 <td>
                                   {% if order.SalesCreateDate != None %}
-                                  {{order.SalesCreateDate|replace:".|-" }}
-                                  <!-- {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}} -->
+                                  <!-- {{order.SalesCreateDate|replace:".|-" }} -->
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="text-center" colspan="3" rowspan="2">
@@ -349,16 +349,15 @@
                                 <td class="title"><strong>Release Date</strong></td>
                                 <td>
                                   {% if order.ReleaseDate != None %}
-                                  {{order.ReleaseDate|replace:".|-" }}
-                                  <!-- {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}} -->
+                                  <!-- {{order.ReleaseDate|replace:".|-" }} -->
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Request Date</strong></td>
                                 <td>
-                                  {{order.RequestDate|replace:".|-" }}
                                   {% if order.RequestDate != None %}
-                                  {{order.RequestDate|replace:".|-" }}
-                                  <!-- {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}} -->
+                                  <!-- {{order.RequestDate|replace:".|-" }} -->
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Prod. Order Qty</strong></td>
@@ -390,8 +389,8 @@
                                 <td class="title"><strong>Sale Create Date</strong></td>
                                 <td>
                                   {% if order.SalesCreateDate != None %}
-                                  {{order.SalesCreateDate|replace:".|-" }}
-                                  <!-- {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}} -->
+                                  <!-- {{order.SalesCreateDate|replace:".|-" }} -->
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="text-center" colspan="3" rowspan="2">
@@ -520,15 +519,15 @@
                                 <td class="title"><strong>Release Date</strong></td>
                                 <td>
                                   {% if order.ReleaseDate != None %}
-                                  {{order.ReleaseDate|replace:".|-" }}
-                                  <!-- {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}} -->
+                                  <!-- {{order.ReleaseDate|replace:".|-" }} -->
+                                  {{order.ReleaseDate|slice:"8:10"}}-{{order.ReleaseDate|slice:"5:7"}}-{{order.ReleaseDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Request Date</strong></td>
                                 <td>
                                   {% if order.RequestDate != None %}
-                                  {{order.RequestDate|replace:".|-" }}
-                                  <!-- {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}} -->
+                                  <!-- {{order.RequestDate|replace:".|-" }} -->
+                                  {{order.RequestDate|slice:"8:10"}}-{{order.RequestDate|slice:"5:7"}}-{{order.RequestDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="title"><strong>Prod. Order Qty</strong></td>
@@ -560,8 +559,8 @@
                                 <td class="title"><strong>Sale Create Date</strong></td>
                                 <td>
                                   {% if order.SalesCreateDate != None %}
-                                  {{order.SalesCreateDate|replace:".|-" }}
-                                  <!-- {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}} -->
+                                  <!-- {{order.SalesCreateDate|replace:".|-" }} -->
+                                  {{order.SalesCreateDate|slice:"8:10"}}-{{order.SalesCreateDate|slice:"5:7"}}-{{order.SalesCreateDate|slice:"0:4"}}
                                   {% endif %}
                                 </td>
                                 <td class="text-center" colspan="3" rowspan="2">
@@ -707,7 +706,7 @@
                 <div class="col-md-8">
                   <select class="form-control form-control-sm" id="sl_start_operation_no">
                     {% for opr in operationList %}
-                    <option value="{{opr.OperationNo}}">{{opr.OperationNo}}</option>
+                    <option value="{{opr.OperationNo}}">{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
                     {% endfor %}
                   </select>
                 </div>
