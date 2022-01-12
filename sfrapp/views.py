@@ -1724,8 +1724,8 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     stop_date = stop_date_time.strftime("%Y%m%d")
     stop_time = stop_date_time.strftime("%H%M%S")
     DateTimeStamp = "CURRENT_TIMESTAMP"
-    if datetime.now().hour == 23:
-        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
+    # if datetime.now().hour == 23:
+    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
@@ -1749,8 +1749,8 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
 
 def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
     DateTimeStamp = "CURRENT_TIMESTAMP"
-    if datetime.now().hour == 23:
-        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
+    # if datetime.now().hour == 23:
+    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Modifier] ([DateTimeStamp],[Mode],[OrderNo],[OperationNo])"
@@ -1763,8 +1763,8 @@ def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
 
 def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
     DateTimeStamp = "CURRENT_TIMESTAMP"
-    if datetime.now().hour == 23:
-        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
+    # if datetime.now().hour == 23:
+    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
@@ -1812,8 +1812,8 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
 
 def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
     DateTimeStamp = "CURRENT_TIMESTAMP"
-    if datetime.now().hour == 23:
-        DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
+    # if datetime.now().hour == 23:
+    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
