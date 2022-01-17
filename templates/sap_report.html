@@ -103,6 +103,7 @@
                           <a class="toggle-vis small text-primary" data-column="13">EmployeeID</a>
                       </div>
                       <br>
+                      <small>* Empty Yeild/Scrap/SetupTime/OperTime/LaborTime = 0.0000</small>
                       <table class="table table-sm table-outline small" id="sap_report_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
@@ -129,11 +130,11 @@
                             <td><a href="/wc/{{report.WorkCenter}}&NOW">{{report.WorkCenter|default_if_none:""}}</a></td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
                             <td>{{report.OperationNumber|default_if_none:""}}</td>
-                            <td>{{report.Yiled|default_if_none:""}}</td>
-                            <td>{{report.Scrap|default_if_none:""}}</td>
-                            <td>{{report.SetupTime|default_if_none:""}}</td>
-                            <td>{{report.OperTime|default_if_none:""}}</td>
-                            <td>{{report.LaborTime|default_if_none:""}}</td>
+                            <td>{%if report.Yiled == 0.0000 %}{% else %}{{report.Yiled|default_if_none:""}}{% endif %}</td>
+                            <td>{%if report.Scrap == 0.0000 %}{% else %}{{report.Scrap|default_if_none:""}}{% endif %}</td>
+                            <td>{%if report.SetupTime == 0.0000 %}{% else %}{{report.SetupTime|default_if_none:""}}{% endif %}</td>
+                            <td>{%if report.OperTime == 0.0000 %}{% else %}{{report.OperTime|default_if_none:""}}{% endif %}</td>
+                            <td>{%if report.LaborTime == 0.0000 %}{% else %}{{report.LaborTime|default_if_none:""}}{% endif %}</td>
                             <td>{{report.StartDate|default_if_none:""}}</td>
                             <td>{{report.StartTime|default_if_none:""}}</td>
                             <td>{{report.FinishDate|default_if_none:""}}</td>
