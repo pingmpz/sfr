@@ -153,12 +153,12 @@
                             <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
                             <div class="col-4" style="padding-top: 3px">
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="non_asm_1" {% if plt.Type.strip == 'NONASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" {% if plt.Type.strip == 'NONASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
                                 <h5 class="form-check-label">Non-ASM</h5>
                               </div>
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="asm_1" {% if plt.Type.strip == 'ASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" {% if plt.Type.strip == 'ASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
                                 <h5 class="form-check-label">ASM</h5>
                               </div>
                             </div>
@@ -168,13 +168,13 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_1" value="{{LotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/{{LotNo}}</td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
-                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_1" value="{{plt.LotQty}}"></td>
+                                <td class="toprow toptable" colspan="2">{{plt.LotQty}}</td>
                               </tr>
                               <tr>
                                 <td class="title"><strong>Release Date</strong></td>
@@ -322,12 +322,12 @@
                             <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
                             <div class="col-4" style="padding-top: 3px">
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="non_asm_2" {% if plt.Type.strip == 'NONASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" {% if plt.Type.strip == 'NONASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
                                 <h5 class="form-check-label">Non-ASM</h5>
                               </div>
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="asm_2" {% if plt.Type.strip == 'ASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" {% if plt.Type.strip == 'ASM' %}checked{% endif %} style="width: 18px; height: 18px;">&nbsp;&nbsp;
                                 <h5 class="form-check-label">ASM</h5>
                               </div>
                             </div>
@@ -337,13 +337,13 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_2" value="{{LotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/{{LotNo}}</td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
-                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_2" value="{{plt.LotQty}}"></td>
+                                <td class="toprow toptable" colspan="2">{{plt.LotQty}}</td>
                               </tr>
                               <tr>
                                 <td class="title"><strong>Release Date</strong></td>
@@ -492,12 +492,12 @@
                             <div class="col-5 text-center"><h3>Partial Lot Traveller</h3></div>
                             <div class="col-4" style="padding-top: 3px">
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="non_asm_3" style="width: 18px; height: 18px;" {% if plt.Type.strip == 'NONASM' %}checked{% endif %}>&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" style="width: 18px; height: 18px;" {% if plt.Type.strip == 'NONASM' %}checked{% endif %}>&nbsp;&nbsp;
                                 <h5 class="form-check-label">Non-ASM</h5>
                               </div>
                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                               <div class="form-check form-check-inline mr-1">
-                                <input class="form-check-input" type="checkbox" id="asm_3" style="width: 18px; height: 18px;" {% if plt.Type.strip == 'ASM' %}checked{% endif %}>&nbsp;&nbsp;
+                                <input class="form-check-input" type="checkbox" onclick="this.checked=!this.checked;" style="width: 18px; height: 18px;" {% if plt.Type.strip == 'ASM' %}checked{% endif %}>&nbsp;&nbsp;
                                 <h5 class="form-check-label">ASM</h5>
                               </div>
                             </div>
@@ -507,13 +507,13 @@
                             <tbody>
                               <tr>
                                 <td class="toprow title toptable"><strong>Prod. Order No.</strong></td>
-                                <td class="toprow toptable">{{orderNo}}/<input type="text" style="border: none; width: 20%" id="lot_no_3" value="{{LotNo}}"></td>
+                                <td class="toprow toptable">{{orderNo}}/{{LotNo}}</td>
                                 <td class="toprow title toptable"><strong>Sales order No.</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderNo|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Sales Order Qty</strong></td>
                                 <td class="toprow toptable">{{order.SalesOrderQuantity|floatformat|default_if_none:""}}</td>
                                 <td class="toprow title toptable"><strong>Partial Lot Qty</strong></td>
-                                <td class="toprow toptable" colspan="2"><input type="text" style="border: none; width: 100%" id="pl_qty_3" value="{{plt.LotQty}}"></td>
+                                <td class="toprow toptable" colspan="2">{{plt.LotQty}}</td>
                               </tr>
                               <tr>
                                 <td class="title"><strong>Release Date</strong></td>
