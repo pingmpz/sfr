@@ -183,13 +183,13 @@
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Plan Start</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|slice:'8:10'}}-{{operation.PlanStartDate|slice:'5:7'}}-{{operation.PlanStartDate|slice:'0:4'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label class="col-md-5 col-form-label text-right"><strong>Plan Finish</strong></label>
                                 <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|default_if_none:""}}" readonly>
+                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|slice:'8:10'}}-{{operation.PlanFinishDate|slice:'5:7'}}-{{operation.PlanFinishDate|slice:'0:4'}}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row">
