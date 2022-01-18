@@ -733,7 +733,7 @@ def confirm(request):
             #-- IF AUTO MACHINE(S) STILL WORKING
             owcList = getOperatingWorkCenterList(orderNo, operationNo)
             for owc in owcList:
-                if owc.Status == 'WORKING':
+                if owc.Status == 'WORKING' and owc.MachineType.strip() == 'Auto':
                     #-- WORKCENTER : STOP
                     updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
                     #-- SAP : WORKING TIME
