@@ -23,6 +23,7 @@ urlpatterns = [
     path('working_emp/', views.working_emp, name='working_emp'),
     #-- REPORT
     path('lot_traveller/<str:orderno>&<str:lotno>', views.lot_traveller, name='lot_traveller'),
+    path('zpp02/', views.zpp02, name='zpp02'),
     #-- SAP
     path('sap_order/<str:fdate>&<str:fhour>', views.sap_order, name='sap_order'),
     path('sap_routing/<str:fdate>&<str:fhour>', views.sap_routing, name='sap_routing'),

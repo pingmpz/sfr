@@ -64,8 +64,7 @@
                       <table class="table table-sm table-outline small" id="working_order_table" style="table-layout: fixed;">
                         <thead class="thead-light">
                           <tr>
-                            <th>Production Order No</th>
-                            <th>Current Operation No</th>
+                            <th colspan="2">Production Order No - Current Operation No</th>
                             <th>Current Work Center</th>
                             <th>Joining To..</th>
                             <th>Partial Lot # Time</th>
@@ -76,16 +75,16 @@
                         <tbody>
                           {% for order in workingOrderList %}
                           <tr>
-                            <td>{{order.OrderNo}}</td>
-                            <td>
-                              <a href="/transaction/{{order.OrderNo}}{{currentOperationList|index:forloop.counter0|index:1}}">{{currentOperationList|index:forloop.counter0|index:1}}</a>
+                            <td colspan="2"><a href="/transaction/{{order.OrderNo}}{{currentOperationList|index:forloop.counter0|index:1}}">
+                              {{order.OrderNo}}-{{currentOperationList|index:forloop.counter0|index:1}}</a>
                             </td>
                             <td>
                               {% if currentOperationList|index:forloop.counter0|index:22 %}<i class="c-icon c-icon-sm cil-external-link"></i>
                               {% elif currentOperationList|index:forloop.counter0|index:21 == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
                               {% elif currentOperationList|index:forloop.counter0|index:21 == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
                               {% endif %}
-                              &nbsp;&nbsp;{{currentOperationList|index:forloop.counter0|index:2}}
+                              &nbsp;&nbsp;
+                              <a href="/wc/{{currentOperationList|index:forloop.counter0|index:2}}&NOW">{{currentOperationList|index:forloop.counter0|index:2}}</a>
                             </td>
                             <td>
                               {% if currentOperationList|index:forloop.counter0|index:8 != None %}

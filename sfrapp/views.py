@@ -354,6 +354,13 @@ def lot_traveller(request, orderno, lotno):
     }
     return render(request, 'lot_traveller.html', context)
 
+def zpp02(request):
+
+    context = {
+
+    }
+    return render(request, 'zpp02.html', context)
+
 #--------------------------------------------------------------------------- SAP
 
 def sap_order(request, fdate, fhour):

@@ -129,7 +129,7 @@
                             <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|default_if_none:""}}</td>
                             <td><a href="/wc/{{report.WorkCenter}}&NOW">{{report.WorkCenter|default_if_none:""}}</a></td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
-                            <td>{{report.OperationNumber|default_if_none:""}}</td>
+                            <td><a href="/transaction/{{report.ProductionOrderNo}}{{report.OperationNumber}}">{{report.OperationNumber|default_if_none:""}}</a></td>
                             <td>{%if report.Yiled == 0.0000 %}{% else %}{{report.Yiled|default_if_none:""}}{% endif %}</td>
                             <td>{%if report.Scrap == 0.0000 %}{% else %}{{report.Scrap|default_if_none:""}}{% endif %}</td>
                             <td>{%if report.SetupTime == 0.0000 %}{% else %}{{report.SetupTime|default_if_none:""}}{% endif %}</td>
