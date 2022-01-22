@@ -71,7 +71,7 @@
               <!-- Hidden Input -->
               <div hidden>
                 <input type="text" id="has_data" value="{% if state == "DATAFOUND" %}True{% else %}False{% endif %}">
-                <input type="text" id="is_operating" value="{{IsOperating}}">
+                <input type="text" id="is_operating" value="{{isOperating}}">
                 <input type="text" id="workcenter_type" value="{{operation.WorkCenterType}}">
                 <input type="text" id="join_list_length" value="{{joinList|length}}">
                 <input type="text" id="is_joining" value="{% if operation.JoinToOrderNo != None %}True{% else %}False{% endif %}">
@@ -451,7 +451,7 @@
                       </div>
                       {% if remainQty > 0 %}
                         <!-- WorkCenter/Operator -->
-                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
+                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None and isOvertime == False %}
                           <div class="col-md-12">
                             <div class="card border-secondary">
                               <div class="card-header">
@@ -525,6 +525,23 @@
 
                                   </tbody>
                                 </table>
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
+                        <!-- Overtime -->
+                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None and isOvertime == True %}
+                          <div class="col-md-12">
+                            <div class="card text-white text-center" style="background-color:#ff5419">
+                              <div class="card-body text-center">
+                                <br><br><br><br><br>
+                                <h1><i class="c-icon c-icon-2xl cil-av-timer" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <br>
+                                <h3><strong>THIS OPERATION IS OVERTIME</strong></h3>
+                                <br>
+                                <p>WorkCenter or operator in this operation is working or setup more than 12 hours.<br>You need to correct these overtime by manual report.</p>
+                                <button type="button" class="btn btn-pill btn-lg btn-dark small"><strong>Start Fix</strong></button>
+                                <br><br><br><br>
                               </div>
                             </div>
                           </div>
@@ -1623,9 +1640,7 @@
                   row += "<div> <strong>STOP</strong> "+stopdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
-                  if(((new Date() - new Date(oopr_startdatetime)) / (1000 * 60) > 720) && (oopr_status == "WORKING" || oopr_status == "SETUP")){
-                    row += "<small class='text-danger'> IT'S MORE THAN 12 HOURS !!</small>";
-                  } else if(oopr_status == "WORKING" || oopr_status == "EXT-WORK"){
+                  if(oopr_status == "WORKING" || oopr_status == "EXT-WORK"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_operating_operator_"+oopr_id+"' onclick='stop_work_operating_operator("+oopr_id+")'>Stop Working</button>";
                   } else if (oopr_status == "SETUP"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button> ";

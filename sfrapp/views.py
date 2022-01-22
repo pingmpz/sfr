@@ -25,7 +25,8 @@ def transaction(request, orderoprno):
     operationNo = ""
     order = None
     operation = None
-    IsOperating = False
+    isOperating = False
+    isOvertime = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
     operationList = []
@@ -70,7 +71,8 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
-                IsOperating = isOperatingOperation(orderNo, operationNo)
+                isOperating = isOperatingOperation(orderNo, operationNo)
+                isOvertime = isOvertimeOperation(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
                 hasNoMoreQty = True
@@ -126,7 +128,8 @@ def transaction(request, orderoprno):
         'state' : state,
         'order' : order,
         'operation' : operation,
-        'IsOperating' : IsOperating,
+        'isOperating' : isOperating,
+        'isOvertime' : isOvertime,
         'remainQty' : remainQty,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
@@ -988,6 +991,8 @@ def change_operation(request):
     password = request.GET.get('password')
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
     deleteAllOperatingData(order_no, operation_no)
+    #-- SAP REQUIRED TO SEND ONLY 1 CHANGE OF THE SAME OPERATION PER HOURLY FILE
+    deleteSFR2SAP_Modifier_Change(order_no, operation_no)
     #-- CHANGE OPERATION CONTROL
     if control_key == "PP01":
         changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time)
@@ -1611,6 +1616,18 @@ def isExistDeletedOperation(order_no, operation_no):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
+def isOvertimeOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    if len(cursor.fetchall()) > 0:
+        return True
+    else:
+        cursor = get_connection().cursor()
+        sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+        cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 #--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
@@ -1730,13 +1747,10 @@ def insertSFR2SAP_Report(workcenter, order_no, operation_no, yiled, scrap, setup
     start_time = start_date_time.strftime("%H%M%S")
     stop_date = stop_date_time.strftime("%Y%m%d")
     stop_time = stop_date_time.strftime("%H%M%S")
-    DateTimeStamp = "CURRENT_TIMESTAMP"
-    # if datetime.now().hour == 23:
-    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Report] ([DateTimeStamp],[WorkCenter],[ProductionOrderNo],[OperationNumber],[Yiled],[Scrap],[SetupTime],[OperTime],[LaborTime],[StartDate],[StartTime],[FinishDate],[FinishTime],[EmployeeID])"
-    sql += " VALUES ("+DateTimeStamp+","
+    sql += " VALUES (CURRENT_TIMESTAMP,"
     sql += "'" + str(workcenter) + "',"
     sql += "'" + str(order_no) + "',"
     sql += "'" + str(operation_no) + "',"
@@ -1761,7 +1775,7 @@ def insertSFR2SAP_Modifier_Delete(order_no, operation_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [SFR2SAP_Modifier] ([DateTimeStamp],[Mode],[OrderNo],[OperationNo])"
-    sql += " VALUES ("+DateTimeStamp+",'31',"
+    sql += " VALUES (CURRENT_TIMESTAMP,'31',"
     sql += "'" + str(order_no) + "',"
     sql += "'" + str(operation_no) + "')"
     cursor.execute(sql)
@@ -1786,7 +1800,7 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
         mode = "11"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
-        sql += " VALUES ("+DateTimeStamp+","
+        sql += " VALUES (CURRENT_TIMESTAMP,"
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1799,7 +1813,7 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
         mode = "12"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[PlannedDeliveryTime],[CostElement],[PriceUnit],[Price],[Currency],[MaterialGroup],[PurchasingGroup],[PurchasingOrg])"
-        sql += " VALUES ("+DateTimeStamp+","
+        sql += " VALUES (CURRENT_TIMESTAMP,"
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1818,9 +1832,6 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     return
 
 def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
-    DateTimeStamp = "CURRENT_TIMESTAMP"
-    # if datetime.now().hour == 23:
-    #     DateTimeStamp = "DATEADD(HOUR,1,CURRENT_TIMESTAMP)"
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
@@ -1835,7 +1846,7 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
         mode = "21"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[SetupTime],[OperTime],[LaborTime])"
-        sql += " VALUES ("+DateTimeStamp+","
+        sql += " VALUES (CURRENT_TIMESTAMP,"
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -1848,7 +1859,7 @@ def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_cent
         mode = "22"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
         sql += " ([DateTimeStamp],[Mode],[OrderNo],[OperationNo],[ControlKey],[WorkCenter],[PlannedDeliveryTime],[CostElement],[PriceUnit],[Price],[Currency],[MaterialGroup],[PurchasingGroup],[PurchasingOrg])"
-        sql += " VALUES ("+DateTimeStamp+","
+        sql += " VALUES (CURRENT_TIMESTAMP,"
         sql += "'" + str(mode) + "',"
         sql += "'" + str(order_no) + "',"
         sql += "'" + str(operation_no) + "',"
@@ -2066,6 +2077,14 @@ def deleteOperationControl(order_no, operation_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteSFR2SAP_Modifier_Change(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [SFR2SAP_Modifier] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Mode = 22 OR Mode = 21) AND CAST(DateTimeStamp AS DATE) = CAST(CURRENT_TIMESTAMP AS DATE) AND DATEPART(HOUR, DateTimeStamp) = DATEPART(HOUR, CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return
