@@ -1205,6 +1205,8 @@ def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()
     sql = """
+            DELETE FROM SAP_Order
+            DELETE FROM SAP_Routing
             DELETE FROM OperatingOperator
             DELETE FROM OperatingWorkCenter
             DELETE FROM SFR2SAP_Report
@@ -1213,6 +1215,8 @@ def reset_all(request):
             DELETE FROM HistoryOperate
             DELETE FROM HistoryJoin
             DELETE FROM HistoryModifier
+            DELETE FROM OvertimeOperator
+            DELETE FROM OvertimeWorkCenter
             DELETE FROM OrderControl
             DELETE FROM OperationControl
             DELETE FROM PartialLotTraveller

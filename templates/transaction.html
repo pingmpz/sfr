@@ -503,7 +503,7 @@
                       </div>
                       {% if remainQty > 0 %}
                         <!-- WorkCenter/Operator -->
-                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
+                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None and isOvertime == False %}
                           <div class="col-md-12">
                             <div class="card border-secondary">
                               <div class="card-header">
