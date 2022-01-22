@@ -46,10 +46,11 @@ urlpatterns = [
     path('start_work_operating_operator/', views.start_work_operating_operator, name='start_work_operating_operator'),
     path('stop_setup_operating_operator/', views.stop_setup_operating_operator, name='stop_setup_operating_operator'),
     path('stop_work_operating_operator/', views.stop_work_operating_operator, name='stop_work_operating_operator'),
-    #-- CONFIRMATION
+    #-- CONFIRM & MANUAL REPORT & FIX OVERTIME
     path('get_data_for_confirm/', views.get_data_for_confirm, name='get_data_for_confirm'),
     path('confirm/', views.confirm, name='confirm'),
     path('manual_report/', views.manual_report, name='manual_report'),
+    path('fix_overtime/', views.fix_overtime, name='fix_overtime'),
     #-- JOIN
     path('join/', views.join, name='join'),
     path('break_join/', views.break_join, name='break_join'),

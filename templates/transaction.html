@@ -115,6 +115,9 @@
                             {% if modList|length > 0 %}
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
                             {% endif %}
+                            {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
+                            {% endif %}
                           </ul>
                           <div class="tab-content">
                             <!-- Operation Tab -->
@@ -415,6 +418,55 @@
                                 </tbody>
                               </table>
                             </div>
+                            <!-- Overtime Tab -->
+                            <div class="tab-pane small" id="overtime-tab" role="tabpanel">
+                              {% if overTimeOperatorList|length > 0 %}
+                              <h6>Operator</h6>
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th>EmpID</th>
+                                    <th>WorkCenter</th>
+                                    <th>Status</th>
+                                    <th>StartDateTime</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for ot in overTimeOperatorList %}
+                                  <tr>
+                                    <td>{{ot.EmpID}}</td>
+                                    <td>{{ot.WorkCenterNo}}</td>
+                                    <td>
+                                      {% if ot.Status == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
+                                      {% elif ot.Status == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
+                                      {% else %}{{ot.Status}}{% endif %}
+                                    </td>
+                                    <td>{{ot.StartDateTime}}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                              {% endif %}
+                              {% if overTimeWorkCenterList|length > 0 %}
+                              <h6>WorkCenter (Auto Machine)</h6>
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th>WorkCenter</th>
+                                    <th>StartDateTime</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for ot in overTimeWorkCenterList %}
+                                  <tr>
+                                    <td>{{ot.WorkCenterNo}}</td>
+                                    <td>{{ot.StartDateTime}}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                              {% endif %}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -451,7 +503,7 @@
                       </div>
                       {% if remainQty > 0 %}
                         <!-- WorkCenter/Operator -->
-                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None and isOvertime == False %}
+                        {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None %}
                           <div class="col-md-12">
                             <div class="card border-secondary">
                               <div class="card-header">
@@ -539,8 +591,8 @@
                                 <br>
                                 <h3><strong>THIS OPERATION IS OVERTIME</strong></h3>
                                 <br>
-                                <p>WorkCenter or operator in this operation is working or setup more than 12 hours.<br>You need to correct these overtime by manual report.</p>
-                                <button type="button" class="btn btn-pill btn-lg btn-dark small"><strong>Start Fix</strong></button>
+                                <p>This operation exceed 12 hrs working time limit.<br>Please correct stop time manually.</p>
+                                <button type="button" class="btn btn-pill btn-lg btn-dark small" onclick="fix_overtime()" id="fix_overtime_button"><strong>Fix Stop Time</strong></button>
                                 <br><br><br><br>
                               </div>
                             </div>
@@ -1829,7 +1881,7 @@
         });
       }
     </script>
-    <!-- CONFIRM & MANUAL REPORT -->
+    <!-- CONFIRM & MANUAL REPORT & FIX OVERTIME -->
     <script>
       function prepare_confirm(id){
         remove_valid_many(["good_qty","reject_qty","reject_reason","other_reason"]);
@@ -2085,6 +2137,23 @@
                 });
               }
             });
+          }
+        });
+      }
+
+      function fix_overtime(){
+        var order_no = $("#order_no").val();
+        var operation_no = $("#operation_no").val();
+        $('#fix_overtime_button').prop('disabled', true);
+        $.ajax({
+          url: '/fix_overtime/',
+          data: {
+            'order_no': order_no,
+            'operation_no': operation_no,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
           }
         });
       }

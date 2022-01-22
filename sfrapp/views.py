@@ -32,6 +32,8 @@ def transaction(request, orderoprno):
     operationList = []
     operationStatusList = []
     modList = []
+    overTimeOperatorList = []
+    overTimeWorkCenterList = []
     joinList = []
     historyOperateList = []
     historyConfirmList = []
@@ -109,6 +111,9 @@ def transaction(request, orderoprno):
                             operationAfter = operationList[i+1].OperationNo
                 #-- MOD LIST
                 modList = getModList(orderNo)
+                #-- OVERTIME LIST
+                overTimeOperatorList = getOverTimeOperatorList(orderNo, operationNo)
+                overTimeWorkCenterList = getOverTimeWorkCenterList(orderNo, operationNo)
                 #-- GET JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
@@ -134,6 +139,8 @@ def transaction(request, orderoprno):
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
         'modList' : modList,
+        'overTimeOperatorList' : overTimeOperatorList,
+        'overTimeWorkCenterList' : overTimeWorkCenterList,
         'joinList' : joinList,
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
@@ -682,7 +689,7 @@ def stop_operating_workcenter(request):
     }
     return JsonResponse(data)
 
-#------------------------------------------------------------------ CONFIRMATION
+#-----------------------------------------CONFIRM & MANUAL REPORT & FIX OVERTIME
 
 def get_data_for_confirm(request):
     id = request.GET.get('id')
@@ -855,6 +862,27 @@ def manual_report(request):
                     #-- ORDER : STOP
                     updateOrderControl(order_no, "STOP")
     data = {
+    }
+    return JsonResponse(data)
+
+def fix_overtime(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    operation = getOperation(order_no, operation_no)
+    operatingOperatorList = getOperatingOperatorList(order_no, operation_no)
+    for oopr in operatingOperatorList:
+        if isOvertimeOperator(oopr.OperatingOperatorID):
+            insertOvertimeOperator(oopr)
+    if operation.WorkCenterType.strip() == 'Machine' and operation.MachineType.strip() == 'Auto':
+        operatingWorkCenterList = getOperatingWorkCenterList(order_no, operation_no)
+        for owc in operatingWorkCenterList:
+            #-- ONLY WORKING WORKCENTER
+            if isOvertimeWorkCenter(owc.OperatingWorkCenterID):
+                insertOvertimeWorkCenter(owc)
+    #-- DELETE ALL OPERATING DATA
+    deleteAllOperatingData(order_no, operation_no)
+    data = {
+
     }
     return JsonResponse(data)
 
@@ -1313,6 +1341,18 @@ def getModList(order_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getOverTimeOperatorList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeOperator] WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOverTimeWorkCenterList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeWorkCenter] WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getUserList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [User]"
@@ -1628,6 +1668,19 @@ def isOvertimeOperation(order_no, operation_no):
         cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
+def isOvertimeOperator(oopr_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingOperator] WHERE OperatingOperatorID = '"+str(oopr_id)+"' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+#-- ONLY WORKING WORKCENTER
+def isOvertimeWorkCenter(owc_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = '"+str(owc_id)+"' AND Status = 'WORKING' AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 #--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
@@ -1938,6 +1991,26 @@ def insertPLT(order_no, operation_no, lot_no, lot_qty, type, chief_id):
     cursor = conn.cursor()
     sql = "INSERT INTO [dbo].[PartialLotTraveller] ([OrderNo],[StartOperationNo],[LotNo],[LotQty],[Type],[ChiefID],[StartDateTime]) VALUES "
     sql += " ('"+order_no+"','"+operation_no+"',"+str(lot_no)+","+str(lot_qty)+",'"+type+"','"+chief_id+"',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertOvertimeWorkCenter(owc):
+    startDateTime = owc.StartDateTime.strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OvertimeWorkCenter] ([DateTimeStamp],[OrderNo],[OperationNo],[WorkCenterNo],[StartDateTime])"
+    sql += " VALUES (CURRENT_TIMESTAMP,'"+owc.OrderNo+"','"+owc.OperationNo+"','"+owc.WorkCenterNo+"','"+startDateTime+"')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertOvertimeOperator(oopr):
+    startDateTime = oopr.StartDateTime.strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [OvertimeOperator] ([DateTimeStamp],[OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Status],[StartDateTime])"
+    sql += " VALUES (CURRENT_TIMESTAMP,'"+oopr.OrderNo+"','"+oopr.OperationNo+"','"+oopr.EmpID+"','"+oopr.WorkCenterNo+"','"+oopr.Status+"','"+startDateTime+"')"
     cursor.execute(sql)
     conn.commit()
     return
