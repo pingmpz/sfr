@@ -75,5 +75,4 @@ urlpatterns = [
     path('add_new_user/', views.add_new_user, name='add_new_user'),
     path('delete_user/', views.delete_user, name='delete_user'),
     path('change_user_password/', views.change_user_password, name='change_user_password'),
-    path('reset_all/', views.reset_all, name='reset_all'),
 ]
