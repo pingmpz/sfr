@@ -734,7 +734,9 @@ def confirm(request):
         sap_reject_qty = reject_qty
         if reject_reason == "MATERIAL DEFECT" or reject_reason == "PARTIAL AT SAP":
             sap_reject_qty = 0
-        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY
+        if sap_reject_qty != 0 and good_qty != 0:
+            insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- CONFIRM : LOG
         insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
         #-- UPDATE QTY OF CURRENT OPERATION
@@ -815,8 +817,12 @@ def manual_report(request):
         sap_reject_qty = reject_qty
         if reject_reason == "MATERIAL DEFECT" or reject_reason == "PARTIAL AT SAP":
             sap_reject_qty = 0
-        # SAP : CONFIRM TIME & QTY
-        insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
+        #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY OR TIME
+        if int(sap_reject_qty) == 0 and int(good_qty) == 0 and int(setup_time) == 0 and int(operate_time) == 0 and int(labor_time) == 0:
+            a = 0
+        else:
+            # SAP : CONFIRM TIME & QTY
+            insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
         #-- MANUAL REPORT : LOG
         insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
         #-- CONFIRM : LOG
