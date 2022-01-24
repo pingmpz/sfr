@@ -90,8 +90,8 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
-                            <td>{{workCenter.StartDateTime}}</td>
-                            <td>{{workCenter.StartDateTime|naturaltime}}</td>
+                            <td>{{workCenter.StartDateTime|default_if_none:""}}</td>
+                            <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
