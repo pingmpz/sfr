@@ -1207,6 +1207,30 @@ def change_user_password(request):
     }
     return JsonResponse(data)
 
+def reset_order(request):
+    order_no = request.GET.get('order_no')
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = " DELETE FROM OperatingOperator WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM OperatingWorkCenter WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM HistoryConfirm WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM HistoryOperate WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM HistoryJoin WHERE JoinToOrderNo = "+order_no+" "
+    sql += " DELETE FROM HistoryJoin WHERE JoinByOrderNo = "+order_no+" "
+    sql += " DELETE FROM HistoryModifier WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM OvertimeOperator WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM OvertimeWorkCenter WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM OrderControl WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM OperationControl WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM PartialLotTraveller WHERE OrderNo = "+order_no+" "
+    sql += " DELETE FROM SFR2SAP_Report WHERE ProductionOrderNo = "+order_no+" "
+    sql += " DELETE FROM SFR2SAP_Modifier WHERE OrderNo = "+order_no+" "
+    cursor.execute(sql)
+    conn.commit()
+    data = {
+    }
+    return JsonResponse(data)
+
 def reset_all(request):
     conn = get_connection()
     cursor = conn.cursor()

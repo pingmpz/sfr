@@ -52,6 +52,9 @@
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
+            {% if state == "DATAFOUND" %}
+            <button type="button" class="btn btn-sm btn-pill btn-outline-danger" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
+            {% endif %}
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
@@ -1450,6 +1453,31 @@
             <div class="modal-footer">
               <small>Permission: Officer+</small>
               <button class="btn btn-primary" type="button" id="mp_button" onclick="manual_report()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="reset_order_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-loop-circular"></i> Reset Order</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to reset this order ?</h3><br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="rso_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="text-danger text-center small" id="rso_invalid_text"></div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Administrator+</small>
+              <button class="btn btn-danger" type="button" id="rso_confirm_button" onclick="reset_order()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -2908,6 +2936,54 @@
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
+    </script>
+    <!-- ADMIN -->
+    <script>
+    function validate_admin_password(password, _callback){
+      if(password.length < 4) _callback(false);
+      else {
+        $.ajax({
+          url: '/validate_admin_password/',
+          data: {
+            'password': password,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data.isCorrect) _callback(true);
+            else _callback(false);
+          }
+        });
+      }
+    }
+
+    function clear_validate_reset_order(){
+      $("#rso_invalid_text").text("");
+      remove_valid_many(["rso_password"]);
+    }
+
+    function reset_order(){
+      var order_no = $('#order_no').val();
+      var password = $('#rso_password').val();
+      validate_admin_password(password, function(isCorrect, invalid_text) {
+        if(!isCorrect){
+          invalid("rso_password");
+          $("#rso_invalid_text").text(invalid_text);
+        } else {
+          valid("rso_password");
+          $('#rso_confirm_button').prop('disabled', true);
+          $.ajax({
+            url: '/reset_order/',
+            data: {
+              'order_no': order_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
+        }
+      });
+    }
     </script>
   </body>
 </html>
