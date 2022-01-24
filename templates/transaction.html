@@ -426,7 +426,9 @@
                                 <thead class="bg-darkslategray">
                                   <tr>
                                     <th>EmpID</th>
+                                    {% if operation.WorkCenterType == 'Machine' %}
                                     <th>WorkCenter</th>
+                                    {% endif %}
                                     <th>Status</th>
                                     <th>StartDateTime</th>
                                   </tr>
@@ -435,7 +437,9 @@
                                   {% for ot in overTimeOperatorList %}
                                   <tr>
                                     <td>{{ot.EmpID}}</td>
+                                    {% if operation.WorkCenterType == 'Machine' %}
                                     <td>{{ot.WorkCenterNo}}</td>
+                                    {% endif %}
                                     <td>
                                       {% if ot.Status == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
                                       {% elif ot.Status == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>

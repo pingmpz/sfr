@@ -1403,7 +1403,8 @@ def getOperatingWorkCenterListForTable(order_no, operation_no):
 
 def getOperatingOperatorList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
+    sql = "SELECT OOPR.OperatingOperatorID, OOPR.OrderNo, OOPR.OperationNo, OOPR.EmpID, OOPR.StartDateTime, OOPR.StopDateTime, OOPR.Status, OOPR.OperatingWorkCenterID, OWC.WorkCenterNo"
+    sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID ASC"
@@ -2011,10 +2012,13 @@ def insertOvertimeWorkCenter(owc):
 
 def insertOvertimeOperator(oopr):
     startDateTime = oopr.StartDateTime.strftime("%Y-%m-%d %H:%M:%S")
+    WorkCenter = oopr.WorkCenterNo
+    if WorkCenter == None:
+        WorkCenter = '-1'
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [OvertimeOperator] ([DateTimeStamp],[OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Status],[StartDateTime])"
-    sql += " VALUES (CURRENT_TIMESTAMP,'"+oopr.OrderNo+"','"+oopr.OperationNo+"','"+oopr.EmpID+"','"+oopr.WorkCenterNo+"','"+oopr.Status+"','"+startDateTime+"')"
+    sql += " VALUES (CURRENT_TIMESTAMP,'"+oopr.OrderNo+"','"+oopr.OperationNo+"','"+oopr.EmpID+"','"+WorkCenter+"','"+oopr.Status+"','"+startDateTime+"')"
     cursor.execute(sql)
     conn.commit()
     return
