@@ -732,7 +732,7 @@ def confirm(request):
             workcenter = getOperation(orderNo, operationNo).WorkCenterNo
         #-- SPECIAL CASE **
         sap_reject_qty = reject_qty
-        if reject_reason == "MATERIAL DEFECT":
+        if reject_reason == "MATERIAL DEFECT" or reject_reason == "PARTIAL AT SAP":
             sap_reject_qty = 0
         insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- CONFIRM : LOG
@@ -813,7 +813,7 @@ def manual_report(request):
                 updateOrderControl(order_no, "START")
         #-- SPECIAL CASE **
         sap_reject_qty = reject_qty
-        if reject_reason == "MATERIAL DEFECT":
+        if reject_reason == "MATERIAL DEFECT" or reject_reason == "PARTIAL AT SAP":
             sap_reject_qty = 0
         # SAP : CONFIRM TIME & QTY
         insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
