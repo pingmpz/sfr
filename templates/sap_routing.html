@@ -118,15 +118,15 @@
                         <tbody>
                           {% for routing in sapRoutingList %}
                           <tr style="background-color:#f{{routing.ProductionOrderNo|add:'0'|modulo:8}}f{{routing.ProductionOrderNo|add:'0'|modulo:9}}f{{routing.ProductionOrderNo|add:'0'|modulo:10}}">
-                            <td><b>{{routing.ProductionOrderNo|default_if_none:""}}</b></td>
-                            <td><b>{{routing.OperationNumber|default_if_none:""}}</b></td>
+                            <td>{{routing.ProductionOrderNo|default_if_none:""}}</td>
+                            <td>{{routing.OperationNumber|default_if_none:""}}</td>
                             <td>{{routing.WorkCenter|default_if_none:""}}</td>
                             <td>{{routing.PlanStartDate|default_if_none:""}}</td>
                             <td>{{routing.PlanFinishDate|default_if_none:""}}</td>
                             <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
-                            <td>{{routing.SystemStatus|default_if_none:""}}</td>
+                            <td>#f{{routing.ProductionOrderNo|add:'0'|modulo:8}}f1f{{routing.ProductionOrderNo|add:'0'|modulo:10}} {{routing.SystemStatus|default_if_none:""}}</td>
                             <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
@@ -162,11 +162,29 @@
         }, 2000);
       });
 
+      var groupColumn = 0;
       var table;
       $(document).ready(function() {
         table = $('#sap_routing_table').DataTable( {
+            // "order": [[ 0, "asc" ],[ 1, "asc" ]],
+            // 'iDisplayLength': 100,
+            "columnDefs": [{ "visible": true, "targets": groupColumn }],
             "order": [[ 0, "asc" ],[ 1, "asc" ]],
-            'iDisplayLength': 100,
+            "displayLength": 100,
+            "drawCallback": function ( settings ) {
+                  var api = this.api();
+                  var rows = api.rows( {page:'current'} ).nodes();
+                  var last=null;
+
+                  api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                      if ( last !== group ) {
+                          $(rows).eq( i ).before(
+                              '<tr class="group"><td colspan="10">⎯<b><i> '+group+'</i></b></td></tr>'
+                          );
+                          last = group;
+                      }
+                });
+              }
         });
       });
 
