@@ -126,7 +126,7 @@
                             <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
                             <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
-                            <td>#f{{routing.ProductionOrderNo|add:'0'|modulo:8}}f1f{{routing.ProductionOrderNo|add:'0'|modulo:10}} {{routing.SystemStatus|default_if_none:""}}</td>
+                            <td>{{routing.SystemStatus|default_if_none:""}}</td>
                             <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
