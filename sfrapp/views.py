@@ -429,8 +429,12 @@ def sap_mod(request, fdate, fhour):
 
 def user_control(request):
     userList = getUserList()
+    empNameList = []
+    for user in userList:
+        empNameList.append(getEmpIDByUserID(user.UserID))
     context = {
         'userList': userList,
+        'empNameList': empNameList,
     }
     return render(request, 'user_control.html', context)
 
@@ -1603,6 +1607,12 @@ def getUserByUserID(user_id):
 def getPTL(order_no, lot_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [PartialLotTraveller] WHERE OrderNo = '" + order_no + "' AND LotNo = " + lot_no
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getEmpIDByUserID(user_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[Employee] WHERE EmpID = '"+ user_id + "'"
     cursor.execute(sql)
     return cursor.fetchone()
 

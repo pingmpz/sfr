@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -169,8 +170,6 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="col-md-7">
                   <div class="card">
                     <div class="card-header">
                       <strong>User Permission</strong>
@@ -247,6 +246,8 @@
                       </table>
                     </div>
                   </div>
+                </div>
+                <div class="col-md-7">
                   <div class="card">
                     <div class="card-header">
                       <strong>User Table ({{userList|length}})</strong>
@@ -256,6 +257,7 @@
                         <thead class="thead-light">
                           <tr>
                             <th>User ID</th>
+                            <th>EmpName</th>
                             <th>Role</th>
                           </tr>
                         </thead>
@@ -263,10 +265,12 @@
                           {% for user in userList %}
                           <tr>
                             <td>{{user.UserID}}</td>
+                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
                             <td>
                               {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                               {% elif user.UserRole == 'ADMIN' %}Administrator
                               {% elif user.UserRole == 'CHIEF' %}Section Chief
+                              {% elif user.UserRole == 'OFFICER' %}Officer
                               {% endif %}
                             </td>
                           </tr>
