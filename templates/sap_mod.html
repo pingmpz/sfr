@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -139,9 +140,9 @@
                         </thead>
                         <tbody>
                           {% for mod in sapModifierList %}
-                          <tr>
+                          <tr style="background-color:#{% if mod.Mode == '31' %}f7f1f7{% elif mod.Mode == '11' or mod.Mode == '12'%}f0f8f4{% elif mod.Mode == '21' or mod.Mode == '22'%}f7f7f1{% endif %}">
                             <td data-order="{{mod.DateTimeStamp|date:"U"}}">{{mod.DateTimeStamp|default_if_none:""}}</td>
-                            <td class="{% if mod.Mode == '31' %}bg-danger{% elif mod.Mode == '11' or mod.Mode == '12'%}bg-success{% elif mod.Mode == '21' or mod.Mode == '22'%}bg-warning{% endif %}"><strong>{{mod.Mode|default_if_none:""}}</strong></td>
+                            <td class="{% if mod.Mode == '31' %}text-danger{% elif mod.Mode == '11' or mod.Mode == '12'%}text-success{% elif mod.Mode == '21' or mod.Mode == '22'%}text-warning{% endif %}"><strong>{{mod.Mode|default_if_none:""}}</strong></td>
                             <td>{{mod.OrderNo|default_if_none:""}}</td>
                             <td><a href="/transaction/{{mod.OrderNo}}{{mod.OperationNo}}">{{mod.OperationNo|default_if_none:""}}</a></td>
                             <td>{{mod.ControlKey|default_if_none:""}}</td>

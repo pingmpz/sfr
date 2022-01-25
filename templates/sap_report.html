@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -125,7 +126,7 @@
                         </thead>
                         <tbody>
                           {% for report in sapReportList %}
-                          <tr>
+                          <tr style="background-color:#f{{report.ProductionOrderNo|add:'0'|modulo:8}}f{{report.ProductionOrderNo|add:'0'|modulo:9}}f{{report.ProductionOrderNo|add:'0'|modulo:10}}">
                             <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|default_if_none:""}}</td>
                             <td><a href="/wc/{{report.WorkCenter}}&NOW">{{report.WorkCenter|default_if_none:""}}</a></td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
