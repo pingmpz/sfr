@@ -126,7 +126,7 @@
                             <!-- Operation Tab -->
                             <div class="tab-pane small active" id="operation-tab" role="tabpanel">
                               <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Production Order No</strong></label>
+                                <label class="col-md-5 col-form-label text-right"><strong>Prod. Order No</strong></label>
                                 <div class="col-md-7">
                                   <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly>
                                 </div>
@@ -486,26 +486,26 @@
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         {% if order.ProcessStop == None %}
-                        <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon c-icon-xs cil-plus"></i><br>Add</button>
+                        <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon cil-plus"></i><br>Add</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button" onclick="prepare_change()"><i class="c-icon c-icon-xs cil-transfer"></i><br>Change</button>
+                        <button type="button" class="btn btn-xs btn-warning my-btn text-white small" data-toggle="modal" data-target="#change_modal" id="change_main_button" onclick="prepare_change()"><i class="c-icon cil-transfer"></i><br>Change</button>
                         {% endif %}
                         {% if operation.ProcessStart == None and joinList|length == 0 and operation.JoinToOrderNo == None and operation.JoinToOperationNo == None %}
-                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="prepare_delete()"><i class="c-icon c-icon-xs cil-trash"></i><br>Delete</button>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#delete_modal" id="delete_main_button" onclick="prepare_delete()"><i class="c-icon cil-trash"></i><br>Delete</button>
                         {% endif %}
                         <p></p>
                       </div>
                       <div class="col-md-6 text-right">
-                        <a type="button" class="btn btn-xs btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_main_button"><i class="c-icon c-icon-xs cil-fullscreen-exit"></i><br>Join</a>
-                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon c-icon-xs cil-fullscreen"></i><br>Break Join</button>
+                        <a type="button" class="btn btn-xs btn-primary my-btn small" href="/join_activity/{{orderNo}}{{operationNo}}" id="join_main_button"><i class="c-icon cil-fullscreen-exit"></i><br>Join</a>
+                        <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon cil-fullscreen"></i><br>Break Join</button>
                         {% if joinList|length > 0 %}
-                        <button type="button" class="btn btn-xs btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon c-icon-xs cil-list"></i><br>Join List</button>
+                        <button type="button" class="btn btn-xs btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon cil-list"></i><br>Join List</button>
                         {% endif %}
                         {% if historyOperateList|length > 0 or historyConfirmList|length > 0 or historyJoinList|length > 0 %}
-                        <button type="button" class="btn btn-xs btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon c-icon-xs cil-history"></i><br>History</button>
+                        <button type="button" class="btn btn-xs btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon cil-history"></i><br>History</button>
                         {% endif %}
-                        <a href="/transaction/0" class="btn btn-xs btn-dark my-btn small"><i class="c-icon c-icon-xs cil-account-logout"></i><br>Exit</a>
+                        <a href="/transaction/0" class="btn btn-xs btn-dark my-btn small"><i class="c-icon cil-account-logout"></i><br>Exit</a>
                         <p></p>
                       </div>
                       {% if remainQty > 0 %}
@@ -514,7 +514,7 @@
                           <div class="col-md-12">
                             <div class="card border-secondary">
                               <div class="card-header">
-                                <strong>Work Center/Operator</strong>
+                                <strong>Working Area</strong>
                                 <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                 data-content="
                                 - <strong class='text-danger'>Stop Working</strong> on manual workcenter will automatically stop workcenter.<br>
@@ -531,23 +531,23 @@
                               <div class="card-body">
                                 {% if operation.WorkCenterType == 'Machine' %}
                                 <div class="form-group row">
-                                  <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> Work Center</strong></label>
+                                  <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> WorkCenter</strong></label>
                                   <div class="col-md-2">
                                     <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                                   </div>
                                   <div class="col-md-5">
                                     <input class="form-control" type="text" id="workcenter_name" value="" readonly>
                                   </div>
-                                  <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='workcenter_add_button' onclick="add_operating_workcenter()" disabled>Add</button></div>
+                                  <div class="col-md-2"><button type="button" class="btn btn-pill btn-info" id='workcenter_add_button' onclick="add_operating_workcenter()" disabled><i class="c-icon c-icon-sm cil-plus"></i> Add</button></div>
                                 </div>
                                 <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="workcenter_table">
                                   <thead class="bg-darkslategray">
                                     <tr>
-                                      <th></th>
-                                      <th>Work Center</th>
-                                      <th>Status</th>
-                                      <th>Start Time</th>
-                                      <th></th>
+                                      <th><i class="c-icon cil-task"></i></th>
+                                      <th><i class="c-icon cil-speedometer"></i></th>
+                                      <th><i class="c-icon cil-speech"></i></th>
+                                      <th><i class="c-icon cil-clock"></i></th>
+                                      <th><i class="c-icon cil-options"></i></th>
                                     </tr>
                                   </thead>
                                   <tbody id="workcenter_table_body">
@@ -564,20 +564,20 @@
                                     <input class="form-control" type="text" id="operator_name" value="" readonly>
                                   </div>
                                   <div class="col-md-3">
-                                    <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled>Start Work</button>
+                                    <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled><i class="c-icon c-icon-sm cil-power-standby"></i> Work</button>
                                     {% if operation.WorkCenterType == 'Machine' %}
-                                    <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled>Start Setup</button>
+                                    <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled><i class="c-icon c-icon-sm cil-power-standby"></i> Setup</button>
                                     {% endif %}
                                   </div>
                                 </div>
                                 <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
                                   <thead class="bg-darkslategray">
                                     <tr>
-                                      {% if operation.WorkCenterType == 'Machine' %}<th>Work Center</th>{% endif %}
-                                      <th>Operator</th>
-                                      <th>Status</th>
-                                      <th>Start-Stop Time</th>
-                                      <th></th>
+                                      {% if operation.WorkCenterType == 'Machine' %}<th><i class="c-icon cil-speedometer"></i></th>{% endif %}
+                                      <th><i class="c-icon cil-user"></i></th>
+                                      <th><i class="c-icon cil-speech"></i></th>
+                                      <th><i class="c-icon cil-clock"></i></th>
+                                      <th><i class="c-icon cil-options"></i></th>
                                     </tr>
                                   </thead>
                                   <tbody id="operator_table_body">
@@ -1636,7 +1636,8 @@
                 // console.log(owc);
                 for(var j = 0;j < owc.length;j++){
                   var owc_id = owc[0];
-                  var owc_workcenter_name = owc[1]+" | "+owc[2];
+                  // var owc_workcenter_name = owc[1]+" | "+owc[2];
+                  var owc_workcenter_name = owc[1];
                   var owc_startdatetime = owc[3];
                   var startdatetime = (owc_startdatetime == null)?"-":getFullDateTimeFromString(owc_startdatetime);
                   var owc_stopdatetime = owc[4];
@@ -1660,7 +1661,7 @@
                   row += "<input type='text' id='workcenter_status_"+owc_id+"' value='"+owc_status+"' hidden>";
                   row += "</td>";
                   row += "<td class='small'>";
-                  row += "<div>"+startdatetime+"</div>";
+                  row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
                   if(owc_status == "WAITING"){
@@ -1706,8 +1707,10 @@
                 // console.log(oopr);
                 for(var j = 0;j < oopr.length;j++){
                   var oopr_id = oopr[0];
-                  var oopr_workcenter_name = (oopr[1] == null)?null:oopr[1]+" | "+oopr[2];
-                  var oopr_operator_name = oopr[3]+" | "+oopr[4];
+                  // var oopr_workcenter_name = (oopr[1] == null)?null:oopr[1]+" | "+oopr[2];
+                  var oopr_workcenter_name = (oopr[1] == null)?null:oopr[1];
+                  var oopr_operator_id = oopr[3];
+                  var oopr_operator_name = oopr[4];
                   var oopr_startdatetime = oopr[5];
                   var startdatetime = (oopr_startdatetime == null)?"-":getFullDateTimeFromString(oopr_startdatetime);
                   var oopr_stopdatetime = oopr[6];
@@ -1716,12 +1719,12 @@
                   row = "";
                   row += "<tr id='operator_row_"+oopr_id+"'>";
                   row += (oopr_workcenter_name == null)? "":"<td class='small'>"+oopr_workcenter_name+"</td>";
-                  row += "<td class='small'>"+oopr_operator_name+"</td>";
+                  row += "<td class='small'><b>"+oopr_operator_id+"</b><br>"+oopr_operator_name+"</td>";
                   row += (oopr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += oopr_status+"</td>";
                   row += "<td class='small'>";
-                  row += "<div> <strong>START</strong> "+startdatetime+"</div>";
-                  row += "<div> <strong>STOP</strong> "+stopdatetime+"</div>";
+                  row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
+                  row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-danger font-weight-bold'></i> "+stopdatetime+"</div>";
                   row += "</td>";
                   row += "<td>";
                   if(oopr_status == "WORKING" || oopr_status == "EXT-WORK"){
