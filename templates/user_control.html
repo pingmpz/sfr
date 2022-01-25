@@ -258,6 +258,7 @@
                           <tr>
                             <th>User ID</th>
                             <th>EmpName</th>
+                            <th>Section</th>
                             <th>Role</th>
                           </tr>
                         </thead>
@@ -266,6 +267,7 @@
                           <tr>
                             <td>{{user.UserID}}</td>
                             <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
+                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:2}}{% endif %}</td>
                             <td>
                               {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
                               {% elif user.UserRole == 'ADMIN' %}Administrator
