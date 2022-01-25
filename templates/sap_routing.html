@@ -117,7 +117,7 @@
                         </thead>
                         <tbody>
                           {% for routing in sapRoutingList %}
-                          <tr>
+                          <tr style="background-color:#f{{routing.ProductionOrderNo|add:'0'|modulo:8}}f{{routing.ProductionOrderNo|add:'0'|modulo:9}}f{{routing.ProductionOrderNo|add:'0'|modulo:10}}">
                             <td><b>{{routing.ProductionOrderNo|default_if_none:""}}</b></td>
                             <td><b>{{routing.OperationNumber|default_if_none:""}}</b></td>
                             <td>{{routing.WorkCenter|default_if_none:""}}</td>

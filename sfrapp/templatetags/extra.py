@@ -27,3 +27,7 @@ def replace(value, arg):
 
     what, to = arg.split('|')
     return value.replace(what, to)
+
+@register.filter
+def modulo(num, val):
+    return num % val

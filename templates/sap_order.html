@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -134,7 +135,7 @@
                         </thead>
                         <tbody>
                           {% for order in sapOrderList %}
-                          <tr>
+                          <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                             <td>{{order.CustomerPONo}}</td>
                             <td>{{order.PartNo|default_if_none:""}}</td>
                             <td>{{order.PartName|default_if_none:""}}</td>
