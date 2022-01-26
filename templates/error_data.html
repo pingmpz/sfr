@@ -67,6 +67,7 @@
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#dup-rt-tab" role="tab">Duplicate Routing ({{duplicateRoutingList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-not-used-tab" role="tab">Order Not Used ({{orderNotUsedList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-not-start-tab" role="tab">Order Not Start ({{orderNotStartList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-error-tab" role="tab">WorkCenter Error ({{workCenterErrorList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- Order No Routing Tab -->
@@ -153,6 +154,29 @@
                               </tbody>
                             </table>
                           </div>
+                          <!-- WorkCenter Error Tab -->
+                          <div class="tab-pane" id="wc-error-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="wc_error_table" style="width: 100%">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>WorkCenter</th>
+                                  <th>ProductionOrderNo</th>
+                                  <th>OperationNumber</th>
+                                  <th>DateGetFromSAP</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for rt in workCenterErrorList %}
+                                <tr style="background-color:#f{{rt.ProductionOrderNo|add:'0'|modulo:8}}f{{rt.ProductionOrderNo|add:'0'|modulo:9}}f{{rt.ProductionOrderNo|add:'0'|modulo:10}}">
+                                  <td>{{rt.WorkCenter|default_if_none:""}}</td>
+                                  <td>{{rt.ProductionOrderNo|default_if_none:""}}</td>
+                                  <td>{{rt.OperationNumber|default_if_none:""}}</td>
+                                  <td>{{rt.DateGetFromSAP|default_if_none:""}}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -219,6 +243,11 @@
 
         $('#order_not_start_table').DataTable( {
             "order": [[ 1, "asc" ]],
+            "displayLength": 100,
+        });
+
+        $('#wc_error_table').DataTable( {
+            "order": [[ 0, "asc" ]],
             "displayLength": 100,
         });
       });

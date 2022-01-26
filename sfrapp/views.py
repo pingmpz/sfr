@@ -443,11 +443,13 @@ def error_data(request):
     duplicateRoutingList = getSAPDuplicateRoutingList()
     orderNotUsedList = getSAPOrderNotUsedList()
     orderNotStartList = getOrderNotStartList()
+    workCenterErrorList = getWorkCenterErrorList()
     context = {
         'oderNoRoutingList': oderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
         'orderNotUsedList': orderNotUsedList,
         'orderNotStartList': orderNotStartList,
+        'workCenterErrorList': workCenterErrorList,
     }
     return render(request, 'error_data.html', context)
 
@@ -1568,6 +1570,12 @@ def getSAPOrderNotUsedList():
 def getOrderNotStartList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM OrderControl WHERE ProcessStart IS NULL"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterErrorList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM SAP_Routing AS RT LEFT JOIN WorkCenter AS WC ON RT.WorkCenter = WC.WorkCenterNo WHERE WC.WorkCenterNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
