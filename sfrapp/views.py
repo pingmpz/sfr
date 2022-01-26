@@ -750,7 +750,9 @@ def confirm(request):
         if reject_reason == "MATERIAL DEFECT" or reject_reason == "PARTIAL AT SAP":
             sap_reject_qty = 0
         #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY
-        if int(sap_reject_qty) != 0 and int(good_qty) != 0:
+        if int(sap_reject_qty) == 0 and int(good_qty) == 0:
+            a = 0
+        else:
             insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- CONFIRM : LOG
         insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
