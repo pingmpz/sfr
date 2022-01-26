@@ -438,6 +438,15 @@ def user_control(request):
     }
     return render(request, 'user_control.html', context)
 
+def error_data(request):
+    oderNoRoutingList = getSAPOrderNoRoutingList()
+    duplicateRoutingList = getSAPDuplicateRoutingList()
+    context = {
+        'oderNoRoutingList': oderNoRoutingList,
+        'duplicateRoutingList': duplicateRoutingList,
+    }
+    return render(request, 'error_data.html', context)
+
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################
@@ -1524,6 +1533,23 @@ def getEmployeeHistoryTransactionList(emp_id, month, year):
 def getPTLList(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [PartialLotTraveller] WHERE OrderNo = '" + order_no + "' ORDER BY LotNo DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPOrderNoRoutingList():
+    cursor = get_connection().cursor()
+    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP" 
+    sql += " From SAP_Order AS OD LEFT JOIN SAP_Routing AS RT ON OD.ProductionOrderNo = RT.ProductionOrderNo WHERE RT.ProductionOrderNo IS NULL"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPDuplicateRoutingList():
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT RT1.ProductionOrderNo, RT1.OperationNumber, RT1.DateGetFromSAP AS RT1DateGetFromSAP, RT2.DateGetFromSAP AS RT2DateGetFromSAP
+            FROM SAP_Routing AS RT1 INNER JOIN SAP_Routing AS RT2 ON RT1.ProductionOrderNo = RT2.ProductionOrderNo AND RT1.OperationNumber = RT2.OperationNumber
+            WHERE RT1.DateGetFromSAP < RT2.DateGetFromSAP
+        """
     cursor.execute(sql)
     return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM

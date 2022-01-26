@@ -32,6 +32,7 @@ urlpatterns = [
     path('blank/', views.blank, name='blank'),
     #-- ADMIN PANEL
     path('user_control/', views.user_control, name='user_control'),
+    path('error_data/', views.error_data, name='error_data'),
     ### REQUEST
     #-- MAIN TABLE
     path('get_workcenter_data/', views.get_workcenter_data, name='get_workcenter_data'),
