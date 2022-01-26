@@ -441,9 +441,11 @@ def user_control(request):
 def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
+    orderNotUsedList = getSAPOrderNotUsedList()
     context = {
         'oderNoRoutingList': oderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
+        'orderNotUsedList': orderNotUsedList,
     }
     return render(request, 'error_data.html', context)
 
@@ -1538,7 +1540,7 @@ def getPTLList(order_no):
 
 def getSAPOrderNoRoutingList():
     cursor = get_connection().cursor()
-    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP" 
+    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP"
     sql += " From SAP_Order AS OD LEFT JOIN SAP_Routing AS RT ON OD.ProductionOrderNo = RT.ProductionOrderNo WHERE RT.ProductionOrderNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -1550,6 +1552,12 @@ def getSAPDuplicateRoutingList():
             FROM SAP_Routing AS RT1 INNER JOIN SAP_Routing AS RT2 ON RT1.ProductionOrderNo = RT2.ProductionOrderNo AND RT1.OperationNumber = RT2.OperationNumber
             WHERE RT1.DateGetFromSAP < RT2.DateGetFromSAP
         """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPOrderNotUsedList():
+    cursor = get_connection().cursor()
+    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo"
     cursor.execute(sql)
     return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
