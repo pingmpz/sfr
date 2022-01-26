@@ -442,10 +442,12 @@ def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
     orderNotUsedList = getSAPOrderNotUsedList()
+    orderNotStartList = getOrderNotStartList()
     context = {
         'oderNoRoutingList': oderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
         'orderNotUsedList': orderNotUsedList,
+        'orderNotStartList': orderNotStartList,
     }
     return render(request, 'error_data.html', context)
 
@@ -1560,6 +1562,12 @@ def getSAPDuplicateRoutingList():
 def getSAPOrderNotUsedList():
     cursor = get_connection().cursor()
     sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOrderNotStartList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OrderControl WHERE ProcessStart IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
