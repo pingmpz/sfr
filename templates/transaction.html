@@ -1724,13 +1724,15 @@
                   row += oopr_status+"</td>";
                   row += "<td class='small'>";
                   row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
-                  row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-danger font-weight-bold'></i> "+stopdatetime+"</div>";
+                  if(stopdatetime != "-"){
+                    row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-danger font-weight-bold'></i> "+stopdatetime+"</div>";
+                  }
                   row += "</td>";
                   row += "<td>";
                   if(oopr_status == "WORKING" || oopr_status == "EXT-WORK"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_work_operating_operator_"+oopr_id+"' onclick='stop_work_operating_operator("+oopr_id+")'>Stop Working</button>";
                   } else if (oopr_status == "SETUP"){
-                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button> ";
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button><br>";
                     row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_operating_operator_"+oopr_id+"' onclick='stop_setup_operating_operator("+oopr_id+")'>Stop Setup & Exit</button>";
                   } else if (oopr_status == "COMPLETED" && $('#remain_qty').val() > 0){
                     if($('#join_list_length').val() == 0) {
