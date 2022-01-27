@@ -779,7 +779,7 @@ def confirm(request):
                     #-- SAP : WORKING TIME
                     owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
                     worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
-                    #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
+                    #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TO SAP
                     if int(worktimeMachine) > 0:
                         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                     #-- WORKCENTER : OPERATING TIME LOG
@@ -1501,13 +1501,13 @@ def getJoinableList(order_no, work_center_group):
 
 def getHistoryOperateList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    sql = "SELECT * FROM [HistoryOperate] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY StopDateTime DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getHistoryConfirmList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryConfirm] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    sql = "SELECT * FROM [HistoryConfirm] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY ConfirmDateTime DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 

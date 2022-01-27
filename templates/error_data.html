@@ -98,6 +98,7 @@
                                   <th>OperationNumber</th>
                                   <th>1st DateGetFromSAP</th>
                                   <th>2nd DateGetFromSAP</th>
+                                  <th></th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -107,6 +108,9 @@
                                   <td>{{dup.OperationNumber|default_if_none:""}}</td>
                                   <td>{{dup.RT1DateGetFromSAP|default_if_none:""}}</td>
                                   <td>{{dup.RT2DateGetFromSAP|default_if_none:""}}</td>
+                                  <td style="color:#f{{dup.ProductionOrderNo|add:'0'|modulo:8}}f{{dup.ProductionOrderNo|add:'0'|modulo:9}}f{{dup.ProductionOrderNo|add:'0'|modulo:10}}">
+                                    <small>DELETE FROM SAP_Routing WHERE ProductionOrderNo = '{{dup.ProductionOrderNo|default_if_none:""}}' AND DateGetFromSAP = '{{dup.RT2DateGetFromSAP|date:"Y-m-d H:i:s:u"|slice:23}}'</small>
+                                  </td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
