@@ -173,8 +173,8 @@
                               <label class="col-md-4 col-form-label text-right"><strong>Status</strong></label>
                               <div class="col-md-8">
                                 <select class="form-control" id="mpa_status">
-                                  <option value="True" selected>Allow</option>
-                                  <option value="False">Not Allow</option>
+                                  <option value="True">Allow</option>
+                                  <option value="False" {% if canMP %}selected{% endif %}>Not Allow</option>
                                 </select>
                               </div>
                             </div>
