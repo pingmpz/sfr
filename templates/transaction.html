@@ -525,7 +525,9 @@
                                 ">?
                                 </a>
                                 <div class="card-header-actions">
+                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 %}
                                   <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
+                                  {% endif %}
                                 </div>
                               </div>
                               <div class="card-body">
