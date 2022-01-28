@@ -76,7 +76,7 @@ def transaction(request, orderoprno):
                 operation = getOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
-                canMP = isManualReportAllow(orderNo, operationNo)
+                canMP = isManualReportAllow()
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
                 hasNoMoreQty = True
@@ -432,14 +432,14 @@ def sap_mod(request, fdate, fhour):
 
 def admin_controller(request):
     userList = getUserList()
-    manualReportAllowdanceList = getManualReportAllowdanceList()
     empNameList = []
     for user in userList:
         empNameList.append(getEmpIDByUserID(user.UserID))
+    canMP = isManualReportAllow()
     context = {
         'userList': userList,
         'empNameList': empNameList,
-        'manualReportAllowdanceList' : manualReportAllowdanceList,
+        'canMP': canMP,
     }
     return render(request, 'admin_controller.html', context)
 
@@ -1233,10 +1233,9 @@ def change_user_password(request):
     }
     return JsonResponse(data)
 
-def allow_mp(request):
-    order_no = request.GET.get('order_no')
-    operation_no = request.GET.get('operation_no')
-    insertAllowManualReport(order_no, operation_no)
+def mpa(request):
+    status = request.GET.get('status')
+    updateManualReportAllowdance(status)
     data = {
     }
     return JsonResponse(data)
@@ -1592,11 +1591,6 @@ def getWorkCenterErrorList():
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getManualReportAllowdanceList():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM ManualReportAllowdance"
-    cursor.execute(sql)
-    return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
@@ -1797,9 +1791,9 @@ def isOvertimeWorkCenter(owc_id):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
-def isManualReportAllow(order_no, operation_no):
+def isManualReportAllow():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [ManualReportAllowdance] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'ManualReportAllowdance' AND Value = 'True' "
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -2140,14 +2134,6 @@ def insertOvertimeOperator(oopr):
     conn.commit()
     return
 
-def insertAllowManualReport(order_no, operation_no):
-    conn = get_connection()
-    cursor = conn.cursor()
-    sql = "INSERT INTO [ManualReportAllowdance] ([DateTimeStamp],[OrderNo],[OperationNo]) VALUES (CURRENT_TIMESTAMP,'"+order_no+"','"+operation_no+"')"
-    cursor.execute(sql)
-    conn.commit()
-    return
-
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -2246,6 +2232,14 @@ def updateOrderLotNo(order_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [OrderControl] SET [LotNo] += 1 WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateManualReportAllowdance(status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"' WHERE KeyText = 'ManualReportAllowdance'"
     cursor.execute(sql)
     conn.commit()
     return

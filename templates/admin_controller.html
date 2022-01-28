@@ -17,7 +17,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>User Control | Shopfloor Reporting Application</title>
+    <title>Admin Controller | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -42,7 +42,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">User Control</li>
+            <li class="breadcrumb-item">Admin Controller</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -71,7 +71,7 @@
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#new-user-tab" role="tab">New User</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#change-password-tab" role="tab">Change Password</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#delete-user-tab" role="tab">Delete User</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#allow-mp-tab" role="tab">Allow Manual Report</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mpa-tab" role="tab">Manual Report</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- New User Tab -->
@@ -167,23 +167,20 @@
                             </div>
                             <small>Permission : Super Administrator</small>
                           </div>
-                          <!-- Allow Manual Report Tab -->
-                          <div class="tab-pane" id="allow-mp-tab" role="tabpanel">
+                          <!-- Manual Report Tab -->
+                          <div class="tab-pane" id="mpa-tab" role="tabpanel">
                             <div class="form-group row">
-                              <label class="col-md-4 col-form-label text-right"><strong>Production Order No</strong></label>
+                              <label class="col-md-4 col-form-label text-right"><strong>Status</strong></label>
                               <div class="col-md-8">
-                                <input class="form-control" type="text" id="amp_order_no"autocomplete="off">
-                              </div>
-                            </div>
-                            <div class="form-group row">
-                              <label class="col-md-4 col-form-label text-right"><strong>Operation No</strong></label>
-                              <div class="col-md-8">
-                                <input class="form-control" type="text" id="amp_operation_no" autocomplete="off">
+                                <select class="form-control" id="mpa_status">
+                                  <option value="True" selected>Allow</option>
+                                  <option value="False">Not Allow</option>
+                                </select>
                               </div>
                             </div>
                             <div class="form-group row">
                               <div class="col-md-12 text-center">
-                                <button type="button" class="btn btn-pill btn-info" id="amp_confirm_button" onclick="allow_mp()">&nbsp;Confirm&nbsp;</button>
+                                <button type="button" class="btn btn-pill btn-info" id="mpa_confirm_button" onclick="mpa()">&nbsp;Confirm&nbsp;</button>
                               </div>
                             </div>
                             <small>Permission : Administrator+</small>
@@ -271,6 +268,16 @@
                 </div>
                 <div class="col-md-7">
                   <div class="card">
+                    <div class="card-body">
+                      {% if canMP %}
+                      <i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i> Manual Report
+                      {% else %}
+                      <i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i> Manual Report
+                      {% endif %}
+                    </div>
+                  </div>
+                  <!-- ALL List -->
+                  <div class="card">
                     <div class="card-header">
                       <strong>All List</strong>
                     </div>
@@ -278,7 +285,6 @@
                       <div class="nav-tabs-boxed">
                         <ul class="nav nav-tabs" role="tablist">
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#user-list-tab" role="tab">User List ({{userList|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#amp-list-tab" role="tab">Allow Manual Report List ({{manualReportAllowdanceList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- User List Tab -->
@@ -305,27 +311,6 @@
                                     {% elif user.UserRole == 'OFFICER' %}Officer
                                     {% endif %}
                                   </td>
-                                </tr>
-                                {% endfor %}
-                              </tbody>
-                            </table>
-                          </div>
-                          <!-- Allow Manual Report List Tab -->
-                          <div class="tab-pane" id="amp-list-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="amp_list_table" style="table-layout: fixed;">
-                              <thead class="thead-light">
-                                <tr>
-                                  <th>DateTimeStamp</th>
-                                  <th>ProductionOrderNo</th>
-                                  <th>OperationNo</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for amp in manualReportAllowdanceList %}
-                                <tr>
-                                  <td data-order="{{amp.DateTimeStamp|date:"U"}}">{{amp.DateTimeStamp}}</td>
-                                  <td>{{amp.OrderNo}}</td>
-                                  <td>{{amp.OperationNo}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -417,10 +402,9 @@
         });
       }
 
-      function allow_mp(){
+      function mpa(){
         var admin_password = $("#admin_password").val();
-        var amp_order_no = $("#amp_order_no").val();
-        var amp_operation_no = $("#amp_operation_no").val();
+        var status = $("#mpa_status").val();
         remove_valid_many(["admin_password"]);
         validate_admin_password(admin_password, function(isCorrect) {
           if(!isCorrect){
@@ -428,10 +412,9 @@
           } else {
             valid("admin_password");
             $.ajax({
-              url: '/allow_mp/',
+              url: '/mpa/',
               data: {
-                'order_no': amp_order_no,
-                'operation_no': amp_operation_no,
+                'status': status,
               },
               dataType: 'json',
               success: function (data) {
