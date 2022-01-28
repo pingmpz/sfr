@@ -71,6 +71,7 @@
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#new-user-tab" role="tab">New User</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#change-password-tab" role="tab">Change Password</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#delete-user-tab" role="tab">Delete User</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#allow-mp-tab" role="tab">Allow Manual Report</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- New User Tab -->
@@ -166,6 +167,27 @@
                             </div>
                             <small>Permission : Super Administrator</small>
                           </div>
+                          <!-- Allow Manual Report Tab -->
+                          <div class="tab-pane" id="allow-mp-tab" role="tabpanel">
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Production Order No</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="amp_order_no"autocomplete="off">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Operation No</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="amp_operation_no" autocomplete="off">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-pill btn-info" id="amp_confirm_button" onclick="allow_mp()">&nbsp;Confirm&nbsp;</button>
+                              </div>
+                            </div>
+                            <small>Permission : Administrator+</small>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -250,35 +272,67 @@
                 <div class="col-md-7">
                   <div class="card">
                     <div class="card-header">
-                      <strong>User Table ({{userList|length}})</strong>
+                      <strong>All List</strong>
                     </div>
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="user_master_table" style="table-layout: fixed;">
-                        <thead class="thead-light">
-                          <tr>
-                            <th>User ID</th>
-                            <th>EmpName</th>
-                            <th>Section</th>
-                            <th>Role</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for user in userList %}
-                          <tr>
-                            <td>{{user.UserID}}</td>
-                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
-                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:2}}{% endif %}</td>
-                            <td>
-                              {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
-                              {% elif user.UserRole == 'ADMIN' %}Administrator
-                              {% elif user.UserRole == 'CHIEF' %}Section Chief
-                              {% elif user.UserRole == 'OFFICER' %}Officer
-                              {% endif %}
-                            </td>
-                          </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
+                      <div class="nav-tabs-boxed">
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#user-list-tab" role="tab">User List ({{userList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#amp-list-tab" role="tab">Allow Manual Report List ({{manualReportAllowdanceList|length}})</a></li>
+                        </ul>
+                        <div class="tab-content">
+                          <!-- User List Tab -->
+                          <div class="tab-pane active" id="user-list-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="user_master_table" style="table-layout: fixed;">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>User ID</th>
+                                  <th>EmpName</th>
+                                  <th>Section</th>
+                                  <th>Role</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for user in userList %}
+                                <tr>
+                                  <td>{{user.UserID}}</td>
+                                  <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
+                                  <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:2}}{% endif %}</td>
+                                  <td>
+                                    {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
+                                    {% elif user.UserRole == 'ADMIN' %}Administrator
+                                    {% elif user.UserRole == 'CHIEF' %}Section Chief
+                                    {% elif user.UserRole == 'OFFICER' %}Officer
+                                    {% endif %}
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Allow Manual Report List Tab -->
+                          <div class="tab-pane" id="amp-list-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="amp_list_table" style="table-layout: fixed;">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>DateTimeStamp</th>
+                                  <th>ProductionOrderNo</th>
+                                  <th>OperationNo</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for amp in manualReportAllowdanceList %}
+                                <tr>
+                                  <td data-order="{{amp.DateTimeStamp|date:"U"}}">{{amp.DateTimeStamp}}</td>
+                                  <td>{{amp.OrderNo}}</td>
+                                  <td>{{amp.OperationNo}}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -312,6 +366,11 @@
 
       $(document).ready(function() {
         $('#user_master_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 25,
+        });
+
+        $('#amp_list_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 25,
         });
@@ -352,6 +411,31 @@
                     });
                   }
                 });
+              }
+            });
+          }
+        });
+      }
+
+      function allow_mp(){
+        var admin_password = $("#admin_password").val();
+        var amp_order_no = $("#amp_order_no").val();
+        var amp_operation_no = $("#amp_operation_no").val();
+        remove_valid_many(["admin_password"]);
+        validate_admin_password(admin_password, function(isCorrect) {
+          if(!isCorrect){
+            invalid("admin_password");
+          } else {
+            valid("admin_password");
+            $.ajax({
+              url: '/allow_mp/',
+              data: {
+                'order_no': amp_order_no,
+                'operation_no': amp_operation_no,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
               }
             });
           }

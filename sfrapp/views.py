@@ -27,6 +27,7 @@ def transaction(request, orderoprno):
     operation = None
     isOperating = False
     isOvertime = False
+    canMP = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
     operationList = []
@@ -75,6 +76,7 @@ def transaction(request, orderoprno):
                 operation = getOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
+                canMP = isManualReportAllow(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
                 hasNoMoreQty = True
@@ -135,6 +137,7 @@ def transaction(request, orderoprno):
         'operation' : operation,
         'isOperating' : isOperating,
         'isOvertime' : isOvertime,
+        'canMP' : canMP,
         'remainQty' : remainQty,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
@@ -427,16 +430,18 @@ def sap_mod(request, fdate, fhour):
 
 #------------------------------------------------------------------- ADMIN PANEL
 
-def user_control(request):
+def admin_controller(request):
     userList = getUserList()
+    manualReportAllowdanceList = getManualReportAllowdanceList()
     empNameList = []
     for user in userList:
         empNameList.append(getEmpIDByUserID(user.UserID))
     context = {
         'userList': userList,
         'empNameList': empNameList,
+        'manualReportAllowdanceList' : manualReportAllowdanceList,
     }
-    return render(request, 'user_control.html', context)
+    return render(request, 'admin_controller.html', context)
 
 def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
@@ -1228,6 +1233,14 @@ def change_user_password(request):
     }
     return JsonResponse(data)
 
+def allow_mp(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    insertAllowManualReport(order_no, operation_no)
+    data = {
+    }
+    return JsonResponse(data)
+
 def reset_order(request):
     order_no = request.GET.get('order_no')
     conn = get_connection()
@@ -1578,6 +1591,12 @@ def getWorkCenterErrorList():
     sql = "SELECT * FROM SAP_Routing AS RT LEFT JOIN WorkCenter AS WC ON RT.WorkCenter = WC.WorkCenterNo WHERE WC.WorkCenterNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
+
+def getManualReportAllowdanceList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM ManualReportAllowdance"
+    cursor.execute(sql)
+    return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
@@ -1775,6 +1794,12 @@ def isOvertimeOperator(oopr_id):
 def isOvertimeWorkCenter(owc_id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = '"+str(owc_id)+"' AND Status = 'WORKING' AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isManualReportAllow(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [ManualReportAllowdance] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -2114,6 +2139,15 @@ def insertOvertimeOperator(oopr):
     cursor.execute(sql)
     conn.commit()
     return
+
+def insertAllowManualReport(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [ManualReportAllowdance] ([DateTimeStamp],[OrderNo],[OperationNo]) VALUES (CURRENT_TIMESTAMP,'"+order_no+"','"+operation_no+"')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
