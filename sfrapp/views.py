@@ -25,6 +25,7 @@ def transaction(request, orderoprno):
     operationNo = ""
     order = None
     operation = None
+    isFirst = False
     isOperating = False
     isOvertime = False
     canMP = False
@@ -74,6 +75,7 @@ def transaction(request, orderoprno):
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 operation = getOperation(orderNo, operationNo)
+                isFirst = isFirstOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
                 canMP = isManualReportAllow()
@@ -135,6 +137,7 @@ def transaction(request, orderoprno):
         'state' : state,
         'order' : order,
         'operation' : operation,
+        'isFirst' : isFirst,
         'isOperating' : isOperating,
         'isOvertime' : isOvertime,
         'canMP' : canMP,
@@ -968,6 +971,22 @@ def break_join(request):
 
 #---------------------------------------------------------------------- MODIFIER
 
+def inc_qty(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    emp_id = request.GET.get('emp_id')
+    password = request.GET.get('password')
+    amount = request.GET.get('amount')
+    operation = getOperation(order_no, operation_no)
+    #-- INCREASE QTY OF 1st OPERATION & ORDER
+    increaseQty(order_no, operation_no, amount)
+    #-- HISTORY : INCREASE QTY
+    user = getUserByPassword(password)
+    insertHistoryModifier("INC QTY", order_no, operation_no, emp_id, user.UserID)
+    data = {
+    }
+    return JsonResponse(data)
+
 def delete_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
@@ -1582,7 +1601,7 @@ def getSAPDuplicateRoutingList():
 
 def getSAPOrderNotUsedList():
     cursor = get_connection().cursor()
-    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo"
+    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1759,6 +1778,13 @@ def hasNotStartOperation(order_no, operation_no):
     sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND ProcessStart IS NULL"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
+
+def isFirstOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OperationControl] WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    return (result[0].OperationNo.strip() == operation_no)
 
 def isLastOperation(order_no, operation_no):
     cursor = get_connection().cursor()
@@ -2247,6 +2273,17 @@ def updateManualReportAllowdance(status):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"' WHERE KeyText = 'ManualReportAllowdance'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def increaseQty(order_no, operation_no, amount):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET [ProductionOrderQuatity] += '" + amount + "' WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "UPDATE [OperationControl] SET [ProcessQty] += '" + amount + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return

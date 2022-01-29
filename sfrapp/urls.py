@@ -57,6 +57,7 @@ urlpatterns = [
     path('join/', views.join, name='join'),
     path('break_join/', views.break_join, name='break_join'),
     #-- MODIFIER
+    path('inc_qty/', views.inc_qty, name='inc_qty'),
     path('delete_operation/', views.delete_operation, name='delete_operation'),
     path('add_operation/', views.add_operation, name='add_operation'),
     path('change_operation/', views.change_operation, name='change_operation'),
