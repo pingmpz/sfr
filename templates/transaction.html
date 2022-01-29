@@ -49,12 +49,15 @@
             </li>
             {% endif %}
           </ol>
-          <div class="c-subheader-nav d-md-down-none mfe-2">
-            <input type="password" hidden> <!-- Prevent Auto fill Password -->
+          <div class="c-subheader-nav">
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
             {% if state == "DATAFOUND" %}
-            <button type="button" class="btn btn-sm btn-pill btn-outline-danger" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
+            <a href="/lot_traveller/{{orderNo}}&0" class="btn btn-sm btn-link">Partial Lot Traveller</a>
+            |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
             {% endif %}
+          </div>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;

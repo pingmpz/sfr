@@ -48,16 +48,18 @@
             </li>
             {% endif %}
           </ol>
+          <div class="c-subheader-nav">
+            {% if state == "DATAFOUND" %}
+              <a href="/transaction/{{orderNo}}0000" class="btn btn-sm btn-link">Transaction</a>
+                |<button class="btn btn-sm btn-link" data-toggle="modal" data-target="#increase_lot_no_modal" onclick="prepare_increase_lot_no()">Create Partial Lot</button>
+                {% if LotNo != '0' %}
+                |<button class="btn btn-sm btn-link" onclick="printDiv()">Print</button>
+                {% endif %}
+            {% endif %}
+          </div>
           <div class="c-subheader-nav d-md-down-none mfe-2" style="width: 600px">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
-            <div class="text-right" style="width: 80px">
-              {% if state == "DATAFOUND" %}
-              {% if LotNo != '0' %}
-                <button class="btn btn-sm btn-link small" onclick="printDiv()"> <i class="c-icon c-icon-sm cil-print"></i></button>
-                {% endif %}
-                <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#increase_lot_no_modal" onclick="prepare_increase_lot_no()"> <i class="c-icon c-icon-sm cil-fork" style="transform: rotateZ(180deg); transform: scaleY(-1);"></i></button>
-              {% endif %}
-            </div>
+            <div class="text-right" style="width: 80px"></div>
             <div>Prod. Order / Lot No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
             &nbsp;&nbsp;<div>/</div>&nbsp;&nbsp;
@@ -664,6 +666,7 @@
                     <h1><i class="c-icon c-icon-2xl cil-list-rich" style="font-size: 8rem; width: 8rem;"></i></h1>
                     <br>
                     <h1><strong>PLEASE CREATE PARTIAL LOT FIRST</strong></h1>
+                    <button class="btn btn-pill btn-lg btn-dark small" data-toggle="modal" data-target="#increase_lot_no_modal" onclick="prepare_increase_lot_no()">Create Partial Lot</button>
                   </div>
                   {% endif %}
                 </div>
