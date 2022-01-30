@@ -1349,9 +1349,9 @@ def getSAPOrderList(fdate, fhour):
     cursor = get_connection().cursor()
     sql = ""
     if fhour == "ALLDAY":
-        sql = "SELECT TOP(3000) * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
     else:
-        sql = "SELECT TOP(3000) * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT * FROM [SAP_Order] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1359,9 +1359,9 @@ def getSAPRoutingList(fdate, fhour):
     cursor = get_connection().cursor()
     sql = ""
     if fhour == "ALLDAY":
-        sql = "SELECT TOP(3000) * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
     else:
-        sql = "SELECT TOP(3000) * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
+        sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1601,7 +1601,7 @@ def getSAPDuplicateRoutingList():
 
 def getSAPOrderNotUsedList():
     cursor = get_connection().cursor()
-    sql = "SELECT OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL"
+    sql = "SELECT TOP (1000) OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 
