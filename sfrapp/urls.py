@@ -1,4 +1,8 @@
 from django.urls import path
+from django.conf.urls import url
+from django.views.static import serve
+from django.conf.urls.static import static
+from django.conf import settings
 
 from . import views
 
@@ -81,4 +85,5 @@ urlpatterns = [
     path('mpa/', views.mpa, name='mpa'),
     # path('reset_all/', views.reset_all, name='reset_all'),
     path('reset_order/', views.reset_order, name='reset_order'),
-]
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT, }),
+]+ static(settings.MEDIA_URL, serve, document_root=settings.MEDIA_ROOT)
