@@ -94,7 +94,7 @@
                             <td>
                               {% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}
                             </td>
-                            <td>{{order.ProcessStart}}</td>
+                            <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, h:i"}}</td>
                             <td>{{order.ProcessStart|naturaltime}}</td>
                           {% endfor %}
                         </tbody>
@@ -131,7 +131,7 @@
 
       $(document).ready(function() {
         $('#working_order_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 4, "asc" ]],
             'iDisplayLength': 100,
         });
       });

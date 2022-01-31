@@ -90,7 +90,7 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
-                            <td>{{workCenter.StartDateTime|default_if_none:""}}</td>
+                            <td data-order="{{workCenter.StartDateTime|date:"U"}}">{{workCenter.StartDateTime|date:"d-M-Y, h:i"}}</td>
                             <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
@@ -128,7 +128,7 @@
 
       $(document).ready(function() {
         $('#working_wc_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 6, "asc" ]],
             'iDisplayLength': 100,
         });
       });

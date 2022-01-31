@@ -90,7 +90,7 @@
                             </td>
                             <td><a href="/transaction/{{operator.OrderNo}}{{operator.OperationNo}}">{{operator.OrderNo}}-{{operator.OperationNo}}</a></td>
                             <td><a href="/wc/{{operator.WorkCenterNo}}&NOW">{{operator.WorkCenterNo|default_if_none:""}}</a></td>
-                            <td>{{operator.StartDateTime}}</td>
+                            <td data-order="{{operator.StartDateTime|date:"U"}}">{{operator.StartDateTime|date:"d-M-Y, h:i"}}</td>
                             <td>{{operator.StartDateTime|naturaltime}}</td>
                           </tr>
                           {% endfor %}
@@ -128,7 +128,7 @@
 
       $(document).ready(function() {
         $('#working_emp_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 6, "asc" ]],
             'iDisplayLength': 100,
         });
       });
