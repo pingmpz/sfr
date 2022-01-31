@@ -1582,18 +1582,6 @@
         }
         dynamic_join();
       });
-
-      function reset_all(){
-        $.ajax({
-          url: '/reset_all/',
-          data: {
-          },
-          dataType: 'json',
-          success: function (data) {
-            location.reload();
-          }
-        });
-      }
     </script>
     <!-- MAIN TABLE -->
     <script>
@@ -3109,6 +3097,18 @@
         }
       });
     }
+
+    // function reset_all(){
+    //   $.ajax({
+    //     url: '/reset_all/',
+    //     data: {
+    //     },
+    //     dataType: 'json',
+    //     success: function (data) {
+    //       location.reload();
+    //     }
+    //   });
+    // }
     </script>
   </body>
 </html>
