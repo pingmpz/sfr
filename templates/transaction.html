@@ -539,7 +539,13 @@
                               <div class="card-body">
                                 {% if operation.WorkCenterType == 'Machine' %}
                                 <div class="form-group row">
-                                  <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> WorkCenter</strong></label>
+                                  <label class="col-md-2 col-form-label text-right">
+                                    <strong><i class="c-icon c-icon-sm cil-plus"></i> WorkCenter</strong>
+                                    <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="WorkCenter(s) in <span class='text-info'>{{operation.WorkCenterGroup}}</span> Group."
+                                    data-content="{% for wc in workCenterInGroupList %}{{wc.WorkCenterNo}}<br>{% endfor %}
+                                    ">?
+                                    </a>
+                                  </label>
                                   <div class="col-md-2">
                                     <input class="form-control" type="text" id="workcenter_no" autocomplete="off" value="" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                                   </div>

@@ -31,19 +31,23 @@ def transaction(request, orderoprno):
     canMP = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
+    #-- Left Content List
     operationList = []
     operationStatusList = []
     modList = []
     overTimeOperatorList = []
     overTimeWorkCenterList = []
     joinList = []
+    #-- History
     historyOperateList = []
     historyConfirmList = []
     historyJoinList = []
-    rejectReasonList = []
-    materialGroupList = []
-    purchaseGroupList = []
-    currencyList = []
+    #-- ETC
+    workCenterInGroupList = [] #-- What work center can be used in the same group (Only Machine)
+    rejectReasonList = [] #-- All
+    materialGroupList = [] #-- All
+    purchaseGroupList = [] #-- All
+    currencyList = [] #-- All
     currentOperation = -1
     operationBefore = -1 #-- For Prev Operation Button
     operationAfter = -1 #-- For Next Operation Button
@@ -58,6 +62,7 @@ def transaction(request, orderoprno):
         else:
             state = "NOOPERATIONFOUND"
             if isExistOrder(orderNo) == False:
+                printString(orderNo + " (1st Time)")
                 setDataFromSAP(orderNo)
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
@@ -118,14 +123,16 @@ def transaction(request, orderoprno):
                 #-- OVERTIME LIST
                 overTimeOperatorList = getOverTimeOperatorList(orderNo, operationNo)
                 overTimeWorkCenterList = getOverTimeWorkCenterList(orderNo, operationNo)
-                #-- GET JOIN LIST
+                #-- JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
-                #-- GET HISTORY LIST
+                #-- HISTORY LIST
                 historyOperateList = getHistoryOperateList(orderNo, operationNo)
                 historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
                 historyJoinList = getHistoryJoinList(orderNo, operationNo)
-                #-- GET ETC LIST
+                #-- ETC LIST
+                if operation.WorkCenterType == 'Machine':
+                    workCenterInGroupList = getWorkCenterInGroupList(operation.WorkCenterGroup)
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
@@ -151,6 +158,7 @@ def transaction(request, orderoprno):
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
         'historyJoinList' : historyJoinList,
+        'workCenterInGroupList' : workCenterInGroupList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
@@ -1614,6 +1622,12 @@ def getOrderNotStartList():
 def getWorkCenterErrorList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM SAP_Routing AS RT LEFT JOIN WorkCenter AS WC ON RT.WorkCenter = WC.WorkCenterNo WHERE WC.WorkCenterNo IS NULL"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterInGroupList(work_center_group):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND WorkCenterGroup = '"+work_center_group+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
