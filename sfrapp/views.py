@@ -464,7 +464,8 @@ def admin_controller(request):
 def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
-    orderNotUsedList = getSAPOrderNotUsedList()
+    # orderNotUsedList = getSAPOrderNotUsedList()
+    orderNotUsedList = []
     orderNotStartList = getOrderNotStartList()
     workCenterErrorList = getWorkCenterErrorList()
     context = {
