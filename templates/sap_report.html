@@ -127,7 +127,7 @@
                         <tbody>
                           {% for report in sapReportList %}
                           <tr style="background-color:#f{{report.ProductionOrderNo|add:'0'|modulo:8}}f{{report.ProductionOrderNo|add:'0'|modulo:9}}f{{report.ProductionOrderNo|add:'0'|modulo:10}}">
-                            <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|default_if_none:""}}</td>
+                            <td data-order="{{report.DateTimeStamp|date:"U"}}">{{report.DateTimeStamp|date:"d-M-Y, H:i:s.u"}}</td>
                             <td><a href="/wc/{{report.WorkCenter}}&NOW">{{report.WorkCenter|default_if_none:""}}</a></td>
                             <td>{{report.ProductionOrderNo|default_if_none:""}}</td>
                             <td><a href="/transaction/{{report.ProductionOrderNo}}{{report.OperationNumber}}">{{report.OperationNumber|default_if_none:""}}</a></td>
