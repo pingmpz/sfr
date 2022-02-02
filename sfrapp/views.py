@@ -1105,6 +1105,21 @@ def change_operation(request):
     }
     return JsonResponse(data)
 
+#-------------------------------------------------------------------------- NOTE
+
+def save_note(request):
+    order_no = request.GET.get('order_no')
+    order_note = request.GET.get('order_note')
+    operation_note_list = request.GET.getlist('operation_note_list[]')
+    operationList = getOperationList(order_no)
+    updateOrderNote(order_no, order_note)
+    for i in range(len(operationList)):
+        printString(operationList[i].OperationNo)
+        updateOperationNote(order_no, operationList[i].OperationNo, operation_note_list[i])
+    data = {
+    }
+    return JsonResponse(data)
+
 #-------------------------------------------------------------------- VALIDATION
 def validate_new_operation(request):
     order_no = request.GET.get('order_no')
@@ -2303,6 +2318,22 @@ def increaseQty(order_no, operation_no, amount):
     cursor.execute(sql)
     conn.commit()
     sql = "UPDATE [OperationControl] SET [ProcessQty] += '" + amount + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateOrderNote(order_no, note):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET [Note] = '"+note+"' WHERE OrderNo = '"+order_no+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateOperationNote(order_no, operation_no, note):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OperationControl] SET [Note] = '"+note+"' WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"'"
     cursor.execute(sql)
     conn.commit()
     return

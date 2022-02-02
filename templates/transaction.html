@@ -360,7 +360,7 @@
                               <div class="nav-tabs-boxed">
                                 <ul class="nav nav-tabs" role="tablist">
                                   <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note (Not Working)</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
                                 </ul>
                                 <div class="tab-content">
                                   <!-- Routing Sheet -->
@@ -424,11 +424,11 @@
                                     <table class="table table-sm table-responsive-sm table-outline text-center">
                                       <thead class="bg-darkslategray">
                                         <tr>
-                                          <th>Operation</th>
+                                          <th></th>
                                           <th class="text-right">
-                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong>
-                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong>
-                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong>
+                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_note()" id="open_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
+                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_note()" id="save_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
+                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="close_note()" id="close_note_button" hidden><strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong></button>
                                             &nbsp;
                                           </th>
                                         </tr>
@@ -436,12 +436,12 @@
                                       <tbody>
                                         <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                           <td>Order</td>
-                                          <td><textarea class="form-control" name="name" rows="2" cols="80" readonly>ตัวอย่างข้อความ</textarea></td>
+                                          <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_0" readonly>{{order.Note|default_if_none:""}}</textarea></td>
                                         </tr>
                                         {% for item in operationList %}
                                         <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                          <td>{{item.OperationNo}}<br>{{item.WorkCenterNo}}</td>
-                                          <td><textarea class="form-control" name="name" rows="2" cols="80" readonly>ตัวอย่างข้อความ</textarea></td>
+                                          <td><strong>{{item.OperationNo}}</strong><br>{{item.WorkCenterNo}}</td>
+                                          <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_{{forloop.counter}}" readonly>{{item.Note|default_if_none:""}}</textarea></td>
                                         </tr>
                                         {% endfor %}
                                       </tbody>
@@ -584,7 +584,7 @@
                                 ">?
                                 </a>
                                 <div class="card-header-actions">
-                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 or canMP or operation.WorkCenterNo.strip == 'STD' %}
+                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 or canMP or operation.WorkCenterGroup.strip == 'STD' %}
                                   <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
                                   {% endif %}
                                 </div>
@@ -1639,6 +1639,7 @@
       var isSearchingOperator = false;
       var currentWorkCenterNo = null;
       var currentOperatorId = null;
+      var operationListLength = parseInt('{{operationList|length}}');
 
       $(document).ready(function() {
         showTime();
@@ -2773,6 +2774,49 @@
         });
       }
     </script>
+    <!-- NOTE -->
+    <script>
+      function open_note(){
+        for(var i = 0;i <= operationListLength;i++){
+          $("#note_" + i).prop("readonly", false);
+        }
+        $("#save_note_button").prop("hidden", false);
+        $("#close_note_button").prop("hidden", false);
+        $("#open_note_button").prop("hidden", true);
+      }
+
+      function close_note(){
+        for(var i = 0;i <= operationListLength;i++){
+          $("#note_" + i).prop("readonly", true);
+        }
+        $("#save_note_button").prop("hidden", true);
+        $("#close_note_button").prop("hidden", true);
+        $("#open_note_button").prop("hidden", false);
+      }
+
+      function save_note(){
+        $("#save_note_button").prop("hidden", true);
+        $("#close_note_button").prop("hidden", true);
+        var order_no = $("#order_no").val();
+        var order_note = $("#note_0").val();
+        var operation_note_list = [];
+        for(var i = 1;i <= operationListLength;i++){
+          operation_note_list.push($("#note_" + i).val());
+        }
+        $.ajax({
+          url: '/save_note/',
+          data: {
+            'order_no': order_no,
+            'order_note': order_note,
+            'operation_note_list': operation_note_list,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+    </script>
     <!-- VALIDATION -->
     <script>
       //-- VALIDATION
@@ -3117,6 +3161,7 @@
       });
     </script>
     <!-- ADMIN -->
+
     <script>
     function validate_admin_password(password, _callback){
       if(password.length < 4) _callback(false);
@@ -3167,17 +3212,17 @@
       });
     }
 
-    // function reset_all(){
-    //   $.ajax({
-    //     url: '/reset_all/',
-    //     data: {
-    //     },
-    //     dataType: 'json',
-    //     success: function (data) {
-    //       location.reload();
-    //     }
-    //   });
-    // }
+      // function reset_all(){
+      //   $.ajax({
+      //     url: '/reset_all/',
+      //     data: {
+      //     },
+      //     dataType: 'json',
+      //     success: function (data) {
+      //       location.reload();
+      //     }
+      //   });
+      // }
     </script>
   </body>
 </html>

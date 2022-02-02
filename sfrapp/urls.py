@@ -65,6 +65,8 @@ urlpatterns = [
     path('delete_operation/', views.delete_operation, name='delete_operation'),
     path('add_operation/', views.add_operation, name='add_operation'),
     path('change_operation/', views.change_operation, name='change_operation'),
+    #-- JOIN
+    path('save_note/', views.save_note, name='save_note'),
     #-- VALIDATION
     path('validate_new_operation/', views.validate_new_operation, name='validate_new_operation'),
     path('validate_routing/', views.validate_routing, name='validate_routing'),
