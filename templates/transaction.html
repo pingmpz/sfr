@@ -360,11 +360,11 @@
                               <div class="nav-tabs-boxed">
                                 <ul class="nav nav-tabs" role="tablist">
                                   <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note (Not Working)</a></li>
                                 </ul>
                                 <div class="tab-content">
                                   <!-- Routing Sheet -->
-                                  <div class="tab-pane active" id="rt-sheet-tab" role="tabpanel">
+                                  <div class="tab-pane small active" id="rt-sheet-tab" role="tabpanel">
                                     <table class="table table-sm table-responsive-sm table-outline text-center">
                                       <thead class="bg-darkslategray">
                                         <tr>
@@ -420,57 +420,28 @@
                                     </table>
                                   </div>
                                   <!-- Note -->
-                                  <div class="tab-pane" id="note-tab" role="tabpanel">
-                                    Note
+                                  <div class="tab-pane small" id="note-tab" role="tabpanel">
                                     <table class="table table-sm table-responsive-sm table-outline text-center">
                                       <thead class="bg-darkslategray">
                                         <tr>
-                                          <th>
-                                            Status
-                                            <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
-                                            data-content="
-                                            <strong class='text-success'>COMPLETED</strong><br>
-                                            <strong class='text-primary'>JOINING</strong><br>
-                                            <strong class='text-warning'>WORKING</strong><br>
-                                            <strong class='text-info'>READY</strong><br>
-                                            <strong class='text-overtime'>OVERTIME</strong><br>
-                                            <strong class='text-danger'>ERROR</strong><br>
-                                            <strong class='text-dark'>CLOSED</strong><br>
-                                            ">?
-                                            </a>
+                                          <th>Operation</th>
+                                          <th class="text-right">
+                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong>
+                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong>
+                                            &nbsp;<strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong>
+                                            &nbsp;
                                           </th>
-                                          <th>Operation No</th>
-                                          <th>Work Center</th>
-                                          <th></th>
                                         </tr>
                                       </thead>
                                       <tbody>
+                                        <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                          <td>Order</td>
+                                          <td><textarea class="form-control" name="name" rows="2" cols="80" readonly>ตัวอย่างข้อความ</textarea></td>
+                                        </tr>
                                         {% for item in operationList %}
                                         <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                          <td>
-                                            {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-overtime" style="padding-top:5px;"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
-                                            {% endif %}
-                                          </td>
-                                          <td>
-                                            {% if item.OperationNo != operationNo %}
-                                            <a href="/transaction/{{orderNo}}{{item.OperationNo}}">{{item.OperationNo}}</a>
-                                            {% else %}
-                                            {{item.OperationNo}}
-                                            {% endif %}
-                                          </td>
-                                          <td>{{item.WorkCenterNo|default_if_none:""}}</td>
-                                          <td>
-                                            {% if item.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
-                                            {% elif item.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
-                                            {% elif item.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
-                                            {% endif %}
-                                          </td>
+                                          <td>{{item.OperationNo}}<br>{{item.WorkCenterNo}}</td>
+                                          <td><textarea class="form-control" name="name" rows="2" cols="80" readonly>ตัวอย่างข้อความ</textarea></td>
                                         </tr>
                                         {% endfor %}
                                       </tbody>
@@ -613,7 +584,7 @@
                                 ">?
                                 </a>
                                 <div class="card-header-actions">
-                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 or canMP %}
+                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 or canMP or operation.WorkCenterNo.strip == 'STD' %}
                                   <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
                                   {% endif %}
                                 </div>
