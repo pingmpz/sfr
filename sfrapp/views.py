@@ -1280,6 +1280,7 @@ def mpa(request):
 
 def reset_order(request):
     order_no = request.GET.get('order_no')
+    start_operation_no = request.GET.get('start_operation_no')
     conn = get_connection()
     cursor = conn.cursor()
     sql = " DELETE FROM OperatingOperator WHERE OrderNo = "+order_no+" "
@@ -1295,7 +1296,7 @@ def reset_order(request):
     sql += " DELETE FROM OperationControl WHERE OrderNo = "+order_no+" "
     sql += " DELETE FROM PartialLotTraveller WHERE OrderNo = "+order_no+" "
     sql += " DELETE FROM SFR2SAP_Report WHERE ProductionOrderNo = "+order_no+" "
-    sql += " DELETE FROM SFR2SAP_Modifier WHERE OrderNo = "+order_no+" "
+    sql += " DELETE SAP_Routing WHERE ProductionOrderNo = '"+order_no+"' AND OperationNumber < " + str(start_operation_no)
     cursor.execute(sql)
     conn.commit()
     data = {
