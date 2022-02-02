@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -112,8 +113,8 @@
                         <tbody>
                           {% for ht in historyTransList %}
                           <tr>
-                            <td>{{ht.StartDateTime}}</td>
-                            <td>{{ht.StopDateTime}}</td>
+                            <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td>{{ht.StopDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{ht.Setup}}</td>
                             <td>{{ht.Oper}}</td>
                             <td>{{ht.Labor}}</td>
