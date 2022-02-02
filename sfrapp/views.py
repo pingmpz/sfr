@@ -107,7 +107,10 @@ def transaction(request, orderoprno):
                     elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
                         operationStatusList.append("JOINING")
                     elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
-                        operationStatusList.append("WORKING")
+                        if(isOvertimeOperation(orderNo, operationList[i].OperationNo)):
+                            operationStatusList.append("OVERTIME")
+                        else:
+                            operationStatusList.append("WORKING")
                     elif tempRemainQty > 0:
                         operationStatusList.append("READY")
                     else:
@@ -262,17 +265,17 @@ def emp(request, empid, fmonth):
 def working_order(request):
     workingOrderList = getWorkingOrderList()
     currentOperationList = []
-    for order in workingOrderList:
-        operationList = getOperationList(order.OrderNo)
-        #-- GET OPERATION WITH REMAINING QTY > 0
-        if len(operationList) > 0:
-            for i in range(len(operationList)):
-                tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                if tempRemainQty > 0:
-                    currentOperationList.append(operationList[i])
-                    break
-        else:
-            currentOperationList.append(None)
+    # for order in workingOrderList:
+    #     operationList = getOperationList(order.OrderNo)
+    #     #-- GET OPERATION WITH REMAINING QTY > 0
+    #     if len(operationList) > 0:
+    #         for i in range(len(operationList)):
+    #             tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+    #             if tempRemainQty > 0:
+    #                 currentOperationList.append(operationList[i])
+    #                 break
+    #     else:
+    #         currentOperationList.append(None)
     context = {
         'workingOrderList': workingOrderList,
         'currentOperationList': currentOperationList,

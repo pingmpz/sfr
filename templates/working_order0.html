@@ -18,7 +18,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Working Work Center | Shopfloor Reporting Application</title>
+    <title>Working Production Order | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -43,7 +43,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Working Work Center ({{workingWorkCenterList|length}})</li>
+            <li class="breadcrumb-item">Working Production Order ({{workingOrderList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
@@ -61,38 +61,43 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="working_wc_table" style="table-layout: fixed;">
+                      <table class="table table-sm table-outline small" id="working_order_table">
                         <thead class="thead-light">
                           <tr>
-                            <th>Work Center</th>
-                            <th>Work Center Name</th>
-                            <th>Work Center Group</th>
-                            <th>Machine Type</th>
-                            <th>Status</th>
-                            <th>Prod. Order - Oper. No</th>
+                            <th>Production Order No - Current Operation No</th>
+                            <th>Current Work Center</th>
+                            <th>FG-MaterialCode</th>
+                            <th>Joining To..</th>
+                            <th>Partial Lot # Time</th>
                             <th>Start Date Time</th>
                             <th>Duration</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for workCenter in workingWorkCenterList %}
-                          <tr class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% endif %}">
-                            <td><a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a></td>
-                            <td>{{workCenter.WorkCenterName}}</td>
-                            <td>{{workCenter.WorkCenterGroup}}</td>
-                            <td>{{workCenter.MachineType|default_if_none:""}}</td>
-                            <td>
-                              <strong>
-                              {% if workCenter.Status == 'WORKING' %}<span class="text-success">Working</span>
-                              {% elif workCenter.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
-                              {% elif workCenter.Status == 'WAITING' %}<span class="text-dark">Waiting</span>
-                              {% else %}{{workCenter.Status}}{% endif %}
-                              </strong>
+                          {% for order in workingOrderList %}
+                          <tr>
+                            <td><a href="/transaction/{{order.OrderNo}}{{currentOperationList|index:forloop.counter0|index:1}}">
+                              {{order.OrderNo}}-{{currentOperationList|index:forloop.counter0|index:1}}</a>
                             </td>
-                            <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
-                            <td data-order="{{workCenter.StartDateTime|date:"U"}}">{{workCenter.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
-                          </tr>
+                            <td>
+                              {% if currentOperationList|index:forloop.counter0|index:22 %}<i class="c-icon c-icon-sm cil-external-link"></i>
+                              {% elif currentOperationList|index:forloop.counter0|index:21 == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
+                              {% elif currentOperationList|index:forloop.counter0|index:21 == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
+                              {% endif %}
+                              &nbsp;&nbsp;
+                              <a href="/wc/{{currentOperationList|index:forloop.counter0|index:2}}&NOW">{{currentOperationList|index:forloop.counter0|index:2}}</a>
+                            </td>
+                            <td>{{order.FG_MaterialCode}}</td>
+                            <td>
+                              {% if currentOperationList|index:forloop.counter0|index:8 != None %}
+                              {{currentOperationList|index:forloop.counter0|index:8}}-{{currentOperationList|index:forloop.counter0|index:9}}
+                              {% endif %}
+                            </td>
+                            <td>
+                              {% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}
+                            </td>
+                            <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>
+                            <td>{{order.ProcessStart|naturaltime}}</td>
                           {% endfor %}
                         </tbody>
                       </table>
@@ -127,8 +132,8 @@
       });
 
       $(document).ready(function() {
-        $('#working_wc_table').DataTable( {
-            "order": [[ 6, "asc" ]],
+        $('#working_order_table').DataTable( {
+            "order": [[ 5, "asc" ]],
             'iDisplayLength': 100,
         });
       });

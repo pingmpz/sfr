@@ -76,7 +76,7 @@
                         </thead>
                         <tbody>
                           {% for operator in workingOperatorList %}
-                          <tr>
+                          <tr class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% endif %}">
                             <td><a href="/emp/{{operator.EmpID}}&NOW">{{operator.EmpID}}</a></td>
                             <td>{{operator.EmpName}}</td>
                             <td>{{operator.Section}}</td>

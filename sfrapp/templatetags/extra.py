@@ -1,4 +1,7 @@
 from django import template
+import datetime
+from django.utils import timezone
+
 register = template.Library()
 
 @register.filter
@@ -31,3 +34,7 @@ def replace(value, arg):
 @register.filter
 def modulo(num, val):
     return num % val
+
+@register.filter
+def hours_ago(time, hours):
+    return time + datetime.timedelta(hours=hours) < datetime.datetime.now()
