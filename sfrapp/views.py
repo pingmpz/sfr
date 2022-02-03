@@ -271,15 +271,23 @@ def working_order(request):
 
 def working_wc(request):
     workingWorkCenterList = getWorkingWorkCenterList()
+    operationNoteList = []
+    for owc in workingWorkCenterList:
+        operationNoteList.append(getOperation(owc.OrderNo, owc.OperationNo).Note)
     context = {
         'workingWorkCenterList': workingWorkCenterList,
+        'operationNoteList' : operationNoteList,
     }
     return render(request, 'working_wc.html', context)
 
 def working_emp(request):
     workingOperatorList = getWorkingOperatorList()
+    operationNoteList = []
+    for oopr in workingOperatorList:
+        operationNoteList.append(getOperation(oopr.OrderNo, oopr.OperationNo).Note)
     context = {
         'workingOperatorList': workingOperatorList,
+        'operationNoteList' : operationNoteList,
     }
     return render(request, 'working_emp.html', context)
 

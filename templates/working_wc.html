@@ -67,9 +67,9 @@
                             <th>Work Center</th>
                             <th>Work Center Name</th>
                             <th>Work Center Group</th>
-                            <th>Machine Type</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
+                            <th>Note</th>
                             <th>Start Date Time</th>
                             <th>Duration</th>
                           </tr>
@@ -80,7 +80,6 @@
                             <td><a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a></td>
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
-                            <td>{{workCenter.MachineType|default_if_none:""}}</td>
                             <td>
                               <strong>
                               {% if workCenter.Status == 'WORKING' %}<span class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% else %}text-success{% endif %}">
@@ -94,6 +93,7 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
+                            <td>{{operationNoteList|index:forloop.counter0|default_if_none:""}}</td>
                             <td data-order="{{workCenter.StartDateTime|date:"U"}}">{{workCenter.StartDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
