@@ -83,8 +83,12 @@
                             <td>{{workCenter.MachineType|default_if_none:""}}</td>
                             <td>
                               <strong>
-                              {% if workCenter.Status == 'WORKING' %}<span class="text-success">Working</span>
-                              {% elif workCenter.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
+                              {% if workCenter.Status == 'WORKING' %}<span class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% else %}text-success{% endif %}">
+                                Working {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                              </span>
+                              {% elif workCenter.Status == 'SETUP' %}<span class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% else %}text-yellowgreen{% endif %}">
+                                Setup {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                              </span>
                               {% elif workCenter.Status == 'WAITING' %}<span class="text-dark">Waiting</span>
                               {% else %}{{workCenter.Status}}{% endif %}
                               </strong>

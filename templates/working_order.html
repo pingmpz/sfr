@@ -64,10 +64,9 @@
                       <table class="table table-sm table-outline small" id="working_order_table">
                         <thead class="thead-light">
                           <tr>
-                            <th>Production Order No - Current Operation No</th>
-                            <th>Current Work Center</th>
+                            <th>Production Order No</th>
                             <th>FG-MaterialCode</th>
-                            <th>Joining To..</th>
+                            <th>Order Note</th>
                             <th>Partial Lot # Time</th>
                             <th>Start Date Time</th>
                             <th>Duration</th>
@@ -76,26 +75,10 @@
                         <tbody>
                           {% for order in workingOrderList %}
                           <tr>
-                            <td><a href="/transaction/{{order.OrderNo}}{{currentOperationList|index:forloop.counter0|index:1}}">
-                              {{order.OrderNo}}-{{currentOperationList|index:forloop.counter0|index:1}}</a>
-                            </td>
-                            <td>
-                              {% if currentOperationList|index:forloop.counter0|index:22 %}<i class="c-icon c-icon-sm cil-external-link"></i>
-                              {% elif currentOperationList|index:forloop.counter0|index:21 == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
-                              {% elif currentOperationList|index:forloop.counter0|index:21 == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
-                              {% endif %}
-                              &nbsp;&nbsp;
-                              <a href="/wc/{{currentOperationList|index:forloop.counter0|index:2}}&NOW">{{currentOperationList|index:forloop.counter0|index:2}}</a>
-                            </td>
+                            <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
                             <td>{{order.FG_MaterialCode}}</td>
-                            <td>
-                              {% if currentOperationList|index:forloop.counter0|index:8 != None %}
-                              {{currentOperationList|index:forloop.counter0|index:8}}-{{currentOperationList|index:forloop.counter0|index:9}}
-                              {% endif %}
-                            </td>
-                            <td>
-                              {% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}
-                            </td>
+                            <td>{{order.Note|default_if_none:""}}</td>
+                            <td>{% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}</td>
                             <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>
                             <td>{{order.ProcessStart|naturaltime}}</td>
                           {% endfor %}

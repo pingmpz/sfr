@@ -82,8 +82,14 @@
                             <td>{{operator.Section}}</td>
                             <td>
                               <strong>
-                              {% if operator.Status == 'WORKING' %}<span class="text-success">Working</span>
-                              {% elif operator.Status == 'SETUP' %}<span class="text-yellowgreen">Setup</span>
+                              {% if operator.Status == 'WORKING' %}
+                              <span class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% else %}text-success{% endif %}">
+                                Working {% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}(Overtime){% endif %}
+                              </span>
+                              {% elif operator.Status == 'SETUP' %}
+                              <span class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% else %}text-yellowgreen{% endif %}">
+                                Setup {% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}(Overtime){% endif %}
+                              </span>
                               {% elif operator.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
                               {% else %}{{operator.OOPRStatus}}{% endif %}
                               </strong>

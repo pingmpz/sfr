@@ -28,11 +28,6 @@
     <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
-    <style media="screen">
-      .text-overtime {
-        color:#ff5419;
-      }
-    </style>
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -376,7 +371,7 @@
                                             <strong class='text-primary'>JOINING</strong><br>
                                             <strong class='text-warning'>WORKING</strong><br>
                                             <strong class='text-info'>READY</strong><br>
-                                            <strong class='text-overtime'>OVERTIME</strong><br>
+                                            <strong class='text-orangered'>OVERTIME</strong><br>
                                             <strong class='text-danger'>ERROR</strong><br>
                                             <strong class='text-dark'>CLOSED</strong><br>
                                             ">?
@@ -395,7 +390,7 @@
                                             {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
                                             {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
                                             {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-overtime" style="padding-top:5px;"></i>
+                                            {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;"></i>
                                             {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
                                             {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
                                             {% endif %}
