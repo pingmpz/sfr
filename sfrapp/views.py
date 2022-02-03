@@ -271,23 +271,15 @@ def working_order(request):
 
 def working_wc(request):
     workingWorkCenterList = getWorkingWorkCenterList()
-    operationNoteList = []
-    for owc in workingWorkCenterList:
-        operationNoteList.append(getOperation(owc.OrderNo, owc.OperationNo).Note)
     context = {
         'workingWorkCenterList': workingWorkCenterList,
-        'operationNoteList' : operationNoteList,
     }
     return render(request, 'working_wc.html', context)
 
 def working_emp(request):
     workingOperatorList = getWorkingOperatorList()
-    operationNoteList = []
-    for oopr in workingOperatorList:
-        operationNoteList.append(getOperation(oopr.OrderNo, oopr.OperationNo).Note)
     context = {
         'workingOperatorList': workingOperatorList,
-        'operationNoteList' : operationNoteList,
     }
     return render(request, 'working_emp.html', context)
 
@@ -1484,16 +1476,18 @@ def getWorkingOrderList():
 def getWorkingWorkCenterList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
     sql += " WHERE Status <> 'COMPLETED' ORDER BY OWC.OperatingWorkCenterID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getWorkingOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo "
+    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note "
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
     sql += " WHERE OOPR.Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()

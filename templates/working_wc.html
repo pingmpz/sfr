@@ -93,7 +93,7 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
-                            <td>{{operationNoteList|index:forloop.counter0|default_if_none:""}}</td>
+                            <td>{{workCenter.Note|default_if_none:""}}</td>
                             <td data-order="{{workCenter.StartDateTime|date:"U"}}">{{workCenter.StartDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
