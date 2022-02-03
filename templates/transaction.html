@@ -1400,13 +1400,13 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right">
                         <strong>Reason</strong>
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>Rejected quantity will not be reported to SAP.</u><br> - PARTIAL AT SAP">!</a>
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>PARTIAL AT SAP</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-8">
                         <select class="form-control" id="reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}*{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -1529,13 +1529,13 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right">
                         <strong>Reason</strong>
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>Rejected quantity will not be reported to SAP.</u><br> - PARTIAL AT SAP">!</a>
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>PARTIAL AT SAP</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-8">
                         <select class="form-control" id="mp_reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}*{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %}</option>
                           {% endfor %}
                         </select>
                       </div>
