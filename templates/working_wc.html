@@ -76,19 +76,33 @@
                         </thead>
                         <tbody>
                           {% for workCenter in workingWorkCenterList %}
-                          <tr class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% endif %}">
+                          <tr class="
+                          {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
+                          {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
+                          >
                             <td><a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a></td>
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
                             <td>
                               <strong>
-                              {% if workCenter.Status == 'WORKING' %}<span class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% else %}text-success{% endif %}">
+                              {% if workCenter.Status == 'WORKING' %}
+                              <span class="
+                              {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning
+                              {% else %}text-success{% endif %}"
+                              >
                                 Working {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
-                              {% elif workCenter.Status == 'SETUP' %}<span class="{% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger{% else %}text-yellowgreen{% endif %}">
+                              {% elif workCenter.Status == 'SETUP' %}
+                              <span class="
+                              {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning
+                              {% else %}text-yellowgreen{% endif %}"
+                              >
                                 Setup {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
-                              {% elif workCenter.Status == 'WAITING' %}<span class="text-dark">Waiting</span>
+                              {% elif workCenter.Status == 'WAITING' %}
+                              <span class="text-dark">Waiting</span>
                               {% else %}{{workCenter.Status}}{% endif %}
                               </strong>
                             </td>

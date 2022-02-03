@@ -77,19 +77,30 @@
                         </thead>
                         <tbody>
                           {% for operator in workingOperatorList %}
-                          <tr class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% endif %}">
+                          <tr class="
+                          {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:12 %}text-danger
+                          {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
+                          >
                             <td><a href="/emp/{{operator.EmpID}}&NOW">{{operator.EmpID}}</a></td>
                             <td>{{operator.EmpName}}</td>
                             <td>{{operator.Section}}</td>
                             <td>
                               <strong>
                               {% if operator.Status == 'WORKING' %}
-                              <span class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% else %}text-success{% endif %}">
-                                Working {% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}(Overtime){% endif %}
+                              <span class="
+                              {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:10 %}text-warning
+                              {% else %}text-success{% endif %}"
+                              >
+                                Working {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
                               {% elif operator.Status == 'SETUP' %}
-                              <span class="{% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}text-danger{% else %}text-yellowgreen{% endif %}">
-                                Setup {% if operator.StartDateTime|hours_ago:12 and operator.Status != 'EXT-WORK' %}(Overtime){% endif %}
+                              <span class="
+                              {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:10 %}text-warning
+                              {% else %}text-yellowgreen{% endif %}"
+                              >
+                                Setup {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
                               {% elif operator.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
                               {% else %}{{operator.OOPRStatus}}{% endif %}
