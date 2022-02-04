@@ -2194,47 +2194,53 @@
                           $("#mp_invalid_text").text("Start Time >= Stop Time.");
                         } else {
                           valid_many(["mp_start_time","mp_stop_time"]);
-                          if(remain_qty < good_qty + reject_qty){
-                            invalid_many(["mp_good_qty","mp_reject_qty"]);
-                            $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+                          if(stop_time > Date.now()){
+                            invalid_many(["mp_stop_time"]);
+                            $("#mp_invalid_text").text("Stop Time > Present.");
                           } else {
-                            valid_many(["mp_good_qty","mp_reject_qty"]);
-                            if(reject_qty > 0 && reject_reason == -1){
-                              invalid("mp_reject_reason");
-                              $("#mp_invalid_text").text("Please select reject reason.");
+                            valid_many(["mp_stop_time"]);
+                            if(remain_qty < good_qty + reject_qty){
+                              invalid_many(["mp_good_qty","mp_reject_qty"]);
+                              $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
                             } else {
-                              valid("mp_reject_reason");
-                              if(reject_reason == "OTHER" && other_reason == ""){
-                                invalid("mp_other_reason");
-                                $("#mp_invalid_text").text("Please fill reason in other reason field.");
+                              valid_many(["mp_good_qty","mp_reject_qty"]);
+                              if(reject_qty > 0 && reject_reason == -1){
+                                invalid("mp_reject_reason");
+                                $("#mp_invalid_text").text("Please select reject reason.");
                               } else {
-                                valid("mp_other_reason");
-                                if(other_reason.includes("|")){
+                                valid("mp_reject_reason");
+                                if(reject_reason == "OTHER" && other_reason == ""){
                                   invalid("mp_other_reason");
-                                  $("#mp_invalid_text").text("character | is not allow to use.");
+                                  $("#mp_invalid_text").text("Please fill reason in other reason field.");
                                 } else {
                                   valid("mp_other_reason");
-                                  if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0){
-                                    invalid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                    $("#mp_invalid_text").text("At least one value need to be more than 0.");
+                                  if(other_reason.includes("|")){
+                                    invalid("mp_other_reason");
+                                    $("#mp_invalid_text").text("character | is not allow to use.");
                                   } else {
-                                    valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                    if(labor_time > 9999){
-                                      invalid("mp_labor_time");
-                                      $("#mp_invalid_text").text("Labor Time is too large.");
+                                    valid("mp_other_reason");
+                                    if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0){
+                                      invalid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                      $("#mp_invalid_text").text("At least one value need to be more than 0.");
                                     } else {
-                                      valid("mp_labor_time");
-                                      if(setup_time > 9999){
-                                        invalid("mp_setup_time");
-                                        $("#mp_invalid_text").text("Setup Time is too large.");
+                                      valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                      if(labor_time > 9999){
+                                        invalid("mp_labor_time");
+                                        $("#mp_invalid_text").text("Labor Time is too large.");
                                       } else {
-                                        valid("mp_setup_time");
-                                        if(operate_time > 9999){
-                                          invalid("mp_operate_time");
-                                          $("#mp_invalid_text").text("Operate Time is too large.");
+                                        valid("mp_labor_time");
+                                        if(setup_time > 9999){
+                                          invalid("mp_setup_time");
+                                          $("#mp_invalid_text").text("Setup Time is too large.");
                                         } else {
-                                          valid("mp_operate_time");
-                                          isReportable = true;
+                                          valid("mp_setup_time");
+                                          if(operate_time > 9999){
+                                            invalid("mp_operate_time");
+                                            $("#mp_invalid_text").text("Operate Time is too large.");
+                                          } else {
+                                            valid("mp_operate_time");
+                                            isReportable = true;
+                                          }
                                         }
                                       }
                                     }

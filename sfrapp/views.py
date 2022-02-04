@@ -1475,7 +1475,7 @@ def getWorkingOrderList():
 
 def getWorkingWorkCenterList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql = "SELECT OWC.WorkCenterNo AS WCN, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " LEFT JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
     sql += " WHERE Status <> 'COMPLETED' ORDER BY OWC.OperatingWorkCenterID ASC"
     cursor.execute(sql)
@@ -1884,7 +1884,7 @@ def setOrderControlFromSAP(order_no):
         ReleaseDate = "CONVERT(DATETIME,'"+order.ReleaseDate+"',104)"
     cursor = conn.cursor()
     sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP]) VALUES "
-    sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName+"','"+order.SalesOrderNo+"',"
+    sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName.replace("'", " ")+"','"+order.SalesOrderNo+"',"
     sql += SalesOrderNo+","+str(order.SalesOrderQuantity)+","+str(order.ProductionOrderQuatity)+",'"+order.FG_MaterialCode+"','"+order.RM_MaterialCode+"',"
     sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+order.AeroSpace+"',"
     sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"')"

@@ -80,7 +80,7 @@
                           {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
                           {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
                           >
-                            <td><a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a></td>
+                            <td><a href="/wc/{{workCenter.WCN}}&NOW">{{workCenter.WCN}}</a></td>
                             <td>{{workCenter.WorkCenterName}}</td>
                             <td>{{workCenter.WorkCenterGroup}}</td>
                             <td>
