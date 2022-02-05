@@ -252,10 +252,14 @@ def emp(request, empid, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     historyTransList = getEmployeeHistoryTransactionList(empid, month, year)
+    historyConfirmList = getEmployeeHistoryConfirmList(empid, month, year)
+    historyOvertimeList = getEmployeeHistoryOvertimeList(empid, month, year)
     context = {
         'employee': employee,
         'fmonth': fmonth,
         'historyTransList': historyTransList,
+        'historyConfirmList': historyConfirmList,
+        'historyOvertimeList': historyOvertimeList,
     }
     return render(request, 'emp.html', context)
 
@@ -671,7 +675,7 @@ def stop_work_operating_operator(request):
     id = request.GET.get('id')
     oopr = getOperatorOperatingByID(id)
     status = oopr.OperatorStatus
-    type = "OPERATE"
+    type = "WORKING"
     #-- OPERATOR : SAVE WORKING TIME
     updateOperatingOperator(id, "COMPLETED")
     #-- SAP : WORKING TIME
@@ -713,7 +717,7 @@ def stop_operating_workcenter(request):
     if int(worktimeMachine) > 0:
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
-    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE", 0, worktimeMachine, 0, owc.StartDateTime, owc.StopDateTime)
+    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING", 0, worktimeMachine, 0, owc.StartDateTime, owc.StopDateTime)
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(owc.OrderNo, owc.OperationNo)
     data = {
@@ -796,7 +800,7 @@ def confirm(request):
                     if int(worktimeMachine) > 0:
                         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                     #-- WORKCENTER : OPERATING TIME LOG
-                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
+                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
             #-- CLEAR ALL CONTROL DATA
             deleteAllOperatingData(orderNo, operationNo)
             #-- STOP OPERATION
@@ -885,7 +889,7 @@ def manual_report(request):
                         if int(worktimeMachine) > 0:
                             insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                         #-- WORKCENTER : OPERATING TIME LOG
-                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "OPERATE",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
+                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
                 #-- CLEAR ALL CONTROL DATA
                 deleteAllOperatingData(order_no, operation_no)
                 #-- STOP OPERATION
@@ -1583,11 +1587,19 @@ def getWorkCenterHistoryTransactionList(work_center_no, month, year):
 
 def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] as HO"
-    sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
-    sql += " INNER JOIN [Employee] AS EMP ON HO.EmpID = EMP.EmpID"
-    sql += " INNER JOIN [WorkCenter] AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE HO.EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql = "SELECT * FROM [HistoryOperate] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getEmployeeHistoryConfirmList(emp_id, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [HistoryConfirm] WHERE EmpID = '"+emp_id+"' AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getEmployeeHistoryOvertimeList(emp_id, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeOperator] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
