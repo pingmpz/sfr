@@ -62,7 +62,6 @@ def transaction(request, orderoprno):
         else:
             state = "NOOPERATIONFOUND"
             if isExistOrder(orderNo) == False:
-                printString(orderNo + " (1st Time)")
                 setDataFromSAP(orderNo)
             order = getOrder(orderNo)
             operationList = getOperationList(orderNo)
@@ -1101,7 +1100,6 @@ def save_note(request):
     operationList = getOperationList(order_no)
     updateOrderNote(order_no, order_note)
     for i in range(len(operationList)):
-        printString(operationList[i].OperationNo)
         updateOperationNote(order_no, operationList[i].OperationNo, operation_note_list[i])
     data = {
     }
