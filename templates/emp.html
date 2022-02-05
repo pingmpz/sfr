@@ -127,7 +127,12 @@
                                   <td>{%if ht.Setup != 0.00 %}{{ht.Setup}}{% endif %}</td>
                                   <td>{%if ht.Oper != 0.00 %}{{ht.Oper}}{% endif %}</td>
                                   <td>{%if ht.Labor != 0.00 %}{{ht.Labor}}{% endif %}</td>
-                                  <td>{{ht.Type}}</td>
+                                  <td>
+                                    {% if ht.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
+                                    {% elif ht.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
+                                    {% elif ht.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
+                                    {% endif %}
+                                  </td>
                                   <td><a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a></td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                 </tr>
@@ -175,7 +180,11 @@
                                 {% for ht in historyOvertimeList %}
                                 <tr>
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                                  <td>{{ht.Status}}</td>
+                                  <td>
+                                    {% if ht.Status.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
+                                    {% elif ht.Status.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
+                                    {% endif %}
+                                  </td>
                                   <td><a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a></td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                 </tr>
