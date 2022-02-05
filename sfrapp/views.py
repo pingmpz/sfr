@@ -238,10 +238,12 @@ def wc(request, wcno, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     historyTransList = getWorkCenterHistoryTransactionList(wcno, month, year)
+    historyOvertimeList = getWorkCenterHistoryOvertimeList(wcno, month, year)
     context = {
         'workCenter': workCenter,
         'fmonth': fmonth,
         'historyTransList': historyTransList,
+        'historyOvertimeList': historyOvertimeList,
     }
     return render(request, 'wc.html', context)
 
@@ -1578,10 +1580,13 @@ def getHistoryJoinList(order_no, operation_no):
 
 def getWorkCenterHistoryTransactionList(work_center_no, month, year):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] as HO"
-    sql += " INNER JOIN [OperationControl] AS OC ON HO.OrderNo = OC.OrderNo AND HO.OperationNo = OC.OperationNo"
-    sql += " LEFT JOIN [Employee] AS EMP ON HO.EmpID = EMP.EmpID"
-    sql += " WHERE HO.WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql = "SELECT * FROM [HistoryOperate] WHERE WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterHistoryOvertimeList(work_center_no, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeWorkCenter] WHERE WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 

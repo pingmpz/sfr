@@ -49,7 +49,11 @@
             </li>
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-
+            <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
+            <input type="text" id="month" value="{{fmonth|slice:'5:7'}}" hidden>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
           </div>
         </div>
       </header>
@@ -139,42 +143,74 @@
                 <div class="col-md-9">
                   <div class="card">
                     <div class="card-header">
-                      <strong>History Transactions</strong>
-                      <div class="card-header-actions">
-                        <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
-                        <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
-                        <input type="text" id="month" value="{{fmonth|slice:'5:7'}}" hidden>
-                      </div>
+                      <strong>History</strong>
                     </div>
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="wc_trans_table" style="table-layout: fixed;">
-                        <thead class="thead-light">
-                          <tr>
-                            <th>StartDateTime</th>
-                            <th>EndDateTime</th>
-                            <th>Setup</th>
-                            <th>Oper</th>
-                            <th>Labor</th>
-                            <th>Type</th>
-                            <th>By EmpID</th>
-                            <th>Prod. Order - Oper.No</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for ht in historyTransList %}
-                          <tr>
-                            <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{ht.StopDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{ht.Setup}}</td>
-                            <td>{{ht.Oper}}</td>
-                            <td>{{ht.Labor}}</td>
-                            <td>{{ht.Type}}</td>
-                            <td><a href="/emp/{{ht.EmpID}}&NOW">{{ht.EmpID|default_if_none:""}}</a></td>
-                            <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
-                          </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
+                      <!-- History -->
+                      <div class="nav-tabs-boxed">
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#wc-tran-tab" role="tab">Transaction ({{historyTransList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-ot-tab" role="tab">Overtime ({{historyOvertimeList|length}})</a></li>
+                        </ul>
+                        <div class="tab-content">
+                          <!-- Transaction Tab -->
+                          <div class="tab-pane active" id="wc-tran-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="wc_tran_table" style="table-layout: fixed;">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>StartDateTime</th>
+                                  <th>EndDateTime</th>
+                                  <th>Setup</th>
+                                  <th>Oper</th>
+                                  <th>Labor</th>
+                                  <th>Type</th>
+                                  <th>By EmpID</th>
+                                  <th>Prod. Order - Oper.No</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for ht in historyTransList %}
+                                <tr>
+                                  <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                                  <td>{{ht.StopDateTime|date:"d-M-Y, H:i"}}</td>
+                                  <td>{%if ht.Setup != 0.00 %}{{ht.Setup}}{% endif %}</td>
+                                  <td>{%if ht.Oper != 0.00 %}{{ht.Oper}}{% endif %}</td>
+                                  <td>{%if ht.Labor != 0.00 %}{{ht.Labor}}{% endif %}</td>
+                                  <td>
+                                    {% if ht.Setup == 0.00 and ht.Oper == 0.00 and ht.Labor == 0.00  %}<span class="text-muted"><strong>Skip For Reporting</strong></span>
+                                    {% elif ht.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
+                                    {% elif ht.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
+                                    {% elif ht.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
+                                    {% endif %}
+                                  </td>
+                                  <td><a href="/emp/{{ht.EmpID}}&NOW">{{ht.EmpID|default_if_none:""}}</a></td>
+                                  <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Overtime Tab -->
+                          <div class="tab-pane" id="wc-ot-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="wc_ot_table" style="table-layout: fixed;">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>StartDateTime</th>
+                                  <th>Prod. Order - Oper.No</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for ht in historyOvertimeList %}
+                                <tr>
+                                  <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                                  <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -207,8 +243,12 @@
       });
 
       $(document).ready(function() {
-        $('#wc_trans_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+        $('#wc_tran_table').DataTable( {
+            "order": [[ 0, "desc" ]],
+            'iDisplayLength': 100,
+        });
+        $('#wc_ot_table').DataTable( {
+            "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
         });
       });
