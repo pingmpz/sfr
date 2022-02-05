@@ -490,9 +490,9 @@
                                 <tbody>
                                   {% for ot in overTimeOperatorList %}
                                   <tr>
-                                    <td>{{ot.EmpID}}</td>
+                                    <td><a href="/emp/{{ot.EmpID}}&NOW">{{ot.EmpID}}</a></td>
                                     {% if operation.WorkCenterType == 'Machine' %}
-                                    <td>{{ot.WorkCenterNo}}</td>
+                                    <td><a href="/wc/{{ot.WorkCenterNo}}&NOW">{{ot.WorkCenterNo}}</a></td>
                                     {% endif %}
                                     <td>
                                       {% if ot.Status == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
@@ -517,7 +517,7 @@
                                 <tbody>
                                   {% for ot in overTimeWorkCenterList %}
                                   <tr>
-                                    <td>{{ot.WorkCenterNo}}</td>
+                                    <td><a href="/wc/{{ot.WorkCenterNo}}&NOW">{{ot.WorkCenterNo}}</a></td>
                                     <td>{{ot.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   </tr>
                                   {% endfor %}
@@ -1313,8 +1313,8 @@
                       <tbody>
                         {% for confirm in historyConfirmList %}
                         <tr>
-                          <td>{{confirm.EmpID}}</td>
-                          <td>{{confirm.WorkCenterNo}}</td>
+                          <td><a href="/emp/{{confirm.EmpID}}&NOW">{{confirm.EmpID}}</a></td>
+                          <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
                           <td>{{confirm.AcceptedQty}}</td>
                           <td>{{confirm.RejectedQty}}</td>
                           <td>{{confirm.RejectReason}}</td>
