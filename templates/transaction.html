@@ -782,9 +782,9 @@
                     <div class="col-md-6">
                       <div class="card">
                         <div class="card-body small">
-                          <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> ปัญหาที่ Order <b class="text-danger">5000819146</b> โปรดติดต่อ <b>1345</b> (พี่นก) <i class="text-muted">(07-Feb-2022 11:00)</i>
+                          <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> Order ที่เคยทำ <b class="text-info">Partial</b> ไปแล้วใน SAP ติดต่อ <b>6624</b> นะครับ <i class="text-muted">(07-Feb-2022 13:30)</i>
+                          <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> Order ที่ Confirm จำนวนชิ้นงานดีไปก่อนแล้วพบว่ามีงานเสีย ให้ Reject งานเสียที่ Process ถัดไปโดยเลือกเหตุผล <b class="text-danger">SCRAP FROM PREVIOUS PROCESS</b> <i class="text-muted">(07-Feb-2022 11:50)</i>
                           <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> ขอให้ทุกแผนก ทุกกระบวนการผลิต  หยุดบันทึกการทำงาน และจำนวนชิ้นงานผ่านระบบ SAP ทุกกรณี <u>ให้ทำผ่านระบบ SFR เท่านั้น</u> หากท่านติดปัญหาการทำงานให้ติดต่อ <b>6624</b> <i class="text-muted">(03-Feb-2022 11:25)</i>
-                          <br>&nbsp;
                           <br>&nbsp;
                           <br>&nbsp;
                           <br>&nbsp;
@@ -1423,13 +1423,13 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right">
                         <strong>Reason</strong>
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>PARTIAL AT SAP</u><br>Rejected quantity will not be reported to SAP.">!</a>
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-8">
                         <select class="form-control" id="reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -1552,13 +1552,13 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right">
                         <strong>Reason</strong>
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>PARTIAL AT SAP</u><br>Rejected quantity will not be reported to SAP.">!</a>
+                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-8">
                         <select class="form-control" id="mp_reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'PARTIAL AT SAP' %}***{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %}</option>
                           {% endfor %}
                         </select>
                       </div>

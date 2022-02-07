@@ -770,7 +770,7 @@ def confirm(request):
             workcenter = getOperation(orderNo, operationNo).WorkCenterNo
         #-- SPECIAL CASE **
         sap_reject_qty = reject_qty
-        if reject_reason == "PARTIAL AT SAP":
+        if reject_reason == "SCRAP FROM PREVIOUS PROCESS":
             sap_reject_qty = 0
         #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY
         if int(sap_reject_qty) == 0 and int(good_qty) == 0:
@@ -855,7 +855,7 @@ def manual_report(request):
                 updateOrderControl(order_no, "START")
         #-- SPECIAL CASE **
         sap_reject_qty = reject_qty
-        if reject_reason == "PARTIAL AT SAP":
+        if reject_reason == "SCRAP FROM PREVIOUS PROCESS":
             sap_reject_qty = 0
         #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY OR TIME
         if int(sap_reject_qty) == 0 and int(good_qty) == 0 and int(setup_time) == 0 and int(operate_time) == 0 and int(labor_time) == 0:
