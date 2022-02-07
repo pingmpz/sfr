@@ -121,7 +121,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyTransList %}
-                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
+                                <tr>
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{{ht.StopDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{%if ht.Setup != 0.00 %}{{ht.Setup}}{% endif %}</td>
@@ -155,7 +155,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyConfirmList %}
-                                <tr style="background-color:#f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:10}}">
+                                <tr>
                                   <td>{{ht.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{%if ht.AcceptedQty != 0.00 %}{{ht.AcceptedQty}}{% endif %}</td>
                                   <td>{%if ht.RejectedQty != 0.00 %}{{ht.RejectedQty}}{% endif %}</td>
@@ -186,7 +186,7 @@
                                     {% elif ht.Status.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
                                     {% endif %}
                                   </td>
-                                  <td><a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a></td>
+                                  <td>{% if ht.WorkCenterNo != "-1" %}<a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a>{% endif %}</td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                 </tr>
                                 {% endfor %}
