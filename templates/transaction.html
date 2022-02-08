@@ -702,6 +702,13 @@
                         {% if operation.ProcessQty != 0 %}
                           <div class="col-md-12">
                             <div class="card text-white bg-success text-center">
+                              <div class="card-header">
+                                <div class="card-header-actions">
+                                  {% if canMP %}
+                                  <button class="btn btn-sm btn-link text-white small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
+                                  {% endif %}
+                                </div>
+                              </div>
                               <div class="card-body text-center">
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
@@ -1544,7 +1551,7 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="number" id="mp_good_qty" autocomplete="off">
+                        <input class="form-control" type="number" id="mp_good_qty" autocomplete="off" {% if operation.ProcessStop != None %}readonly{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -1552,7 +1559,7 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="number" id="mp_reject_qty" autocomplete="off">
+                        <input class="form-control" type="number" id="mp_reject_qty" autocomplete="off" {% if operation.ProcessStop != None %}readonly{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -1563,7 +1570,7 @@
                         <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-8">
-                        <select class="form-control" id="mp_reject_reason">
+                        <select class="form-control" id="mp_reject_reason" {% if operation.ProcessStop != None %}readonly{% endif %}>
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
                           <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %}</option>
