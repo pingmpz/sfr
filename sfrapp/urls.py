@@ -11,6 +11,7 @@ urlpatterns = [
     path('index/', views.index, name='index'),
     path('transaction/<str:orderoprno>', views.transaction, name='transaction'),
     path('join_activity/<str:orderoprno>', views.join_activity, name='join_activity'),
+    path('lot_traveller/<str:orderno>&<str:lotno>', views.lot_traveller, name='lot_traveller'),
     #-- MASTER
     path('wc_master/', views.wc_master, name='wc_master'),
     path('emp_master/', views.emp_master, name='emp_master'),
@@ -26,7 +27,7 @@ urlpatterns = [
     path('working_wc/', views.working_wc, name='working_wc'),
     path('working_emp/', views.working_emp, name='working_emp'),
     #-- REPORT
-    path('lot_traveller/<str:orderno>&<str:lotno>', views.lot_traveller, name='lot_traveller'),
+    path('auto_mc_mp_ot/<str:fmonth>', views.auto_mc_mp_ot, name='auto_mc_mp_ot'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP

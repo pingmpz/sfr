@@ -185,6 +185,89 @@ def join_activity(request, orderoprno):
     }
     return render(request, 'join_activity.html', context)
 
+def lot_traveller(request, orderno, lotno):
+    orderNo = ""
+    LotNo = ""
+    order = None
+    state = ""
+    pltList = []
+    plt = None
+    operationList = []
+    operationList1 = []
+    operationList2 = []
+    operationList3 = []
+    planDayCountList1 = []
+    planDayCountList2 = []
+    planDayCountList3 = []
+    pageCount = 1
+    maxRows = 13
+    counter = 0
+    #--
+    if orderno == "0":
+        state = "FIRSTPAGE"
+    else:
+        orderNo = orderno
+        LotNo = lotno
+        if isExistOrder(orderNo) == False:
+            state = "NODATAFOUND"
+        else:
+            state = "DATAFOUND"
+            order = getOrder(orderNo)
+            operationList = getOperationList(orderNo)
+            pltList = getPTLList(orderNo)
+            #-- IF COME FROM FIRST PAGE
+            if LotNo == "-1":
+                #-- IF NEVER DO PLT GO TO 0
+                if pltList == []:
+                    return redirect('/lot_traveller/' + orderNo + "&0")
+                #-- IF EVER DO PLT GO TO LASTEST PLT
+                else:
+                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
+            #-- IF TRY TO GO TO 0 AFTER EVER DONE PLT, WILL KICK TO LASTEST PLT
+            elif LotNo == "0":
+                if pltList != []:
+                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
+            else:
+                #-- IF TRY TO GO TO # AFTER NEVER DONE PLT, WILL KICK TO 0
+                if pltList == []:
+                    return redirect('/lot_traveller/' + orderNo + "&0")
+                plt = getPTL(orderNo, LotNo)
+                for opr in operationList:
+                    if opr.OperationNo >= plt.StartOperationNo:
+                        if counter == maxRows:
+                            pageCount += 1
+                            counter = 0
+                        start_date = datetime.strptime(opr.PlanStartDate, '%Y-%m-%d')
+                        stop_date = datetime.strptime(opr.PlanFinishDate, '%Y-%m-%d')
+                        days = stop_date - start_date
+                        if pageCount == 1:
+                            operationList1.append(opr)
+                            planDayCountList1.append(days.days)
+                        elif pageCount == 2:
+                            operationList2.append(opr)
+                            planDayCountList2.append(days.days)
+                        else:
+                            operationList3.append(opr)
+                            planDayCountList3.append(days.days)
+                        counter += 1
+    context = {
+        'orderNo' : orderNo,
+        'LotNo' : LotNo,
+        'order' : order,
+        'state' : state,
+        'pltList' : pltList,
+        'plt' : plt,
+        'operationList' : operationList,
+        'operationList1' : operationList1,
+        'operationList2' : operationList2,
+        'operationList3' : operationList3,
+        'planDayCountList1': planDayCountList1,
+        'planDayCountList2': planDayCountList2,
+        'planDayCountList3': planDayCountList3,
+        'pageCount': pageCount,
+    }
+    return render(request, 'lot_traveller.html', context)
+
 #------------------------------------------------------------------------ MASTER
 
 def wc_master(request):
@@ -290,88 +373,18 @@ def working_emp(request):
 
 #------------------------------------------------------------------------ REPORT
 
-def lot_traveller(request, orderno, lotno):
-    orderNo = ""
-    LotNo = ""
-    order = None
-    state = ""
-    pltList = []
-    plt = None
-    operationList = []
-    operationList1 = []
-    operationList2 = []
-    operationList3 = []
-    planDayCountList1 = []
-    planDayCountList2 = []
-    planDayCountList3 = []
-    pageCount = 1
-    maxRows = 13
-    counter = 0
-    #--
-    if orderno == "0":
-        state = "FIRSTPAGE"
-    else:
-        orderNo = orderno
-        LotNo = lotno
-        if isExistOrder(orderNo) == False:
-            state = "NODATAFOUND"
-        else:
-            state = "DATAFOUND"
-            order = getOrder(orderNo)
-            operationList = getOperationList(orderNo)
-            pltList = getPTLList(orderNo)
-            #-- IF COME FROM FIRST PAGE
-            if LotNo == "-1":
-                #-- IF NEVER DO PLT GO TO 0
-                if pltList == []:
-                    return redirect('/lot_traveller/' + orderNo + "&0")
-                #-- IF EVER DO PLT GO TO LASTEST PLT
-                else:
-                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
-            #-- IF TRY TO GO TO 0 AFTER EVER DONE PLT, WILL KICK TO LASTEST PLT
-            elif LotNo == "0":
-                if pltList != []:
-                    return redirect('/lot_traveller/' + orderNo + "&" + str(pltList[0].LotNo))
-            else:
-                #-- IF TRY TO GO TO # AFTER NEVER DONE PLT, WILL KICK TO 0
-                if pltList == []:
-                    return redirect('/lot_traveller/' + orderNo + "&0")
-                plt = getPTL(orderNo, LotNo)
-                for opr in operationList:
-                    if opr.OperationNo >= plt.StartOperationNo:
-                        if counter == maxRows:
-                            pageCount += 1
-                            counter = 0
-                        start_date = datetime.strptime(opr.PlanStartDate, '%Y-%m-%d')
-                        stop_date = datetime.strptime(opr.PlanFinishDate, '%Y-%m-%d')
-                        days = stop_date - start_date
-                        if pageCount == 1:
-                            operationList1.append(opr)
-                            planDayCountList1.append(days.days)
-                        elif pageCount == 2:
-                            operationList2.append(opr)
-                            planDayCountList2.append(days.days)
-                        else:
-                            operationList3.append(opr)
-                            planDayCountList3.append(days.days)
-                        counter += 1
+def auto_mc_mp_ot(request, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    ReportList = []
+    # ReportList = getEmployeeHistoryTransactionList(month, year)
     context = {
-        'orderNo' : orderNo,
-        'LotNo' : LotNo,
-        'order' : order,
-        'state' : state,
-        'pltList' : pltList,
-        'plt' : plt,
-        'operationList' : operationList,
-        'operationList1' : operationList1,
-        'operationList2' : operationList2,
-        'operationList3' : operationList3,
-        'planDayCountList1': planDayCountList1,
-        'planDayCountList2': planDayCountList2,
-        'planDayCountList3': planDayCountList3,
-        'pageCount': pageCount,
+        'fmonth': fmonth,
+        'ReportList': ReportList,
     }
-    return render(request, 'lot_traveller.html', context)
+    return render(request, 'auto_mc_mp_ot.html', context)
 
 def zpp02(request):
 
