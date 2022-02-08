@@ -29,6 +29,7 @@ def transaction(request, orderoprno):
     isOperating = False
     isOvertime = False
     canMP = False
+    hasReportTime = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
     #-- Left Content List
@@ -83,6 +84,7 @@ def transaction(request, orderoprno):
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
                 canMP = isManualReportAllow()
+                hasReportTime = hasReportTimeToSAP(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
                 hasNoMoreQty = True
@@ -150,6 +152,7 @@ def transaction(request, orderoprno):
         'isOperating' : isOperating,
         'isOvertime' : isOvertime,
         'canMP' : canMP,
+        'hasReportTime' : hasReportTime,
         'remainQty' : remainQty,
         'operationList' : operationList,
         'operationStatusList' : operationStatusList,
@@ -1888,6 +1891,12 @@ def isOvertimeWorkCenter(owc_id):
 def isManualReportAllow():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'ManualReportAllowdance' AND Value = 'True' "
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def hasReportTimeToSAP(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SFR2SAP_Report] WHERE ProductionOrderNo = '"+order_no+"' AND OperationNumber = '"+operation_no+"' AND LaborTime > 0"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 

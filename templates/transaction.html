@@ -81,6 +81,7 @@
                 <input type="text" id="workcenter_type" value="{{operation.WorkCenterType}}">
                 <input type="text" id="join_list_length" value="{{joinList|length}}">
                 <input type="text" id="is_joining" value="{% if operation.JoinToOrderNo != None %}True{% else %}False{% endif %}">
+                <input type="text" id="has_report_time" value="{{hasReportTime}}">
               </div>
               <!-- Main Body -->
               {% if state == "DATAFOUND" %}
