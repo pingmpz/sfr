@@ -121,7 +121,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyTransList %}
-                                <tr>
+                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{{ht.StopDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{%if ht.Setup != 0.00 %}{{ht.Setup}}{% endif %}</td>
@@ -155,7 +155,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyConfirmList %}
-                                <tr>
+                                <tr style="background-color:#f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.ConfirmDateTime|date:'dm'|add:'0'|modulo:10}}">
                                   <td>{{ht.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>{%if ht.AcceptedQty != 0.00 %}{{ht.AcceptedQty}}{% endif %}</td>
                                   <td>{%if ht.RejectedQty != 0.00 %}{{ht.RejectedQty}}{% endif %}</td>
@@ -170,7 +170,7 @@
                           <div class="tab-pane" id="emp-ot-tab" role="tabpanel">
                             <table class="table table-sm table-outline small" id="emp_ot_table" style="table-layout: fixed;">
                               <thead class="thead-light">
-                                <tr>
+                                <tr >
                                   <th>StartDateTime</th>
                                   <th>Status</th>
                                   <th>On WorkCenter</th>
@@ -179,14 +179,14 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyOvertimeList %}
-                                <tr>
+                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td>
                                     {% if ht.Status.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
                                     {% elif ht.Status.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
                                     {% endif %}
                                   </td>
-                                  <td>{% if ht.WorkCenterNo != "-1" %}<a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a>{% endif %}</td>
+                                  <td>{% if ht.WorkCenterNo.strip != "-1" %}<a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a>{% endif %}</td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                 </tr>
                                 {% endfor %}

@@ -625,7 +625,7 @@
                                   </div>
                                   <div class="col-md-3">
                                     <button type="button" class="btn btn-pill {% if operation.IsExternalProcess %}bg-plum text-white{% else %}btn-success{% endif %}" id='operator_work_button' onclick="add_operating_operator('{% if operation.IsExternalProcess %}EXT-WORK{% else %}WORKING{% endif %}')" disabled><i class="c-icon c-icon-sm cil-power-standby"></i> Work</button>
-                                    {% if operation.WorkCenterType == 'Machine' %}
+                                    {% if operation.WorkCenterType == 'Machine' and joinList|length == 0 %}
                                     <button type="button" class="btn btn-pill bg-yellowgreen text-white" id='operator_setup_button' onclick="add_operating_operator('SETUP')" disabled><i class="c-icon c-icon-sm cil-power-standby"></i> Setup</button>
                                     {% endif %}
                                   </div>
@@ -783,6 +783,7 @@
                     <div class="col-md-6">
                       <div class="card">
                         <div class="card-body small">
+                          <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> ตางราง Overtime ดูได้ที่แถบซ้ายมือ Report > Overtime Table <i class="text-muted">(09-Feb-2022 00:45)</i>
                           <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> Order ที่เคยทำ <b class="text-info">Partial</b> ไปแล้วใน SAP ติดต่อ <b>6624</b> นะครับ <i class="text-muted">(07-Feb-2022 13:30)</i>
                           <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> Order ที่ Confirm จำนวนชิ้นงานดีไปก่อนแล้วพบว่ามีงานเสีย ให้ Reject งานเสียที่ Process ถัดไปโดยเลือกเหตุผล <b class="text-danger">SCRAP FROM PREVIOUS PROCESS</b> <i class="text-muted">(07-Feb-2022 11:50)</i>
                           <br><i class="c-icon cil-icon-sm cil-comment-bubble"></i> ขอให้ทุกแผนก ทุกกระบวนการผลิต  หยุดบันทึกการทำงาน และจำนวนชิ้นงานผ่านระบบ SAP ทุกกรณี <u>ให้ทำผ่านระบบ SFR เท่านั้น</u> หากท่านติดปัญหาการทำงานให้ติดต่อ <b>6624</b> <i class="text-muted">(03-Feb-2022 11:25)</i>
@@ -1294,9 +1295,9 @@
                             {% elif operate.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
                             {% endif %}
                           </td>
-                          <td>{{operate.Setup}}</td>
-                          <td>{{operate.Oper}}</td>
-                          <td>{{operate.Labor}}</td>
+                          <td>{%if operate.Setup != 0.00 %}{{operate.Setup}}{% endif %}</td>
+                          <td>{%if operate.Oper != 0.00 %}{{operate.Oper}}{% endif %}</td>
+                          <td>{%if operate.Labor != 0.00 %}{{operate.Labor}}{% endif %}</td>
                           <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
                           <td>{{operate.StopDateTime|date:"d-M-Y, H:i"}}</td>
                         </tr>
@@ -1323,8 +1324,8 @@
                         <tr>
                           <td><a href="/emp/{{confirm.EmpID}}&NOW">{{confirm.EmpID}}</a></td>
                           <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
-                          <td>{{confirm.AcceptedQty}}</td>
-                          <td>{{confirm.RejectedQty}}</td>
+                          <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty}}{% endif %}</td>
+                          <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty}}{% endif %}</td>
                           <td>{{confirm.RejectReason}}</td>
                           <td>{{confirm.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
                         </tr>

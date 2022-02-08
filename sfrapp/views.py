@@ -376,7 +376,21 @@ def working_emp(request):
 
 #------------------------------------------------------------------------ REPORT
 
-def auto_mc_mp_ot(request, fmonth):
+def ot_table(request, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    overtimeOperatorList = getOvertimeOperatorList(month, year)
+    overtimeWorkCenterList = getOvertimeWorkCenterList(month, year)
+    context = {
+        'fmonth': fmonth,
+        'overtimeOperatorList': overtimeOperatorList,
+        'overtimeWorkCenterList': overtimeWorkCenterList,
+    }
+    return render(request, 'ot_table.html', context)
+
+def mp_ot_auto_machine(request, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     year = fmonth[0:4]
@@ -386,7 +400,7 @@ def auto_mc_mp_ot(request, fmonth):
         'fmonth': fmonth,
         'ReportList': ReportList,
     }
-    return render(request, 'auto_mc_mp_ot.html', context)
+    return render(request, 'mp_ot_auto_machine.html', context)
 
 def zpp02(request):
 
@@ -1602,6 +1616,12 @@ def getWorkCenterHistoryOvertimeList(work_center_no, month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getOvertimeWorkCenterList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeWorkCenter] WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
@@ -1617,6 +1637,12 @@ def getEmployeeHistoryConfirmList(emp_id, month, year):
 def getEmployeeHistoryOvertimeList(emp_id, month, year):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeOperator] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOvertimeOperatorList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeOperator] WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 

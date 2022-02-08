@@ -201,7 +201,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in historyOvertimeList %}
-                                <tr>
+                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                 </tr>

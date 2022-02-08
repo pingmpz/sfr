@@ -27,7 +27,8 @@ urlpatterns = [
     path('working_wc/', views.working_wc, name='working_wc'),
     path('working_emp/', views.working_emp, name='working_emp'),
     #-- REPORT
-    path('auto_mc_mp_ot/<str:fmonth>', views.auto_mc_mp_ot, name='auto_mc_mp_ot'),
+    path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
+    path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP
