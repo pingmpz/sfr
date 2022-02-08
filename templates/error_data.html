@@ -63,34 +63,14 @@
                     <div class="card-body">
                       <div class="nav-tabs-boxed">
                         <ul class="nav nav-tabs" role="tablist">
-                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#no-rt-tab" role="tab">Order No Routing ({{oderNoRoutingList|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#dup-rt-tab" role="tab">Duplicate Routing ({{duplicateRoutingList|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-not-used-tab" role="tab">Order Not Used ({{orderNotUsedList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#dup-rt-tab" role="tab">Duplicate Routing ({{duplicateRoutingList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#no-rt-tab" role="tab">Order No Routing ({{oderNoRoutingList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-not-start-tab" role="tab">Order Not Start ({{orderNotStartList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-error-tab" role="tab">WorkCenter Error ({{workCenterErrorList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
-                          <!-- Order No Routing Tab -->
-                          <div class="tab-pane active" id="no-rt-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="no_rt_table" style="width: 100%">
-                              <thead class="thead-light">
-                                <tr>
-                                  <th>ProductionOrderNo</th>
-                                  <th>DateGetFromSAP</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for order in oderNoRoutingList %}
-                                <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
-                                  <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
-                                  <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
-                                </tr>
-                                {% endfor %}
-                              </tbody>
-                            </table>
-                          </div>
                           <!-- Duplicate Routing Tab -->
-                          <div class="tab-pane" id="dup-rt-tab" role="tabpanel">
+                          <div class="tab-pane active" id="dup-rt-tab" role="tabpanel">
                             <table class="table table-sm table-outline small" id="dup_rt_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -116,22 +96,20 @@
                               </tbody>
                             </table>
                           </div>
-                          <!-- Order Not Used Tab -->
-                          <div class="tab-pane" id="order-not-used-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="order_not_used_table" style="width: 100%">
+                          <!-- Order No Routing Tab -->
+                          <div class="tab-pane" id="no-rt-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="no_rt_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
                                   <th>ProductionOrderNo</th>
                                   <th>DateGetFromSAP</th>
-                                  <th>Duration</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {% for order in orderNotUsedList %}
+                                {% for order in oderNoRoutingList %}
                                 <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                                   <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
-                                  <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
-                                  <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
+                                  <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>

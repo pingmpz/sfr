@@ -474,14 +474,11 @@ def admin_controller(request):
 def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
-    # orderNotUsedList = getSAPOrderNotUsedList()
-    orderNotUsedList = []
     orderNotStartList = getOrderNotStartList()
     workCenterErrorList = getWorkCenterErrorList()
     context = {
         'oderNoRoutingList': oderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
-        'orderNotUsedList': orderNotUsedList,
         'orderNotStartList': orderNotStartList,
         'workCenterErrorList': workCenterErrorList,
     }
@@ -1643,12 +1640,6 @@ def getSAPDuplicateRoutingList():
             FROM SAP_Routing AS RT1 INNER JOIN SAP_Routing AS RT2 ON RT1.ProductionOrderNo = RT2.ProductionOrderNo AND RT1.OperationNumber = RT2.OperationNumber
             WHERE RT1.DateGetFromSAP < RT2.DateGetFromSAP
         """
-    cursor.execute(sql)
-    return cursor.fetchall()
-
-def getSAPOrderNotUsedList():
-    cursor = get_connection().cursor()
-    sql = "SELECT TOP (1000) OD.ProductionOrderNo, OD.DateGetFromSAP FROM SAP_Order AS OD LEFT JOIN OrderControl AS OC ON OD.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL"
     cursor.execute(sql)
     return cursor.fetchall()
 
