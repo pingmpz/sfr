@@ -2333,7 +2333,7 @@ def updateOrderLotNo(order_no):
 def updateManualReportAllowdance(status):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"' WHERE KeyText = 'ManualReportAllowdance'"
+    sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"', LastUpdate = CURRENT_TIMESTAMP WHERE KeyText = 'ManualReportAllowdance'"
     cursor.execute(sql)
     conn.commit()
     return
