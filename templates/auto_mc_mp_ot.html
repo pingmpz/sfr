@@ -42,7 +42,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Auto Machine MP OT</li>
+            <li class="breadcrumb-item">Auto Machine MP OT ({{ReportList|length}})</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
@@ -67,17 +67,25 @@
                       <table class="table table-sm table-outline small" id="auto_mc_mp_ot_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
-                            <th>#</th>
-                            <th>#</th>
-                            <th>#</th>
+                            <th>DateTimeStamp</th>
+                            <th>Prod. Order - Oper.No</th>
+                            <th>EmpID</th>
+                            <th>WorkCenter</th>
+                            <th>Setup</th>
+                            <th>Oper</th>
+                            <th>Labor</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for rp in ReportList %}
                           <tr>
-                            <td>#</td>
-                            <td>#</td>
-                            <td>#</td>
+                            <td>{{rp.DateTimeStamp|date:"d-M-Y, H:i"}}</td>
+                            <td><a href="/transaction/{{rp.OrderNo}}{{rp.OperationNo}}">{{rp.OrderNo}}-{{rp.OperationNo}}</a></td>
+                            <td><a href="/emp/{{rp.EmpID}}&NOW">{{rp.EmpID}}</a></td>
+                            <td><a href="/wc/{{rp.WorkCenterNo}}&NOW">{{rp.WorkCenterNo}}</a></td>
+                            <td>{%if rp.Setup != 0.00 %}{{rp.Setup}}{% endif %}</td>
+                            <td>{%if rp.Oper != 0.00 %}{{rp.Oper}}{% endif %}</td>
+                            <td>{%if rp.Labor != 0.00 %}{{rp.Labor}}{% endif %}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -123,7 +131,7 @@
       });
 
       $('#fmonth').change(function() {
-        window.location.href =  "/auto_mc_mp_ot_table/" + $("#fmonth").val());
+        window.location.href = "/auto_mc_mp_ot/" + $("#fmonth").val();
       });
 
     </script>

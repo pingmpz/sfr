@@ -378,8 +378,7 @@ def auto_mc_mp_ot(request, fmonth):
         fmonth = datetime.today().strftime('%Y-%m')
     year = fmonth[0:4]
     month = fmonth[5:7]
-    ReportList = []
-    # ReportList = getEmployeeHistoryTransactionList(month, year)
+    ReportList = getAutoMachineManualReportOvertimeList(month, year)
     context = {
         'fmonth': fmonth,
         'ReportList': ReportList,
@@ -1665,6 +1664,17 @@ def getWorkCenterErrorList():
 def getWorkCenterInGroupList(work_center_group):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND WorkCenterGroup = '"+work_center_group+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getAutoMachineManualReportOvertimeList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT DateTimeStamp, HO.OrderNo, HO.OperationNo, EmpID, HO.WorkCenterNo, Setup, Oper, Labor"
+    sql += " FROM HistoryOperate AS HO "
+    sql += " INNER JOIN OvertimeWorkCenter AS OTWC ON HO.OrderNo = OTWC.OrderNo AND HO.OperationNo = OTWC.OperationNo "
+    sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo "
+    sql += " WHERE Type = 'MANUAL' AND WC.MachineType = 'Auto' AND (Setup != 0 OR Oper != 0 OR Labor != 0) "
+    sql += " AND month(DateTimeStamp) = '"+month+"' AND year(DateTimeStamp) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
