@@ -75,41 +75,44 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for workCenter in workingWorkCenterList %}
+                          {% for wc in workingWorkCenterList %}
                           <tr class="
-                          {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
-                          {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
+                          {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
+                          {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
+                          {% if wc.StartDateTime != None %}
+                          style="background-color:#f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:8}}f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:9}}f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:10}}"
+                          {% endif %}
                           >
-                            <td><a href="/wc/{{workCenter.WCN}}&NOW">{{workCenter.WCN}}</a></td>
-                            <td>{{workCenter.WorkCenterName}}</td>
-                            <td>{{workCenter.WorkCenterGroup}}</td>
+                            <td><a href="/wc/{{wc.WCN}}&NOW">{{wc.WCN}}</a></td>
+                            <td>{{wc.WorkCenterName}}</td>
+                            <td>{{wc.WorkCenterGroup}}</td>
                             <td>
                               <strong>
-                              {% if workCenter.Status == 'WORKING' %}
+                              {% if wc.Status == 'WORKING' %}
                               <span class="
-                              {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
-                              {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning
+                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning
                               {% else %}text-success{% endif %}"
                               >
-                                Working {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                                Working {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
-                              {% elif workCenter.Status == 'SETUP' %}
+                              {% elif wc.Status == 'SETUP' %}
                               <span class="
-                              {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}text-danger
-                              {% elif workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:10 %}text-warning
+                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
+                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning
                               {% else %}text-yellowgreen{% endif %}"
                               >
-                                Setup {% if workCenter.StartDateTime != None and workCenter.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                                Setup {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
                               </span>
-                              {% elif workCenter.Status == 'WAITING' %}
+                              {% elif wc.Status == 'WAITING' %}
                               <span class="text-dark">Waiting</span>
-                              {% else %}{{workCenter.Status}}{% endif %}
+                              {% else %}{{wc.Status}}{% endif %}
                               </strong>
                             </td>
-                            <td><a href="/transaction/{{workCenter.OrderNo}}{{workCenter.OperationNo}}">{{workCenter.OrderNo}}-{{workCenter.OperationNo}}</a></td>
-                            <td>{{workCenter.Note|default_if_none:""}}</td>
-                            <td data-order="{{workCenter.StartDateTime|date:"U"}}">{{workCenter.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{workCenter.StartDateTime|naturaltime|default_if_none:""}}</td>
+                            <td><a href="/transaction/{{wc.OrderNo}}{{wc.OperationNo}}">{{wc.OrderNo}}-{{wc.OperationNo}}</a></td>
+                            <td>{{wc.Note|default_if_none:""}}</td>
+                            <td data-order="{{wc.StartDateTime|date:"U"}}">{{wc.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td>{{wc.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
