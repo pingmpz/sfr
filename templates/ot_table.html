@@ -84,7 +84,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in overtimeOperatorList %}
-                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
+                                <tr style="background-color:#f{{ht.StartDateTime|date:'md'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:10}}">
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td><a href="/emp/{{ht.EmpID}}&NOW">{{ht.EmpID}}</a></td>
                                   <td>
@@ -111,7 +111,7 @@
                               </thead>
                               <tbody>
                                 {% for ht in overtimeWorkCenterList %}
-                                <tr style="background-color:#f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'dm'|add:'0'|modulo:10}}">
+                                <tr style="background-color:#f{{ht.StartDateTime|date:'md'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:10}}">
                                   <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                   <td><a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a></td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>

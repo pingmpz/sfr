@@ -78,7 +78,7 @@
                         </thead>
                         <tbody>
                           {% for rp in ReportList %}
-                          <tr>
+                          <tr style="background-color:#f{{rp.DateTimeStamp|date:'md'|add:'0'|modulo:8}}f{{rp.DateTimeStamp|date:'md'|add:'0'|modulo:9}}f{{rp.DateTimeStamp|date:'md'|add:'0'|modulo:10}}">
                             <td>{{rp.DateTimeStamp|date:"d-M-Y, H:i"}}</td>
                             <td><a href="/transaction/{{rp.OrderNo}}{{rp.OperationNo}}">{{rp.OrderNo}}-{{rp.OperationNo}}</a></td>
                             <td><a href="/emp/{{rp.EmpID}}&NOW">{{rp.EmpID}}</a></td>
