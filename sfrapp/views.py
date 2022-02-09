@@ -862,7 +862,6 @@ def manual_report(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
-    password = request.GET.get('password')
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":

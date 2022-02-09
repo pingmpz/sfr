@@ -1476,14 +1476,6 @@
             <div class="modal-body">
               <div class="col-md-12">
                 <div class="row">
-                  <div class="col-md-12">
-                    <div class="form-group row">
-                      <label class="col-md-2 col-form-label text-right"><strong>Password</strong></label>
-                      <div class="col-md-10">
-                        <input class="form-control my-password" type="text" id="mp_password" autocomplete="off">
-                      </div>
-                    </div>
-                  </div>
                   <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Work Time</strong></div><div class="col-md-5"><hr></div>
                   <div class="col-md-6"  {% if operation.WorkCenterType == 'Labor' %}hidden{% endif %}>
                     <div class="form-group row">
@@ -2084,8 +2076,7 @@
       }
 
       function prepare_mp(){
-        remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
-        $('#mp_password').val("");
+        remove_valid_many(["mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
         $('#mp_emp_id').val("");
         if ($("#work_center_type") == 'Machine') $('#mp_workcenter_no').val("");
         $('#mp_labor_time').val("");
@@ -2098,7 +2089,7 @@
         $('#mp_reject_reason').val(-1);
         $('#mp_other_reason').val("");
         $("#mp_invalid_text").text("");
-        $('#mp_password').focus();
+        $('#mp_workcenter_no').focus();
         timeleft = 300;
       }
 
@@ -2179,7 +2170,6 @@
         var order_no = $("#order_no").val();
         var operation_no = $("#operation_no").val();
         var workcenter_type = $('#workcenter_type').val();
-        var password = $('#mp_password').val();
         var emp_id = $('#mp_emp_id').val();
         var workcenter_no = $('#mp_workcenter_no').val();
         var labor_time = parseFloat($('#mp_labor_time').val());
@@ -2194,89 +2184,81 @@
         var other_reason = $('#mp_other_reason').val();
         var isReportable = false;
         $("#mp_invalid_text").text("");
-        remove_valid_many(["mp_password","mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
+        remove_valid_many(["mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
         //c
-        validate_password(password, function(isCorrect, invalid_text1) {
-          if(!isCorrect){
-            invalid("mp_password");
-            $("#mp_invalid_text").text(invalid_text1);
+        validate_operator(emp_id, function(isExist, invalid_text2) {
+          if(!isExist){
+            invalid("mp_emp_id");
+            $("#mp_invalid_text").text(invalid_text2);
           } else{
-            valid("mp_password");
-            validate_operator(emp_id, function(isExist, invalid_text2) {
-              if(!isExist){
-                invalid("mp_emp_id");
-                $("#mp_invalid_text").text(invalid_text2);
+            valid("mp_emp_id");
+            validate_work_center(workcenter_no, function(canUse, invalid_text3) {
+              if(!canUse && workcenter_type != "Labor"){
+                invalid("mp_workcenter_no");
+                $("#mp_invalid_text").text(invalid_text3);
               } else{
-                valid("mp_emp_id");
-                validate_work_center(workcenter_no, function(canUse, invalid_text3) {
-                  if(!canUse && workcenter_type != "Labor"){
-                    invalid("mp_workcenter_no");
-                    $("#mp_invalid_text").text(invalid_text3);
-                  } else{
-                    valid("mp_workcenter_no");
-                    if($('#mp_start_time').val() == ""){
-                      invalid("mp_start_time");
-                      $("#mp_invalid_text").text("Please fill Start Time.");
+                valid("mp_workcenter_no");
+                if($('#mp_start_time').val() == ""){
+                  invalid("mp_start_time");
+                  $("#mp_invalid_text").text("Please fill Start Time.");
+                } else {
+                  valid("mp_start_time");
+                  if($('#mp_stop_time').val() == ""){
+                    invalid("mp_stop_time");
+                    $("#mp_invalid_text").text("Please fill Stop Time.");
+                  } else {
+                    valid("mp_stop_time");
+                    if(start_time >= stop_time){
+                      invalid_many(["mp_start_time","mp_stop_time"]);
+                      $("#mp_invalid_text").text("Start Time >= Stop Time.");
                     } else {
-                      valid("mp_start_time");
-                      if($('#mp_stop_time').val() == ""){
-                        invalid("mp_stop_time");
-                        $("#mp_invalid_text").text("Please fill Stop Time.");
+                      valid_many(["mp_start_time","mp_stop_time"]);
+                      if(stop_time > Date.now()){
+                        invalid_many(["mp_stop_time"]);
+                        $("#mp_invalid_text").text("Stop Time > Present.");
                       } else {
-                        valid("mp_stop_time");
-                        if(start_time >= stop_time){
-                          invalid_many(["mp_start_time","mp_stop_time"]);
-                          $("#mp_invalid_text").text("Start Time >= Stop Time.");
+                        valid_many(["mp_stop_time"]);
+                        if(remain_qty < good_qty + reject_qty){
+                          invalid_many(["mp_good_qty","mp_reject_qty"]);
+                          $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
                         } else {
-                          valid_many(["mp_start_time","mp_stop_time"]);
-                          if(stop_time > Date.now()){
-                            invalid_many(["mp_stop_time"]);
-                            $("#mp_invalid_text").text("Stop Time > Present.");
+                          valid_many(["mp_good_qty","mp_reject_qty"]);
+                          if(reject_qty > 0 && reject_reason == -1){
+                            invalid("mp_reject_reason");
+                            $("#mp_invalid_text").text("Please select reject reason.");
                           } else {
-                            valid_many(["mp_stop_time"]);
-                            if(remain_qty < good_qty + reject_qty){
-                              invalid_many(["mp_good_qty","mp_reject_qty"]);
-                              $("#mp_invalid_text").text("Good Qty + Reject Qty can not be more than Remaining Qty.");
+                            valid("mp_reject_reason");
+                            if(reject_reason == "OTHER" && other_reason == ""){
+                              invalid("mp_other_reason");
+                              $("#mp_invalid_text").text("Please fill reason in other reason field.");
                             } else {
-                              valid_many(["mp_good_qty","mp_reject_qty"]);
-                              if(reject_qty > 0 && reject_reason == -1){
-                                invalid("mp_reject_reason");
-                                $("#mp_invalid_text").text("Please select reject reason.");
+                              valid("mp_other_reason");
+                              if(other_reason.includes("|")){
+                                invalid("mp_other_reason");
+                                $("#mp_invalid_text").text("character | is not allow to use.");
                               } else {
-                                valid("mp_reject_reason");
-                                if(reject_reason == "OTHER" && other_reason == ""){
-                                  invalid("mp_other_reason");
-                                  $("#mp_invalid_text").text("Please fill reason in other reason field.");
+                                valid("mp_other_reason");
+                                if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0){
+                                  invalid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                  $("#mp_invalid_text").text("At least one value need to be more than 0.");
                                 } else {
-                                  valid("mp_other_reason");
-                                  if(other_reason.includes("|")){
-                                    invalid("mp_other_reason");
-                                    $("#mp_invalid_text").text("character | is not allow to use.");
+                                  valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
+                                  if(labor_time > 9999){
+                                    invalid("mp_labor_time");
+                                    $("#mp_invalid_text").text("Labor Time is too large.");
                                   } else {
-                                    valid("mp_other_reason");
-                                    if(labor_time == 0 && operate_time == 0 && setup_time == 0 && good_qty == 0 && reject_qty == 0){
-                                      invalid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                      $("#mp_invalid_text").text("At least one value need to be more than 0.");
+                                    valid("mp_labor_time");
+                                    if(setup_time > 9999){
+                                      invalid("mp_setup_time");
+                                      $("#mp_invalid_text").text("Setup Time is too large.");
                                     } else {
-                                      valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                      if(labor_time > 9999){
-                                        invalid("mp_labor_time");
-                                        $("#mp_invalid_text").text("Labor Time is too large.");
+                                      valid("mp_setup_time");
+                                      if(operate_time > 9999){
+                                        invalid("mp_operate_time");
+                                        $("#mp_invalid_text").text("Operate Time is too large.");
                                       } else {
-                                        valid("mp_labor_time");
-                                        if(setup_time > 9999){
-                                          invalid("mp_setup_time");
-                                          $("#mp_invalid_text").text("Setup Time is too large.");
-                                        } else {
-                                          valid("mp_setup_time");
-                                          if(operate_time > 9999){
-                                            invalid("mp_operate_time");
-                                            $("#mp_invalid_text").text("Operate Time is too large.");
-                                          } else {
-                                            valid("mp_operate_time");
-                                            isReportable = true;
-                                          }
-                                        }
+                                        valid("mp_operate_time");
+                                        isReportable = true;
                                       }
                                     }
                                   }
@@ -2288,31 +2270,30 @@
                       }
                     }
                   }
-                  if(isReportable){
-                    $('#mp_button').prop('disabled', true);
-                    $.ajax({
-                      url: '/manual_report/',
-                      data: {
-                        'order_no': order_no,
-                        'operation_no': operation_no,
-                        'emp_id': emp_id,
-                        'workcenter_no': workcenter_no,
-                        'labor_time': labor_time,
-                        'operate_time': operate_time,
-                        'setup_time': setup_time,
-                        'start_time': new Date(start_time).addHours(7).toISOString(),
-                        'stop_time': new Date(stop_time).addHours(7).toISOString(),
-                        'good_qty': good_qty,
-                        'reject_qty': reject_qty,
-                        'reject_reason': reject_reason,
-                        'other_reason': other_reason,
-                        'password': password,
-                      },
-                      dataType: 'json',
-                      success: function (data) {
-                        location.reload();
-                      }
-                    });
+                }
+              }
+              if(isReportable){
+                $('#mp_button').prop('disabled', true);
+                $.ajax({
+                  url: '/manual_report/',
+                  data: {
+                    'order_no': order_no,
+                    'operation_no': operation_no,
+                    'emp_id': emp_id,
+                    'workcenter_no': workcenter_no,
+                    'labor_time': labor_time,
+                    'operate_time': operate_time,
+                    'setup_time': setup_time,
+                    'start_time': new Date(start_time).addHours(7).toISOString(),
+                    'stop_time': new Date(stop_time).addHours(7).toISOString(),
+                    'good_qty': good_qty,
+                    'reject_qty': reject_qty,
+                    'reject_reason': reject_reason,
+                    'other_reason': other_reason,
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                    location.reload();
                   }
                 });
               }
