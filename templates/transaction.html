@@ -87,7 +87,7 @@
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
                   <!-- Left Content -->
-                  <div class="col-sm-12 col-md-4">
+                  <div class="col-sm-12 col-md-4" style="padding:0px;">
                     <div class="card border-secondary">
                       <div class="card-body">
                         <!-- Quantity -->
@@ -116,362 +116,469 @@
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
-                            <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
-                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
-                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#structure-tab" role="tab">Structure ({{operationList|length}})</a></li>
-                            {% if modList|length > 0 %}
-                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
-                            {% endif %}
+                            <li class="nav-item">
+                              <a class="nav-link active small" data-toggle="tab" href="#info-tab" role="tab">
+                                {{operation.OperationNo}} ({{operation.WorkCenterNo}})
+                              </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#history-tab" role="tab">History</a></li>
                             {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
                             {% endif %}
                           </ul>
-                          <div class="tab-content">
-                            <!-- Operation Tab -->
-                            <div class="tab-pane small active" id="operation-tab" role="tabpanel">
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Prod. Order No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Operation No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Operation Start</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="operation_start" value="{{operation.ProcessStart|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Operation Stop</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="operation_stop" value="{{operation.ProcessStop|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row" hidden>
-                                <label class="col-md-5 col-form-label text-right text-info"><strong>Process Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row" hidden>
-                                <label class="col-md-5 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="remain_qty" value="{{remainQty}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row" hidden>
-                                <label class="col-md-5 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row" hidden>
-                                <label class="col-md-5 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
-                                </div>
-                              </div>
-                              <hr>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong>
-                                  {% if workCenterInGroupList|length != 0 %}
-                                  <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true"
-                                  title="WorkCenter(s) in <span class='text-info'>{{operation.WorkCenterGroup}}</span> Group."
-                                  data-content="{% for wc in workCenterInGroupList %}{{wc.WorkCenterNo}}<br>{% endfor %}">?</a>
-                                  {% endif %}
-                                </label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Plan Start</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|slice:'8:10'}}-{{operation.PlanStartDate|slice:'5:7'}}-{{operation.PlanStartDate|slice:'0:4'}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Plan Finish</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|slice:'8:10'}}-{{operation.PlanFinishDate|slice:'5:7'}}-{{operation.PlanFinishDate|slice:'0:4'}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:'Created at SFR'}}" readonly>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Production Order Tab -->
-                            <div class="tab-pane small" id="order-tab" role="tabpanel">
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right text-primary"><strong>Prod. Order Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Order Start</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="order_start" value="{{order.ProcessStart|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Order Stop</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="order_stop" value="{{order.ProcessStop|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Customer PO No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Part No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Part Name</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Sales Order No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="sale_order_no" value="{{order.SalesOrderNo|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Sales Create Date</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="sale_create_date" value="{{order.SalesCreateDate|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Sales Order Qty</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="sale_order_qty" value="{{order.SalesOrderQuantity|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>FG Mat Code</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="fg_material_code" value="{{order.FG_MaterialCode|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>RM Mat Code</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="rm_material_code" value="{{order.RM_MaterialCode|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>MRP Controller</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="mrp_controller" value="{{order.MRP_Controller|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Request Date</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Release Date</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="release_date" value="{{order.ReleaseDate|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Drawing No</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Routing Group</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="routing_group" value="{{order.RoutingGroup|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Routing Group Counter</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="routing_group_counter" value="{{order.RoutingGroupCounter|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Plant</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="plant" value="{{order.Plant|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
-                                <div class="col-md-7">
-                                  <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Structure Tab -->
-                            <div class="tab-pane" id="structure-tab" role="tabpanel">
-                              <!-- Structure Inner Tab -->
+                          <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                            <!-- Info Tab -->
+                            <div class="tab-pane active" id="info-tab" role="tabpanel">
                               <div class="nav-tabs-boxed">
                                 <ul class="nav nav-tabs" role="tablist">
-                                  <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
+                                  <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
                                 </ul>
-                                <div class="tab-content">
-                                  <!-- Routing Sheet -->
-                                  <div class="tab-pane small active" id="rt-sheet-tab" role="tabpanel">
-                                    <table class="table table-sm table-responsive-sm table-outline text-center">
-                                      <thead class="bg-darkslategray">
-                                        <tr>
-                                          <th>
-                                            Status
-                                            <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
-                                            data-content="
-                                            <strong class='text-success'>COMPLETED</strong><br>
-                                            <strong class='text-primary'>JOINING</strong><br>
-                                            <strong class='text-warning'>WORKING</strong><br>
-                                            <strong class='text-info'>READY</strong><br>
-                                            <strong class='text-orangered'>OVERTIME</strong><br>
-                                            <strong class='text-danger'>ERROR</strong><br>
-                                            <strong class='text-dark'>CLOSED</strong><br>
-                                            ">?
-                                            </a>
-                                          </th>
-                                          <th>Operation No</th>
-                                          <th>Work Center</th>
-                                          <th></th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {% for item in operationList %}
-                                        <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                          <td>
-                                            {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
-                                            {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
-                                            {% endif %}
-                                          </td>
-                                          <td>
-                                            {% if item.OperationNo != operationNo %}
-                                            <a href="/transaction/{{orderNo}}{{item.OperationNo}}">{{item.OperationNo}}</a>
-                                            {% else %}
-                                            {{item.OperationNo}}
-                                            {% endif %}
-                                          </td>
-                                          <td>{{item.WorkCenterNo|default_if_none:""}}</td>
-                                          <td>
-                                            {% if item.IsExternalProcess %}<i class="c-icon c-icon-sm cil-external-link"></i>
-                                            {% elif item.WorkCenterType == 'Labor' %}<i class="c-icon c-icon-sm cil-user"></i>
-                                            {% elif item.WorkCenterType == 'Machine' %}<i class="c-icon c-icon-sm cil-gauge"></i>
-                                            {% endif %}
-                                          </td>
-                                        </tr>
-                                        {% endfor %}
-                                      </tbody>
-                                    </table>
+                              </div>
+                              <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                                <!-- Operation Tab -->
+                                <div class="tab-pane small active" id="operation-tab" role="tabpanel">
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Prod. Order No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_no" value="{{orderNo}}" readonly>
+                                    </div>
                                   </div>
-                                  <!-- Note -->
-                                  <div class="tab-pane small" id="note-tab" role="tabpanel">
-                                    <table class="table table-sm table-responsive-sm table-outline text-center">
-                                      <thead class="bg-darkslategray">
-                                        <tr>
-                                          <th></th>
-                                          <th class="text-right">
-                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_note()" id="open_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
-                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_note()" id="save_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
-                                            <button type="button" class="btn btn-sm btn-pill btn-link" onclick="close_note()" id="close_note_button" hidden><strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong></button>
-                                            &nbsp;
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                          <td>Order</td>
-                                          <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_0" readonly>{{order.Note|default_if_none:""}}</textarea></td>
-                                        </tr>
-                                        {% for item in operationList %}
-                                        <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                          <td><strong>{{item.OperationNo}}</strong><br>{{item.WorkCenterNo}}</td>
-                                          <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_{{forloop.counter}}" readonly>{{item.Note|default_if_none:""}}</textarea></td>
-                                        </tr>
-                                        {% endfor %}
-                                      </tbody>
-                                    </table>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Operation No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="operation_no" value="{{operationNo}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Operation Start</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="operation_start" value="{{operation.ProcessStart|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Operation Stop</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="operation_stop" value="{{operation.ProcessStop|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row" hidden>
+                                    <label class="col-md-5 col-form-label text-right text-info"><strong>Process Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="process_qty" value="{{operation.ProcessQty}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row" hidden>
+                                    <label class="col-md-5 col-form-label text-right text-warning"><strong>Remain Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="remain_qty" value="{{remainQty}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row" hidden>
+                                    <label class="col-md-5 col-form-label text-right text-success"><strong>Accepted Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="accepted_qty" value="{{operation.AcceptedQty}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row" hidden>
+                                    <label class="col-md-5 col-form-label text-right text-danger"><strong>Rejected Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="rejected_qty" value="{{operation.RejectedQty}}" readonly>
+                                    </div>
+                                  </div>
+                                  <hr>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong>
+                                      {% if workCenterInGroupList|length != 0 %}
+                                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true"
+                                      title="WorkCenter(s) in <span class='text-info'>{{operation.WorkCenterGroup}}</span> Group."
+                                      data-content="{% for wc in workCenterInGroupList %}{{wc.WorkCenterNo}}<br>{% endfor %}">?</a>
+                                      {% endif %}
+                                    </label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Plan Start</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="plan_start" value="{{operation.PlanStartDate|slice:'8:10'}}-{{operation.PlanStartDate|slice:'5:7'}}-{{operation.PlanStartDate|slice:'0:4'}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Plan Finish</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="plan_finish" value="{{operation.PlanFinishDate|slice:'8:10'}}-{{operation.PlanFinishDate|slice:'5:7'}}-{{operation.PlanFinishDate|slice:'0:4'}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:'Created at SFR'}}" readonly>
+                                    </div>
+                                  </div>
+                                </div>
+                                <!-- Production Order Tab -->
+                                <div class="tab-pane small" id="order-tab" role="tabpanel">
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right text-primary"><strong>Prod. Order Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_qty" value="{{order.ProductionOrderQuatity}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Order Start</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_start" value="{{order.ProcessStart|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Order Stop</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_stop" value="{{order.ProcessStop|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Customer PO No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="customer_po_no" value="{{order.CustomerPONo|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Part No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="part_no" value="{{order.PartNo|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Part Name</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="part_name" value="{{order.PartName|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Sales Order No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="sale_order_no" value="{{order.SalesOrderNo|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Sales Create Date</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="sale_create_date" value="{{order.SalesCreateDate|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Sales Order Qty</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="sale_order_qty" value="{{order.SalesOrderQuantity|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>FG Mat Code</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="fg_material_code" value="{{order.FG_MaterialCode|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>RM Mat Code</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="rm_material_code" value="{{order.RM_MaterialCode|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>MRP Controller</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="mrp_controller" value="{{order.MRP_Controller|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Request Date</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="request_date" value="{{order.request_date|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Release Date</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="release_date" value="{{order.ReleaseDate|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Drawing No</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Routing Group</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="routing_group" value="{{order.RoutingGroup|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Routing Group Counter</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="routing_group_counter" value="{{order.RoutingGroupCounter|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Plant</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="plant" value="{{order.Plant|default_if_none:""}}" readonly>
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                            <!-- Mod Tab -->
-                            <div class="tab-pane small" id="mod-tab" role="tabpanel">
+                            <!-- Routing Sheet -->
+                            <div class="tab-pane small" id="rt-sheet-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
-                                    <th>Action</th>
+                                    <th>
+                                      Status
+                                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                                      data-content="
+                                      <strong class='text-success'>COMPLETED</strong><br>
+                                      <strong class='text-primary'>JOINING</strong><br>
+                                      <strong class='text-warning'>WORKING</strong><br>
+                                      <strong class='text-info'>READY</strong><br>
+                                      <strong class='text-orangered'>OVERTIME</strong><br>
+                                      <strong class='text-danger'>ERROR</strong><br>
+                                      <strong class='text-dark'>CLOSED</strong><br>
+                                      ">?
+                                      </a>
+                                    </th>
                                     <th>Operation No</th>
-                                    <th>EmpID</th>
-                                    <th>ChiefID</th>
-                                    <th>DateTimeStamp</th>
+                                    <th>Work Center</th>
+                                    <th>ProcessQty</th>
+                                    <th>AcceptedQty</th>
+                                    <th>RejectedQty</th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {% for mod in modList %}
-                                  <tr>
-                                    <td class="{% if mod.Type == 'ADD' %}text-success{% elif mod.Type == 'CHANGE' %}text-warning{% elif mod.Type == 'DELETE' %}text-danger{% elif mod.Type == 'INC QTY' %}text-info{% endif %}">
-                                      <strong>{{mod.Type}}</strong>
+                                  {% for item in operationList %}
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                    <td>
+                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
+                                      {% endif %}
                                     </td>
-                                    <td>{{mod.OperationNo}}</td>
-                                    <td>{{mod.EmpID}}</td>
-                                    <td>{{mod.ChiefID}}</td>
-                                    <td>{{mod.ModifyDateTime}}</td>
+                                    <td>
+                                      {% if item.OperationNo != operationNo %}
+                                      <a href="/transaction/{{orderNo}}{{item.OperationNo}}">{{item.OperationNo}}</a>
+                                      {% else %}
+                                      {{item.OperationNo}}
+                                      {% endif %}
+                                    </td>
+                                    <td>{{item.WorkCenterNo|default_if_none:""}}</td>
+                                    <td>{{item.ProcessQty.normalize}}</td>
+                                    <td>{{item.AcceptedQty.normalize}}</td>
+                                    <td>{{item.RejectedQty.normalize}}</td>
                                   </tr>
                                   {% endfor %}
                                 </tbody>
                               </table>
+                            </div>
+                            <!-- Note -->
+                            <div class="tab-pane small" id="note-tab" role="tabpanel">
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th></th>
+                                    <th class="text-right">
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_note()" id="open_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_note()" id="save_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="close_note()" id="close_note_button" hidden><strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong></button>
+                                      &nbsp;
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                    <td>Order</td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_0" readonly>{{order.Note|default_if_none:""}}</textarea></td>
+                                  </tr>
+                                  {% for item in operationList %}
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                    <td><strong>{{item.OperationNo}}</strong><br>{{item.WorkCenterNo}}</td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_{{forloop.counter}}" readonly>{{item.Note|default_if_none:""}}</textarea></td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                            <!-- History Tab -->
+                            <div class="tab-pane" id="history-tab" role="tabpanel">
+                              <div class="nav-tabs-boxed">
+                                <ul class="nav nav-tabs" role="tablist">
+                                  <li class="nav-item"><a class="nav-link small active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate ({{historyOperateList|length}})</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm ({{historyConfirmList|length}})</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join ({{historyJoinList|length}})</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
+                                </ul>
+                              </div>
+                              <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                                <!-- Operate Tab -->
+                                <div class="tab-pane active" id="operate-tab" role="tabpanel">
+                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                    <thead class="bg-darkslategray">
+                                      <tr>
+                                        <th>Operator</th>
+                                        <th>Work Center</th>
+                                        <th>Type</th>
+                                        <th>Setup</th>
+                                        <th>Oper</th>
+                                        <th>Labor</th>
+                                        <th>Start Time</th>
+                                        <th>Finish Time</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for operate in historyOperateList %}
+                                      {% if operate.EmpID != None %}
+                                      <tr>
+                                        <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
+                                        <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
+                                        <td>
+                                          {% if operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-muted"><strong>Skip For Reporting</strong></span>
+                                          {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
+                                          {% elif operate.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
+                                          {% elif operate.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
+                                          {% endif %}
+                                        </td>
+                                        <td>{%if operate.Setup != 0.00 %}{{operate.Setup.normalize}}{% endif %}</td>
+                                        <td>{%if operate.Oper != 0.00 %}{{operate.Oper.normalize}}{% endif %}</td>
+                                        <td>{%if operate.Labor != 0.00 %}{{operate.Labor.normalize}}{% endif %}</td>
+                                        <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                                        <td>{{operate.StopDateTime|date:"d-M-Y, H:i"}}</td>
+                                      </tr>
+                                      {% endif %}
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <!-- Confirm Tab -->
+                                <div class="tab-pane" id="confirm-tab" role="tabpanel">
+                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                    <thead class="bg-darkslategray">
+                                      <tr>
+                                        <th>Operator</th>
+                                        <th>Work Center</th>
+                                        <th>Good Qty</th>
+                                        <th>Reject Qty</th>
+                                        <th>Reason</th>
+                                        <th>Confirm Time</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for confirm in historyConfirmList %}
+                                      <tr>
+                                        <td><a href="/emp/{{confirm.EmpID}}&NOW">{{confirm.EmpID}}</a></td>
+                                        <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
+                                        <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty.normalize}}{% endif %}</td>
+                                        <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty.normalize}}{% endif %}</td>
+                                        <td>{{confirm.RejectReason}}</td>
+                                        <td>{{confirm.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <!-- Join Tab -->
+                                <div class="tab-pane" id="join-tab" role="tabpanel">
+                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                    <thead class="bg-darkslategray">
+                                      <tr>
+                                        <th>Join To</th>
+                                        <th>Join By</th>
+                                        <th>Start</th>
+                                        <th>Stop</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for join in historyJoinList %}
+                                      <tr>
+                                        {% if orderNo == join.JoinToOrderNo and operationNo == join.JoinToOperationNo %}
+                                        <td>{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</td>
+                                        <td><a href="/transaction/{{join.JoinByOrderNo}}{{join.JoinByOperationNo}}">{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</a></td>
+                                        {% elif orderNo == join.JoinByOrderNo and operationNo == join.JoinByOperationNo %}
+                                        <td><a href="/transaction/{{join.JoinToOrderNo}}{{join.JoinToOperationNo}}">{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</a></td>
+                                        <td>{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</td>
+                                        {% endif %}
+                                        <td>{{join.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                                        <td>{{join.StopDateTime|date:"d-M-Y, H:i"}}</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <!-- Mod Tab -->
+                                <div class="tab-pane" id="mod-tab" role="tabpanel">
+                                  <table class="table table-sm table-responsive-sm table-outline text-center small">
+                                    <thead class="bg-darkslategray">
+                                      <tr>
+                                        <th>Action</th>
+                                        <th>Operation No</th>
+                                        <th>EmpID</th>
+                                        <th>ChiefID</th>
+                                        <th>DateTimeStamp</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for mod in modList %}
+                                      <tr>
+                                        <td class="{% if mod.Type == 'ADD' %}text-success{% elif mod.Type == 'CHANGE' %}text-warning{% elif mod.Type == 'DELETE' %}text-danger{% elif mod.Type == 'INC QTY' %}text-info{% endif %}">
+                                          <strong>{{mod.Type}}</strong>
+                                        </td>
+                                        <td>{{mod.OperationNo}}</td>
+                                        <td>{{mod.EmpID}}</td>
+                                        <td>{{mod.ChiefID}}</td>
+                                        <td>{{mod.ModifyDateTime}}</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
                             </div>
                             <!-- Overtime Tab -->
                             <div class="tab-pane small" id="overtime-tab" role="tabpanel">
@@ -533,7 +640,7 @@
                   </div>
 
                   <!-- Right Content -->
-                  <div class="col-sm-12 col-md-8">
+                  <div class="col-sm-12 col-md-8" style="padding-left: 10px; padding-right: 0px;">
                     <div class="row">
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
@@ -556,9 +663,6 @@
                         <button type="button" class="btn btn-xs btn-danger my-btn small" data-toggle="modal" data-target="#break_join_modal" id="break_join_main_button"><i class="c-icon cil-fullscreen"></i><br>Break Join</button>
                         {% if joinList|length > 0 %}
                         <button type="button" class="btn btn-xs btn-primary text-white my-btn small" data-toggle="modal" data-target="#join_list_modal" id="join_list_main_button"><i class="c-icon cil-list"></i><br>Join List</button>
-                        {% endif %}
-                        {% if historyOperateList|length > 0 or historyConfirmList|length > 0 or historyJoinList|length > 0 %}
-                        <button type="button" class="btn btn-xs btn-info text-white my-btn small" data-toggle="modal" data-target="#history_modal" id="history_main_button"><i class="c-icon cil-history"></i><br>History</button>
                         {% endif %}
                         <a href="/transaction/0" class="btn btn-xs btn-dark my-btn small"><i class="c-icon cil-account-logout"></i><br>Exit</a>
                         <p></p>
@@ -790,7 +894,7 @@
                     <div class="col-md-6">
                       <div class="card">
                         <div class="card-body small" style="height:240px; overflow:auto;">
-                          ปัญหา Order <b class="text-primary">5000828457-0032</b> (MCA_M5) โปรดติดต่อ <b>6624</b> <i class="text-muted">(09-Feb-2022 10:40)</i><hr>
+                          CASE ไหนที่เคยแจ้งมาแล้ว และยังไม่ได้รับการแก้ไข โปรดติดต่อ <b>6624</b> ด้วยนะครับ <i class="text-muted">(09-Feb-2022 14:20)</i><hr>
                           CASE การแก้ไขข้อมูลต่าง ๆ <u>โปรดส่งเมลมาเท่านั้น</u> ส่งถึง <b>yashawantatul.man@ccsadvancetech.co.th, warissara@ccsadvancetech.co.th, puchong.nan@ccsadvancetech.co.th</b> และ CC ถึง <b>atul@ccsgroups.com</b> <i class="text-muted">(09-Feb-2022 09:40)</i><hr>
                           ตาราง Overtime ดูได้ที่แถบซ้ายมือ Report > Overtime Table สำหรับหัวหน้าแผนก (กด Fix Stop Time ไปแล้ว) <i class="text-muted">(09-Feb-2022 00:45)</i><hr>
                           Order ที่เคยทำ <b class="text-info">Partial</b> ไปแล้วใน SAP ติดต่อ <b>6624</b> นะครับ <i class="text-muted">(07-Feb-2022 13:30)</i><hr>
@@ -1249,124 +1353,6 @@
                   {% endfor %}
                 </tbody>
               </table>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal" id="history_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-info modal-lg" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title"><i class="c-icon cil-history"></i> History</h4>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-            </div>
-            <div class="modal-body">
-              <div class="nav-tabs-boxed">
-                <ul class="nav nav-tabs" role="tablist">
-                  <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate ({{historyOperateList|length}})</a></li>
-                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm ({{historyConfirmList|length}})</a></li>
-                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join ({{historyJoinList|length}})</a></li>
-                </ul>
-                <div class="tab-content">
-                  <!-- Operate Tab -->
-                  <div class="tab-pane active" id="operate-tab" role="tabpanel">
-                    <table class="table table-sm table-responsive-sm table-outline small">
-                      <thead class="bg-darkslategray">
-                        <tr>
-                          <th>Operator</th>
-                          <th>Work Center</th>
-                          <th>Type</th>
-                          <th>Setup</th>
-                          <th>Oper</th>
-                          <th>Labor</th>
-                          <th>Start Time</th>
-                          <th>Finish Time</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for operate in historyOperateList %}
-                        {% if operate.EmpID != None %}
-                        <tr>
-                          <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
-                          <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
-                          <td>
-                            {% if operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-muted"><strong>Skip For Reporting</strong></span>
-                            {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
-                            {% elif operate.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
-                            {% elif operate.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
-                            {% endif %}
-                          </td>
-                          <td>{%if operate.Setup != 0.00 %}{{operate.Setup}}{% endif %}</td>
-                          <td>{%if operate.Oper != 0.00 %}{{operate.Oper}}{% endif %}</td>
-                          <td>{%if operate.Labor != 0.00 %}{{operate.Labor}}{% endif %}</td>
-                          <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                          <td>{{operate.StopDateTime|date:"d-M-Y, H:i"}}</td>
-                        </tr>
-                        {% endif %}
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-                  <!-- Confirm Tab -->
-                  <div class="tab-pane" id="confirm-tab" role="tabpanel">
-                    <table class="table table-sm table-responsive-sm table-outline small">
-                      <thead class="bg-darkslategray">
-                        <tr>
-                          <th>Operator</th>
-                          <th>Work Center</th>
-                          <th>Good Qty</th>
-                          <th>Reject Qty</th>
-                          <th>Reason</th>
-                          <th>Confirm Time</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for confirm in historyConfirmList %}
-                        <tr>
-                          <td><a href="/emp/{{confirm.EmpID}}&NOW">{{confirm.EmpID}}</a></td>
-                          <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
-                          <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty}}{% endif %}</td>
-                          <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty}}{% endif %}</td>
-                          <td>{{confirm.RejectReason}}</td>
-                          <td>{{confirm.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-                  <!-- Join Tab -->
-                  <div class="tab-pane" id="join-tab" role="tabpanel">
-                    <table class="table table-sm table-responsive-sm table-outline small">
-                      <thead class="bg-darkslategray">
-                        <tr>
-                          <th>Join To</th>
-                          <th>Join By</th>
-                          <th>Start</th>
-                          <th>Stop</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for join in historyJoinList %}
-                        <tr>
-                          {% if orderNo == join.JoinToOrderNo and operationNo == join.JoinToOperationNo %}
-                          <td>{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</td>
-                          <td><a href="/transaction/{{join.JoinByOrderNo}}{{join.JoinByOperationNo}}">{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</a></td>
-                          {% elif orderNo == join.JoinByOrderNo and operationNo == join.JoinByOperationNo %}
-                          <td><a href="/transaction/{{join.JoinToOrderNo}}{{join.JoinToOperationNo}}">{{join.JoinToOrderNo}} - {{join.JoinToOperationNo}}</a></td>
-                          <td>{{join.JoinByOrderNo}} - {{join.JoinByOperationNo}}</td>
-                          {% endif %}
-                          <td>{{join.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                          <td>{{join.StopDateTime|date:"d-M-Y, H:i"}}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="modal-footer">
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
