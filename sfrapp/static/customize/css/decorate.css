@@ -30,9 +30,15 @@
     background-color:#8ed6c0;
     color:white;
 }
+.text-skyblue {
+    color:#8ed6c0;
+}
 .bg-lightpink {
     background-color:#f2a9a9;
     color:white;
+}
+.text-lightpink {
+    color:#f2a9a9;
 }
 .my-btn {
   width: 90px;

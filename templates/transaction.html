@@ -566,7 +566,13 @@
                                     <tbody>
                                       {% for mod in modList %}
                                       <tr>
-                                        <td class="{% if mod.Type == 'ADD' %}text-success{% elif mod.Type == 'CHANGE' %}text-warning{% elif mod.Type == 'DELETE' %}text-danger{% elif mod.Type == 'INC QTY' %}text-info{% endif %}">
+                                        <td class="
+                                        {% if mod.Type == 'ADD' %}text-success
+                                        {% elif mod.Type == 'CHANGE' %}text-warning
+                                        {% elif mod.Type == 'DELETE' %}text-danger
+                                        {% elif mod.Type == 'INC QTY' %}text-skyblue
+                                        {% elif mod.Type == 'DEC QTY' %}text-lightpink
+                                        {% endif %}">
                                           <strong>{{mod.Type}}</strong>
                                         </td>
                                         <td>{{mod.OperationNo}}</td>
