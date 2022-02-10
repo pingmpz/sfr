@@ -21,6 +21,9 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
+    #CONST
+    overtimehour = getOvertimeHour()
+    canMP = isManualReportAllow()
     orderNo = ""
     operationNo = ""
     order = None
@@ -83,7 +86,6 @@ def transaction(request, orderoprno):
                 isFirst = isFirstOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
-                canMP = isManualReportAllow()
                 hasReportTime = hasReportTimeToSAP(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
@@ -143,6 +145,8 @@ def transaction(request, orderoprno):
                 currencyList = getCurrencyList()
     printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
+        'overtimehour' : overtimehour,
+        'canMP' : canMP,
         'orderNo' : orderNo,
         'operationNo' : operationNo,
         'state' : state,
@@ -151,7 +155,6 @@ def transaction(request, orderoprno):
         'isFirst' : isFirst,
         'isOperating' : isOperating,
         'isOvertime' : isOvertime,
-        'canMP' : canMP,
         'hasReportTime' : hasReportTime,
         'remainQty' : remainQty,
         'operationList' : operationList,
@@ -361,15 +364,23 @@ def working_order(request):
     return render(request, 'working_order.html', context)
 
 def working_wc(request):
+    overtimehour = getOvertimeHour()
+    warninghour = overtimehour - 2
     workingWorkCenterList = getWorkingWorkCenterList()
     context = {
+        'overtimehour': overtimehour,
+        'warninghour': warninghour,
         'workingWorkCenterList': workingWorkCenterList,
     }
     return render(request, 'working_wc.html', context)
 
 def working_emp(request):
+    overtimehour = getOvertimeHour()
+    warninghour = overtimehour - 2
     workingOperatorList = getWorkingOperatorList()
     context = {
+        'overtimehour': overtimehour,
+        'warninghour': warninghour,
         'workingOperatorList': workingOperatorList,
     }
     return render(request, 'working_emp.html', context)
@@ -1787,6 +1798,12 @@ def getEmpIDByUserID(user_id):
     cursor.execute(sql)
     return cursor.fetchone()
 
+def getOvertimeHour():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[AdminConfig] WHERE KeyText = 'OVERTIME_HOUR'"
+    cursor.execute(sql)
+    return int((cursor.fetchone()).Value)
+
 #----------------------------------------------------------------------- BOOLEAN
 
 def isExistSAPOrder(order_no):
@@ -1880,14 +1897,15 @@ def isExistDeletedOperation(order_no, operation_no):
     return (len(cursor.fetchall()) > 0)
 
 def isOvertimeOperation(order_no, operation_no):
+    ot = str(getOvertimeHour())
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, "+ot+", StartDateTime) < CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     if len(cursor.fetchall()) > 0:
         return True
     else:
         cursor = get_connection().cursor()
-        sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
+        sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' AND (Status = 'WORKING' OR Status = 'SETUP') AND (DATEADD(HOUR, "+ot+", StartDateTime) < CURRENT_TIMESTAMP)"
         cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 

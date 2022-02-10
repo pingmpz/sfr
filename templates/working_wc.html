@@ -77,8 +77,8 @@
                         <tbody>
                           {% for wc in workingWorkCenterList %}
                           <tr class="
-                          {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
-                          {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning{% endif %}"
+                          {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:overtimehour %}text-danger
+                          {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:warninghour %}text-warning{% endif %}"
                           {% if wc.StartDateTime != None %}
                           style="background-color:#f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:8}}f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:9}}f{{wc.StartDateTime|date:'mdH'|add:'0'|modulo:10}}"
                           {% endif %}
@@ -90,19 +90,19 @@
                               <strong>
                               {% if wc.Status == 'WORKING' %}
                               <span class="
-                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
-                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning
+                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:warninghour %}text-warning
                               {% else %}text-success{% endif %}"
                               >
-                                Working {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                                Working {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
                               </span>
                               {% elif wc.Status == 'SETUP' %}
                               <span class="
-                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}text-danger
-                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:10 %}text-warning
+                              {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif wc.StartDateTime != None and wc.StartDateTime|hours_ago:warninghour %}text-warning
                               {% else %}text-yellowgreen{% endif %}"
                               >
-                                Setup {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:12 %}(Overtime){% endif %}
+                                Setup {% if wc.StartDateTime != None and wc.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
                               </span>
                               {% elif wc.Status == 'WAITING' %}
                               <span class="text-dark">Waiting</span>
