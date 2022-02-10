@@ -49,9 +49,6 @@
             </li>
             {% endif %}
           </ol>
-          <div class="c-subheader-nav"></div>
-          <div class="c-subheader-nav"></div>
-          <div class="c-subheader-nav"></div>
           {% if state == "DATAFOUND" %}
           <div class="c-subheader-nav">
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
@@ -59,11 +56,8 @@
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
           </div>
           {% endif %}
-          <div class="c-subheader-nav"></div>
-          <div class="c-subheader-nav"></div>
-          <div class="c-subheader-nav"></div>
           {% if state == "FIRSTPAGE" %}
-          <div class="c-subheader-nav mfe-2">
+          <div class="c-subheader-nav">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div><i class="c-icon c-icon-lg cil-user"></i></div>&nbsp;&nbsp;
             <div style="width:50%"><input type="text" class="form-control form-control-sm" id="fp_operator_id" autocomplete="off"></div>
@@ -106,7 +100,29 @@
                     <div class="card border-secondary">
                       <div class="card-body" style="padding-left: 5px; padding-right: 5px;">
                         <!-- Quantity -->
-                        <div class="text-center">
+                        <div class="row">
+                          <div class="col text-right" style="padding-left:0px; padding-right:5px;">
+                            <div class="ui-widget-info fade-in" style="margin-bottom:20px">
+                              <h1 class="ui-value text-info"><strong><small>{{operation.ProcessQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-info">Process</span>
+                            </div>
+                            <div class="ui-widget-warning fade-in">
+                              <h1 class="ui-value text-warning"><strong><small>{{remainQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-warning">Remain</span>
+                            </div>
+                          </div>
+                          <div class="col text-left" style="padding:0px;">
+                            <div class="ui-widget-success fade-in" style="margin-bottom:20px">
+                              <h1 class="ui-value text-success"><strong><small>{{operation.AcceptedQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-success">Accept</span>
+                            </div>
+                            <div class="ui-widget-danger fade-in">
+                              <h1 class="ui-value text-danger"><strong><small>{{operation.RejectedQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-danger">Reject</span>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- <div class="text-center">
                           <div class="ui-widget-info fade-in">
                             <h1 class="ui-value text-info"><strong><small>{{operation.ProcessQty.normalize}}</small></strong></h1>
                             <span class="ui-label text-info">Process</span>
@@ -126,7 +142,7 @@
                             <h1 class="ui-value text-danger"><strong><small>{{operation.RejectedQty.normalize}}</small></strong></h1>
                             <span class="ui-label text-danger">Reject</span>
                           </div>
-                        </div>
+                        </div> -->
                         <br>
                         <!-- Tab -->
                         <div class="nav-tabs-boxed">
@@ -916,6 +932,8 @@
                     <div class="col-sm-10 col-md-8">
                       <div class="card">
                         <div class="card-body small" style="height:240px; overflow:auto;">
+                          สีปุ่มไม่ขึ้นกด CTRL+F5 หนึ่งรอบนะครับ <i class="text-muted">(10-Feb-2022 14:50)</i><hr>
+                          กล่องด้านบนรูป <i class="c-icon c-icon-sm cil-user"></i> ใช้สำหรับใส่เลขรหัสพนักงาน ถ้าหากพนักงานทำงานอยู่จะกระโดดไปที่ Production Order นั้น ๆ ให้ทันที ไม่สามารถใช้ได้กับ <b class="text-plum">External Process</b> <i class="text-muted">(10-Feb-2022 13:40)</i><hr>
                           ฟังค์ชั่น <b class="text-skyblue">Inc. Qty</b> (เพิ่มจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนครบ</u><br>
                           ฟังค์ชั่น <b class="text-lightpink">Dec. Qty</b> (ลดจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนเลย</u><br>
                           โดยทั้ง 2 ฟังค์ชั่นนี้ จะต้องแก้ไขที่ SAP เองด้วย<br>
