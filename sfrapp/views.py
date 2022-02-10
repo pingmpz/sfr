@@ -22,8 +22,8 @@ def index(request):
 
 def transaction(request, orderoprno):
     #CONST
-    overtimehour = getOvertimeHour()
-    canMP = isManualReportAllow()
+    overtimehour = 0
+    canMP = False
     orderNo = ""
     operationNo = ""
     order = None
@@ -31,7 +31,6 @@ def transaction(request, orderoprno):
     isFirst = False
     isOperating = False
     isOvertime = False
-    canMP = False
     hasReportTime = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
@@ -82,6 +81,10 @@ def transaction(request, orderoprno):
                     return redirect('/transaction/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
+                #CONST
+                overtimehour = getOvertimeHour()
+                canMP = getManualReportAllow()
+                #OPRATION DETIAL
                 operation = getOperation(orderNo, operationNo)
                 isFirst = isFirstOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
@@ -488,7 +491,7 @@ def admin_controller(request):
     empNameList = []
     for user in userList:
         empNameList.append(getEmpIDByUserID(user.UserID))
-    canMP = isManualReportAllow()
+    canMP = getManualReportAllow()
     context = {
         'userList': userList,
         'empNameList': empNameList,
@@ -512,6 +515,19 @@ def error_data(request):
 ################################################################################
 #################################### REQUEST ###################################
 ################################################################################
+
+def fp_emp_search(request):
+    operator_id = request.GET.get('operator_id')
+    path = ""
+    operator = getOperator(operator_id)
+    if emp != None:
+        if isOperatorOperating(operator_id):
+            oopr = getOperatorOperatingByEmpID(operator_id)
+            path = str(oopr.OperatorOrderNo) + "" + str(oopr.OperatorOperationNo)
+    data = {
+        'path': path,
+    }
+    return JsonResponse(data)
 
 #-------------------------------------------------------------------- MAIN TABLE
 
@@ -1820,6 +1836,12 @@ def getOvertimeHour():
     cursor.execute(sql)
     return int((cursor.fetchone()).Value)
 
+def getManualReportAllow():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE'"
+    cursor.execute(sql)
+    return (cursor.fetchone().Value)
+
 #----------------------------------------------------------------------- BOOLEAN
 
 def isExistSAPOrder(order_no):
@@ -1935,12 +1957,6 @@ def isOvertimeOperator(oopr_id):
 def isOvertimeWorkCenter(owc_id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OperatingWorkCenter] WHERE OperatingWorkCenterID = '"+str(owc_id)+"' AND Status = 'WORKING' AND (DATEADD(HOUR, 12, StartDateTime) < CURRENT_TIMESTAMP)"
-    cursor.execute(sql)
-    return (len(cursor.fetchall()) > 0)
-
-def isManualReportAllow():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE' AND Value = 'True' "
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 

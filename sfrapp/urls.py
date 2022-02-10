@@ -41,6 +41,7 @@ urlpatterns = [
     path('admin_controller/', views.admin_controller, name='admin_controller'),
     path('error_data/', views.error_data, name='error_data'),
     ### REQUEST
+    path('fp_emp_search/', views.fp_emp_search, name='fp_emp_search'),
     #-- MAIN TABLE
     path('get_workcenter_data/', views.get_workcenter_data, name='get_workcenter_data'),
     path('get_operator_data/', views.get_operator_data, name='get_operator_data'),

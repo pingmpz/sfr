@@ -49,14 +49,29 @@
             </li>
             {% endif %}
           </ol>
+          <div class="c-subheader-nav"></div>
+          <div class="c-subheader-nav"></div>
+          <div class="c-subheader-nav"></div>
+          {% if state == "DATAFOUND" %}
           <div class="c-subheader-nav">
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
-            {% if state == "DATAFOUND" %}
             <a href="/lot_traveller/{{orderNo}}&0" class="btn btn-sm btn-link">Partial Lot Traveller</a>
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
-            {% endif %}
           </div>
-          <div class="c-subheader-nav d-md-down-none mfe-2">
+          {% endif %}
+          <div class="c-subheader-nav"></div>
+          <div class="c-subheader-nav"></div>
+          <div class="c-subheader-nav"></div>
+          {% if state == "FIRSTPAGE" %}
+          <div class="c-subheader-nav mfe-2">
+            <input type="password" hidden> <!-- Prevent Auto fill Password -->
+            &nbsp;&nbsp;<div><i class="c-icon c-icon-lg cil-user"></i></div>&nbsp;&nbsp;
+            <div style="width:50%"><input type="text" class="form-control form-control-sm" id="fp_operator_id" autocomplete="off"></div>
+            &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="fp_emp_search()">Go !</button></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          </div>
+          {% endif %}
+          <div class="c-subheader-nav mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
             &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="sc_order_no" autocomplete="off" value="{{orderNo}}"></div>
@@ -3064,6 +3079,34 @@
             window.open('/transaction/' + order_no + operation_no, '_self');
           }
         }
+
+      document.getElementById("fp_operator_id").addEventListener("keydown", function (e) {
+        if (e.code === "Enter" || e.code == "NumpadEnter") fp_emp_search();
+      });
+
+      function fp_emp_search(){
+          remove_valid_many(["fp_operator_id"]);
+          var operator_id =  $("#fp_operator_id").val();
+          if (operator_id.length < 4){
+            invalid("fp_operator_id");
+          } else {
+            $.ajax({
+              url: '/fp_emp_search/',
+              data: {
+                'operator_id': operator_id,
+              },
+              dataType: 'json',
+              success: function (data) {
+                if(data.path == ""){
+                  invalid("fp_operator_id");
+                } else {
+                  valid("fp_operator_id");
+                  window.open('/transaction/' + data.path, '_self');
+                }
+              }
+            });
+          }
+      }
     </script>
     <!-- DYNAMIC INPUT -->
     <script>
@@ -3272,6 +3315,11 @@
       });
 
       $("#sc_operation_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#fp_operator_id").on("keypress keyup blur",function (event) {
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
