@@ -110,7 +110,7 @@
                             <td><a href="/transaction/{{operator.OrderNo}}{{operator.OperationNo}}">{{operator.OrderNo}}-{{operator.OperationNo}}</a></td>
                             <td>{{operator.Note|default_if_none:""}}</td>
                             <td><a href="/wc/{{operator.WorkCenterNo}}&NOW">{{operator.WorkCenterNo|default_if_none:""}}</a></td>
-                            <td data-order="{{operator.StartDateTime|date:"U"}}">{{operator.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td data-order="{% if operator.Status == 'EXT-WORK' %}1{% else%}0{% endif %}{{operator.StartDateTime|date:"U"}}">{{operator.StartDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{operator.StartDateTime|naturaltime}}</td>
                           </tr>
                           {% endfor %}

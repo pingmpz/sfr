@@ -1906,7 +1906,7 @@ def isOvertimeWorkCenter(owc_id):
 
 def isManualReportAllow():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'ManualReportAllowdance' AND Value = 'True' "
+    sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE' AND Value = 'True' "
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -2358,7 +2358,7 @@ def updateOrderLotNo(order_no):
 def updateManualReportAllowdance(status):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"', LastUpdate = CURRENT_TIMESTAMP WHERE KeyText = 'ManualReportAllowdance'"
+    sql = "UPDATE [AdminConfig] SET [Value] = '"+status+"' WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE'"
     cursor.execute(sql)
     conn.commit()
     return
