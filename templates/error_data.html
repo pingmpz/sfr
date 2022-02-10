@@ -122,7 +122,6 @@
                                   <th>ProductionOrderNo</th>
                                   <th>DateGetFromSAP</th>
                                   <th>Duration</th>
-                                  <th></th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -131,10 +130,6 @@
                                   <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo|default_if_none:""}}</a></td>
                                   <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
-                                  <td style="color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
-                                    DELETE FROM OrderControl WHERE OrderNo = '{{order.OrderNo}}'
-                                    DELETE FROM OperationControl WHERE OrderNo = '{{order.OrderNo}}'
-                                  </td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
