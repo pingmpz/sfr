@@ -1027,6 +1027,22 @@ def inc_qty(request):
     }
     return JsonResponse(data)
 
+def dec_qty(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    emp_id = request.GET.get('emp_id')
+    password = request.GET.get('password')
+    amount = request.GET.get('amount')
+    operation = getOperation(order_no, operation_no)
+    #-- DECREASE QTY OF 1st OPERATION & ORDER
+    decreaseQty(order_no, operation_no, amount)
+    #-- HISTORY : DECREASE QTY
+    user = getUserByPassword(password)
+    insertHistoryModifier("DEC QTY", order_no, operation_no, emp_id, user.UserID)
+    data = {
+    }
+    return JsonResponse(data)
+
 def delete_operation(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
@@ -2388,6 +2404,17 @@ def increaseQty(order_no, operation_no, amount):
     cursor.execute(sql)
     conn.commit()
     sql = "UPDATE [OperationControl] SET [ProcessQty] += '" + amount + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def decreaseQty(order_no, operation_no, amount):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET [ProductionOrderQuatity] -= '" + amount + "' WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "UPDATE [OperationControl] SET [ProcessQty] -= '" + amount + "' WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "'"
     cursor.execute(sql)
     conn.commit()
     return

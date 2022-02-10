@@ -645,7 +645,10 @@
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
                         {% if isFirst and operation.ProcessStop == None %}
-                        <button type="button" class="btn btn-xs btn-info my-btn small btn-icon" data-toggle="modal" data-target="#inc_qty_modal" id="inc_qty_main_button" onclick="prepare_inc_qty()"><i class="c-icon cil-vertical-align-top"></i><br>Inc. Qty</button>
+                        <button type="button" class="btn btn-xs bg-skyblue my-btn small btn-icon" data-toggle="modal" data-target="#inc_qty_modal" id="inc_qty_main_button" onclick="prepare_inc_qty()"><i class="c-icon cil-vertical-align-top"></i><br>Inc. Qty</button>
+                        {% endif %}
+                        {% if isFirst and operation.AcceptedQty == 0 and operation.RejectedQty == 0 %}
+                        <button type="button" class="btn btn-xs bg-lightpink my-btn small btn-icon" data-toggle="modal" data-target="#dec_qty_modal" id="dec_qty_main_button" onclick="prepare_dec_qty()"><i class="c-icon cil-vertical-align-bottom"></i><br>Dec. Qty</button>
                         {% endif %}
                         {% if order.ProcessStop == None %}
                         <button type="button" class="btn btn-xs btn-success my-btn small btn-icon" data-toggle="modal" data-target="#add_modal" id="add_main_button" onclick="prepare_add()"><i class="c-icon cil-plus"></i><br>Add</button>
@@ -918,14 +921,15 @@
       {% include 'footer.html' %}
       <!-- *** MODAL *** -->
       <div class="modal" id="inc_qty_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-info" role="document">
+        <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-skyblue">
               <h4 class="modal-title"><i class="c-icon cil-vertical-align-top"></i> Increase Production Order Qty</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <br>
+              <small>การเพิ่มจำนวนชิ้นงานสามารถเพิ่มได้เฉพาะเมื่อ Process แรกยังไม่ได้ Confirm จำนวนครบ โดยจะต้องทำการแก้ไขใน SAP ด้วยตัวเองด้วย</small>
+              <hr>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
                 <div class="col-md-8">
@@ -954,7 +958,51 @@
             </div>
             <div class="modal-footer">
               <small>Permission: Section Chief+</small>
-              <button class="btn btn-info" type="button" id="inc_qty_confirm_button" onclick="inc_qty()">Confirm</button>
+              <button class="btn bg-skyblue" type="button" id="inc_qty_confirm_button" onclick="inc_qty()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="dec_qty_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header bg-lightpink">
+              <h4 class="modal-title"><i class="c-icon cil-vertical-align-bottom"></i> Decrease Production Order Qty</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <small>การลดจำนวนชิ้นงานสามารถลดได้เฉพาะเมื่อ Process แรกยังไม่ได้ Confirm จำนวน โดยจะต้องทำการแก้ไขใน SAP ด้วยตัวเองด้วย</small>
+              <hr>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Employee ID</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="dec_qty_emp_id" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="dec_qty_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Decrease Qty By</strong></label>
+                <div class="col-md-3">
+                  <input class="form-control form-control-sm" type="text" value="{{operation.ProcessQty.normalize}}" autocomplete="off" readonly>
+                </div>
+                <div class="col-md-1">
+                  -
+                </div>
+                <div class="col-md-4">
+                  <input class="form-control form-control-sm" type="text" id="dec_qty_amount" autocomplete="off">
+                </div>
+              </div>
+              <div class="text-danger text-center small" id="dec_qty_invalid_text"></div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn bg-lightpink" type="button" id="dec_qty_confirm_button" onclick="dec_qty()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -2312,6 +2360,11 @@
         remove_valid_many(["inc_qty_emp_id","inc_qty_password","inc_qty_amount"]);
       }
 
+      function clear_validate_dec_qty(){
+        $("#dec_qty_invalid_text").text("");
+        remove_valid_many(["dec_qty_emp_id","dec_qty_password","dec_qty_amount"]);
+      }
+
       function clear_validate_add(){
         $("#add_invalid_text").text("");
         remove_valid_many(["add_emp_id","add_password","add_new_operation_no","add_work_center_no","add_plan_start_date","add_plan_finish_date","add_est_setup_time","add_est_operate_time","add_est_labor_time","add_price_unit","add_price"]);
@@ -2331,6 +2384,13 @@
         clear_validate_inc_qty();
         emptyInputs(["inc_qty_emp_id","inc_qty_password","inc_qty_amount"]);
         $("#inc_qty_emp_id").focus();
+        timeleft = 300;
+      }
+
+      function prepare_dec_qty(){
+        clear_validate_dec_qty();
+        emptyInputs(["dec_qty_emp_id","dec_qty_password","dec_qty_amount"]);
+        $("#dec_qty_emp_id").focus();
         timeleft = 300;
       }
 
@@ -2758,6 +2818,52 @@
                   $('#inc_qty_confirm_button').prop('disabled', true);
                   $.ajax({
                     url: '/inc_qty/',
+                    data: {
+                      'order_no': order_no,
+                      'operation_no': operation_no,
+                      'emp_id' : emp_id,
+                      'password': password,
+                      'amount' : amount,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                      location.reload();
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+      }
+
+      function dec_qty(){
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        var emp_id = $("#dec_qty_emp_id").val();
+        var password = $("#dec_qty_password").val();
+        var amount = $("#dec_qty_amount").val();
+        clear_validate_dec_qty();
+        validate_operator(emp_id, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("dec_qty_emp_id");
+            $("#dec_qty_invalid_text").text(invalid_text);
+          } else {
+            valid("dec_qty_emp_id");
+            validate_section_chief_password(password, function(isCorrect, invalid_text) {
+              if(!isCorrect){
+                invalid("dec_qty_password");
+                $("#dec_qty_invalid_text").text(invalid_text);
+              } else {
+                valid("dec_qty_password");
+                if(amount == "" || amount == 0){
+                  invalid("dec_qty_amount");
+                  $("#dec_qty_invalid_text").text("Please fill amount correctly.");
+                } else {
+                  valid("dec_qty_amount");
+                  $('#dec_qty_confirm_button').prop('disabled', true);
+                  $.ajax({
+                    url: '/dec_qty/',
                     data: {
                       'order_no': order_no,
                       'operation_no': operation_no,

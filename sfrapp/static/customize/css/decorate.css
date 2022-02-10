@@ -23,11 +23,17 @@
 .text-palegoldenrod {
   color:#dfffad;
 }
-
 .text-orangered {
   color:#ff5419;
 }
-
+.bg-skyblue {
+    background-color:#8ed6c0;
+    color:white;
+}
+.bg-lightpink {
+    background-color:#f2a9a9;
+    color:white;
+}
 .my-btn {
   width: 90px;
   padding: 3px;
