@@ -128,7 +128,7 @@
                                   <td>{%if ht.Oper != 0.00 %}{{ht.Oper}}{% endif %}</td>
                                   <td>{%if ht.Labor != 0.00 %}{{ht.Labor}}{% endif %}</td>
                                   <td>
-                                    {% if ht.Setup == 0.00 and ht.Oper == 0.00 and ht.Labor == 0.00  %}<span class="text-muted"><strong>Skip For Reporting</strong></span>
+                                    {% if ht.Setup == 0.00 and ht.Oper == 0.00 and ht.Labor == 0.00  %}<span class="text-muted"><strong>Skip</strong></span>
                                     {% elif ht.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
                                     {% elif ht.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
                                     {% elif ht.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
