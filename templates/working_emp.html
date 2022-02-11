@@ -71,6 +71,7 @@
                             <th>Section</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
+                            <th>FG-MaterialCode</th>
                             <th>Note</th>
                             <th>Working On..</th>
                             <th>Start Date Time</th>
@@ -78,42 +79,43 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for operator in workingOperatorList %}
+                          {% for opr in workingOperatorList %}
                           <tr class="
-                          {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:overtimehour %}text-danger
-                          {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:warninghour %}text-warning{% endif %}"
-                          style="background-color:#f{{operator.StartDateTime|date:'mdH'|add:'0'|modulo:8}}f{{operator.StartDateTime|date:'mdH'|add:'0'|modulo:9}}f{{operator.StartDateTime|date:'mdH'|add:'0'|modulo:10}}"
+                          {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                          {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning{% endif %}"
+                          style="background-color:#f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:8}}f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:9}}f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:10}}"
                           >
-                            <td><a href="/emp/{{operator.EmpID}}&NOW">{{operator.EmpID}}</a></td>
-                            <td>{{operator.EmpName}}</td>
-                            <td>{{operator.Section}}</td>
+                            <td><a href="/emp/{{opr.EmpID}}&NOW">{{opr.EmpID}}</a></td>
+                            <td>{{opr.EmpName}}</td>
+                            <td>{{opr.Section}}</td>
                             <td>
                               <strong>
-                              {% if operator.Status == 'WORKING' %}
+                              {% if opr.Status == 'WORKING' %}
                               <span class="
-                              {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:overtimehour %}text-danger
-                              {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:warninghour %}text-warning
+                              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning
                               {% else %}text-success{% endif %}"
                               >
-                                Working {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
+                                Working {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
                               </span>
-                              {% elif operator.Status == 'SETUP' %}
+                              {% elif opr.Status == 'SETUP' %}
                               <span class="
-                              {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:overtimehour %}text-danger
-                              {% elif operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:warninghour %}text-warning
+                              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning
                               {% else %}text-yellowgreen{% endif %}"
                               >
-                                Setup {% if operator.Status != 'EXT-WORK' and operator.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
+                                Setup {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
                               </span>
-                              {% elif operator.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
-                              {% else %}{{operator.OOPRStatus}}{% endif %}
+                              {% elif opr.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
+                              {% else %}{{opr.OOPRStatus}}{% endif %}
                               </strong>
                             </td>
-                            <td><a href="/transaction/{{operator.OrderNo}}{{operator.OperationNo}}">{{operator.OrderNo}}-{{operator.OperationNo}}</a></td>
-                            <td>{{operator.Note|default_if_none:""}}</td>
-                            <td><a href="/wc/{{operator.WorkCenterNo}}&NOW">{{operator.WorkCenterNo|default_if_none:""}}</a></td>
-                            <td data-order="{% if operator.Status == 'EXT-WORK' %}1{% else%}0{% endif %}{{operator.StartDateTime|date:"U"}}">{{operator.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{operator.StartDateTime|naturaltime}}</td>
+                            <td><a href="/transaction/{{opr.OrderNo}}{{opr.OperationNo}}">{{opr.OrderNo}}-{{opr.OperationNo}}</a></td>
+                            <td>{{opr.FG_MaterialCode|default_if_none:""}}</td>
+                            <td>{{opr.Note|default_if_none:""}}</td>
+                            <td><a href="/wc/{{opr.WorkCenterNo}}&NOW">{{opr.WorkCenterNo|default_if_none:""}}</a></td>
+                            <td data-order="{% if opr.Status == 'EXT-WORK' %}1{% else%}0{% endif %}{{opr.StartDateTime|date:"U"}}">{{opr.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td>{{opr.StartDateTime|naturaltime}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -150,7 +152,7 @@
 
       $(document).ready(function() {
         $('#working_emp_table').DataTable( {
-            "order": [[ 7, "asc" ]],
+            "order": [[ 8, "asc" ]],
             'iDisplayLength': 100,
         });
       });

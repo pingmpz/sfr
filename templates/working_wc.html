@@ -71,6 +71,7 @@
                             <th>Work Center Group</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
+                            <th>FG-MaterialCode</th>
                             <th>Note</th>
                             <th>Start Date Time</th>
                             <th>Duration</th>
@@ -112,6 +113,7 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{wc.OrderNo}}{{wc.OperationNo}}">{{wc.OrderNo}}-{{wc.OperationNo}}</a></td>
+                            <td>{{wc.FG_MaterialCode|default_if_none:""}}</td>
                             <td>{{wc.Note|default_if_none:""}}</td>
                             <td data-order="{{wc.StartDateTime|date:"U"}}">{{wc.StartDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{wc.StartDateTime|naturaltime|default_if_none:""}}</td>
@@ -151,7 +153,7 @@
 
       $(document).ready(function() {
         $('#working_wc_table').DataTable( {
-            "order": [[ 6, "asc" ]],
+            "order": [[ 7, "asc" ]],
             'iDisplayLength': 100,
         });
       });

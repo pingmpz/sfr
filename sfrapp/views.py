@@ -1548,18 +1548,20 @@ def getWorkingOrderList():
 def getWorkingWorkCenterList():
     cursor = get_connection().cursor()
     sql = "SELECT OWC.WorkCenterNo AS WCN, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " LEFT JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
+    sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
+    sql += " INNER JOIN [OrderControl] as ORDC ON OWC.OrderNo = ORDC.OrderNo"
     sql += " WHERE Status <> 'COMPLETED' ORDER BY OWC.OperatingWorkCenterID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getWorkingOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note "
+    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode "
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
+    sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
+    sql += " INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " LEFT JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
     sql += " WHERE OOPR.Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
