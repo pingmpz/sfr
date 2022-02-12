@@ -385,13 +385,14 @@
                                       Status
                                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                       data-content="
-                                      <strong class='text-success'>COMPLETED</strong><br>
-                                      <strong class='text-primary'>JOINING</strong><br>
-                                      <strong class='text-warning'>WORKING</strong><br>
-                                      <strong class='text-info'>READY</strong><br>
-                                      <strong class='text-orangered'>OVERTIME</strong><br>
-                                      <strong class='text-danger'>ERROR</strong><br>
-                                      <strong class='text-dark'>CLOSED</strong><br>
+                                      <strong class='text-success'>Completed</strong><br>
+                                      <strong class='text-yellowgreen'>Partial Completed</strong><br>
+                                      <strong class='text-primary'>Joning</strong><br>
+                                      <strong class='text-warning'>Working</strong><br>
+                                      <strong class='text-info'>Ready</strong><br>
+                                      <strong class='text-orangered'>Overtime</strong><br>
+                                      <strong class='text-danger'>Error</strong><br>
+                                      <strong class='text-dark'>Closed</strong><br>
                                       ">?
                                       </a>
                                     </th>
@@ -407,6 +408,7 @@
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>

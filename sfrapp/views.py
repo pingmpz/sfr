@@ -101,6 +101,7 @@ def transaction(request, orderoprno):
                 #-- IF CLOSED NOT SHOW CURRENT OPERATION
                 if hasNoMoreQty:
                     currentOperation = -1
+                isPartial = False
                 for i in range(len(operationList)):
                     #-- GET STATUS OF OPERATION LIST
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
@@ -109,7 +110,11 @@ def transaction(request, orderoprno):
                     elif operationList[i].ProcessQty == 0:
                         operationStatusList.append("WAITING")
                     elif tempRemainQty == 0:
-                        operationStatusList.append("COMPLETED")
+                        if isPartial:
+                            operationStatusList.append("PARTIALCOMPLETED")
+                        else:
+                            operationStatusList.append("COMPLETED")
+                            isPartial = True
                     elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
                         operationStatusList.append("JOINING")
                     elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
