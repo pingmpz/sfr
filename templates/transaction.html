@@ -407,14 +407,14 @@
                                   {% for item in operationList %}
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px"></i>
+                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Partial Completed"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Joining"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ready"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;" data-toggle="tooltip" data-original-title="Overtime"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Closed"></i>
                                       {% endif %}
                                     </td>
                                     <td>
@@ -1692,6 +1692,8 @@
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Popover JS -->
     <script src="{% static "js/popovers.js" %}"></script>
+    <!-- Tooltips JS -->
+    <script src="{% static "js/tooltips.js" %}"></script>
     <!-- Custom JS -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
