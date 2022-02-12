@@ -98,32 +98,31 @@ def transaction(request, orderoprno):
                     if tempRemainQty > 0:
                         hasNoMoreQty = False
                         break
-                #-- IF CLOSED NOT SHOW CURRENT OPERATION
+                #-- IF CLOSED DONT SHOW CURRENT OPERATION
                 if hasNoMoreQty:
                     currentOperation = -1
                 isPartial = False
                 for i in range(len(operationList)):
                     #-- GET STATUS OF OPERATION LIST
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                    if isPartial == False and tempRemainQty > 0:
+                        isPartial = True
                     if operationList[i].ProcessQty == 0 and hasNoMoreQty:
                         operationStatusList.append("CLOSED")
                     elif operationList[i].ProcessQty == 0:
                         operationStatusList.append("WAITING")
-                    elif tempRemainQty == 0:
-                        if isPartial:
-                            operationStatusList.append("PARTIALCOMPLETED")
-                        else:
-                            operationStatusList.append("COMPLETED")
-                            isPartial = True
                     elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
                         operationStatusList.append("JOINING")
+                    elif isOvertimeOperation(orderNo, operationList[i].OperationNo):
+                        operationStatusList.append("OVERTIME")
                     elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
-                        if(isOvertimeOperation(orderNo, operationList[i].OperationNo)):
-                            operationStatusList.append("OVERTIME")
-                        else:
-                            operationStatusList.append("WORKING")
-                    elif tempRemainQty > 0:
+                        operationStatusList.append("WORKING")
+                    elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
                         operationStatusList.append("READY")
+                    elif tempRemainQty == 0 and isPartial == False:
+                        operationStatusList.append("COMPLETED")
+                    elif tempRemainQty == 0 and isPartial == True:
+                        operationStatusList.append("PARTIALCOMPLETED")
                     else:
                         operationStatusList.append("ERROR")
                     #-- GET PREV & NEXT OPERATION
