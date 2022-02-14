@@ -29,6 +29,7 @@ urlpatterns = [
     #-- REPORT
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
+    path('monthly_work_rec/<str:fmonth>', views.monthly_work_rec, name='monthly_work_rec'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP

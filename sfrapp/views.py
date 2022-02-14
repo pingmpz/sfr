@@ -451,6 +451,18 @@ def mp_ot_auto_machine(request, fmonth):
     }
     return render(request, 'mp_ot_auto_machine.html', context)
 
+def monthly_work_rec(request, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    empWorkRecords = getEmpWorkRecordsList(month, year)
+    context = {
+        'fmonth': fmonth,
+        'empWorkRecords': empWorkRecords,
+    }
+    return render(request, 'monthly_work_rec.html', context)
+
 def zpp02(request):
 
     context = {
@@ -1774,6 +1786,15 @@ def getAutoMachineManualReportOvertimeList(month, year):
     sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo "
     sql += " WHERE Type = 'MANUAL' AND WC.MachineType = 'Auto' AND (Setup != 0 OR Oper != 0 OR Labor != 0) "
     sql += " AND month(DateTimeStamp) = '"+month+"' AND year(DateTimeStamp) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getEmpWorkRecordsList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
+    sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON EMP.EmpID = HO.EmpID"
+    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " GROUP BY HO.EmpID, EMP.EmpName, EMP.Section"
     cursor.execute(sql)
     return cursor.fetchall()
 
