@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from datetime import datetime
 from dateutil import parser
 # FILE READER
-from openpyxl import load_workbook, Workbook
+# from openpyxl import load_workbook, Workbook
 
 ################################################################################
 ##################################### PAGES ####################################
@@ -338,11 +338,25 @@ def wc(request, wcno, fmonth):
     month = fmonth[5:7]
     historyTransList = getWorkCenterHistoryTransactionList(wcno, month, year)
     historyOvertimeList = getWorkCenterHistoryOvertimeList(wcno, month, year)
+    #STATISTIC
+    totalSetupTime = 0
+    totalOperTime = 0
+    totalWorkingTime = 0
+    for trans in historyTransList:
+        totalSetupTime = totalSetupTime + trans.Setup
+        totalOperTime = totalOperTime + trans.Oper
+    totalWorkingTime = totalSetupTime + totalOperTime
+    totalSetupTime = str(int(totalSetupTime/60)) + " Hours " + str(int(totalSetupTime%60)) + " Minutes"
+    totalOperTime = str(int(totalOperTime/60)) + " Hours " + str(int(totalOperTime%60)) + " Minutes"
+    totalWorkingTime = str(int(totalWorkingTime/60)) + " Hours " + str(int(totalWorkingTime%60)) + " Minutes"
     context = {
         'workCenter': workCenter,
         'fmonth': fmonth,
         'historyTransList': historyTransList,
         'historyOvertimeList': historyOvertimeList,
+        'totalSetupTime': totalSetupTime,
+        'totalOperTime': totalOperTime,
+        'totalWorkingTime': totalWorkingTime,
     }
     return render(request, 'wc.html', context)
 
@@ -355,12 +369,26 @@ def emp(request, empid, fmonth):
     historyTransList = getEmployeeHistoryTransactionList(empid, month, year)
     historyConfirmList = getEmployeeHistoryConfirmList(empid, month, year)
     historyOvertimeList = getEmployeeHistoryOvertimeList(empid, month, year)
+    #STATISTIC
+    totalSetupTime = 0
+    totalLaborTime = 0
+    totalWorkingTime = 0
+    for trans in historyTransList:
+        totalSetupTime = totalSetupTime + trans.Setup
+        totalLaborTime = totalLaborTime + trans.Labor
+    totalWorkingTime = totalSetupTime + totalLaborTime
+    totalSetupTime = str(int(totalSetupTime/60)) + " Hours " + str(int(totalSetupTime%60)) + " Minutes"
+    totalLaborTime = str(int(totalLaborTime/60)) + " Hours " + str(int(totalLaborTime%60)) + " Minutes"
+    totalWorkingTime = str(int(totalWorkingTime/60)) + " Hours " + str(int(totalWorkingTime%60)) + " Minutes"
     context = {
         'employee': employee,
         'fmonth': fmonth,
         'historyTransList': historyTransList,
         'historyConfirmList': historyConfirmList,
         'historyOvertimeList': historyOvertimeList,
+        'totalSetupTime': totalSetupTime,
+        'totalLaborTime': totalLaborTime,
+        'totalWorkingTime': totalWorkingTime,
     }
     return render(request, 'emp.html', context)
 
@@ -875,7 +903,7 @@ def confirm(request):
                 if tempRemainQty > 0:
                     hasNoMoreQty = False
                     break
-            if isLastOperation(orderNo, operationNo) or hasNoMoreQty:
+            if isLastOperation(orderNo, operationNo) and hasNoMoreQty:
                 #-- ORDER : STOP
                 updateOrderControl(orderNo, "STOP")
     data = {
@@ -963,7 +991,7 @@ def manual_report(request):
                     if tempRemainQty > 0:
                         hasNoMoreQty = False
                         break
-                if isLastOperation(order_no, operation_no) or hasNoMoreQty:
+                if isLastOperation(order_no, operation_no) and hasNoMoreQty:
                     #-- ORDER : STOP
                     updateOrderControl(order_no, "STOP")
     data = {
@@ -2538,43 +2566,43 @@ def frontZero(str, length):
         result = "0" + result
     return result
 
-def replace_rm_mat_code():
-    wb = load_workbook(filename = 'media/Material Bom.xlsx')
-    ws = wb.active
-    skip_count = 3
-    success_count = 0
-    temp_order_no = None
-    for i in range(ws.max_row + 1):
-        if i < skip_count:
-            continue
-        order_no = ws['A' + str(i)].value
-        new_rm_mat_code = ws['B' + str(i)].value
-        bom_item = ws['C' + str(i)].value
-        if isinstance(order_no, int):
-            if temp_order_no != order_no:
-                temp_order_no = order_no
-                cursor = get_connection().cursor()
-                sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+str(order_no)+"'"
-                cursor.execute(sql)
-                old_order_no = cursor.fetchone()
-                cursor.commit()
-                if old_order_no == None:
-                    print("Order Not Found -->", order_no)
-                else:
-                    old_rm_mat_code = old_order_no.RM_MaterialCode
-                    if old_rm_mat_code == new_rm_mat_code:
-                        print("Already Correct -->", order_no)
-                    elif old_rm_mat_code != new_rm_mat_code:
-                        print("Fixing -->", order_no, "| Old RM Mat Code :", old_rm_mat_code, "| New RM Mat Code :", new_rm_mat_code, "| Bom Item :", bom_item)
-                        # conn = get_connection()
-                        # cursor = conn.cursor()
-                        # sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
-                        # cursor.execute(sql)
-                        # conn.commit()
-                        # cursor = conn.cursor()
-                        # sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
-                        # cursor.execute(sql)
-                        # conn.commit()
-                        success_count = success_count + 1
-    print("Data Correction Amount :", success_count)
-    return
+# def replace_rm_mat_code():
+#     wb = load_workbook(filename = 'media/Material Bom.xlsx')
+#     ws = wb.active
+#     skip_count = 3
+#     success_count = 0
+#     temp_order_no = None
+#     for i in range(ws.max_row + 1):
+#         if i < skip_count:
+#             continue
+#         order_no = ws['A' + str(i)].value
+#         new_rm_mat_code = ws['B' + str(i)].value
+#         bom_item = ws['C' + str(i)].value
+#         if isinstance(order_no, int):
+#             if temp_order_no != order_no:
+#                 temp_order_no = order_no
+#                 cursor = get_connection().cursor()
+#                 sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+str(order_no)+"'"
+#                 cursor.execute(sql)
+#                 old_order_no = cursor.fetchone()
+#                 cursor.commit()
+#                 if old_order_no == None:
+#                     print("Order Not Found -->", order_no)
+#                 else:
+#                     old_rm_mat_code = old_order_no.RM_MaterialCode
+#                     if old_rm_mat_code == new_rm_mat_code:
+#                         print("Already Correct -->", order_no)
+#                     elif old_rm_mat_code != new_rm_mat_code:
+#                         print("Fixing -->", order_no, "| Old RM Mat Code :", old_rm_mat_code, "| New RM Mat Code :", new_rm_mat_code, "| Bom Item :", bom_item)
+#                         # conn = get_connection()
+#                         # cursor = conn.cursor()
+#                         # sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
+#                         # cursor.execute(sql)
+#                         # conn.commit()
+#                         # cursor = conn.cursor()
+#                         # sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
+#                         # cursor.execute(sql)
+#                         # conn.commit()
+#                         success_count = success_count + 1
+#     print("Data Correction Amount :", success_count)
+#     # return
