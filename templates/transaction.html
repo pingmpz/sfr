@@ -50,7 +50,7 @@
             {% endif %}
           </ol>
           {% if state == "DATAFOUND" %}
-          <div class="c-subheader-nav">
+          <div class="c-subheader-nav small">
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
             <a href="/lot_traveller/{{orderNo}}&0" class="btn btn-sm btn-link">Partial Lot Traveller</a>
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
@@ -349,6 +349,7 @@
                                       <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
                                     </div>
                                   </div>
+                                  <img class="imgView" src="//129.1.100.188/Drawingsap/DRAWING/DSKJ0/FG-DSKJ0-B00000001-1AZ.JPG" alt="test"></img>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Routing Group</strong></label>
                                     <div class="col-md-7">
@@ -916,7 +917,7 @@
                     <div class="col-sm-10 col-md-8">
                       <div class="card">
                         <div class="card-body small" style="height:240px; overflow:auto;">
-                          สีปุ่มไม่ขึ้นกด CTRL+F5 หนึ่งรอบนะครับ <i class="text-muted">(10-Feb-2022 14:50)</i><hr>
+                          ปัญหาเรื่อง <b>RM Material Code</b> ไม่ตรงจะอัพเดทอีกทีวันจันทร์ที่ 14 กุมภาพันธ์นะครับ หากมีเคสด่วนโปรดแจ้ง <b>6624</b> <i class="text-muted">(12-Feb-2022 14:05)</i><hr>
                           กล่องด้านบนรูป <i class="c-icon c-icon-sm cil-user"></i> ใช้สำหรับใส่เลขรหัสพนักงาน ถ้าหากพนักงานทำงานอยู่จะกระโดดไปที่ Production Order นั้น ๆ ให้ทันที ไม่สามารถใช้ได้กับ <b class="text-plum">External Process</b> <i class="text-muted">(10-Feb-2022 13:40)</i><hr>
                           ฟังค์ชั่น <b class="text-skyblue">Inc. Qty</b> (เพิ่มจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนครบ</u><br>
                           ฟังค์ชั่น <b class="text-lightpink">Dec. Qty</b> (ลดจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนเลย</u><br>
@@ -1654,7 +1655,7 @@
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <br><h3 class="text-center">Are you sure to reset this order ?</h3><br>
+              <br>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
                 <div class="col-md-8">

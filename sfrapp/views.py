@@ -1373,7 +1373,7 @@ def reset_order(request):
     sql += " DELETE FROM OrderControl WHERE OrderNo = "+order_no+" "
     sql += " DELETE FROM OperationControl WHERE OrderNo = "+order_no+" "
     sql += " DELETE FROM PartialLotTraveller WHERE OrderNo = "+order_no+" "
-    sql += " DELETE FROM SFR2SAP_Report WHERE ProductionOrderNo = "+order_no+" "
+    # sql += " DELETE FROM SFR2SAP_Report WHERE ProductionOrderNo = "+order_no+" "
     sql += " DELETE SAP_Routing WHERE ProductionOrderNo = '"+order_no+"' AND OperationNumber < " + str(start_operation_no)
     cursor.execute(sql)
     conn.commit()
@@ -1581,7 +1581,7 @@ def getOperatingWorkCenterListForTable(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT OWC.OperatingWorkCenterID, OWC.WorkCenterNo, WC.WorkCenterName, OWC.StartDateTime, OWC.StopDateTime, OWC.Status, WC.MachineType, *"
     sql += " FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY OWC.OperatingWorkCenterID ASC"
+    sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY OWC.OperatingWorkCenterID DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1601,7 +1601,7 @@ def getOperatingOperatorListForTable(order_no, operation_no):
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID ASC"
+    sql += " WHERE OOPR.OrderNo = '" + order_no + "' AND OOPR.OperationNo = '" + operation_no + "' ORDER BY OOPR.OperatingOperatorID DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
