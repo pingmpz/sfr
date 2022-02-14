@@ -347,7 +347,6 @@
                                       <input class="form-control form-control-sm" type="text" id="drawing_no" value="{{order.DrawingNo|default_if_none:""}}" readonly>
                                     </div>
                                   </div>
-                                  <img class="imgView" src="//129.1.100.188/Drawingsap/DRAWING/DSKJ0/FG-DSKJ0-B00000001-1AZ.JPG" alt="test"></img>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Routing Group</strong></label>
                                     <div class="col-md-7">
@@ -1849,7 +1848,11 @@
                   row += "<input type='text' id='workcenter_status_"+owc_id+"' value='"+owc_status+"' hidden>";
                   row += "</td>";
                   row += "<td class='small'>";
-                  row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
+                  if(owc_status == "WAITING"){
+                    row += "<div></div>";
+                  } else {
+                    row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
+                  }
                   row += "</td>";
                   row += "<td>";
                   if(owc_status == "WAITING"){
