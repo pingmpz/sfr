@@ -3,6 +3,8 @@ import pyodbc
 from django.http import JsonResponse
 from datetime import datetime
 from dateutil import parser
+# FILE READER
+from openpyxl import load_workbook, Workbook
 
 ################################################################################
 ##################################### PAGES ####################################
@@ -2534,3 +2536,34 @@ def frontZero(str, length):
     for i in range(length - len(str)):
         result = "0" + result
     return result
+
+def replace_rm_mat_code():
+    wb = load_workbook(filename = 'media/RM_MaterialCode.xlsx')
+    ws = wb.active
+    skip_count = 1
+    row_count = 0
+    success_count = 0
+    for i in range(ws.max_row + 1):
+        if i < skip_count:
+            continue
+        order_no = ws['A' + str(i)].value
+        new_rm_mat_code = ws['B' + str(i)].value
+        print(order_no, new_rm_mat_code)
+        cursor = get_connection().cursor()
+        sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+order_no+"'"
+        cursor.execute(sql)
+        old_rm_mat_code = cursor.fetchone().RM_MaterialCode
+        if old_rm_mat_code != new_rm_mat_code:
+            conn = get_connection()
+            cursor = conn.cursor()
+            sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
+            cursor.execute(sql)
+            conn.commit()
+            cursor = conn.cursor()
+            sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
+            cursor.execute(sql)
+            conn.commit()
+            success_count = success_count + 1
+        row_count = row_count + 1
+    print(row_count, success_count)
+    return

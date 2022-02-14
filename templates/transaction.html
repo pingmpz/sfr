@@ -56,15 +56,13 @@
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
           </div>
           {% endif %}
-          {% if state == "FIRSTPAGE" %}
-          <div class="c-subheader-nav">
+          <div class="c-subheader-nav" {% if state != "FIRSTPAGE" %}hidden{% endif %}>
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div><i class="c-icon c-icon-lg cil-user"></i></div>&nbsp;&nbsp;
             <div style="width:50%"><input type="text" class="form-control form-control-sm" id="fp_operator_id" autocomplete="off"></div>
             &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="fp_emp_search()">Go !</button></div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           </div>
-          {% endif %}
           <div class="c-subheader-nav mfe-2">
             <input type="password" hidden> <!-- Prevent Auto fill Password -->
             &nbsp;&nbsp;<div>Prod. Order - Oper. No</div>
@@ -762,8 +760,8 @@
                                 <table class="table table-sm table-outline text-center" style="table-layout:fixed;" id="operator_table">
                                   <thead class="bg-darkslategray">
                                     <tr>
-                                      {% if operation.WorkCenterType == 'Machine' %}<th><i class="c-icon cil-speedometer"></i></th>{% endif %}
                                       <th><i class="c-icon cil-user"></i></th>
+                                      {% if operation.WorkCenterType == 'Machine' %}<th><i class="c-icon cil-speedometer"></i></th>{% endif %}
                                       <th><i class="c-icon cil-speech"></i></th>
                                       <th><i class="c-icon cil-clock"></i></th>
                                       <th><i class="c-icon cil-options"></i></th>
@@ -1908,8 +1906,8 @@
                   var oopr_status = $.trim(oopr[7]);
                   row = "";
                   row += "<tr id='operator_row_"+oopr_id+"'>";
-                  row += (oopr_workcenter_name == null)? "":"<td class='small'>"+oopr_workcenter_name+"</td>";
                   row += "<td class='small'><b>"+oopr_operator_id+"</b><br>"+oopr_operator_name+"</td>";
+                  row += (oopr_workcenter_name == null)? "":"<td class='small'>"+oopr_workcenter_name+"</td>";
                   row += (oopr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += oopr_status+"</td>";
                   row += "<td class='small'>";
