@@ -1529,9 +1529,9 @@ def getWorkCenterList():
 def getOperatorList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT EMP.EmpID, EMP.EmpName, EMP.Section, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
+            SELECT EMP.EmpID, EMP.EmpName, EMP.Section, EMP.IsActive, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
             LEFT JOIN HistoryOperate AS HO ON EMP.EmpID = HO.EmpID
-            GROUP BY EMP.EmpId, EMP.EmpName, EMP.Section
+            GROUP BY EMP.EmpId, EMP.EmpName, EMP.Section, EMP.IsActive
         """
     cursor.execute(sql)
     return cursor.fetchall()

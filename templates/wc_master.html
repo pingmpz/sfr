@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load extra %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -72,17 +73,19 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for workCenter in workCenterList %}
-                          <tr class="{% if workCenter.IsActive == False %}text-danger{% endif %}">
-                            <td>{% if workCenter.IsActive %}<a href="/wc/{{workCenter.WorkCenterNo}}&NOW">{{workCenter.WorkCenterNo}}</a>{% else %}{{workCenter.WorkCenterNo}}{% endif %}</td>
-                            <td>{{workCenter.WorkCenterName}}</td>
-                            <td>{{workCenter.WorkCenterGroup}}</td>
-                            <td>{% if workCenter.IsRouting %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{% if workCenter.IsExternalProcess %}<i class="c-icon cil-check {% if workCenter.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{{workCenter.WorkCenterType}}</td>
-                            <td>{{workCenter.MachineType|default_if_none:""}}</td>
-                            <td>{{workCenter.HourlyRate|floatformat:"0"}}</td>
-                            <td>{{workCenter.Noted|default_if_none:""}}</td>
+                          {% for wc in workCenterList %}
+                          <tr class="{% if wc.IsActive == False %}text-danger{% endif %}"
+                          style="background-color:#f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:8}}f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:9}}f{{wc.WorkCenterGroup|make_list|last|convert_char|modulo:10}}"
+                          >
+                            <td>{{wc.WorkCenterGroup}}</td>
+                            <td>{% if wc.IsActive %}<a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a>{% else %}{{wc.WorkCenterNo}}{% endif %}</td>
+                            <td>{{wc.WorkCenterName}}</td>
+                            <td>{% if wc.IsRouting %}<i class="c-icon cil-check {% if wc.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{% if wc.IsExternalProcess %}<i class="c-icon cil-check {% if wc.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{{wc.WorkCenterType}}</td>
+                            <td>{{wc.MachineType|default_if_none:""}}</td>
+                            <td>{{wc.HourlyRate|floatformat:"0"}}</td>
+                            <td>{{wc.Noted|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -117,10 +120,28 @@
         }, 2000);
       });
 
+      var groupColumn = 0;
       $(document).ready(function() {
         $('#wc_master_table').DataTable( {
+            // "order": [[ 0, "asc" ],[ 1, "asc" ]],
+            // 'iDisplayLength': 100,
+            "columnDefs": [{ "visible": true, "targets": groupColumn }],
             "order": [[ 0, "asc" ]],
-            'iDisplayLength': 100,
+            "displayLength": 100,
+            "drawCallback": function ( settings ) {
+                  var api = this.api();
+                  var rows = api.rows( {page:'current'} ).nodes();
+                  var last=null;
+
+                  api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                      if ( last !== group ) {
+                          $(rows).eq( i ).before(
+                              '<tr class="group"><td colspan="10">⎯<b><i> '+group+'</i></b></td></tr>'
+                          );
+                          last = group;
+                      }
+                });
+              }
         });
       });
     </script>

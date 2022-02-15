@@ -85,7 +85,7 @@
                               <tbody>
                                 {% for rc in empWorkRecords %}
                                 <tr>
-                                  <td>{% if rc.Section != "" %}{{rc.Section}}{% else %}<span hidden>Z</span>No Section{% endif %}</td>
+                                  <td>{{rc.Section}}</td>
                                   <td><a href="/emp/{{rc.EmpID}}&NOW">{{rc.EmpID}}</a></td>
                                   <td>{{rc.EmpName}}</td>
                                   <td>{{rc.Setup.normalize}}</td>
