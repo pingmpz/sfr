@@ -84,7 +84,7 @@
                               </thead>
                               <tbody>
                                 {% for rc in empWorkRecords %}
-                                <tr>
+                                <tr style="background-color:#f{{rc.Section|make_list|first|convert_char|modulo:8}}f{{rc.Section|make_list|first|convert_char|modulo:9}}f{{rc.Section|make_list|last|convert_char|modulo:10}}">
                                   <td>{{rc.Section}}</td>
                                   <td><a href="/emp/{{rc.EmpID}}&NOW">{{rc.EmpID}}</a></td>
                                   <td>{{rc.EmpName}}</td>
@@ -109,7 +109,7 @@
                               </thead>
                               <tbody>
                                 {% for rc in workCenterWorkRecords %}
-                                <tr>
+                                <tr style="background-color:#f{{rc.WorkCenterGroup|make_list|first|convert_char|modulo:8}}f{{rc.WorkCenterGroup|make_list|first|convert_char|modulo:9}}f{{rc.WorkCenterGroup|make_list|last|convert_char|modulo:10}}">
                                   <td>{{rc.WorkCenterGroup}}</td>
                                   <td><a href="/wc/{{rc.WorkCenterNo}}&NOW">{{rc.WorkCenterNo}}</a></td>
                                   <td>{{rc.WorkCenterName}}</td>
