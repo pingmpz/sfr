@@ -457,9 +457,11 @@ def monthly_work_rec(request, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     empWorkRecords = getEmpWorkRecordsList(month, year)
+    workCenterWorkRecords = getWorkCenterWorkRecordsList(month, year)
     context = {
         'fmonth': fmonth,
         'empWorkRecords': empWorkRecords,
+        'workCenterWorkRecords': workCenterWorkRecords,
     }
     return render(request, 'monthly_work_rec.html', context)
 
@@ -1792,9 +1794,18 @@ def getAutoMachineManualReportOvertimeList(month, year):
 def getEmpWorkRecordsList(month, year):
     cursor = get_connection().cursor()
     sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
-    sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON EMP.EmpID = HO.EmpID"
+    sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID"
     sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     sql += " GROUP BY HO.EmpID, EMP.EmpName, EMP.Section"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterWorkRecordsList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT WorkCenterGroup, WC.WorkCenterNo, WorkCenterName, SUM(Setup) AS Setup, SUM(Oper) AS Oper"
+    sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " GROUP BY WC.WorkCenterGroup, WC.WorkCenterNo, WC.WorkCenterName"
     cursor.execute(sql)
     return cursor.fetchall()
 

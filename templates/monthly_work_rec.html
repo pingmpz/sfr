@@ -66,12 +66,12 @@
                     <div class="card-body">
                       <div class="nav-tabs-boxed">
                         <ul class="nav nav-tabs" role="tablist">
-                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#ot-opr-tab" role="tab">Employee ({{empWorkRecords|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#ot-wc-tab" role="tab">WorkCenter ({{overtimeWorkCenterList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#emp-rec-tab" role="tab">Employee ({{empWorkRecords|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-rec-tab" role="tab">WorkCenter ({{workCenterWorkRecords|length}})</a></li>
                         </ul>
                         <div class="tab-content">
-                          <!-- Overtime Operator Tab -->
-                          <div class="tab-pane active" id="ot-opr-tab" role="tabpanel">
+                          <!-- Employee Tab -->
+                          <div class="tab-pane active" id="emp-rec-tab" role="tabpanel">
                             <table class="table table-sm table-outline small" id="emp_work_rec_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -95,22 +95,26 @@
                               </tbody>
                             </table>
                           </div>
-                          <!-- Overtime WorkCenter Tab -->
-                          <div class="tab-pane" id="ot-wc-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="ot_wc_table" style="width: 100%">
+                          <!--WorkCenter Tab -->
+                          <div class="tab-pane" id="wc-rec-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="wc_work_rec_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
-                                  <th>StartDateTime</th>
+                                  <th>WorkCenterGroup</th>
                                   <th>WorkCenter</th>
-                                  <th>Prod. Order - Oper.No</th>
+                                  <th>Name</th>
+                                  <th>Setup (min)</th>
+                                  <th>Oper (min)</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {% for ht in overtimeWorkCenterList %}
-                                <tr style="background-color:#f{{ht.StartDateTime|date:'md'|add:'0'|modulo:8}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:9}}f{{ht.StartDateTime|date:'md'|add:'0'|modulo:10}}">
-                                  <td>{{ht.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                                  <td><a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a></td>
-                                  <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
+                                {% for rc in workCenterWorkRecords %}
+                                <tr>
+                                  <td>{{rc.WorkCenterGroup}}</td>
+                                  <td><a href="/wc/{{rc.WorkCenterNo}}&NOW">{{rc.WorkCenterNo}}</a></td>
+                                  <td>{{rc.WorkCenterName}}</td>
+                                  <td>{{rc.Setup.normalize}}</td>
+                                  <td>{{rc.Oper.normalize}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -152,9 +156,29 @@
       });
 
       var groupColumn = 0;
-      var table;
       $(document).ready(function() {
-        table = $('#emp_work_rec_table').DataTable( {
+        $('#emp_work_rec_table').DataTable( {
+            // "order": [[ 0, "asc" ],[ 1, "asc" ]],
+            // 'iDisplayLength': 100,
+            "columnDefs": [{ "visible": true, "targets": groupColumn }],
+            "order": [[ 0, "asc" ]],
+            "displayLength": 100,
+            "drawCallback": function ( settings ) {
+                  var api = this.api();
+                  var rows = api.rows( {page:'current'} ).nodes();
+                  var last=null;
+
+                  api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                      if ( last !== group ) {
+                          $(rows).eq( i ).before(
+                              '<tr class="group"><td colspan="10">⎯<b><i> '+group+'</i></b></td></tr>'
+                          );
+                          last = group;
+                      }
+                });
+              }
+        });
+        $('#wc_work_rec_table').DataTable( {
             // "order": [[ 0, "asc" ],[ 1, "asc" ]],
             // 'iDisplayLength': 100,
             "columnDefs": [{ "visible": true, "targets": groupColumn }],
