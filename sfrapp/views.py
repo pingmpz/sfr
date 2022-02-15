@@ -110,6 +110,7 @@ def transaction(request, orderoprno):
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
                     if isPartial == False and tempRemainQty > 0:
                         isPartial = True
+                    temphasReportTime = hasReportTimeToSAP(orderNo, operationList[i].OperationNo)
                     if operationList[i].ProcessQty == 0 and hasNoMoreQty:
                         operationStatusList.append("CLOSED")
                     elif operationList[i].ProcessQty == 0:
@@ -122,8 +123,10 @@ def transaction(request, orderoprno):
                         operationStatusList.append("WORKING")
                     elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
                         operationStatusList.append("READY")
-                    elif tempRemainQty == 0 and isPartial == False:
+                    elif tempRemainQty == 0 and isPartial == False and temphasReportTime:
                         operationStatusList.append("COMPLETED")
+                    elif tempRemainQty == 0 and isPartial == False:
+                        operationStatusList.append("COMPLETED, NO WORKING TIME REPORT")
                     elif tempRemainQty == 0 and isPartial == True:
                         operationStatusList.append("PARTIALCOMPLETED")
                     else:

@@ -236,25 +236,25 @@
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime|default_if_none:""}}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime|default_if_none:""}}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime|default_if_none:""}}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:'Created at SFR'}}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="operation_date_get_from_sap" value="{{operation.DateGetFromSAP|default_if_none:'Created at SFR'|date:"d-M-Y, H:i"}}" readonly>
                                     </div>
                                   </div>
                                 </div>
@@ -371,7 +371,7 @@
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""}}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
                                     </div>
                                   </div>
                                 </div>
@@ -387,8 +387,9 @@
                                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                       data-content="
                                       <strong class='text-success'>Completed</strong><br>
+                                      <strong class='text-skyblue'>Completed (No Working Time Report)</strong><br>
                                       <strong class='text-yellowgreen'>Partial Completed</strong><br>
-                                      <strong class='text-primary'>Joning</strong><br>
+                                      <strong class='text-primary'>Joining</strong><br>
                                       <strong class='text-warning'>Working</strong><br>
                                       <strong class='text-info'>Ready</strong><br>
                                       <strong class='text-orangered'>Overtime</strong><br>
@@ -399,16 +400,18 @@
                                     </th>
                                     <th>Operation No</th>
                                     <th>Work Center</th>
-                                    <th>ProcessQty</th>
-                                    <th>AcceptedQty</th>
-                                    <th>RejectedQty</th>
+                                    <th class="text-info">Process</th>
+                                    <th class="text-success">Accepted</th>
+                                    <th class="text-danger">Rejected</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {% for item in operationList %}
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed"></i>
+                                      {% if item.WorkCenterNo == None %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETED, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed (No Working Time Report)"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Partial Completed"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Joining"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working"></i>
@@ -439,7 +442,7 @@
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
-                                    <th></th>
+                                    <th>Note</th>
                                     <th class="text-right">
                                       <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_note()" id="open_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
                                       <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_note()" id="save_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
@@ -475,6 +478,9 @@
                               <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
                                 <!-- Operate Tab -->
                                 <div class="tab-pane active" id="operate-tab" role="tabpanel">
+                                  {% if historyOperateList|length == 0 %}
+                                  <h5 class="text-center">NO DATA</h5>
+                                  {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small">
                                     <thead class="bg-darkslategray">
                                       <tr>
@@ -511,16 +517,20 @@
                                       {% endfor %}
                                     </tbody>
                                   </table>
+                                  {% endif %}
                                 </div>
                                 <!-- Confirm Tab -->
                                 <div class="tab-pane" id="confirm-tab" role="tabpanel">
+                                  {% if historyConfirmList|length == 0 %}
+                                  <h5 class="text-center">NO DATA</h5>
+                                  {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small">
                                     <thead class="bg-darkslategray">
                                       <tr>
                                         <th>Operator</th>
                                         <th>Work Center</th>
-                                        <th>Good Qty</th>
-                                        <th>Reject Qty</th>
+                                        <th class="text-success">Good Qty</th>
+                                        <th class="text-danger">Reject Qty</th>
                                         <th>Reason</th>
                                         <th>Confirm Time</th>
                                       </tr>
@@ -538,9 +548,13 @@
                                       {% endfor %}
                                     </tbody>
                                   </table>
+                                  {% endif %}
                                 </div>
                                 <!-- Join Tab -->
                                 <div class="tab-pane" id="join-tab" role="tabpanel">
+                                  {% if historyJoinList|length == 0 %}
+                                  <h5 class="text-center">NO DATA</h5>
+                                  {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small">
                                     <thead class="bg-darkslategray">
                                       <tr>
@@ -566,9 +580,13 @@
                                       {% endfor %}
                                     </tbody>
                                   </table>
+                                  {% endif %}
                                 </div>
                                 <!-- Mod Tab -->
                                 <div class="tab-pane" id="mod-tab" role="tabpanel">
+                                  {% if modList|length == 0 %}
+                                  <h5 class="text-center">NO DATA</h5>
+                                  {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline text-center small">
                                     <thead class="bg-darkslategray">
                                       <tr>
@@ -594,11 +612,12 @@
                                         <td>{{mod.OperationNo}}</td>
                                         <td>{{mod.EmpID}}</td>
                                         <td>{{mod.ChiefID}}</td>
-                                        <td>{{mod.ModifyDateTime}}</td>
+                                        <td>{{mod.ModifyDateTime|date:"d-M-Y, H:i"}}</td>
                                       </tr>
                                       {% endfor %}
                                     </tbody>
                                   </table>
+                                  {% endif %}
                                 </div>
                               </div>
                             </div>
@@ -810,22 +829,6 @@
                             </div>
                           </div>
                         {% endif %}
-                        <!-- Work Center Error -->
-                        {% if operation.WorkCenterNo == None %}
-                          <div class="col-md-12">
-                            <div class="card text-white bg-danger text-center">
-                              <div class="card-body text-center">
-                                <br><br><br><br><br>
-                                <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
-                                <br>
-                                <h3><strong>ERROR</strong></h3>
-                                <br>
-                                <h6>*** THIS OPERATION WORKCENTER HAS NOT DEFINED PLEASE CONTACT ADMIN ***</h6>
-                                <br><br><br><br><br><br>
-                              </div>
-                            </div>
-                          </div>
-                        {% endif %}
                       {% else %}
                         <!-- Completed Operation -->
                         {% if operation.ProcessQty != 0 %}
@@ -840,11 +843,24 @@
                               </div>
                               <div class="card-body text-center">
                                 <br><br><br><br><br>
-                                <h1><i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i></h1>
+                                <h1>
+                                  <i class="c-icon c-icon-2xl cil-check" style="font-size: 10rem; width: 10rem;"></i>
+                                </h1>
                                 <br>
-                                <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
-                                <h6>Start Process : {{operation.ProcessStart}}</h6>
-                                <h6>Stop Process : {{operation.ProcessStop}}</h6>
+                                <div class="row">
+                                  {% if order.ProcessStop != None %}
+                                  <div class="col-6">
+                                    <h3><strong>THIS ORDER IS COMPLETED</strong></h3>
+                                    <h6>Start Order : {{order.ProcessStart|date:"d-M-Y, H:i"}}</h6>
+                                    <h6>Stop Order : {{order.ProcessStop|date:"d-M-Y, H:i"}}</h6>
+                                  </div>
+                                  {% endif %}
+                                  <div class="{% if order.ProcessStop != None %}col-6{% else %}col-12{% endif %}">
+                                    <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
+                                    <h6>Start Process : {{operation.ProcessStart|date:"d-M-Y, H:i"}}</h6>
+                                    <h6>Stop Process : {{operation.ProcessStop|date:"d-M-Y, H:i"}}</h6>
+                                  </div>
+                                </div>
                                 <br>
                                 {% if currentOperation != -1 %}
                                 <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
@@ -1642,7 +1658,6 @@
               <div class="text-danger text-center small" id="mp_invalid_text"></div>
             </div>
             <div class="modal-footer">
-              <small>Permission: Officer+</small>
               <button class="btn btn-primary" type="button" id="mp_button" onclick="manual_report()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
