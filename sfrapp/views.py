@@ -84,10 +84,10 @@ def transaction(request, orderoprno):
                     return redirect('/transaction/' + orderNo + currentOperation)
             if isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
-                #CONST
+                #-- CONST
                 overtimehour = getOvertimeHour()
                 canMP = getManualReportAllow()
-                #OPRATION DETIAL
+                #-- OPRATION DETIAL
                 operation = getOperation(orderNo, operationNo)
                 isFirst = isFirstOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
@@ -104,9 +104,9 @@ def transaction(request, orderoprno):
                 #-- IF CLOSED DONT SHOW CURRENT OPERATION
                 if hasNoMoreQty:
                     currentOperation = -1
+                #-- SET STATUS OF EACH OPERATION IN LIST
                 isPartial = False
                 for i in range(len(operationList)):
-                    #-- GET STATUS OF OPERATION LIST
                     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
                     if isPartial == False and tempRemainQty > 0:
                         isPartial = True
@@ -137,18 +137,17 @@ def transaction(request, orderoprno):
                             operationBefore = operationList[i-1].OperationNo
                         if i != len(operationList) - 1:
                             operationAfter = operationList[i+1].OperationNo
-                #-- MOD LIST
+                #-- HISTORY TAB
+                historyOperateList = getHistoryOperateList(orderNo, operationNo)
+                historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
+                historyJoinList = getHistoryJoinList(orderNo, operationNo)
                 modList = getModList(orderNo)
-                #-- OVERTIME LIST
+                #-- OVERTIME TAB
                 overTimeOperatorList = getOverTimeOperatorList(orderNo, operationNo)
                 overTimeWorkCenterList = getOverTimeWorkCenterList(orderNo, operationNo)
                 #-- JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
-                #-- HISTORY LIST
-                historyOperateList = getHistoryOperateList(orderNo, operationNo)
-                historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
-                historyJoinList = getHistoryJoinList(orderNo, operationNo)
                 #-- ETC LIST
                 if operation.WorkCenterType == 'Machine':
                     workCenterInGroupList = getWorkCenterInGroupList(operation.WorkCenterGroup)
