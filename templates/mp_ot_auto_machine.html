@@ -83,9 +83,9 @@
                             <td><a href="/transaction/{{rp.OrderNo}}{{rp.OperationNo}}">{{rp.OrderNo}}-{{rp.OperationNo}}</a></td>
                             <td><a href="/emp/{{rp.EmpID}}&NOW">{{rp.EmpID}}</a></td>
                             <td><a href="/wc/{{rp.WorkCenterNo}}&NOW">{{rp.WorkCenterNo}}</a></td>
-                            <td>{%if rp.Setup != 0.00 %}{{rp.Setup}}{% endif %}</td>
-                            <td>{%if rp.Oper != 0.00 %}{{rp.Oper}}{% endif %}</td>
-                            <td>{%if rp.Labor != 0.00 %}{{rp.Labor}}{% endif %}</td>
+                            <td>{%if rp.Setup != 0.00 %}{{rp.Setup.normalize}}{% endif %}</td>
+                            <td>{%if rp.Oper != 0.00 %}{{rp.Oper.normalize}}{% endif %}</td>
+                            <td>{%if rp.Labor != 0.00 %}{{rp.Labor.normalize}}{% endif %}</td>
                           </tr>
                           {% endfor %}
                         </tbody>

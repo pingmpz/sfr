@@ -501,7 +501,8 @@
                                         <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
                                         <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
                                         <td>
-                                          {% if operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-muted"><strong>Skip</strong></span>
+                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-plum"><strong>Ext-Work</strong></span>
+                                          {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-muted"><strong>Skip</strong></span>
                                           {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
                                           {% elif operate.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
                                           {% elif operate.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>

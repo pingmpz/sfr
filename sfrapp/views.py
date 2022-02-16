@@ -795,6 +795,8 @@ def stop_work_operating_operator(request):
         worktimeMachine = 0
     elif oopr.MachineType.strip() == 'Auto':
         worktimeMachine = 0
+    if status == "EXT-WORK":
+        worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
     #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
     if status != "EXT-WORK" and (int(worktimeMachine) > 0 or int(worktimeOperator) > 0):
@@ -1686,7 +1688,9 @@ def getJoinableList(order_no, work_center_group):
 
 def getHistoryOperateList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY StopDateTime DESC"
+    sql = "SELECT * FROM [HistoryOperate] AS HO"
+    sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY StopDateTime DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1724,7 +1728,9 @@ def getOvertimeWorkCenterList(month, year):
 
 def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql = "SELECT * FROM [HistoryOperate] AS HO"
+    sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE EmpID = '"+emp_id+"'AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
