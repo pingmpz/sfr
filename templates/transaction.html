@@ -386,9 +386,9 @@
                                       Status
                                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                       data-content="
-                                      <strong class='text-success'>Completed</strong><br>
-                                      <strong class='text-skyblue'>Completed (No Working Time Report)</strong><br>
-                                      <strong class='text-yellowgreen'>Partial Completed</strong><br>
+                                      <strong class='text-success'>Complete</strong><br>
+                                      <strong class='text-skyblue'>Complete (No Working Time Report)</strong><br>
+                                      <strong class='text-yellowgreen'>Partial Complete</strong><br>
                                       <strong class='text-primary'>Joining</strong><br>
                                       <strong class='text-warning'>Working</strong><br>
                                       <strong class='text-info'>Ready</strong><br>
@@ -410,9 +410,9 @@
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
                                       {% if item.WorkCenterNo == None %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETED, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue" style="padding-top:5px" data-toggle="tooltip" data-original-title="Completed (No Working Time Report)"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETED' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Partial Completed"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Complete"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue" style="padding-top:5px" data-toggle="tooltip" data-original-title="Complete (No Working Time Report)"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Partial Complete"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Joining"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ready"></i>
@@ -831,7 +831,7 @@
                           </div>
                         {% endif %}
                       {% else %}
-                        <!-- Completed Operation -->
+                        <!-- Complete Operation -->
                         {% if operation.ProcessQty != 0 %}
                           <div class="col-md-12">
                             <div class="card text-white bg-success text-center">
@@ -851,13 +851,13 @@
                                 <div class="row">
                                   {% if order.ProcessStop != None %}
                                   <div class="col-6">
-                                    <h3><strong>THIS ORDER IS COMPLETED</strong></h3>
+                                    <h3><strong>THIS ORDER IS COMPLETE</strong></h3>
                                     <h6>Start Order : {{order.ProcessStart|date:"d-M-Y, H:i"}}</h6>
                                     <h6>Stop Order : {{order.ProcessStop|date:"d-M-Y, H:i"}}</h6>
                                   </div>
                                   {% endif %}
                                   <div class="{% if order.ProcessStop != None %}col-6{% else %}col-12{% endif %}">
-                                    <h3><strong>THIS OPERATION IS COMPLETED</strong></h3>
+                                    <h3><strong>THIS OPERATION IS COMPLETE</strong></h3>
                                     <h6>Start Process : {{operation.ProcessStart|date:"d-M-Y, H:i"}}</h6>
                                     <h6>Stop Process : {{operation.ProcessStop|date:"d-M-Y, H:i"}}</h6>
                                   </div>
@@ -1079,7 +1079,7 @@
                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
                       data-content="
                       1) Not Exist Number.<br>
-                      2) Only After Working/Completed Operation.<br>
+                      2) Only After Working/Complete Operation.<br>
                       3) Never Deleted Number.<br>
                       ">!
                       </a>
@@ -1852,7 +1852,7 @@
                   var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTimeFromString(owc_stopdatetime);
                   var owc_status = $.trim(owc[5]);
                   var mc_type = $.trim(owc[6]);
-                  if(owc_status == "COMPLETED") {
+                  if(owc_status == "COMPLETE") {
                     completed_count++;
                     break;
                   }
@@ -1932,7 +1932,7 @@
                   row += "<tr id='operator_row_"+oopr_id+"'>";
                   row += "<td class='small'><b>"+oopr_operator_id+"</b><br>"+oopr_operator_name+"</td>";
                   row += (oopr_workcenter_name == null)? "":"<td class='small'>"+oopr_workcenter_name+"</td>";
-                  row += (oopr_status == 'COMPLETED')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
+                  row += (oopr_status == 'COMPLETE')?"<td class='text-success font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += oopr_status+"</td>";
                   row += "<td class='small'>";
                   row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
@@ -1946,7 +1946,7 @@
                   } else if (oopr_status == "SETUP"){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-success small' id='start_work_operating_operator_"+oopr_id+"' onclick='start_work_operating_operator("+oopr_id+")'>Start Working</button><br>";
                     row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_operating_operator_"+oopr_id+"' onclick='stop_setup_operating_operator("+oopr_id+")'>Stop Setup & Exit</button>";
-                  } else if (oopr_status == "COMPLETED" && $('#remain_qty').val() > 0){
+                  } else if (oopr_status == "COMPLETE" && $('#remain_qty').val() > 0){
                     if($('#join_list_length').val() == 0) {
                       row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
                     } else {

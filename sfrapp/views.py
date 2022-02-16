@@ -124,11 +124,11 @@ def transaction(request, orderoprno):
                     elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
                         operationStatusList.append("READY")
                     elif tempRemainQty == 0 and isPartial == False and temphasReportTime:
-                        operationStatusList.append("COMPLETED")
+                        operationStatusList.append("COMPLETE")
                     elif tempRemainQty == 0 and isPartial == False:
-                        operationStatusList.append("COMPLETED, NO WORKING TIME REPORT")
+                        operationStatusList.append("COMPLETE, NO WORKING TIME REPORT")
                     elif tempRemainQty == 0 and isPartial == True:
-                        operationStatusList.append("PARTIALCOMPLETED")
+                        operationStatusList.append("PARTIALCOMPLETE")
                     else:
                         operationStatusList.append("ERROR")
                     #-- GET PREV & NEXT OPERATION
@@ -468,6 +468,18 @@ def monthly_work_rec(request, fmonth):
     }
     return render(request, 'monthly_work_rec.html', context)
 
+def completed_order(request, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    completedOrderList = getCompletedOrderList(month, year)
+    context = {
+        'fmonth': fmonth,
+        'completedOrderList': completedOrderList,
+    }
+    return render(request, 'completed_order.html', context)
+
 def zpp02(request):
 
     context = {
@@ -732,10 +744,10 @@ def start_work_operating_operator(request):
     oopr = getOperatorOperatingByID(id)
     if oopr.WorkCenterStatus.strip() == "SETUP":
         #-- OPERATOR : SAVE SETUP TIME
-        updateOperatingOperator(id, "COMPLETED")
+        updateOperatingOperator(id, "COMPLETE")
         #-- WORKCENTER : SAVE SETUP TIME
         oopr = getOperatorOperatingByID(id)
-        updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
+        updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETE")
         #-- SAP : SETUP TIME
         oopr = getOperatorOperatingByID(id)
         setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
@@ -756,10 +768,10 @@ def stop_setup_operating_operator(request):
     #-- *** ONLY MACHINE TYPE ***
     id = request.GET.get('id')
     #-- OPERATOR : SAVE SETUP TIME
-    updateOperatingOperator(id, "COMPLETED")
+    updateOperatingOperator(id, "COMPLETE")
     #-- WORKCENTER : SAVE SETUP TIME
     oopr = getOperatorOperatingByID(id)
-    updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
+    updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETE")
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
     #-- IF SETUP TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
@@ -784,7 +796,7 @@ def stop_work_operating_operator(request):
     status = oopr.OperatorStatus
     type = "WORKING"
     #-- OPERATOR : SAVE WORKING TIME
-    updateOperatingOperator(id, "COMPLETED")
+    updateOperatingOperator(id, "COMPLETE")
     #-- SAP : WORKING TIME
     oopr = getOperatorOperatingByID(id)
     workcenter = oopr.WorkCenterNo
@@ -806,7 +818,7 @@ def stop_work_operating_operator(request):
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & WORKCENTER IS MANUAL
     if oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual':
         #-- WORKCENTER : STOP
-        updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETED")
+        updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETE")
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
     data = {
@@ -818,7 +830,7 @@ def stop_operating_workcenter(request):
     #-- *** ONLY AUTO MACHINE TYPE ***
     id = request.GET.get('id')
     #-- WORKCENTER : STOP
-    updateOperatingWorkCenter(id, "COMPLETED")
+    updateOperatingWorkCenter(id, "COMPLETE")
     #-- SAP : WORKING TIME
     owc = getWorkCenterOperatingByID(id)
     worktimeMachine = int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60)
@@ -901,7 +913,7 @@ def confirm(request):
             for owc in owcList:
                 if owc.Status == 'WORKING' and owc.MachineType.strip() == 'Auto':
                     #-- WORKCENTER : STOP
-                    updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
+                    updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETE")
                     #-- SAP : WORKING TIME
                     owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
                     worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
@@ -989,7 +1001,7 @@ def manual_report(request):
                 for owc in owcList:
                     if owc.Status == 'WORKING':
                         #-- WORKCENTER : STOP
-                        updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETED")
+                        updateOperatingWorkCenter(owc.OperatingWorkCenterID, "COMPLETE")
                         #-- SAP : WORKING TIME
                         owc = getWorkCenterOperatingByID(owc.OperatingWorkCenterID)
                         worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
@@ -1608,7 +1620,7 @@ def getWorkingWorkCenterList():
     sql = "SELECT OWC.WorkCenterNo AS WCN, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
     sql += " INNER JOIN [OrderControl] as ORDC ON OWC.OrderNo = ORDC.OrderNo"
-    sql += " WHERE Status <> 'COMPLETED' ORDER BY OWC.OperatingWorkCenterID ASC"
+    sql += " WHERE Status <> 'COMPLETE' ORDER BY OWC.OperatingWorkCenterID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1620,7 +1632,7 @@ def getWorkingOperatorList():
     sql += " INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE OOPR.Status <> 'COMPLETED' ORDER BY OOPR.OperatingOperatorID ASC"
+    sql += " WHERE OOPR.Status <> 'COMPLETE' ORDER BY OOPR.OperatingOperatorID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1674,7 +1686,7 @@ def getJoinableList(order_no, work_center_group):
     #1
     sql += " ProcessQty - (AcceptedQty + RejectedQty) <> 0"
     #2
-    sql += " AND (EmpID IS NULL OR STATUS = 'COMPLETED')"
+    sql += " AND (EmpID IS NULL OR STATUS = 'COMPLETE')"
     #3
     sql += " AND WorkCenterType = 'Machine'"
     #4
@@ -1822,6 +1834,12 @@ def getWorkCenterWorkRecordsList(month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getCompletedOrderList(month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT *, DATEDIFF(DAY, CONVERT(DATE, ProcessStart), CONVERT(DATE, ProcessStop)) AS 'Day' FROM OrderControl WHERE ProcessStop IS NOT NULL and month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
@@ -1852,7 +1870,7 @@ def getOperator(operator_id):
 
 def getWorkCenterOperatingByWorkCenterNo(workcenter_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingWorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "' AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [OperatingWorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "' AND Status <> 'COMPLETE'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -1862,7 +1880,7 @@ def getOperatorOperatingByEmpID(operator_id):
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE OOPR.EmpID = " + str(operator_id) + " AND OOPR.Status <> 'COMPLETED' AND OOPR.Status <> 'EXT-WORK'"
+    sql += " WHERE OOPR.EmpID = " + str(operator_id) + " AND OOPR.Status <> 'COMPLETE' AND OOPR.Status <> 'EXT-WORK'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -1958,29 +1976,29 @@ def isExistOperator(emp_id):
 
 def isWorkCenterOperating(workcenter_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingWorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "' AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [OperatingWorkCenter] WHERE WorkCenterNo = '" + workcenter_no + "' AND Status <> 'COMPLETE'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
 def isOperatorOperating(operator_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] WHERE EmpID = " + str(operator_id) + " AND Status <> 'COMPLETED' AND Status <> 'EXT-WORK'"
+    sql = "SELECT * FROM [OperatingOperator] WHERE EmpID = " + str(operator_id) + " AND Status <> 'COMPLETE' AND Status <> 'EXT-WORK'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
 def hasOperatorOperating(owc_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] WHERE OperatingWorkCenterID = " + str(owc_id) + " AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [OperatingOperator] WHERE OperatingWorkCenterID = " + str(owc_id) + " AND Status <> 'COMPLETE'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
 def isOperatingOperation(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [OperatingOperator] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETE'"
     cursor.execute(sql)
     if len(cursor.fetchall()) > 0:
         return True
-    sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETED'"
+    sql = "SELECT * FROM [OperatingWorkCenter] WHERE OrderNo = '" + order_no + "' and OperationNo = '" + operation_no + "' AND Status <> 'COMPLETE'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -2141,7 +2159,7 @@ def getInsertJoinOperatingWorkCenter(order_no, operation_no, workcenter_no, star
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [OperatingWorkCenter] ([OrderNo],[OperationNo],[WorkCenterNo],[StartDateTime],[StopDateTime],[Status])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + workcenter_no + "','" + startDateTime + "','" + stopDateTime + "','COMPLETED')"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + workcenter_no + "','" + startDateTime + "','" + stopDateTime + "','COMPLETE')"
     cursor.execute(sql)
     conn.commit()
     sql = "SELECT SCOPE_IDENTITY()"
@@ -2157,7 +2175,7 @@ def insertJoinOperatingOperator(order_no, operation_no, operator_id, owc_id, sta
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [OperatingOperator] ([OrderNo],[OperationNo],[EmpID],[OperatingWorkCenterID],[StartDateTime],[StopDateTime],[Status])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + str(owc_id) + "','" + startDateTime + "','" + stopDateTime + "','COMPLETED')"
+    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + str(owc_id) + "','" + startDateTime + "','" + stopDateTime + "','COMPLETE')"
     cursor.execute(sql)
     conn.commit()
     return
@@ -2397,8 +2415,8 @@ def updateOperatingWorkCenter(id, status):
         sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE OperatingWorkCenterID = " + str(id)
     if status == "SETUP":
         sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'SETUP' WHERE OperatingWorkCenterID = " + str(id)
-    if status == "COMPLETED":
-        sql = "UPDATE [OperatingWorkCenter] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE OperatingWorkCenterID = " + str(id)
+    if status == "COMPLETE":
+        sql = "UPDATE [OperatingWorkCenter] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETE' WHERE OperatingWorkCenterID = " + str(id)
     cursor.execute(sql)
     conn.commit()
     return
@@ -2413,8 +2431,8 @@ def updateOperatingOperator(id, status):
         sql = "UPDATE [OperatingOperator] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE OperatingOperatorID = " + str(id)
     if status == "SETUP":
         sql = "UPDATE [OperatingOperator] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'SETUP' WHERE OperatingOperatorID = " + str(id)
-    if status == "COMPLETED":
-        sql = "UPDATE [OperatingOperator] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETED' WHERE OperatingOperatorID = " + str(id)
+    if status == "COMPLETE":
+        sql = "UPDATE [OperatingOperator] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETE' WHERE OperatingOperatorID = " + str(id)
     cursor.execute(sql)
     conn.commit()
 
