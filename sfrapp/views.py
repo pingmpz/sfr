@@ -446,17 +446,27 @@ def mp_ot_auto_machine(request, fmonth):
     }
     return render(request, 'mp_ot_auto_machine.html', context)
 
-def monthly_work_rec(request, fmonth):
+def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    empWorkRecords = getEmpWorkRecordsList(fmonth)
-    workCenterWorkRecords = getWorkCenterWorkRecordsList(fmonth)
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    empWorkRecords = getEmpWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    workCenterWorkRecords = getWorkCenterWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate)
     context = {
+        'ftype': ftype,
+        'fdate': fdate,
         'fmonth': fmonth,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
         'empWorkRecords': empWorkRecords,
         'workCenterWorkRecords': workCenterWorkRecords,
     }
-    return render(request, 'monthly_work_rec.html', context)
+    return render(request, 'work_records.html', context)
 
 def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
@@ -1833,24 +1843,36 @@ def getAutoMachineManualReportOvertimeList(fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmpWorkRecordsList(fmonth):
+def getEmpWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
     sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID"
-    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " WHERE HO.Setup + HO.Labor > 0 AND"
+    if ftype == "DAILY":
+        sql += " StartDateTime >= '" + fdate + " 00:00:00' AND StartDateTime <= '" + fdate + " 23:59:59'"
+    if ftype == "MONTHLY":
+        sql += " month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    if ftype == "RANGE":
+        sql += " StartDateTime >= '" + fstartdate + " 00:00:00' AND StartDateTime <= '" + fstopdate + " 23:59:59'"
     sql += " GROUP BY HO.EmpID, EMP.EmpName, EMP.Section"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterWorkRecordsList(fmonth):
+def getWorkCenterWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT WorkCenterGroup, WC.WorkCenterNo, WorkCenterName, SUM(Setup) AS Setup, SUM(Oper) AS Oper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
-    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " WHERE HO.Setup + HO.Oper > 0 AND"
+    if ftype == "DAILY":
+        sql += " StartDateTime >= '" + fdate + " 00:00:00' AND StartDateTime <= '" + fdate + " 23:59:59'"
+    if ftype == "MONTHLY":
+        sql += " month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    if ftype == "RANGE":
+        sql += " StartDateTime >= '" + fstartdate + " 00:00:00' AND StartDateTime <= '" + fstopdate + " 23:59:59'"
     sql += " GROUP BY WC.WorkCenterGroup, WC.WorkCenterNo, WC.WorkCenterName"
     cursor.execute(sql)
     return cursor.fetchall()
