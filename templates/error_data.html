@@ -120,14 +120,16 @@
                               <thead class="thead-light">
                                 <tr>
                                   <th>ProductionOrderNo</th>
+                                  <th>Registered to SFR</th>
                                   <th>DateGetFromSAP</th>
                                   <th>Duration</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {% for order in orderNotStartList %}
-                                <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
-                                  <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo|default_if_none:""}}</a></td>
+                                <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
+                                  <td><a href="/transaction/{{order.ProductionOrderNo}}0000">{{order.ProductionOrderNo|default_if_none:""}}</a></td>
+                                  <td>{% if order.OrderNo != None %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
                                   <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
                                 </tr>
@@ -217,13 +219,8 @@
             }
         });
 
-        $('#order_not_used_table').DataTable( {
-            "order": [[ 1, "asc" ]],
-            "displayLength": 100,
-        });
-
         $('#order_not_start_table').DataTable( {
-            "order": [[ 1, "asc" ]],
+            "order": [[ 2, "asc" ]],
             "displayLength": 100,
         });
 
