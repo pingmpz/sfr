@@ -47,9 +47,18 @@
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="ftype">
+              <option value="DAILY" {% if ftype == 'DAILY' %}style="color:blue" selected{% endif %}>Daily</option>
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <option value="RANGE" {% if ftype == 'RANGE' %}style="color:blue" selected{% endif %}>Range</option>
+            </select>&nbsp;
+            <input type="date" class="form-control" id="fdate" value="{{fdate}}" onkeydown="return false" required>
             <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
             <input type="text" id="year" value="{{fmonth|slice:'0:4'}}" hidden>
             <input type="text" id="month" value="{{fmonth|slice:'5:7'}}" hidden>
+            <input type="date" class="form-control" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
+            <span id="range-to">&nbsp;-&nbsp;</span>
+            <input type="date" class="form-control" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
           </div>
@@ -122,6 +131,7 @@
         }, 2000);
       });
 
+      toggle();
       $(document).ready(function() {
         $('#completed_order').DataTable( {
             "order": [[ 1, "desc" ]],
@@ -129,9 +139,57 @@
         });
       });
 
-      $('#fmonth').change(function() {
-        window.location.href = "/completed_order/" + $("#fmonth").val();
+      $('#ftype').change(function() {
+        toggle();
+        filter();
       });
+
+      $('#fdate').change(function() {
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      $('#fstartdate').change(function() {
+        filter();
+      });
+
+      $('#fstopdate').change(function() {
+        filter();
+      });
+
+      function toggle(){
+        if($('#ftype').val() == "DAILY"){
+          $("#fdate").prop("hidden", false);
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "MONTHLY"){
+          $("#fdate").prop("hidden", true);
+          $("#fmonth").prop("hidden", false);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "RANGE"){
+          $("#fdate").prop("hidden", true);
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", false);
+          $("#range-to").prop("hidden", false);
+        }
+      }
+
+      function filter(){
+        var ftype = $("#ftype").val();
+        var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
+        var fstartdate = ($("#fstartdate").val() != "" && ftype == "RANGE")?$("#fstartdate").val():"NOW";
+        var fdate = ($("#fdate").val() != "" && ftype == "DAILY")?$("#fdate").val():"NOW";
+        var fstopdate = ($("#fstopdate").val() != "" && ftype == "RANGE")?$("#fstopdate").val():"NOW";
+        window.location.href = "/completed_order/" + ftype + "&" + fdate + "&" + fmonth + "&" + fstartdate + "&" + fstopdate;
+      }
 
     </script>
   </body>

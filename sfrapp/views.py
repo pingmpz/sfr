@@ -467,14 +467,22 @@ def monthly_work_rec(request, fmonth):
     }
     return render(request, 'monthly_work_rec.html', context)
 
-def completed_order(request, fmonth):
+def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    completedOrderList = getCompletedOrderList(month, year)
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    completedOrderList = getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
     context = {
+        'ftype': ftype,
+        'fdate': fdate,
         'fmonth': fmonth,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
         'completedOrderList': completedOrderList,
     }
     return render(request, 'completed_order.html', context)
@@ -1833,9 +1841,26 @@ def getWorkCenterWorkRecordsList(month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getCompletedOrderList(month, year):
+def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT *, DATEDIFF(DAY, CONVERT(DATE, ProcessStart), CONVERT(DATE, ProcessStop)) AS 'Day' FROM OrderControl WHERE ProcessStop IS NOT NULL and month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+    sql = "SELECT *, DATEDIFF(DAY, CONVERT(DATE, ProcessStart), CONVERT(DATE, ProcessStop)) AS 'Day' FROM OrderControl"
+    sql += " WHERE ProcessStop IS NOT NULL AND"
+    if ftype == "DAILY":
+        sql += " ProcessStop >= '" + fdate + " 00:00:00' AND ProcessStop <= '" + fdate + " 23:59:59'"
+    if ftype == "MONTHLY":
+        sql += " month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+    if ftype == "RANGE":
+        sql += " ProcessStop >= '" + fstartdate + " 00:00:00' AND ProcessStop <= '" + fstopdate + " 23:59:59'"
     cursor.execute(sql)
     return cursor.fetchall()
 
