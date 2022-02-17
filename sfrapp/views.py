@@ -27,6 +27,7 @@ def transaction(request, orderoprno):
     #CONST
     overtimehour = 0
     canMP = False
+    refreshSecond = 300
     orderNo = ""
     operationNo = ""
     order = None
@@ -87,6 +88,7 @@ def transaction(request, orderoprno):
                 #-- CONST
                 overtimehour = getOvertimeHour()
                 canMP = getManualReportAllow()
+                refreshSecond = getRefreshSecond()
                 #-- OPRATION DETIAL
                 operation = getOperation(orderNo, operationNo)
                 isFirst = isFirstOperation(orderNo, operationNo)
@@ -159,6 +161,7 @@ def transaction(request, orderoprno):
     context = {
         'overtimehour' : overtimehour,
         'canMP' : canMP,
+        'refreshSecond' : refreshSecond,
         'orderNo' : orderNo,
         'operationNo' : operationNo,
         'state' : state,
@@ -1993,6 +1996,12 @@ def getManualReportAllow():
     sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE'"
     cursor.execute(sql)
     return (cursor.fetchone().Value)
+
+def getRefreshSecond():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[AdminConfig] WHERE KeyText = 'REFRESH_SECOND'"
+    cursor.execute(sql)
+    return int((cursor.fetchone()).Value)
 
 #----------------------------------------------------------------------- BOOLEAN
 
