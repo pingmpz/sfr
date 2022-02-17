@@ -336,10 +336,8 @@ def wc(request, wcno, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     workCenter = getWorkCenter(wcno)
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    historyTransList = getWorkCenterHistoryTransactionList(wcno, month, year)
-    historyOvertimeList = getWorkCenterHistoryOvertimeList(wcno, month, year)
+    historyTransList = getWorkCenterHistoryTransactionList(wcno, fmonth)
+    historyOvertimeList = getWorkCenterHistoryOvertimeList(wcno, fmonth)
     #STATISTIC
     totalSetupTime = 0
     totalOperTime = 0
@@ -366,11 +364,9 @@ def emp(request, empid, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     employee = getOperator(empid)
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    historyTransList = getEmployeeHistoryTransactionList(empid, month, year)
-    historyConfirmList = getEmployeeHistoryConfirmList(empid, month, year)
-    historyOvertimeList = getEmployeeHistoryOvertimeList(empid, month, year)
+    historyTransList = getEmployeeHistoryTransactionList(empid, fmonth)
+    historyConfirmList = getEmployeeHistoryConfirmList(empid, fmonth)
+    historyOvertimeList = getEmployeeHistoryOvertimeList(empid, fmonth)
     #STATISTIC
     totalSetupTime = 0
     totalLaborTime = 0
@@ -430,10 +426,8 @@ def working_emp(request):
 def ot_table(request, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    overtimeOperatorList = getOvertimeOperatorList(month, year)
-    overtimeWorkCenterList = getOvertimeWorkCenterList(month, year)
+    overtimeOperatorList = getOvertimeOperatorList(fmonth)
+    overtimeWorkCenterList = getOvertimeWorkCenterList(fmonth)
     context = {
         'fmonth': fmonth,
         'overtimeOperatorList': overtimeOperatorList,
@@ -444,9 +438,8 @@ def ot_table(request, fmonth):
 def mp_ot_auto_machine(request, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    ReportList = getAutoMachineManualReportOvertimeList(month, year)
+    printString(fmonth)
+    ReportList = getAutoMachineManualReportOvertimeList(fmonth)
     context = {
         'fmonth': fmonth,
         'ReportList': ReportList,
@@ -456,10 +449,8 @@ def mp_ot_auto_machine(request, fmonth):
 def monthly_work_rec(request, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    empWorkRecords = getEmpWorkRecordsList(month, year)
-    workCenterWorkRecords = getWorkCenterWorkRecordsList(month, year)
+    empWorkRecords = getEmpWorkRecordsList(fmonth)
+    workCenterWorkRecords = getWorkCenterWorkRecordsList(fmonth)
     context = {
         'fmonth': fmonth,
         'empWorkRecords': empWorkRecords,
@@ -1729,25 +1720,33 @@ def getHistoryJoinList(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterHistoryTransactionList(work_center_no, month, year):
+def getWorkCenterHistoryTransactionList(work_center_no, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] WHERE WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterHistoryOvertimeList(work_center_no, month, year):
+def getWorkCenterHistoryOvertimeList(work_center_no, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeWorkCenter] WHERE WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getOvertimeWorkCenterList(month, year):
+def getOvertimeWorkCenterList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeWorkCenter] WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmployeeHistoryTransactionList(emp_id, month, year):
+def getEmployeeHistoryTransactionList(emp_id, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] AS HO"
     sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -1755,19 +1754,25 @@ def getEmployeeHistoryTransactionList(emp_id, month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmployeeHistoryConfirmList(emp_id, month, year):
+def getEmployeeHistoryConfirmList(emp_id, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryConfirm] WHERE EmpID = '"+emp_id+"' AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmployeeHistoryOvertimeList(emp_id, month, year):
+def getEmployeeHistoryOvertimeList(emp_id, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeOperator] WHERE EmpID = '"+emp_id+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getOvertimeOperatorList(month, year):
+def getOvertimeOperatorList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeOperator] WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
@@ -1814,7 +1819,10 @@ def getWorkCenterInGroupList(work_center_group):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getAutoMachineManualReportOvertimeList(month, year):
+def getAutoMachineManualReportOvertimeList(fmonth):
+    printString(fmonth)
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT DateTimeStamp, HO.OrderNo, HO.OperationNo, EmpID, HO.WorkCenterNo, Setup, Oper, Labor"
     sql += " FROM HistoryOperate AS HO "
@@ -1825,7 +1833,9 @@ def getAutoMachineManualReportOvertimeList(month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getEmpWorkRecordsList(month, year):
+def getEmpWorkRecordsList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
     sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID"
@@ -1834,7 +1844,9 @@ def getEmpWorkRecordsList(month, year):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterWorkRecordsList(month, year):
+def getWorkCenterWorkRecordsList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT WorkCenterGroup, WC.WorkCenterNo, WorkCenterName, SUM(Setup) AS Setup, SUM(Oper) AS Oper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -1844,14 +1856,6 @@ def getWorkCenterWorkRecordsList(month, year):
     return cursor.fetchall()
 
 def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
-    if fdate == "NOW":
-        fdate = datetime.today().strftime('%Y-%m-%d')
-    if fmonth == "NOW":
-        fmonth = datetime.today().strftime('%Y-%m')
-    if fstartdate == "NOW":
-        fstartdate = datetime.today().strftime('%Y-%m-%d')
-    if fstopdate == "NOW":
-        fstopdate = datetime.today().strftime('%Y-%m-%d')
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
