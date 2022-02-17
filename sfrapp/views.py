@@ -517,7 +517,7 @@ def sap_order(request, fdate, fhour):
     return render(request, 'sap_order.html', context)
 
 def sap_routing(request, fdate, fhour):
-    if fdate == "TODAY":
+    if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
     if fhour == "NOW":
         fhour = datetime.today().strftime('%H')
@@ -530,7 +530,7 @@ def sap_routing(request, fdate, fhour):
     return render(request, 'sap_routing.html', context)
 
 def sap_report(request, fdate, fhour):
-    if fdate == "TODAY":
+    if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
     if fhour == "NOW":
         fhour = datetime.today().strftime('%H')
@@ -543,7 +543,7 @@ def sap_report(request, fdate, fhour):
     return render(request, 'sap_report.html', context)
 
 def sap_mod(request, fdate, fhour):
-    if fdate == "TODAY":
+    if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
     if fhour == "NOW":
         fhour = datetime.today().strftime('%H')
@@ -672,6 +672,8 @@ def get_operator_data(request):
         if isOperatorOperating(operator_id):
             oopr = getOperatorOperatingByEmpID(operator_id)
             invalid_text = operator_id + ' is working at ' + str(oopr.OperatorOrderNo) + "-" + str(oopr.OperatorOperationNo) + "."
+        elif operator.IsActive == False:
+            invalid_text = operator_id + " is In-Active."
         else:
             canAdd = True
     else:
