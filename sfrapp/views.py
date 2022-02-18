@@ -1581,9 +1581,9 @@ def getWorkCenterRoutingList():
 def getOperatorList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT EMP.EmpID, EMP.EmpName, EMP.Section, EMP.IsActive, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
+            SELECT EMP.EmpID, EmpName, Section, CostCenter, IsActive, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
             LEFT JOIN HistoryOperate AS HO ON EMP.EmpID = HO.EmpID
-            GROUP BY EMP.EmpId, EMP.EmpName, EMP.Section, EMP.IsActive
+            GROUP BY EMP.EmpId, EmpName, Section, CostCenter, IsActive
         """
     cursor.execute(sql)
     return cursor.fetchall()
@@ -1661,7 +1661,7 @@ def getWorkingWorkCenterList():
 
 def getWorkingOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode "
+    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode "
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
     sql += " INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo"
@@ -1809,7 +1809,8 @@ def getOvertimeOperatorList(fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OvertimeOperator] WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql = "SELECT * FROM [OvertimeOperator] AS OO LEFT JOIN Employee AS EMP ON OO.EmpID = EMP.EmpID"
+    sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -1876,7 +1877,7 @@ def getEmpWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
+    sql = "SELECT HO.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, SUM(Setup) AS Setup, SUM(Labor) AS Labor"
     sql += " FROM HistoryOperate AS HO INNER JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID"
     sql += " WHERE HO.Setup + HO.Labor > 0 AND"
     if ftype == "DAILY":
@@ -1885,7 +1886,7 @@ def getEmpWorkRecordsList(ftype, fdate, fmonth, fstartdate, fstopdate):
         sql += " month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
     if ftype == "RANGE":
         sql += " StartDateTime >= '" + fstartdate + " 00:00:00' AND StartDateTime <= '" + fstopdate + " 23:59:59'"
-    sql += " GROUP BY HO.EmpID, EMP.EmpName, EMP.Section"
+    sql += " GROUP BY HO.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter"
     cursor.execute(sql)
     return cursor.fetchall()
 

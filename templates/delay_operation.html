@@ -72,7 +72,7 @@
                           <tr>
                             <th>PlanStartDate</th>
                             <th>PlanFinishDate</th>
-                            <th>Late For.. (Days)</th>
+                            <th>Late For.. (Day)</th>
                             <th>Prod. Order - Oper.No</th>
                             <th>FG_MaterialCode</th>
                             <th>SalesOrderNo</th>
@@ -162,7 +162,7 @@
 
       $(document).ready(function() {
         $('#delay_operation_table').DataTable( {
-            "order": [[ 0, "asc" ]],
+            "order": [[ 2, "desc" ]],
             'iDisplayLength': 100,
         });
       });

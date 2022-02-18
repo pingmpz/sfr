@@ -85,6 +85,12 @@
                           </div>
                         </div>
                         <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>CostCenter</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{employee.CostCenter}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
                           <label class="col-md-4 col-form-label text-right"><strong>Active</strong></label>
                           <div class="col-md-8">
                             {% if employee.IsActive %}<i class="c-icon cil-check-alt text-success" style="padding-top: 7px"></i>

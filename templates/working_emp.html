@@ -69,6 +69,7 @@
                             <th>EmpID</th>
                             <th>Name</th>
                             <th>Section</th>
+                            <th>CostCenter</th>
                             <th>Status</th>
                             <th>Prod. Order - Oper. No</th>
                             <th>FG-MaterialCode</th>
@@ -88,6 +89,7 @@
                             <td><a href="/emp/{{opr.EmpID}}&NOW">{{opr.EmpID}}</a></td>
                             <td>{{opr.EmpName}}</td>
                             <td>{{opr.Section}}</td>
+                            <td>{{opr.CostCenter}}</td>
                             <td>
                               <strong>
                               {% if opr.Status == 'WORKING' %}
@@ -152,7 +154,7 @@
 
       $(document).ready(function() {
         $('#working_emp_table').DataTable( {
-            "order": [[ 8, "asc" ]],
+            "order": [[ 9, "asc" ]],
             'iDisplayLength': 100,
         });
       });
