@@ -428,11 +428,15 @@ def pending_operation(request, fwc):
     workCenterList = getWorkCenterRoutingList()
     if fwc == "FIRST":
         fwc = workCenterList[0].WorkCenterNo
-    pendingOperationList = getPendingOperationList(fwc)
+    SAPPendingOperationList = getSAPPendingOperationList(fwc)
+    SFRPendingOperationList = getSFRPendingOperationList(fwc)
+    pending_list_len = len(SAPPendingOperationList) + len(SFRPendingOperationList)
     context = {
         'fwc': fwc,
         'workCenterList': workCenterList,
-        'pendingOperationList': pendingOperationList,
+        'SAPPendingOperationList': SAPPendingOperationList,
+        'SFRPendingOperationList': SFRPendingOperationList,
+        'pending_list_len': pending_list_len,
     }
     return render(request, 'pending_operation.html', context)
 
@@ -520,7 +524,7 @@ def zpp04(request):
 #--------------------------------------------------------------------------- SAP
 
 def sap_order(request, fdate, fhour):
-    if fdate == "TODAY":
+    if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
     if fhour == "NOW":
         fhour = datetime.today().strftime('%H')
@@ -1917,16 +1921,24 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getPendingOperationList(fwc):
+def getSAPPendingOperationList(fwc):
     cursor = get_connection().cursor()
-    sql = "SELECT RT.ProductionOrderNo, Min(OperationNumber) AS OperationNumber, OrderNo, OperationNo, ProcessQty, AcceptedQty, RejectedQty, ProductionOrderQuatity,"
-    sql += " RT.PlanStartDate AS RTPlanStartDate, RT.PlanFinishDate AS RTPlanFinishDate, OC.PlanStartDate AS OCPlanStartDate, OC.PlanFinishDate AS OCPlanFinishDate"
-    sql += " FROM SAP_Routing AS RT FULL OUTER JOIN OperationControl AS OC ON RT.ProductionOrderNo = OC.OrderNo AND RT.OperationNumber = OC.OperationNo"
-    sql += " INNER JOIN SAP_Order AS ORD1 ON RT.ProductionOrderNo = ORD1.ProductionOrderNo"
-    sql += " WHERE (OrderNo IS NULL AND RT.WorkCenter = '"+ fwc +"') OR ((ProcessQty -(AcceptedQty + RejectedQty) > 0) AND OC.WorkCenterNo = '"+ fwc +"')"
-    sql += " GROUP BY RT.ProductionOrderNo, OrderNo, OperationNo, ProcessQty, AcceptedQty, RejectedQty, ProductionOrderQuatity, RT.PlanStartDate, RT.PlanFinishDate, OC.PlanStartDate, OC.PlanFinishDate"
-    sql += " ORDER BY RT.ProductionOrderNo, OrderNo ASC"
-    print(sql)
+    sql = """
+            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo
+            FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
+            WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
+            GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
+            INNER JOIN SAP_Order AS SO ON SO.ProductionOrderNo = RT.ProductionOrderNo
+        """
+    sql += " WHERE RT.WorkCenter = '"+fwc+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSFRPendingOperationList(fwc):
+    cursor = get_connection().cursor()
+    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, *"
+    sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
+    sql += " WHERE (ProcessQty - (AcceptedQty + RejectedQty) > 0) AND WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
