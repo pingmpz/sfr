@@ -1924,7 +1924,7 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
 def getSAPDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
-            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo
+            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, PlanStartDate, PlanFinishDate, DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, PlanFinishDate, 104)), GETDATE()) AS 'Day'
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
             WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
@@ -1936,7 +1936,7 @@ def getSAPDelayOperationList(fwc):
 
 def getSFRDelayOperationList(fwc):
     cursor = get_connection().cursor()
-    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, *"
+    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, DATEDIFF(DAY, CONVERT(DATE, PlanFinishDate), GETDATE()) AS 'Day', *"
     sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
     sql += " WHERE (ProcessQty - (AcceptedQty + RejectedQty) > 0) AND WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)

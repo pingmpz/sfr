@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 {% load extra %}
+{% load humanize %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -69,41 +70,58 @@
                       <table class="table table-sm table-outline small" id="delay_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
+                            <th>PlanStartDate</th>
+                            <th>PlanFinishDate</th>
+                            <th>Late For.. (Days)</th>
                             <th>Prod. Order - Oper.No</th>
                             <th>FG_MaterialCode</th>
+                            <th>SalesOrderNo</th>
+                            <th>DrawingNo</th>
                             <th>ProcessQty</th>
                             <th>RemainingQty</th>
                             <th>AcceptedQty</th>
                             <th>RejectedQty</th>
-                            <th>SalesOrderNo</th>
-                            <th>DrawingNo</th>
                             <th>Registered to SFR</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for op in SAPDelayOperationList %}
                             <tr>
+                              <td data-order="{{op.PlanStartDate|slice:'6:10'}}{{op.PlanStartDate|slice:'3:5'}}{{op.PlanStartDate|slice:'0:2'}}">
+                                {{op.PlanStartDate|slice:'0:2'}}-{{op.PlanStartDate|slice:'3:5'}}-{{op.PlanStartDate|slice:'6:10'}}
+                              </td>
+                              <td data-order="{{op.PlanFinishDate|slice:'6:10'}}{{op.PlanFinishDate|slice:'3:5'}}{{op.PlanFinishDate|slice:'0:2'}}">
+                                {{op.PlanFinishDate|slice:'0:2'}}-{{op.PlanFinishDate|slice:'3:5'}}-{{op.PlanFinishDate|slice:'6:10'}}
+                              </td>
+                              <td>{{op.Day}}</td>
                               <td>{{op.ProductionOrderNo}}-{{op.OperationNumber}}</td>
                               <td>{{op.FG_MaterialCode}}</td>
-                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
-                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
-                              <td>0</td>
-                              <td>0</td>
                               <td>{{op.SalesOrderNo}}</td>
                               <td>{{op.DrawingNo}}</td>
+                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
+                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
+                              <td>0</td>
+                              <td>0</td>
                               <td><b class="text-danger">No</b></td>
                             </tr>
                           {% endfor %}
                           {% for op in SFRDelayOperationList %}
                             <tr>
-                              <td>{{op.OrderNo}}-{{op.OperationNo}}</td>
+                              <td data-order="{{op.PlanStartDate|slice:'0:4'}}{{op.PlanStartDate|slice:'5:7'}}{{op.PlanStartDate|slice:'8:10'}}">
+                                {{op.PlanStartDate|slice:'8:10'}}-{{op.PlanStartDate|slice:'5:7'}}-{{op.PlanStartDate|slice:'0:4'}}
+                              </td>
+                              <td data-order="{{op.PlanFinishDate|slice:'0:4'}}{{op.PlanFinishDate|slice:'5:7'}}{{op.PlanFinishDate|slice:'8:10'}}">
+                                {{op.PlanFinishDate|slice:'8:10'}}-{{op.PlanFinishDate|slice:'5:7'}}-{{op.PlanFinishDate|slice:'0:4'}}
+                              </td>
+                              <td>{{op.Day}}</td>
+                              <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
+                              <td>{{op.SalesOrderNo}}</td>
+                              <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProcessQty.normalize}}</td>
                               <td>{{op.RemainingQty.normalize}}</td>
                               <td>{{op.AcceptedQty.normalize}}</td>
                               <td>{{op.RejectedQty.normalize}}</td>
-                              <td>{{op.SalesOrderNo}}</td>
-                              <td>{{op.DrawingNo}}</td>
                               <td><b class="text-success">Yes</b></td>
                             </tr>
                           {% endfor %}
@@ -143,7 +161,7 @@
       });
 
       $(document).ready(function() {
-        $('#pending_operation_table').DataTable( {
+        $('#delay_operation_table').DataTable( {
             "order": [[ 0, "asc" ]],
             'iDisplayLength': 100,
         });
