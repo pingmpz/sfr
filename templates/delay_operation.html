@@ -17,7 +17,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Pending Operation | Shopfloor Reporting Application</title>
+    <title>Delay | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -42,7 +42,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Pending Operation ({{pending_list_len}})</li>
+            <li class="breadcrumb-item">Delay ({{delay_list_len}})</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
@@ -66,7 +66,7 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="pending_operation_table" style="width: 100%">
+                      <table class="table table-sm table-outline small" id="delay_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
                             <th>Prod. Order - Oper.No</th>
@@ -81,7 +81,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for op in SAPPendingOperationList %}
+                          {% for op in SAPDelayOperationList %}
                             <tr>
                               <td>{{op.ProductionOrderNo}}-{{op.OperationNumber}}</td>
                               <td>{{op.FG_MaterialCode}}</td>
@@ -94,7 +94,7 @@
                               <td><b class="text-danger">No</b></td>
                             </tr>
                           {% endfor %}
-                          {% for op in SFRPendingOperationList %}
+                          {% for op in SFRDelayOperationList %}
                             <tr>
                               <td>{{op.OrderNo}}-{{op.OperationNo}}</td>
                               <td>{{op.FG_MaterialCode}}</td>
@@ -150,7 +150,7 @@
       });
 
       $('#fwc').change(function() {
-        window.location.href = "/pending_operation/" + $("#fwc").val();
+        window.location.href = "/delay_operation/" + $("#fwc").val();
       });
 
     </script>

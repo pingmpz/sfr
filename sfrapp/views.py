@@ -424,21 +424,21 @@ def working_emp(request):
     }
     return render(request, 'working_emp.html', context)
 
-def pending_operation(request, fwc):
+def delay_operation(request, fwc):
     workCenterList = getWorkCenterRoutingList()
     if fwc == "FIRST":
         fwc = workCenterList[0].WorkCenterNo
-    SAPPendingOperationList = getSAPPendingOperationList(fwc)
-    SFRPendingOperationList = getSFRPendingOperationList(fwc)
-    pending_list_len = len(SAPPendingOperationList) + len(SFRPendingOperationList)
+    SAPDelayOperationList = getSAPDelayOperationList(fwc)
+    SFRDelayOperationList = getSFRDelayOperationList(fwc)
+    delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     context = {
         'fwc': fwc,
         'workCenterList': workCenterList,
-        'SAPPendingOperationList': SAPPendingOperationList,
-        'SFRPendingOperationList': SFRPendingOperationList,
-        'pending_list_len': pending_list_len,
+        'SAPDelayOperationList': SAPDelayOperationList,
+        'SFRDelayOperationList': SFRDelayOperationList,
+        'delay_list_len': delay_list_len,
     }
-    return render(request, 'pending_operation.html', context)
+    return render(request, 'delay_operation.html', context)
 
 #------------------------------------------------------------------------ REPORT
 
@@ -1921,7 +1921,7 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getSAPPendingOperationList(fwc):
+def getSAPDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
             SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo
@@ -1934,7 +1934,7 @@ def getSAPPendingOperationList(fwc):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getSFRPendingOperationList(fwc):
+def getSFRDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, *"
     sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
