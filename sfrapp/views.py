@@ -424,6 +424,18 @@ def working_emp(request):
     }
     return render(request, 'working_emp.html', context)
 
+def pending_operation(request, fwc):
+    workCenterList = getWorkCenterRoutingList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    pendingOperationList = getPendingOperationList(fwc)
+    context = {
+        'fwc': fwc,
+        'workCenterList': workCenterList,
+        'pendingOperationList': pendingOperationList,
+    }
+    return render(request, 'pending_operation.html', context)
+
 #------------------------------------------------------------------------ REPORT
 
 def ot_table(request, fmonth):
@@ -1556,6 +1568,12 @@ def getWorkCenterList():
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getWorkCenterRoutingList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [WorkCenter] WHERE IsRouting = 1"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getOperatorList():
     cursor = get_connection().cursor()
     sql = """
@@ -1899,6 +1917,18 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getPendingOperationList(fwc):
+    cursor = get_connection().cursor()
+    sql = "SELECT RT.ProductionOrderNo, Min(OperationNumber) AS OperationNumber, OrderNo, OperationNo, ProcessQty, AcceptedQty, RejectedQty, ProductionOrderQuatity,"
+    sql += " RT.PlanStartDate AS RTPlanStartDate, RT.PlanFinishDate AS RTPlanFinishDate, OC.PlanStartDate AS OCPlanStartDate, OC.PlanFinishDate AS OCPlanFinishDate"
+    sql += " FROM SAP_Routing AS RT FULL OUTER JOIN OperationControl AS OC ON RT.ProductionOrderNo = OC.OrderNo AND RT.OperationNumber = OC.OperationNo"
+    sql += " INNER JOIN SAP_Order AS ORD1 ON RT.ProductionOrderNo = ORD1.ProductionOrderNo"
+    sql += " WHERE (OrderNo IS NULL AND RT.WorkCenter = '"+ fwc +"') OR ((ProcessQty -(AcceptedQty + RejectedQty) > 0) AND OC.WorkCenterNo = '"+ fwc +"')"
+    sql += " GROUP BY RT.ProductionOrderNo, OrderNo, OperationNo, ProcessQty, AcceptedQty, RejectedQty, ProductionOrderQuatity, RT.PlanStartDate, RT.PlanFinishDate, OC.PlanStartDate, OC.PlanFinishDate"
+    sql += " ORDER BY RT.ProductionOrderNo, OrderNo ASC"
+    print(sql)
+    cursor.execute(sql)
+    return cursor.fetchall()
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
