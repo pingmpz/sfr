@@ -72,15 +72,13 @@
                           <tr>
                             <th>PlanStartDate</th>
                             <th>PlanFinishDate</th>
-                            <th>Late For.. (Day)</th>
+                            <th>Late From PlanFinishDate (Day)</th>
                             <th>Prod. Order - Oper.No</th>
                             <th>FG_MaterialCode</th>
                             <th>SalesOrderNo</th>
                             <th>DrawingNo</th>
                             <th>ProcessQty</th>
                             <th>RemainingQty</th>
-                            <th>AcceptedQty</th>
-                            <th>RejectedQty</th>
                             <th>Registered to SFR</th>
                           </tr>
                         </thead>
@@ -94,14 +92,12 @@
                                 {{op.PlanFinishDate|slice:'0:2'}}-{{op.PlanFinishDate|slice:'3:5'}}-{{op.PlanFinishDate|slice:'6:10'}}
                               </td>
                               <td>{{op.Day}}</td>
-                              <td>{{op.ProductionOrderNo}}-{{op.OperationNumber}}</td>
+                              <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
-                              <td>0</td>
-                              <td>0</td>
                               <td><b class="text-danger">No</b></td>
                             </tr>
                           {% endfor %}
@@ -120,8 +116,6 @@
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProcessQty.normalize}}</td>
                               <td>{{op.RemainingQty.normalize}}</td>
-                              <td>{{op.AcceptedQty.normalize}}</td>
-                              <td>{{op.RejectedQty.normalize}}</td>
                               <td><b class="text-success">Yes</b></td>
                             </tr>
                           {% endfor %}

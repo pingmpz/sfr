@@ -583,11 +583,15 @@ def admin_controller(request):
     empNameList = []
     for user in userList:
         empNameList.append(getEmpIDByUserID(user.UserID))
+    overtimehour = getOvertimeHour()
     canMP = getManualReportAllow()
+    refreshSecond = getRefreshSecond()
     context = {
         'userList': userList,
         'empNameList': empNameList,
+        'overtimehour': overtimehour,
         'canMP': canMP,
+        'refreshSecond': refreshSecond,
     }
     return render(request, 'admin_controller.html', context)
 

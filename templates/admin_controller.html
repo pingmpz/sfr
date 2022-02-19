@@ -289,12 +289,11 @@
                 </div>
                 <div class="col-md-7">
                   <div class="card">
-                    <div class="card-body">
-                      {% if canMP %}
-                      <i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px"></i> Manual Report
-                      {% else %}
-                      <i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i> Manual Report
-                      {% endif %}
+                    <div class="card-body small">
+                      MANUAL_REPORT_ALLOWDANCE :
+                      {% if canMP %}<span class="text-success"> Allow</span>{% else %}<span class="text-danger"> Not Allow</span>{% endif %}<br>
+                      REFRESH_SECOND : {{refreshSecond}}<br>
+                      OVERTIME_HOUR : {{overtimehour}}<br>
                     </div>
                   </div>
                   <!-- ALL List -->

@@ -113,6 +113,9 @@
                                 {% endfor %}
                               </tbody>
                             </table>
+                            {% for dup in oderNoRoutingList %}
+                                <small class="text-dark">DELETE FROM OrderControl WHERE OrderNo = '{{dup.ProductionOrderNo}}'<br></small>
+                            {% endfor %}
                           </div>
                           <!-- Order Not Start Tab -->
                           <div class="tab-pane" id="order-not-start-tab" role="tabpanel">
