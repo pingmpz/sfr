@@ -11,7 +11,8 @@ from dateutil import parser
 ################################################################################
 
 def blank(request):
-    replace_rm_mat_code()
+    # replace_rm_mat_code()
+    # replace_sec_and_cost()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -2776,4 +2777,29 @@ def frontZero(str, length):
 #                         # conn.commit()
 #                         success_count = success_count + 1
 #     print("Data Correction Amount :", success_count)
-#     # return
+    # return
+
+# def replace_sec_and_cost():
+#     wb = load_workbook(filename = 'media/Employee.xlsx')
+#     ws = wb.active
+#     skip_count = 1
+#     success_count = 0
+#     for i in range(ws.max_row + 1):
+#         if i < skip_count:
+#             continue
+#         emp_id = ws['A' + str(i)].value
+#         emp_name = ws['B' + str(i)].value
+#         section = ws['C' + str(i)].value
+#         costcenter = ws['D' + str(i)].value
+#         if emp_id != None:
+#             if section == None:
+#                 section = ""
+#             if costcenter == None:
+#                 costcenter = ""
+#             conn = get_connection()
+#             cursor = conn.cursor()
+#             sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"' WHERE EmpID = '"+str(emp_id)+"'"
+#             cursor.execute(sql)
+#             conn.commit()
+#     print("Data Correction Amount :", success_count)
+#     return
