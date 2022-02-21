@@ -806,7 +806,7 @@
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-av-timer" style="font-size: 10rem; width: 10rem;"></i></h1>
                                 <br>
-                                <h3><strong>THIS OPERATION IS OVERTIME</strong></h3>
+                                <h3><strong>This Operation is Overtime</strong></h3>
                                 <br>
                                 <p>This operation exceed {{overtimehour}} hrs working time limit.<br>Please correct stop time manually.</p>
                                 <button type="button" class="btn btn-pill btn-lg btn-dark small" onclick="fix_overtime()" id="fix_overtime_button"><strong>Fix Stop Time</strong></button>
@@ -823,7 +823,7 @@
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-fork" style="font-size: 10rem; width: 10rem;"></i></h1>
                                 <br>
-                                <h3><strong>THIS OPERATION IS JOINING</strong></h3>
+                                <h3><strong>This Operation is Joining</strong></h3>
                                 <br>
                                 <a href="/transaction/{{operation.JoinToOrderNo}}{{operation.JoinToOperationNo}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO JOIN OPERATION #{{operation.JoinToOrderNo}}-{{operation.JoinToOperationNo}}&nbsp;&nbsp;&nbsp;</strong></a>
                                 <br><br><br><br><br>
@@ -852,20 +852,20 @@
                                 <div class="row">
                                   {% if order.ProcessStop != None %}
                                   <div class="col-6">
-                                    <h3><strong>THIS ORDER IS COMPLETE</strong></h3>
+                                    <h3><strong>This Order is Complete</strong></h3>
                                     <h6>Start Order : {{order.ProcessStart|date:"d-M-Y, H:i"}}</h6>
                                     <h6>Stop Order : {{order.ProcessStop|date:"d-M-Y, H:i"}}</h6>
                                   </div>
                                   {% endif %}
                                   <div class="{% if order.ProcessStop != None %}col-6{% else %}col-12{% endif %}">
-                                    <h3><strong>THIS OPERATION IS COMPLETE</strong></h3>
+                                    <h3><strong>This Operation is Complete</strong></h3>
                                     <h6>Start Process : {{operation.ProcessStart|date:"d-M-Y, H:i"}}</h6>
                                     <h6>Stop Process : {{operation.ProcessStop|date:"d-M-Y, H:i"}}</h6>
                                   </div>
                                 </div>
                                 <br>
                                 {% if currentOperation != -1 %}
-                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;Go To Current Operation #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
                                 {% endif %}
                                 <br><br><br><br>
                               </div>
@@ -880,10 +880,10 @@
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
                                 <br>
-                                <h3><strong>THIS OPERATION IS WAITING</strong></h3>
+                                <h3><strong>This Operation is Waiting</strong></h3>
                                 <br>
                                 {% if currentOperation != -1 %}
-                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;Go To Current Operation #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
                                 {% endif %}
                                 <br><br><br><br><br>
                               </div>
@@ -903,20 +903,22 @@
                   <h1><i class="c-icon c-icon-2xl cil-ban" style="font-size: 10rem; width: 10rem;"></i></h1>
                   <br>
                   {% if state == "NODATAFOUND" %}
-                  <h1><strong>PRODUCTION ORDER NOT FOUND</strong></h1>
+                  <h1><strong>Production Order No Not Found</strong></h1>
                   {% elif state == "NOOPERATIONFOUND" %}
-                  <h1><strong>OPERATION NOT FOUND</strong></h1>
+                  <h1><strong>Operation Not Found</strong></h1>
                   {% endif %}
                   <p>
-                    <strong>PRODUCTION ORDER NO</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
+                    <strong>Production Order No</strong><br><span class="{% if state == "NODATAFOUND" %}text-danger{% else %}text-success{% endif %}"><strong><span id="nf_order_no">{{orderNo}}</span></strong></span>
                     <br>
-                    <strong>OPERATION NO</strong><br><span class="text-danger"><strong><span id="nf_operation_no">{{operationNo}}</span></strong></span>
+                    <strong>Operation No</strong><br><span class="text-danger"><strong><span id="nf_operation_no">{{operationNo}}</span></strong></span>
                   </p>
                   {% if state == "NOOPERATIONFOUND" and currentOperation != -1 %}
-                  <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                  <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;Go To Current Operation #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
                   {% elif state == "NOOPERATIONFOUND" %}
-                  <p class="text-danger">*** This Production has only header, please try refresh (F5) once ***</p>
-                  <p class="text-danger">*** If this message show again please contact SFR Team ***</p>
+                  <p class="text-danger">
+                    This Production has only header, please try refresh (F5) once<br>
+                    If this message show again please contact SFR Team<br>
+                  </p>
                   {% endif %}
                 </div>
               </div>
