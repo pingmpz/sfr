@@ -158,6 +158,8 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
+            else:
+                deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
         'overtimehour' : overtimehour,
@@ -2714,6 +2716,14 @@ def deleteUser(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [User] WHERE UserID = '"+user_id+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteOrderControl(order_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OrderControl] WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     conn.commit()
     return

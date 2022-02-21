@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>AB Graph | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">AB Graph</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="ftype">
+              <option value="DAILY" {% if ftype == 'DAILY' %}style="color:blue" selected{% endif %}>Daily</option>
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <option value="RANGE" {% if ftype == 'RANGE' %}style="color:blue" selected{% endif %}>Range</option>
+            </select>&nbsp;
+            <input type="date" class="form-control" id="fdate" value="{{fdate}}" onkeydown="return false" required>
+            <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="date" class="form-control" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
+            <span id="range-to">&nbsp;-&nbsp;</span>
+            <input type="date" class="form-control" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <table class="table table-sm table-outline small" id="completed_order" style="width: 100%">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>Start Date Time</th>
+                            <th>Stop Date Time</th>
+                            <th>Duration (Day)</th>
+                            <th>Production Order No</th>
+                            <th>FG-MaterialCode</th>
+                            <th>Order Note</th>
+                            <th>Partial Lot # Time</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for order in completedOrderList %}
+                          <tr style="background-color:#f{{order.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:10}}">
+                            <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>
+                            <td data-order="{{order.ProcessStop|date:"U"}}">{{order.ProcessStop|date:"d-M-Y, H:i"}}</td>
+                            <td>{{order.Day}}</td>
+                            <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
+                            <td>{{order.FG_MaterialCode}}</td>
+                            <td>{{order.Note|default_if_none:""}}</td>
+                            <td>{% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}</td>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      toggle();
+      $(document).ready(function() {
+        $('#completed_order').DataTable( {
+            "order": [[ 1, "desc" ]],
+            'iDisplayLength': 100,
+        });
+      });
+
+      $('#ftype').change(function() {
+        toggle();
+        filter();
+      });
+
+      $('#fdate').change(function() {
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      $('#fstartdate').change(function() {
+        filter();
+      });
+
+      $('#fstopdate').change(function() {
+        filter();
+      });
+
+      function toggle(){
+        if($('#ftype').val() == "DAILY"){
+          $("#fdate").prop("hidden", false);
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "MONTHLY"){
+          $("#fdate").prop("hidden", true);
+          $("#fmonth").prop("hidden", false);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "RANGE"){
+          $("#fdate").prop("hidden", true);
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", false);
+          $("#range-to").prop("hidden", false);
+        }
+      }
+
+      function filter(){
+        var ftype = $("#ftype").val();
+        var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
+        var fstartdate = ($("#fstartdate").val() != "" && ftype == "RANGE")?$("#fstartdate").val():"NOW";
+        var fdate = ($("#fdate").val() != "" && ftype == "DAILY")?$("#fdate").val():"NOW";
+        var fstopdate = ($("#fstopdate").val() != "" && ftype == "RANGE")?$("#fstopdate").val():"NOW";
+        window.location.href = "/completed_order/" + ftype + "&" + fdate + "&" + fmonth + "&" + fstartdate + "&" + fstopdate;
+      }
+
+    </script>
+  </body>
+</html>

@@ -915,7 +915,8 @@
                   {% if state == "NOOPERATIONFOUND" and currentOperation != -1 %}
                   <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-dark small"><strong>&nbsp;&nbsp;&nbsp;GO TO CURRENT OPERATION #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
                   {% elif state == "NOOPERATIONFOUND" %}
-                  <p class="text-danger">*** THIS PRODUCTION ORDER HAS ONLY HEADER PLEASE CONTACT ADMIN ***</p>
+                  <p class="text-danger">*** This Production has only header, please try refresh (F5) once ***</p>
+                  <p class="text-danger">*** If this message show again please contact SFR Team ***</p>
                   {% endif %}
                 </div>
               </div>
