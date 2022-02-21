@@ -30,6 +30,8 @@
     <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <!-- Chart CSS -->
+    <link href="{% static "vendors/@coreui/chartjs/css/coreui-chartjs.css" %}" rel="stylesheet" >
   </head>
   <body class="c-app c-no-layout-transition">
     <!-- *** LEFT SIDE BAR *** -->
@@ -47,16 +49,27 @@
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            <select class="form-control" id="ftype">
-              <option value="DAILY" {% if ftype == 'DAILY' %}style="color:blue" selected{% endif %}>Daily</option>
-              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
-              <option value="RANGE" {% if ftype == 'RANGE' %}style="color:blue" selected{% endif %}>Range</option>
+            <select class="form-control" id="fwctype">
+              <option value="WC" {% if fwctype == 'WC' %}style="color:blue" selected{% endif %}>WorkCenter</option>
+              <option value="WCG" {% if fwctype == 'WCG' %}style="color:blue" selected{% endif %}>WorkCenterGroup</option>
             </select>&nbsp;
-            <input type="date" class="form-control" id="fdate" value="{{fdate}}" onkeydown="return false" required>
+            <select class="form-control" id="fwc">
+              {% for wc in workCenterList %}
+              <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>
+            <select class="form-control" id="fwcg">
+              {% for wcg in workCenterGroupList %}
+              <option value="{{wcg.WorkCenterGroup}}" {% if fwcg == wcg.WorkCenterGroup %}style="color:blue" selected{% endif %}>{{wcg.WorkCenterGroup}}</option>
+              {% endfor %}
+            </select>
+            &nbsp;
+            <select class="form-control" id="ftype">
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <option value="YEARLY" {% if ftype == 'YEARLY' %}style="color:blue" selected{% endif %}>Yearly</option>
+            </select>&nbsp;
             <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
-            <input type="date" class="form-control" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
-            <span id="range-to">&nbsp;-&nbsp;</span>
-            <input type="date" class="form-control" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
+            <input type="number" class="form-control" id="fyear" value="{{fyear}}" onkeydown="return false" required>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
           </div>
@@ -71,31 +84,12 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="completed_order" style="width: 100%">
-                        <thead class="thead-light">
-                          <tr>
-                            <th>Start Date Time</th>
-                            <th>Stop Date Time</th>
-                            <th>Duration (Day)</th>
-                            <th>Production Order No</th>
-                            <th>FG-MaterialCode</th>
-                            <th>Order Note</th>
-                            <th>Partial Lot # Time</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for order in completedOrderList %}
-                          <tr style="background-color:#f{{order.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:10}}">
-                            <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>
-                            <td data-order="{{order.ProcessStop|date:"U"}}">{{order.ProcessStop|date:"d-M-Y, H:i"}}</td>
-                            <td>{{order.Day}}</td>
-                            <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
-                            <td>{{order.FG_MaterialCode}}</td>
-                            <td>{{order.Note|default_if_none:""}}</td>
-                            <td>{% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}</td>
-                          {% endfor %}
-                        </tbody>
-                      </table>
+                      <input type="text" id="data_len" value="{{data_len}}" hidden>
+                      {% if ftype == 'MONTHLY' %}
+                      <canvas id="monthly_chart" width="400" height="180"></canvas>
+                      {% else %}
+                      <canvas id="yearly_chart" width="400" height="180"></canvas>
+                      {% endif %}
                     </div>
                   </div>
                 </div>
@@ -119,6 +113,13 @@
     <!-- Data Table JS -->
     <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
     <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Chart JS -->
+    <!-- Charts -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script> -->
+    <script src="{% static "vendors/@coreui/chartjs/js/coreui-chartjs.bundle.js" %}"></script>
+    <script src="{% static "js/charts.js" %}"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -131,10 +132,20 @@
 
       toggle();
       $(document).ready(function() {
-        $('#completed_order').DataTable( {
-            "order": [[ 1, "desc" ]],
-            'iDisplayLength': 100,
-        });
+
+      });
+
+      $('#fwctype').change(function() {
+        toggle();
+        filter();
+      });
+
+      $('#fwc').change(function() {
+        filter();
+      });
+
+      $('#fwcg').change(function() {
+        filter();
       });
 
       $('#ftype').change(function() {
@@ -142,53 +153,135 @@
         filter();
       });
 
-      $('#fdate').change(function() {
-        filter();
-      });
-
       $('#fmonth').change(function() {
         filter();
       });
 
-      $('#fstartdate').change(function() {
-        filter();
-      });
-
-      $('#fstopdate').change(function() {
+      $('#fyear').change(function() {
         filter();
       });
 
       function toggle(){
-        if($('#ftype').val() == "DAILY"){
-          $("#fdate").prop("hidden", false);
-          $("#fmonth").prop("hidden", true);
-          $("#fstartdate").prop("hidden", true);
-          $("#fstopdate").prop("hidden", true);
-          $("#range-to").prop("hidden", true);
-        } else if($('#ftype').val() == "MONTHLY"){
-          $("#fdate").prop("hidden", true);
+        if($('#fwctype').val() == "WC"){
+          $("#fwc").prop("hidden", false);
+          $("#fwcg").prop("hidden", true);
+        } else if($('#fwctype').val() == "WCG"){
+          $("#fwc").prop("hidden", true);
+          $("#fwcg").prop("hidden", false);
+        }
+
+        if($('#ftype').val() == "MONTHLY"){
           $("#fmonth").prop("hidden", false);
-          $("#fstartdate").prop("hidden", true);
-          $("#fstopdate").prop("hidden", true);
-          $("#range-to").prop("hidden", true);
-        } else if($('#ftype').val() == "RANGE"){
-          $("#fdate").prop("hidden", true);
+          $("#fyear").prop("hidden", true);
+        } else if($('#ftype').val() == "YEARLY"){
           $("#fmonth").prop("hidden", true);
-          $("#fstartdate").prop("hidden", false);
-          $("#fstopdate").prop("hidden", false);
-          $("#range-to").prop("hidden", false);
+          $("#fyear").prop("hidden", false);
         }
       }
 
       function filter(){
+        var fwctype = $("#fwctype").val();
+        var fwc = ($("#fwc").val() != "" && fwctype == "WC")?$("#fwc").val():"FIRST";
+        var fwcg = ($("#fwcg").val() != "" && fwctype == "WCG")?$("#fwcg").val():"FIRST";
         var ftype = $("#ftype").val();
         var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
-        var fstartdate = ($("#fstartdate").val() != "" && ftype == "RANGE")?$("#fstartdate").val():"NOW";
-        var fdate = ($("#fdate").val() != "" && ftype == "DAILY")?$("#fdate").val():"NOW";
-        var fstopdate = ($("#fstopdate").val() != "" && ftype == "RANGE")?$("#fstopdate").val():"NOW";
-        window.location.href = "/completed_order/" + ftype + "&" + fdate + "&" + fmonth + "&" + fstartdate + "&" + fstopdate;
+        var fyear = ($("#fyear").val() != "" && ftype == "YEARLY")?$("#fyear").val():"NOW";
+        window.location.href = "/ab_graph/" + fwctype + "&" + fwc + "&" + fwcg + "&" + ftype + "&" + fmonth + "&" + fyear;
       }
 
     </script>
+    <!-- OTHER FUNCTION -->
+    <script>
+      function getDataLen(){
+        var arr = []
+        for(i = 1;i <= parseInt($("#data_len").val());i++) arr.push(i);
+        return arr;
+      }
+
+      function getDataRandom(){
+        var arr = []
+        for(i = 1;i <= parseInt($("#data_len").val());i++) arr.push(Math.floor(Math.random() * 12));
+        return arr;
+      }
+    </script>
+    {% if ftype == 'MONTHLY' %}
+    <!-- MONTHLY GRAPH -->
+    <script>
+      const monthly_ctx = document.getElementById('monthly_chart').getContext('2d');
+      const monthly_chart = new Chart(monthly_ctx, {
+          type: 'bar',
+          data: {
+              labels: getDataLen(),
+              datasets: [{
+                  label: 'WORK',
+                  data: getDataRandom(),
+                  backgroundColor: 'rgb(46,184,92, 0.2)',
+                  borderColor: 'rgb(46,184,92, 1)',
+                  borderWidth: 1
+              },{
+                  label: 'SETUP',
+                  data: getDataRandom(),
+                  backgroundColor: 'rgb(157,208,77, 0.2)',
+                  borderColor: 'rgb(157,208,77, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+            scales: {
+              xAxes: [{
+                  stacked: true,
+              }],
+              yAxes: [{
+                  stacked: true,
+                  ticks: {
+                      beginAtZero: true,
+                      max: 24,
+                      min: 0,
+                  }
+              }],
+            }
+          }
+      });
+    </script>
+    {% else %}
+    <!-- YEARLY GRAPH -->
+    <script>
+      const yearly_ctx = document.getElementById('yearly_chart').getContext('2d');
+      const yearly_chart = new Chart(yearly_ctx, {
+          type: 'bar',
+          data: {
+              labels: ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],
+              datasets: [{
+                  label: 'WORK',
+                  data: getDataRandom(),
+                  backgroundColor: 'rgb(46,184,92, 0.2)',
+                  borderColor: 'rgb(46,184,92, 1)',
+                  borderWidth: 1
+              },{
+                  label: 'SETUP',
+                  data: getDataRandom(),
+                  backgroundColor: 'rgb(157,208,77, 0.2)',
+                  borderColor: 'rgb(157,208,77, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+            scales: {
+              xAxes: [{
+                  stacked: true,
+              }],
+              yAxes: [{
+                  stacked: true,
+                  ticks: {
+                      beginAtZero: true,
+                      max: 24,
+                      min: 0,
+                  }
+              }],
+            }
+          }
+      });
+    </script>
+    {% endif %}
   </body>
 </html>

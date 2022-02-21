@@ -510,6 +510,33 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     }
     return render(request, 'completed_order.html', context)
 
+def ab_graph(request, fwctype, fwc, fwcg, ftype, fmonth, fyear):
+    workCenterList = getWorkCenterMachineList()
+    workCenterGroupList = getWorkCenterGroupList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    if fwcg == "FIRST":
+        fwcg = workCenterGroupList[0].WorkCenterGroup
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fyear == "NOW":
+        fyear = datetime.today().strftime('%Y')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    data_len = get_day_count(month, year)
+    context = {
+        'workCenterList': workCenterList,
+        'workCenterGroupList': workCenterGroupList,
+        'fwctype': fwctype,
+        'fwc': fwc,
+        'fwcg': fwcg,
+        'ftype': ftype,
+        'fmonth': fmonth,
+        'fyear': fyear,
+        'data_len': data_len,
+    }
+    return render(request, 'ab_graph.html', context)
+
 def zpp02(request):
 
     context = {
@@ -1582,6 +1609,18 @@ def getWorkCenterList():
 def getWorkCenterRoutingList():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [WorkCenter] WHERE IsRouting = 1"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterMachineList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterType = 'Machine' AND IsRouting = 0"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getWorkCenterGroupList():
+    cursor = get_connection().cursor()
+    sql = "SELECT WorkCenterGroup FROM [WorkCenter] GROUP BY WorkCenterGroup"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2751,6 +2790,15 @@ def frontZero(str, length):
     for i in range(length - len(str)):
         result = "0" + result
     return result
+
+def get_day_count(month, year):
+    if int(year)%4 == 0 and month == "02":
+        return 29
+    elif  month == "02":
+        return 28
+    elif month == "01" or month == "03" or month == "05" or month == "07" or month == "08" or month == "10" or month == "12":
+        return 31
+    return 30
 
 # def replace_rm_mat_code():
 #     wb = load_workbook(filename = 'media/Material Bom.xlsx')
