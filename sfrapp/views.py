@@ -1549,7 +1549,6 @@ def cancel_order(request):
     order_no = request.GET.get('order_no')
     conn = get_connection()
     cursor = conn.cursor()
-    print(order_no)
     sql = "INSERT INTO CanceledOrder ([OrderNo],[DateTimeStamp]) VALUES ('"+order_no+"',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
