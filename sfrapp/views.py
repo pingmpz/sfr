@@ -1722,7 +1722,7 @@ def getUserList():
 
 def getWorkingOrderList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [OrderControl] WHERE ProcessStart IS NOT NULL AND ProcessStop IS NULL"
+    sql = "SELECT * FROM [OrderControl] WHERE ProcessStart IS NOT NULL AND ProcessStop IS NULL AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
     cursor.execute(sql)
     return cursor.fetchall()
 
