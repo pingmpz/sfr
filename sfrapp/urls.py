@@ -27,11 +27,12 @@ urlpatterns = [
     path('working_wc/', views.working_wc, name='working_wc'),
     path('working_emp/', views.working_emp, name='working_emp'),
     path('delay_operation/<str:fwc>', views.delay_operation, name='delay_operation'),
+    path('none_working_wc/', views.none_working_wc, name='none_working_wc'),
     #-- REPORT
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
-    path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
     path('completed_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.completed_order, name='completed_order'),
+    path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
     path('ab_graph/<str:fwctype>&<str:fwc>&<str:fwcg>&<str:factive>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),

@@ -443,6 +443,13 @@ def delay_operation(request, fwc):
     }
     return render(request, 'delay_operation.html', context)
 
+def none_working_wc(request):
+    workCenterList = getNoneWorkingWorkCenterList()
+    context = {
+        'workCenterList' : workCenterList,
+    }
+    return render(request, 'none_working_wc.html', context)
+
 #------------------------------------------------------------------------ REPORT
 
 def ot_table(request, fmonth):
@@ -468,6 +475,26 @@ def mp_ot_auto_machine(request, fmonth):
     }
     return render(request, 'mp_ot_auto_machine.html', context)
 
+def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    completedOrderList = getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    context = {
+        'ftype': ftype,
+        'fdate': fdate,
+        'fmonth': fmonth,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
+        'completedOrderList': completedOrderList,
+    }
+    return render(request, 'completed_order.html', context)
+
 def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
@@ -489,26 +516,6 @@ def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'workCenterWorkRecords': workCenterWorkRecords,
     }
     return render(request, 'work_records.html', context)
-
-def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
-    if fdate == "NOW":
-        fdate = datetime.today().strftime('%Y-%m-%d')
-    if fmonth == "NOW":
-        fmonth = datetime.today().strftime('%Y-%m')
-    if fstartdate == "NOW":
-        fstartdate = datetime.today().strftime('%Y-%m-%d')
-    if fstopdate == "NOW":
-        fstopdate = datetime.today().strftime('%Y-%m-%d')
-    completedOrderList = getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
-    context = {
-        'ftype': ftype,
-        'fdate': fdate,
-        'fmonth': fmonth,
-        'fstartdate': fstartdate,
-        'fstopdate': fstopdate,
-        'completedOrderList': completedOrderList,
-    }
-    return render(request, 'completed_order.html', context)
 
 def ab_graph(request, fwctype, fwc, fwcg, factive, ftype, fmonth, fyear):
     workCenterList = getWorkCenterMachineList()
@@ -1749,6 +1756,16 @@ def getWorkingOperatorList():
     sql += " LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID"
     sql += " LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE OOPR.Status <> 'COMPLETE' ORDER BY OOPR.OperatingOperatorID ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getNoneWorkingWorkCenterList():
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT * FROM WorkCenter WHERE WorkCenterNo NOT IN
+            (SELECT WorkCenterNo FROM OperatingWorkCenter WHERE Status <> 'COMPLETE' AND Status <> 'WAITING')
+            AND IsRouting = 0 AND IsActive = 1 AND WorkCenterType = 'Machine'
+            """
     cursor.execute(sql)
     return cursor.fetchall()
 
