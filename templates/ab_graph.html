@@ -97,39 +97,75 @@
                           <canvas id="yearly_chart" width="400" height="180"></canvas>
                           {% endif %}
                         </div>
-                        <div class="col-3">
-                          {% if fwctype == "WC" %}
-                          <div class="form-group row">
-                            <label class="col-md-6 col-form-label text-right"><strong>WorkCenter</strong></label>
-                            <div class="col-md-6">
-                              <input class="form-control form-control" type="text" value="{{fwc}}" readonly>
-                            </div>
-                          </div>
-                          {% endif %}
-                          {% if fwctype == "WCG" %}
-                          <div class="form-group row">
-                            <label class="col-md-6 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
-                            <div class="col-md-6">
-                              <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
-                            </div>
-                          </div>
-                          <div class="form-group row">
-                            <label class="col-md-6 col-form-label text-right"><strong>Active</strong></label>
-                            <div class="col-md-6">
-                              <input class="form-control form-control" type="text" value="{% if factive == 'ACTIVE' %}Only Active{% else %}All{% endif %}" readonly>
-                            </div>
-                          </div>
-                          <div class="form-group row">
-                            <label class="col-md-6 col-form-label text-right"><strong>Size of WorkCenter</strong></label>
-                            <div class="col-md-6">
-                              <input class="form-control form-control" type="text" value="{{sizeOfWorkCenterInGroup}}" readonly>
-                            </div>
-                          </div>
-                          {% endif %}
-                          <div class="form-group row">
-                            <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours</strong></label>
-                            <div class="col-md-6">
-                              <input class="form-control form-control" type="text" value="{{max_hour}}" readonly>
+                        <div class="col-3" style="padding-left: 5px; padding-right: 5px;">
+                          <div class="nav-tabs-boxed">
+                            <ul class="nav nav-tabs" role="tablist">
+                              <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#info-tab" role="tab">Info</a></li>
+                              <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#table-view-tab" role="tab">Table View</a></li>
+                            </ul>
+                            <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                              <!-- Info Tab -->
+                              <div class="tab-pane active" id="info-tab" role="tabpanel">
+                                <br>
+                                {% if fwctype == "WC" %}
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>WorkCenter</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{fwc}}" readonly>
+                                  </div>
+                                </div>
+                                {% endif %}
+                                {% if fwctype == "WCG" %}
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Active</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{% if factive == 'ACTIVE' %}Only Active{% else %}All{% endif %}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Size of WorkCenter</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{sizeOfWorkCenterInGroup}}" readonly>
+                                  </div>
+                                </div>
+                                {% endif %}
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour}}" readonly>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- Table View Tab -->
+                              <div class="tab-pane" id="table-view-tab" role="tabpanel">
+                                {% if ftype == 'MONTHLY' %}
+                                <table class="table table-sm table-outline small" id="table_view_table" style="table-layout: fixed;">
+                                  <thead class="thead-light">
+                                    <tr>
+                                      <th>Day</th>
+                                      <th>SetupTime (Hour)</th>
+                                      <th>OperTime (Hour)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for i in data_oper %}
+                                      <tr>
+                                        <td>{{forloop.counter}}</td>
+                                        <td>{{data_setup|index:forloop.counter0}}</td>
+                                        <td>{{data_oper|index:forloop.counter0}}</td>
+                                      </tr>
+                                    {% endfor %}
+                                  </tbody>
+
+                                </table>
+                                {% endif %}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -176,7 +212,13 @@
 
       toggle();
       $(document).ready(function() {
-
+        $('#table_view_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 100,
+            searching: false,
+            paging: false,
+            info: false,
+        });
       });
 
       $('#fwctype').change(function() {
