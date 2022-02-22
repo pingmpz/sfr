@@ -65,7 +65,6 @@
                         <ul class="nav nav-tabs" role="tablist">
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#dup-rt-tab" role="tab">Duplicate Routing ({{duplicateRoutingList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#no-rt-tab" role="tab">Order No Routing ({{oderNoRoutingList|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#order-not-start-tab" role="tab">Order Not Start ({{orderNotStartList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-error-tab" role="tab">WorkCenter Error ({{workCenterErrorList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
@@ -110,29 +109,6 @@
                                 <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                                   <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
-                                  <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
-                                </tr>
-                                {% endfor %}
-                              </tbody>
-                            </table>
-                          </div>
-                          <!-- Order Not Start Tab -->
-                          <div class="tab-pane" id="order-not-start-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="order_not_start_table" style="width: 100%">
-                              <thead class="thead-light">
-                                <tr>
-                                  <th>ProductionOrderNo</th>
-                                  <th>Registered to SFR</th>
-                                  <th>DateGetFromSAP</th>
-                                  <th>Duration</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for order in orderNotStartList %}
-                                <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
-                                  <td><a href="/transaction/{{order.ProductionOrderNo}}0000">{{order.ProductionOrderNo|default_if_none:""}}</a></td>
-                                  <td>{% if order.OrderNo != None %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
-                                  <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
                                 </tr>
                                 {% endfor %}
@@ -219,11 +195,6 @@
                   }
               });
             }
-        });
-
-        $('#order_not_start_table').DataTable( {
-            "order": [[ 2, "asc" ]],
-            "displayLength": 100,
         });
 
         $('#wc_error_table').DataTable( {

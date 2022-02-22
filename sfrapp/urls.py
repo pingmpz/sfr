@@ -28,6 +28,7 @@ urlpatterns = [
     path('working_emp/', views.working_emp, name='working_emp'),
     path('delay_operation/<str:fwc>', views.delay_operation, name='delay_operation'),
     path('none_working_wc/', views.none_working_wc, name='none_working_wc'),
+    path('none_start_order/', views.none_start_order, name='none_start_order'),
     #-- REPORT
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),

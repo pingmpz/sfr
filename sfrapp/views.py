@@ -453,6 +453,13 @@ def none_working_wc(request):
     }
     return render(request, 'none_working_wc.html', context)
 
+def none_start_order(request):
+    noneStartOrderList = getNoneStartOrderList()
+    context = {
+        'noneStartOrderList': noneStartOrderList,
+    }
+    return render(request, 'none_start_order.html', context)
+
 #------------------------------------------------------------------------ REPORT
 
 def ot_table(request, fmonth):
@@ -686,12 +693,10 @@ def admin_controller(request):
 def error_data(request):
     oderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
-    orderNotStartList = getOrderNotStartList()
     workCenterErrorList = getWorkCenterErrorList()
     context = {
         'oderNoRoutingList': oderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
-        'orderNotStartList': orderNotStartList,
         'workCenterErrorList': workCenterErrorList,
     }
     return render(request, 'error_data.html', context)
@@ -1943,7 +1948,7 @@ def getSAPDuplicateRoutingList():
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getOrderNotStartList():
+def getNoneStartOrderList():
     cursor = get_connection().cursor()
     sql = """
             SELECT ProductionOrderNo, OrderNo, SO.DateGetFromSAP FROM SAP_Order AS SO
