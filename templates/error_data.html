@@ -102,6 +102,7 @@
                                 <tr>
                                   <th>ProductionOrderNo</th>
                                   <th>DateGetFromSAP</th>
+                                  <th>Duration</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -109,13 +110,11 @@
                                 <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                                   <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
+                                  <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
                             </table>
-                            {% for dup in oderNoRoutingList %}
-                                <small class="text-dark">DELETE FROM OrderControl WHERE OrderNo = '{{dup.ProductionOrderNo}}'<br></small>
-                            {% endfor %}
                           </div>
                           <!-- Order Not Start Tab -->
                           <div class="tab-pane" id="order-not-start-tab" role="tabpanel">

@@ -54,6 +54,7 @@
             <!-- <button type="button" class="btn btn-sm btn-pill btn-outline-danger" onclick="reset_all()">Reset All</button> -->
             <a href="/lot_traveller/{{orderNo}}&0" class="btn btn-sm btn-link">Partial Lot Traveller</a>
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
+            |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#cancel_order_modal">Cancel Order</button>
           </div>
           {% endif %}
           <div class="c-subheader-nav" {% if state != "FIRSTPAGE" %}hidden{% endif %}>
@@ -801,7 +802,7 @@
                         <!-- Overtime -->
                         {% if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None and operation.WorkCenterNo != None and isOvertime == True %}
                           <div class="col-md-12">
-                            <div class="card text-white text-center" style="background-color:#ff5419">
+                            <div class="card text-white text-center bg-orangered">
                               <div class="card-body text-center">
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-av-timer" style="font-size: 10rem; width: 10rem;"></i></h1>
@@ -894,6 +895,21 @@
                     </div>
                   </div>
                 </div>
+              {% endif%}
+              <!-- Cancel Order -->
+              {% if state == "CANCEL" %}
+              <div class="row">
+                <div class="col-md-12 text-center">
+                  <br><br><br><br><br><br><br><br>
+                  <h1><i class="c-icon c-icon-2xl cil-x-circle" style="font-size: 10rem; width: 10rem;"></i></h1>
+                  <br>
+                  <h1><strong>Canceled Production Order</strong></h1>
+                  <br>
+                  <p>
+                    <strong>Production Order No</strong><br><span class="text-danger"><strong>{{orderNo}}</strong></span>
+                  </p>
+                </div>
+              </div>
               {% endif%}
               <!-- Not Found -->
               {% if state == "NODATAFOUND" or state == "NOOPERATIONFOUND" %}
@@ -1699,6 +1715,31 @@
             <div class="modal-footer">
               <small>Permission: Administrator+</small>
               <button class="btn btn-danger" type="button" id="rso_confirm_button" onclick="reset_order()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="cancel_order_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header bg-darkslategray">
+              <h4 class="modal-title"><i class="c-icon cil-x-circle"></i> Cancel Order</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="cc_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="text-danger text-center small" id="cc_invalid_text"></div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Administrator+</small>
+              <button class="btn bg-darkslategray text-white" type="button" id="cc_confirm_button" onclick="cancel_order()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -3383,8 +3424,7 @@
 
     function reset_order(){
       var order_no = $('#order_no').val();
-      var start_operation_no = $('#rso_start_operation_no').val()
-      console.log(start_operation_no)
+      var start_operation_no = $('#rso_start_operation_no').val();
       var password = $('#rso_password').val();
       validate_admin_password(password, function(isCorrect, invalid_text) {
         if(!isCorrect){
@@ -3408,17 +3448,36 @@
       });
     }
 
-      // function reset_all(){
-      //   $.ajax({
-      //     url: '/reset_all/',
-      //     data: {
-      //     },
-      //     dataType: 'json',
-      //     success: function (data) {
-      //       location.reload();
-      //     }
-      //   });
-      // }
+    function clear_validate_cancel_order(){
+      $("#cc_invalid_text").text("");
+      remove_valid_many(["cc_password"]);
+    }
+
+    function cancel_order(){
+      var order_no = $('#order_no').val();
+      var password = $('#cc_password').val();
+      validate_admin_password(password, function(isCorrect, invalid_text) {
+        if(!isCorrect){
+          invalid("cc_password");
+          $("#cc_invalid_text").text(invalid_text);
+        } else {
+          valid("cc_password");
+          $('#cc_confirm_button').prop('disabled', true);
+          $.ajax({
+            url: '/cancel_order/',
+            data: {
+              'order_no': order_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
+        }
+      });
+    }
+
+
     </script>
   </body>
 </html>

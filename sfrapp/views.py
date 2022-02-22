@@ -84,7 +84,10 @@ def transaction(request, orderoprno):
                 #-- IF NO OPERATION INPUT (0000), WILL AUTO REDIRECT TO CURRENT PAGE
                 if operationNo == '0000':
                     return redirect('/transaction/' + orderNo + currentOperation)
-            if isExistOperation(orderNo, operationNo):
+            #-- Check Cancel Order
+            if isCanceledOrder(orderNo):
+                state = "CANCEL"
+            elif isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 #-- CONST
                 overtimehour = getOvertimeHour()
@@ -1542,26 +1545,12 @@ def reset_order(request):
     }
     return JsonResponse(data)
 
-def reset_all(request):
+def cancel_order(request):
+    order_no = request.GET.get('order_no')
     conn = get_connection()
     cursor = conn.cursor()
-    sql = """
-            DELETE FROM SAP_Order
-            DELETE FROM SAP_Routing
-            DELETE FROM OperatingOperator
-            DELETE FROM OperatingWorkCenter
-            DELETE FROM SFR2SAP_Report
-            DELETE FROM SFR2SAP_Modifier
-            DELETE FROM HistoryConfirm
-            DELETE FROM HistoryOperate
-            DELETE FROM HistoryJoin
-            DELETE FROM HistoryModifier
-            DELETE FROM OvertimeOperator
-            DELETE FROM OvertimeWorkCenter
-            DELETE FROM OrderControl
-            DELETE FROM OperationControl
-            DELETE FROM PartialLotTraveller
-            """
+    print(order_no)
+    sql = "INSERT INTO CanceledOrder ([OrderNo],[DateTimeStamp]) VALUES ('"+order_no+"',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     data = {
@@ -2038,6 +2027,7 @@ def getSFRDelayOperationList(fwc):
     sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, DATEDIFF(DAY, CONVERT(DATE, PlanFinishDate), GETDATE()) AS 'Day', *"
     sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
     sql += " WHERE (ProcessQty - (AcceptedQty + RejectedQty) > 0) AND WorkCenterNo = '"+fwc+"'"
+    sql += " AND OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2385,6 +2375,12 @@ def isOvertimeWorkCenter(owc_id):
 def hasReportTimeToSAP(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [SFR2SAP_Report] WHERE ProductionOrderNo = '"+order_no+"' AND OperationNumber = '"+operation_no+"' AND LaborTime > 0"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isCanceledOrder(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [CanceledOrder] WHERE OrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
