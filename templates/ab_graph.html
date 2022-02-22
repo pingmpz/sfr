@@ -62,6 +62,10 @@
               {% for wcg in workCenterGroupList %}
               <option value="{{wcg.WorkCenterGroup}}" {% if fwcg == wcg.WorkCenterGroup %}style="color:blue" selected{% endif %}>{{wcg.WorkCenterGroup}}</option>
               {% endfor %}
+            </select>&nbsp;
+            <select class="form-control" id="factive">
+              <option value="ACTIVE" {% if factive == "ACTIVE" %}style="color:blue" selected{% endif %}>Only Active</option>
+              <option value="ALL" {% if factive == "ALL" %}style="color:blue" selected{% endif %}>All</option>
             </select>
             &nbsp;
             <select class="form-control" id="ftype">
@@ -85,11 +89,51 @@
                   <div class="card">
                     <div class="card-body">
                       <input type="text" id="data_len" value="{{data_len}}" hidden>
-                      {% if ftype == 'MONTHLY' %}
-                      <canvas id="monthly_chart" width="400" height="180"></canvas>
-                      {% else %}
-                      <canvas id="yearly_chart" width="400" height="180"></canvas>
-                      {% endif %}
+                      <div class="row">
+                        <div class="col-9">
+                          {% if ftype == 'MONTHLY' %}
+                          <canvas id="monthly_chart" width="400" height="180"></canvas>
+                          {% else %}
+                          <canvas id="yearly_chart" width="400" height="180"></canvas>
+                          {% endif %}
+                        </div>
+                        <div class="col-3">
+                          {% if fwctype == "WC" %}
+                          <div class="form-group row">
+                            <label class="col-md-6 col-form-label text-right"><strong>WorkCenter</strong></label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control" type="text" value="{{fwc}}" readonly>
+                            </div>
+                          </div>
+                          {% endif %}
+                          {% if fwctype == "WCG" %}
+                          <div class="form-group row">
+                            <label class="col-md-6 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label class="col-md-6 col-form-label text-right"><strong>Active</strong></label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control" type="text" value="{% if factive == 'ACTIVE' %}Only Active{% else %}All{% endif %}" readonly>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label class="col-md-6 col-form-label text-right"><strong>Size of WorkCenter</strong></label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control" type="text" value="{{sizeOfWorkCenterInGroup}}" readonly>
+                            </div>
+                          </div>
+                          {% endif %}
+                          <div class="form-group row">
+                            <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours</strong></label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control" type="text" value="{{max_hour}}" readonly>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -148,6 +192,10 @@
         filter();
       });
 
+      $('#factive').change(function() {
+        filter();
+      });
+
       $('#ftype').change(function() {
         toggle();
         filter();
@@ -165,9 +213,11 @@
         if($('#fwctype').val() == "WC"){
           $("#fwc").prop("hidden", false);
           $("#fwcg").prop("hidden", true);
+          $("#factive").prop("hidden", true);
         } else if($('#fwctype').val() == "WCG"){
           $("#fwc").prop("hidden", true);
           $("#fwcg").prop("hidden", false);
+          $("#factive").prop("hidden", false);
         }
 
         if($('#ftype').val() == "MONTHLY"){
@@ -183,10 +233,11 @@
         var fwctype = $("#fwctype").val();
         var fwc = ($("#fwc").val() != "" && fwctype == "WC")?$("#fwc").val():"FIRST";
         var fwcg = ($("#fwcg").val() != "" && fwctype == "WCG")?$("#fwcg").val():"FIRST";
+        var factive = ($("#factive").val() != "" && fwctype == "WCG")?$("#factive").val():"ACTIVE";
         var ftype = $("#ftype").val();
         var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
         var fyear = ($("#fyear").val() != "" && ftype == "YEARLY")?$("#fyear").val():"NOW";
-        window.location.href = "/ab_graph/" + fwctype + "&" + fwc + "&" + fwcg + "&" + ftype + "&" + fmonth + "&" + fyear;
+        window.location.href = "/ab_graph/" + fwctype + "&" + fwc + "&" + fwcg + "&" + factive + "&" + ftype + "&" + fmonth + "&" + fyear;
       }
 
     </script>
@@ -214,13 +265,13 @@
               labels: getDataLen(),
               datasets: [{
                   label: 'WORK',
-                  data: getDataRandom(),
+                  data: {{data_oper}},
                   backgroundColor: 'rgb(46,184,92, 0.2)',
                   borderColor: 'rgb(46,184,92, 1)',
                   borderWidth: 1
               },{
                   label: 'SETUP',
-                  data: getDataRandom(),
+                  data: {{data_setup}},
                   backgroundColor: 'rgb(157,208,77, 0.2)',
                   borderColor: 'rgb(157,208,77, 1)',
                   borderWidth: 1
@@ -235,7 +286,7 @@
                   stacked: true,
                   ticks: {
                       beginAtZero: true,
-                      max: 24,
+                      max: {{max_y}},
                       min: 0,
                   }
               }],

@@ -32,7 +32,7 @@ urlpatterns = [
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
     path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
     path('completed_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.completed_order, name='completed_order'),
-    path('ab_graph/<str:fwctype>&<str:fwc>&<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
+    path('ab_graph/<str:fwctype>&<str:fwc>&<str:fwcg>&<str:factive>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP
