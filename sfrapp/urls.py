@@ -32,6 +32,7 @@ urlpatterns = [
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
     path('completed_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.completed_order, name='completed_order'),
+    path('canceled_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.canceled_order, name='canceled_order'),
     path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
     path('ab_graph/<str:fwctype>&<str:fwc>&<str:fwcg>&<str:factive>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
     path('zpp02/', views.zpp02, name='zpp02'),

@@ -17,7 +17,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Completed Production Order | Shopfloor Reporting Application</title>
+    <title>Canceled Production Order | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -42,7 +42,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Completed Production Order ({{completedOrderList|length}})</li>
+            <li class="breadcrumb-item">Canceled Production Order ({{canceledOrderList|length}})</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
@@ -74,25 +74,19 @@
                       <table class="table table-sm table-outline small" id="completed_order_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
-                            <th>Start Date Time</th>
-                            <th>Stop Date Time</th>
-                            <th>Duration (Day)</th>
+                            <th>DateTimeStamp</th>
                             <th>Production Order No</th>
                             <th>FG-MaterialCode</th>
                             <th>Order Note</th>
-                            <th>Partial Lot # Time</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for order in completedOrderList %}
-                          <tr style="background-color:#f{{order.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{order.ProcessStop|date:'md'|add:'0'|modulo:10}}">
-                            <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>
-                            <td data-order="{{order.ProcessStop|date:"U"}}">{{order.ProcessStop|date:"d-M-Y, H:i"}}</td>
-                            <td>{{order.Day}}</td>
+                          {% for order in canceledOrderList %}
+                          <tr style="background-color:#f{{order.DateTimeStamp|date:'md'|add:'0'|modulo:8}}f{{order.DateTimeStamp|date:'md'|add:'0'|modulo:9}}f{{order.DateTimeStamp|date:'md'|add:'0'|modulo:10}}">
+                            <td data-order="{{order.DateTimeStamp|date:"U"}}">{{order.DateTimeStamp|date:"d-M-Y, H:i"}}</td>
                             <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
                             <td>{{order.FG_MaterialCode}}</td>
                             <td>{{order.Note|default_if_none:""}}</td>
-                            <td>{% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}</td>
                           {% endfor %}
                         </tbody>
                       </table>
@@ -132,7 +126,7 @@
       toggle();
       $(document).ready(function() {
         $('#completed_order_table').DataTable( {
-            "order": [[ 1, "desc" ]],
+            "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
         });
       });
@@ -186,7 +180,7 @@
         var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
         var fstartdate = ($("#fstartdate").val() != "" && ftype == "RANGE")?$("#fstartdate").val():"NOW";
         var fstopdate = ($("#fstopdate").val() != "" && ftype == "RANGE")?$("#fstopdate").val():"NOW";
-        window.location.href = "/completed_order/" + ftype + "&" + fdate + "&" + fmonth + "&" + fstartdate + "&" + fstopdate;
+        window.location.href = "/canceled_order/" + ftype + "&" + fdate + "&" + fmonth + "&" + fstartdate + "&" + fstopdate;
       }
 
     </script>

@@ -498,6 +498,26 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     }
     return render(request, 'completed_order.html', context)
 
+def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    canceledOrderList = getCanceledOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    context = {
+        'ftype': ftype,
+        'fdate': fdate,
+        'fmonth': fmonth,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
+        'canceledOrderList': canceledOrderList,
+    }
+    return render(request, 'canceled_order.html', context)
+
 def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
@@ -2005,6 +2025,21 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
         sql += " month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
     if ftype == "RANGE":
         sql += " ProcessStop >= '" + fstartdate + " 00:00:00' AND ProcessStop <= '" + fstopdate + " 23:59:59'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getCanceledOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM CanceledOrder AS CO INNER JOIN OrderControl AS OC ON CO.OrderNo = OC.OrderNo"
+    sql += " WHERE"
+    if ftype == "DAILY":
+        sql += " CO.DateTimeStamp >= '" + fdate + " 00:00:00' AND CO.DateTimeStamp <= '" + fdate + " 23:59:59'"
+    if ftype == "MONTHLY":
+        sql += " month(CO.DateTimeStamp) = '"+month+"' AND year(CO.DateTimeStamp) = '"+year+"'"
+    if ftype == "RANGE":
+        sql += " CO.DateTimeStamp >= '" + fstartdate + " 00:00:00' AND CO.DateTimeStamp <= '" + fstopdate + " 23:59:59'"
     cursor.execute(sql)
     return cursor.fetchall()
 
