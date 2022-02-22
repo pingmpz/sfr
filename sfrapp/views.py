@@ -1928,7 +1928,7 @@ def getOrderNotStartList():
     sql = """
             SELECT ProductionOrderNo, OrderNo, SO.DateGetFromSAP FROM SAP_Order AS SO
             LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo
-            WHERE OC.OrderNo IS NULL OR (OC.ProcessStart IS NULL)
+            WHERE (OC.OrderNo IS NULL OR (OC.ProcessStart IS NULL)) AND ProductionOrderNo NOT IN (SELECT OrderNo From CanceledOrder)
           """
     cursor.execute(sql)
     return cursor.fetchall()
