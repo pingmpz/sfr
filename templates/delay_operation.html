@@ -79,7 +79,7 @@
                             <th>DrawingNo</th>
                             <th>ProcessQty</th>
                             <th>RemainingQty</th>
-                            <th>Registered to SFR</th>
+                            <!-- <th>Registered to SFR</th> -->
                           </tr>
                         </thead>
                         <tbody>
@@ -98,7 +98,7 @@
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
-                              <td><b class="text-danger">No</b></td>
+                              <!-- <td><b class="text-danger">No</b></td> -->
                             </tr>
                           {% endfor %}
                           {% for op in SFRDelayOperationList %}
@@ -116,7 +116,7 @@
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProcessQty.normalize}}</td>
                               <td>{{op.RemainingQty.normalize}}</td>
-                              <td><b class="text-success">Yes</b></td>
+                              <!-- <td><b class="text-success">Yes</b></td> -->
                             </tr>
                           {% endfor %}
                         </tbody>
