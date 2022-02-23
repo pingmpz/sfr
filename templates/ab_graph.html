@@ -49,28 +49,14 @@
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            <select class="form-control" id="fwctype">
-              <option value="WC" {% if fwctype == 'WC' %}style="color:blue" selected{% endif %}>WorkCenter</option>
-              <option value="WCG" {% if fwctype == 'WCG' %}style="color:blue" selected{% endif %}>WorkCenterGroup</option>
-            </select>&nbsp;
-            <select class="form-control" id="fwc">
-              {% for wc in workCenterList %}
-              <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
-              {% endfor %}
-            </select>
             <select class="form-control" id="fwcg">
               {% for wcg in workCenterGroupList %}
               <option value="{{wcg.WorkCenterGroup}}" {% if fwcg == wcg.WorkCenterGroup %}style="color:blue" selected{% endif %}>{{wcg.WorkCenterGroup}}</option>
               {% endfor %}
             </select>&nbsp;
-            <select class="form-control" id="factive">
-              <option value="ACTIVE" {% if factive == "ACTIVE" %}style="color:blue" selected{% endif %}>Only Active</option>
-              <option value="ALL" {% if factive == "ALL" %}style="color:blue" selected{% endif %}>All</option>
-            </select>
-            &nbsp;
             <select class="form-control" id="ftype">
               <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
-              <option value="YEARLY" {% if ftype == 'YEARLY' %}style="color:blue" selected{% endif %}>Yearly</option>
+              <!-- <option value="YEARLY" {% if ftype == 'YEARLY' %}style="color:blue" selected{% endif %}>Yearly</option> -->
             </select>&nbsp;
             <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
             <input type="number" class="form-control" id="fyear" value="{{fyear}}" onkeydown="return false" required>
@@ -88,14 +74,20 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <input type="text" id="data_len" value="{{data_len}}" hidden>
                       <div class="row">
                         <div class="col-9">
-                          {% if ftype == 'MONTHLY' %}
-                          <canvas id="monthly_chart" width="400" height="180"></canvas>
-                          {% else %}
-                          <canvas id="yearly_chart" width="400" height="180"></canvas>
-                          {% endif %}
+                          <div class="row">
+                            <div class="col-12">
+                              <div class="card border-dard">
+                                <div class="card-header">
+                                  {{fwcg}}
+                                </div>
+                                <div class="card-body">
+                                  <canvas id="wcg_monthly_chart" width="400" height="180"></canvas>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div class="col-3" style="padding-left: 5px; padding-right: 5px;">
                           <div class="nav-tabs-boxed">
@@ -107,15 +99,6 @@
                               <!-- Info Tab -->
                               <div class="tab-pane active" id="info-tab" role="tabpanel">
                                 <br>
-                                {% if fwctype == "WC" %}
-                                <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>WorkCenter</strong></label>
-                                  <div class="col-md-6">
-                                    <input class="form-control form-control" type="text" value="{{fwc}}" readonly>
-                                  </div>
-                                </div>
-                                {% endif %}
-                                {% if fwctype == "WCG" %}
                                 <div class="form-group row">
                                   <label class="col-md-6 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
                                   <div class="col-md-6">
@@ -123,28 +106,38 @@
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Active</strong></label>
-                                  <div class="col-md-6">
-                                    <input class="form-control form-control" type="text" value="{% if factive == 'ACTIVE' %}Only Active{% else %}All{% endif %}" readonly>
-                                  </div>
-                                </div>
-                                <div class="form-group row">
                                   <label class="col-md-6 col-form-label text-right"><strong>Size of WorkCenter</strong></label>
                                   <div class="col-md-6">
-                                    <input class="form-control form-control" type="text" value="{{sizeOfWorkCenterInGroup}}" readonly>
+                                    <input class="form-control form-control" type="text" value="{{workCenterInGroupList|length}}" readonly>
                                   </div>
                                 </div>
-                                {% endif %}
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours</strong></label>
+                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours (Day)</strong></label>
                                   <div class="col-md-6">
-                                    <input class="form-control form-control" type="text" value="{{max_hour}}" readonly>
+                                    <input class="form-control form-control" type="text" value="{{max_hour_day}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours (Month)</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Working Hour (Month)</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right"><strong>Working Hour (Month) (%)</strong></label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_month_percent}}%" readonly>
                                   </div>
                                 </div>
                               </div>
                               <!-- Table View Tab -->
                               <div class="tab-pane" id="table-view-tab" role="tabpanel">
-                                {% if ftype == 'MONTHLY' %}
                                 <table class="table table-sm table-outline small" id="table_view_table" style="table-layout: fixed;">
                                   <thead class="thead-light">
                                     <tr>
@@ -154,21 +147,33 @@
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {% for i in data_oper %}
+                                    {% for wcg in wcg_oper %}
                                       <tr>
                                         <td>{{forloop.counter}}</td>
-                                        <td>{{data_setup|index:forloop.counter0}}</td>
-                                        <td>{{data_oper|index:forloop.counter0}}</td>
+                                        <td>{{wcg_setup|index:forloop.counter0}}</td>
+                                        <td>{{wcg_oper|index:forloop.counter0}}</td>
                                       </tr>
                                     {% endfor %}
                                   </tbody>
-
                                 </table>
-                                {% endif %}
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
+                      <div class="row">
+                        {% for wc in workCenterInGroupList %}
+                        <div class="col-6">
+                          <div class="card border-dard">
+                            <div class="card-header">
+                              {{wc.WorkCenterNo}}
+                            </div>
+                            <div class="card-body">
+                              <canvas id="wc_{{forloop.counter0}}_monthly_chart" width="400" height="180"></canvas>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
                       </div>
                     </div>
                   </div>
@@ -194,12 +199,11 @@
     <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
     <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
     <!-- Chart JS -->
-    <!-- Charts -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script> -->
-    <script src="{% static "vendors/@coreui/chartjs/js/coreui-chartjs.bundle.js" %}"></script>
-    <script src="{% static "js/charts.js" %}"></script>
+    <!-- <script src="{% static "vendors/@coreui/chartjs/js/coreui-chartjs.bundle.js" %}"></script> -->
+    <!-- <script src="{% static "js/charts.js" %}"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0-rc.1/chartjs-plugin-datalabels.min.js" integrity="sha512-+UYTD5L/bU1sgAfWA0ELK5RlQ811q8wZIocqI7+K0Lhh8yVdIoAMEs96wJAIbgFvzynPm36ZCXtkydxu1cs27w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script> -->
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -212,29 +216,10 @@
 
       toggle();
       $(document).ready(function() {
-        $('#table_view_table').DataTable( {
-            "order": [[ 0, "asc" ]],
-            'iDisplayLength': 100,
-            searching: false,
-            paging: false,
-            info: false,
-        });
-      });
 
-      $('#fwctype').change(function() {
-        toggle();
-        filter();
-      });
-
-      $('#fwc').change(function() {
-        filter();
       });
 
       $('#fwcg').change(function() {
-        filter();
-      });
-
-      $('#factive').change(function() {
         filter();
       });
 
@@ -252,16 +237,6 @@
       });
 
       function toggle(){
-        if($('#fwctype').val() == "WC"){
-          $("#fwc").prop("hidden", false);
-          $("#fwcg").prop("hidden", true);
-          $("#factive").prop("hidden", true);
-        } else if($('#fwctype').val() == "WCG"){
-          $("#fwc").prop("hidden", true);
-          $("#fwcg").prop("hidden", false);
-          $("#factive").prop("hidden", false);
-        }
-
         if($('#ftype').val() == "MONTHLY"){
           $("#fmonth").prop("hidden", false);
           $("#fyear").prop("hidden", true);
@@ -272,109 +247,147 @@
       }
 
       function filter(){
-        var fwctype = $("#fwctype").val();
-        var fwc = ($("#fwc").val() != "" && fwctype == "WC")?$("#fwc").val():"FIRST";
-        var fwcg = ($("#fwcg").val() != "" && fwctype == "WCG")?$("#fwcg").val():"FIRST";
-        var factive = ($("#factive").val() != "" && fwctype == "WCG")?$("#factive").val():"ACTIVE";
+        var fwcg = ($("#fwcg").val() != "")?$("#fwcg").val():"FIRST";
         var ftype = $("#ftype").val();
         var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
         var fyear = ($("#fyear").val() != "" && ftype == "YEARLY")?$("#fyear").val():"NOW";
-        window.location.href = "/ab_graph/" + fwctype + "&" + fwc + "&" + fwcg + "&" + factive + "&" + ftype + "&" + fmonth + "&" + fyear;
+        window.location.href = "/ab_graph/" + fwcg + "&" + ftype + "&" + fmonth + "&" + fyear;
       }
-
     </script>
     <!-- OTHER FUNCTION -->
     <script>
-      function getDataLen(){
+      function getXAxisSize(){
         var arr = []
-        for(i = 1;i <= parseInt($("#data_len").val());i++) arr.push(i);
-        return arr;
-      }
-
-      function getDataRandom(){
-        var arr = []
-        for(i = 1;i <= parseInt($("#data_len").val());i++) arr.push(Math.floor(Math.random() * 12));
+        for(i = 1;i <= parseInt({{x_size}});i++) arr.push(i);
         return arr;
       }
     </script>
-    {% if ftype == 'MONTHLY' %}
-    <!-- MONTHLY GRAPH -->
+    <!-- GRAPH -->
     <script>
-      const monthly_ctx = document.getElementById('monthly_chart').getContext('2d');
-      const monthly_chart = new Chart(monthly_ctx, {
-          type: 'bar',
-          data: {
-              labels: getDataLen(),
-              datasets: [{
-                  label: 'WORK',
-                  data: {{data_oper}},
-                  backgroundColor: 'rgb(46,184,92, 0.2)',
-                  borderColor: 'rgb(46,184,92, 1)',
-                  borderWidth: 1
-              },{
-                  label: 'SETUP',
-                  data: {{data_setup}},
-                  backgroundColor: 'rgb(157,208,77, 0.2)',
-                  borderColor: 'rgb(157,208,77, 1)',
-                  borderWidth: 1
-              }]
-          },
-          options: {
-            scales: {
-              xAxes: [{
-                  stacked: true,
-              }],
-              yAxes: [{
-                  stacked: true,
-                  ticks: {
-                      beginAtZero: true,
-                      max: {{max_y}},
-                      min: 0,
+      window.onload = function() {
+        // WCG MONTHLY GRAPH
+        var wcg_monthly_ctx = document.getElementById('wcg_monthly_chart').getContext('2d');
+        var wcg_monthly_chart = new Chart(wcg_monthly_ctx, {
+              type: 'bar',
+              data: {
+                  labels: getXAxisSize(),
+                  datasets: [{
+                      label: 'WORK',
+                      data: {{wcg_oper}},
+                      backgroundColor: 'rgb(46,184,92, 0.2)',
+                      borderColor: 'rgb(46,184,92, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'SETUP',
+                      data: {{wcg_setup}},
+                      backgroundColor: 'rgb(157,208,77, 0.2)',
+                      borderColor: 'rgb(157,208,77, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              plugins: [ChartDataLabels],
+              options: {
+                plugins: {
+                  datalabels: {
+                		formatter: (value, ctx) => {
+                			let datasets = ctx.chart.data.datasets; // Tried `.filter(ds => !ds._meta.hidden);` without success
+                  		if (ctx.datasetIndex == datasets.length - 1) {
+                  			let sum = 0;
+                  			datasets.map(dataset => {
+                  				sum += (dataset.data[ctx.dataIndex] > 0)?dataset.data[ctx.dataIndex]:0;
+                  			});
+                        if(sum == 0) return "";
+                  			return sum;
+                      }
+                      return "";
+                		},
+                		anchor: 'end',
+                		align: 'end'
+                	}
+                },
+                scales: {
+                  x: {
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Day',
+                    }
+                  },
+                  y: {
+                    max: {{y_size}},
+                    min: 0,
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Hour',
+                    },
                   }
-              }],
-            }
-          }
-      });
-    </script>
-    {% else %}
-    <!-- YEARLY GRAPH -->
-    <script>
-      const yearly_ctx = document.getElementById('yearly_chart').getContext('2d');
-      const yearly_chart = new Chart(yearly_ctx, {
-          type: 'bar',
-          data: {
-              labels: ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],
-              datasets: [{
-                  label: 'WORK',
-                  data: getDataRandom(),
-                  backgroundColor: 'rgb(46,184,92, 0.2)',
-                  borderColor: 'rgb(46,184,92, 1)',
-                  borderWidth: 1
-              },{
-                  label: 'SETUP',
-                  data: getDataRandom(),
-                  backgroundColor: 'rgb(157,208,77, 0.2)',
-                  borderColor: 'rgb(157,208,77, 1)',
-                  borderWidth: 1
-              }]
-          },
-          options: {
-            scales: {
-              xAxes: [{
-                  stacked: true,
-              }],
-              yAxes: [{
-                  stacked: true,
-                  ticks: {
-                      beginAtZero: true,
-                      max: 24,
-                      min: 0,
+                }
+              }
+          });
+        // WC MONTHLY GRAPH
+        {% for wc in workCenterInGroupList %}
+        var wc_{{forloop.counter0}}_monthly_ctx = document.getElementById('wc_{{forloop.counter0}}_monthly_chart').getContext('2d');
+        var wc_{{forloop.counter0}}_monthly_chart = new Chart(wc_{{forloop.counter0}}_monthly_ctx, {
+              type: 'bar',
+              data: {
+                  labels: getXAxisSize(),
+                  datasets: [{
+                      label: 'WORK',
+                      data: {{wc_oper_list|index:forloop.counter0}},
+                      backgroundColor: 'rgb(46,184,92, 0.2)',
+                      borderColor: 'rgb(46,184,92, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'SETUP',
+                      data: {{wc_setup_list|index:forloop.counter0}},
+                      backgroundColor: 'rgb(157,208,77, 0.2)',
+                      borderColor: 'rgb(157,208,77, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              plugins: [ChartDataLabels],
+              options: {
+                plugins: {
+                  datalabels: {
+                		formatter: (value, ctx) => {
+                			let datasets = ctx.chart.data.datasets; // Tried `.filter(ds => !ds._meta.hidden);` without success
+                  		if (ctx.datasetIndex == datasets.length - 1) {
+                  			let sum = 0;
+                  			datasets.map(dataset => {
+                  				sum += (dataset.data[ctx.dataIndex] > 0)?dataset.data[ctx.dataIndex]:0;
+                  			});
+                        if(sum == 0) return "";
+                  			return sum;
+                      }
+                      return "";
+                		},
+                		anchor: 'end',
+                		align: 'end'
+                	}
+                },
+                scales: {
+                  x: {
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Day',
+                    }
+                  },
+                  y: {
+                    max: 24,
+                    min: 0,
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Hour',
+                    },
                   }
-              }],
-            }
-          }
-      });
+                }
+              }
+          });
+        {% endfor %}
+      };
     </script>
-    {% endif %}
   </body>
 </html>

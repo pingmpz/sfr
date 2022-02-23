@@ -86,7 +86,7 @@ def transaction(request, orderoprno):
                     return redirect('/transaction/' + orderNo + currentOperation)
             #-- Check Cancel Order
             if isCanceledOrder(orderNo):
-                state = "CANCEL"
+                 state = "CANCEL"
             elif isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 #-- CONST
@@ -161,8 +161,8 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
-            else:
-                deleteOrderControl(orderNo)
+            # else:
+            #     deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
         'overtimehour' : overtimehour,
@@ -547,11 +547,8 @@ def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     }
     return render(request, 'work_records.html', context)
 
-def ab_graph(request, fwctype, fwc, fwcg, factive, ftype, fmonth, fyear):
-    workCenterList = getWorkCenterMachineList()
+def ab_graph(request,fwcg, ftype, fmonth, fyear):
     workCenterGroupList = getMachineWorkCenterGroupList()
-    if fwc == "FIRST":
-        fwc = workCenterList[0].WorkCenterNo
     if fwcg == "FIRST":
         fwcg = workCenterGroupList[0].WorkCenterGroup
     if fmonth == "NOW":
@@ -560,46 +557,60 @@ def ab_graph(request, fwctype, fwc, fwcg, factive, ftype, fmonth, fyear):
         fyear = datetime.today().strftime('%Y')
     year = fmonth[0:4]
     month = fmonth[5:7]
-    data_len = 0
-    max_hour = 24
-    max_y = 24
-    sizeOfWorkCenterInGroup = 0
-    data_oper = []
-    data_setup = []
+    workCenterInGroupList = getWorkCenterInGroupActiveList(fwcg)
+    #-- INITIALIZE
+    x_size = 0
+    y_size = 0
+    max_hour_day = 0
+    max_hour_month = 0
+    working_hour_month = 0
+    working_hour_month_percent = 0
+    wcg_oper = []
+    wcg_setup = []
+    wc_oper_list = []
+    wc_setup_list = []
     if ftype == "MONTHLY":
-        data_len = get_day_count(month, year)
+        x_size = get_day_count(month, year)
     elif ftype == "YEARLY":
-        data_len = 12
-    data_oper = [0] * data_len
-    data_setup = [0] * data_len
+        x_size = 12
+    wcg_oper = [0] * x_size
+    wcg_setup = [0] * x_size
     if ftype == "MONTHLY":
-        for rs in getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
-            data_oper[rs.Fday - 1] = rs.Foper
-        for rs in getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
-            data_setup[rs.Fday - 1] = rs.Fsetup
-    if fwctype == "WC":
-        max_hour = 24
-        max_y = 24
-    elif fwctype == "WCG":
-        sizeOfWorkCenterInGroup = getSizeOfMachineWorkCenterByGroup(fwcg, factive)
-        max_hour = 24 * sizeOfWorkCenterInGroup
-        max_y = 1.25 * (max(data_oper) + max(data_setup))
+        for rs in getMonthlyWorkCenterOperForABGrap('WCG', '', fwcg, fmonth):
+            wcg_oper[rs.Fday - 1] = rs.Foper
+        for rs in getMonthlyWorkCenterSetupForABGrap('WCG', '', fwcg, fmonth):
+            wcg_setup[rs.Fday - 1] = rs.Fsetup
+        y_size = 1.25 * (max(wcg_oper) + max(wcg_setup))
+        max_hour_day = 24 * len(workCenterInGroupList)
+        max_hour_month = max_hour_day * x_size
+        working_hour_month = sum(wcg_oper) + sum(wcg_setup)
+        working_hour_month_percent = round((working_hour_month / max_hour_month) * 100, 2)
+        for wc in workCenterInGroupList:
+            temp_oper = [0] * x_size
+            temp_setup = [0] * x_size
+            for rs in getMonthlyWorkCenterOperForABGrap('WC', wc.WorkCenterNo, '', fmonth):
+                temp_oper[rs.Fday - 1] = rs.Foper
+            for rs in getMonthlyWorkCenterSetupForABGrap('WC', wc.WorkCenterNo, '', fmonth):
+                temp_setup[rs.Fday - 1] = rs.Fsetup
+            wc_oper_list.append(temp_oper)
+            wc_setup_list.append(temp_setup)
     context = {
-        'workCenterList': workCenterList,
         'workCenterGroupList': workCenterGroupList,
-        'fwctype': fwctype,
-        'fwc': fwc,
         'fwcg': fwcg,
-        'factive': factive,
         'ftype': ftype,
         'fmonth': fmonth,
         'fyear': fyear,
-        'data_len': data_len,
-        'max_hour': max_hour,
-        'max_y': max_y,
-        'sizeOfWorkCenterInGroup': sizeOfWorkCenterInGroup,
-        'data_oper': data_oper,
-        'data_setup': data_setup,
+        'x_size': x_size,
+        'y_size': y_size,
+        'max_hour_day': max_hour_day,
+        'max_hour_month': max_hour_month,
+        'working_hour_month': working_hour_month,
+        'working_hour_month_percent': working_hour_month_percent,
+        'wcg_oper': wcg_oper,
+        'wcg_setup': wcg_setup,
+        'workCenterInGroupList': workCenterInGroupList,
+        'wc_oper_list': wc_oper_list,
+        'wc_setup_list': wc_setup_list,
     }
     return render(request, 'ab_graph.html', context)
 
@@ -1970,6 +1981,12 @@ def getWorkCenterInGroupList(work_center_group):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getWorkCenterInGroupActiveList(work_center_group):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND WorkCenterGroup = '"+work_center_group+"' AND IsActive = 1"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getAutoMachineManualReportOvertimeList(fmonth):
     printString(fmonth)
     year = fmonth[0:4]
@@ -2070,7 +2087,7 @@ def getSFRDelayOperationList(fwc):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
+def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
@@ -2083,9 +2100,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1 AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StartDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper) AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2094,9 +2109,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1 AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StopDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper) AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2105,9 +2118,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StartDateTime As Fdate, Oper AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2116,15 +2127,13 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ")) AS TB"
     sql += " GROUP BY day(CONVERT(DATE, Fdate))"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
+def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
@@ -2136,9 +2145,7 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StartDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Setup) * Setup) AS Fsetup"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2147,9 +2154,7 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StopDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Setup) * Setup) AS Fsetup"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2158,9 +2163,7 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
     sql += " (SELECT StartDateTime As Fdate, Setup AS Fsetup"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
@@ -2169,9 +2172,7 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, factive, fmonth):
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fwc+"'"
     elif fwctype == "WCG":
-        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
-        if factive == "ACTIVE":
-            sql += " AND IsActive = 1"
+        sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ")) AS TB"
     sql += " GROUP BY day(CONVERT(DATE, Fdate))"
     cursor.execute(sql)
