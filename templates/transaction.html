@@ -546,7 +546,11 @@
                                         <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
                                         <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty.normalize}}{% endif %}</td>
                                         <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty.normalize}}{% endif %}</td>
-                                        <td>{{confirm.RejectReason}}</td>
+                                        <td>
+                                          {% if confirm.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
+                                          SCRAP FROM → {{confirm.OPN}} ({{confirm.WorkCenterNo}})
+                                          {% else %}{{confirm.RejectReason}}{% endif %}
+                                        </td>
                                         <td>{{confirm.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
                                       </tr>
                                       {% endfor %}
@@ -955,6 +959,10 @@
                     <div class="col-sm-10 col-md-8">
                       <div class="card">
                         <div class="card-body small" style="height:240px; overflow:auto;">
+                          <h5 class="text-center">
+                            <b class="text-warning blink">★★★★★</b><br> วันที่ <u>อาทิตย์ที่ 27 กุมภาพันธ์ เวลา 17:00 น. - เที่ยงคืน</u> แผนก <b class="text-primary">MIS</b> จะทำการปิดปรับปรุงเซิพเวอร์ <b>SFR</b><br>
+                            ขอให้พนักงานทุกท่าน <b class="text-danger">Stop</b> ตัวเองออกจากระบบก่อนเวลาดังกล่าวด้วย และ สำหรับพนักงานที่ทำงาน ณ เวลาดังกล่าว โปรดจดบันทึกข้อมูลการทำงานไว้ เพื่อทำ <b class="text-info">Manual Report</b> ในภายหลัง<hr>
+                          </h5>
                           <b class="text-warning blink">★</b> ขอให้ทุกแผนก ทุกกระบวนการผลิต  หยุดบันทึกการทำงาน และจำนวนชิ้นงานผ่านระบบ SAP ทุกกรณี <u>ให้ทำผ่านระบบ SFR เท่านั้น</u> (ยกเว้นการได้รับอนุญาติจาก <b class="text-orangered">SFR Team</b> นะครับ)<hr>
                           <b class="text-warning blink">★</b> CASE การแก้ไขข้อมูลต่าง ๆ <u>โปรดส่งเมลมาเท่านั้น</u> ส่งถึง <b>yashawantatul.man@ccsadvancetech.co.th, warissara@ccsadvancetech.co.th, puchong.nan@ccsadvancetech.co.th</b> และ CC ถึง <b>atul@ccsgroups.com</b><hr>
                           หากพนักงานท่านใดเจอ Order ที่ถูก <b class="text-danger">Cancel</b> ไปแล้ว โปรดแจ้งมาที่เมล <b>yashawantatul.man@ccsadvancetech.co.th</b> <i class="text-muted">──22-Feb-2022 14:15</i><hr>
@@ -968,7 +976,6 @@
                           แถบ <b class="text-info">History</b> (ประวัติ) ถูกย้ายมากล่องซ้ายมือนะครับ <i class="text-muted">──10-Feb-2022 08:45</i><hr>
                           ตาราง Overtime ดูได้ที่แถบซ้ายมือ Report > Overtime Table สำหรับหัวหน้าแผนก (กด Fix Stop Time ไปแล้ว) <i class="text-muted">──09-Feb-2022 00:45</i><hr>
                           Order ที่เคยทำ <b class="text-info">Partial</b> ไปแล้วใน SAP ติดต่อ <b>6624</b> นะครับ <i class="text-muted">──07-Feb-2022 13:30</i><hr>
-                          Order ที่ Confirm จำนวนชิ้นงานดีไปก่อนแล้วพบว่ามีงานเสีย ให้ Reject งานเสียที่ Process ถัดไปโดยเลือกเหตุผล <b class="text-danger">SCRAP FROM PREVIOUS PROCESS</b> <i class="text-muted">──07-Feb-2022 11:50</i><hr>
                         </div>
                       </div>
                     </div>
@@ -1481,7 +1488,6 @@
             </div>
             <div class="modal-body">
               <input type="text" id="confirm_id" hidden>
-              <h4 class="text-center text-danger blink">โปรดตรวจสอบให้มั่นใจก่อน Confirm จำนวนชิ้นงาน</h4><hr>
               <div class="col-md-12">
                 <div class="form-group row">
                   <label class="col-md-3 col-form-label text-right"><strong>Operator</strong></label>
@@ -1530,17 +1536,17 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right">
+                      <label class="col-md-2 col-form-label text-right">
                         <strong>Reason</strong>
                         <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
-                      <div class="col-md-8">
+                      <div class="col-md-10">
                         <select class="form-control" id="reject_reason">
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -1551,6 +1557,18 @@
                       <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="text" id="other_reason" autocomplete="off" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" id="scrap_at_group" hidden>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Scrap At</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control" id="scrap_at">
+                          {% for opr in operationList %}
+                          <option value="{{opr.OperationNo}}">{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
+                          {% endfor %}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -1573,7 +1591,6 @@
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <h4 class="text-center text-danger blink">โปรดตรวจสอบให้มั่นใจก่อน Confirm จำนวนชิ้นงาน</h4><hr>
               <div class="col-md-12">
                 <div class="row">
                   <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Work Time</strong></div><div class="col-md-5"><hr></div>
@@ -1652,17 +1669,16 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right">
+                      <label class="col-md-2 col-form-label text-right">
                         <strong>Reason</strong>
-                        <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
-                      <div class="col-md-8">
+                      <div class="col-md-10">
                         <select class="form-control" id="mp_reject_reason" {% if operation.ProcessStop != None and remainQty == 0 %}readonly{% endif %}>
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %} {{rejectReason.Name}} {% if rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}***{% endif %}</option>
+                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
                           {% endfor %}
                         </select>
                       </div>
@@ -1673,6 +1689,18 @@
                       <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="text" id="mp_other_reason" autocomplete="off" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" id="mp_scrap_at_group" hidden>
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right"><strong>Scrap At</strong></label>
+                      <div class="col-md-8">
+                        <select class="form-control" id="mp_scrap_at">
+                          {% for opr in operationList %}
+                          <option value="{{opr.OperationNo}}">{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
+                          {% endfor %}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -2277,6 +2305,7 @@
         var reject_qty = parseFloat($('#reject_qty').val());
         var reject_reason = $('#reject_reason').val();
         var other_reason = $('#other_reason').val();
+        var scrap_at = $('#scrap_at').val();
         var canConfirm = false;
         remove_valid_many(["good_qty","reject_qty","reject_reason","other_reason"]);
         if(good_qty <= 0 && reject_qty <= 0){
@@ -2324,6 +2353,7 @@
               'reject_qty': reject_qty,
               'reject_reason': reject_reason,
               'other_reason': other_reason,
+              'scrap_at': scrap_at,
             },
             dataType: 'json',
             success: function (data) {
@@ -2356,6 +2386,7 @@
         var reject_qty = parseFloat($('#mp_reject_qty').val());
         var reject_reason = $('#mp_reject_reason').val();
         var other_reason = $('#mp_other_reason').val();
+        var scrap_at = $('#mp_scrap_at').val();
         var isReportable = false;
         $("#mp_invalid_text").text("");
         remove_valid_many(["mp_emp_id","mp_workcenter_no","mp_labor_time","mp_operate_time","mp_setup_time","mp_start_time","mp_stop_time","mp_good_qty","mp_reject_qty","mp_reject_reason","mp_other_reason"]);
@@ -2464,6 +2495,7 @@
                     'reject_qty': reject_qty,
                     'reject_reason': reject_reason,
                     'other_reason': other_reason,
+                    'scrap_at': scrap_at,
                   },
                   dataType: 'json',
                   success: function (data) {
@@ -3278,20 +3310,32 @@
       });
 
       $('#reject_reason').on("change", function() {
-        if($('#reject_reason').val() != "OTHER"){
+        var reason = $('#reject_reason').val();
+        if(reason == "OTHER"){
+          $("#other_reason").prop("readonly", false);
+          $("#scrap_at_group").prop("hidden", true);
+        } else if (reason == "SCRAP FROM PREVIOUS PROCESS"){
           $("#other_reason").prop("readonly", true);
-          $("#other_reason").val("");
+          $("#scrap_at_group").prop("hidden", false);
         } else {
-          $("#other_reason").prop("readonly", false)
+          $("#other_reason").prop("readonly", true);
+          $("#scrap_at_group").prop("hidden", true);
+          $("#other_reason").val("");
         }
       });
 
       $('#mp_reject_reason').on("change", function() {
-        if($('#mp_reject_reason').val() != "OTHER"){
+        var reason = $('#mp_reject_reason').val();
+        if(reason == "OTHER"){
+          $("#mp_other_reason").prop("readonly", false);
+          $("#mp_scrap_at_group").prop("hidden", true);
+        } else if (reason == "SCRAP FROM PREVIOUS PROCESS"){
           $("#mp_other_reason").prop("readonly", true);
-          $("#mp_other_reason").val("");
+          $("#mp_scrap_at_group").prop("hidden", false);
         } else {
-          $("#mp_other_reason").prop("readonly", false)
+          $("#mp_other_reason").prop("readonly", true);
+          $("#mp_scrap_at_group").prop("hidden", true);
+          $("#mp_other_reason").val("");
         }
       });
 

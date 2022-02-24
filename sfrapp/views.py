@@ -1029,6 +1029,7 @@ def confirm(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
+    scrap_at = request.GET.get('scrap_at')
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -1044,17 +1045,9 @@ def confirm(request):
         #-- SAP : CONFIRM
         if oopr.WorkCenterNo == None:
             workcenter = getOperation(orderNo, operationNo).WorkCenterNo
-        #-- SPECIAL CASE **
-        sap_reject_qty = reject_qty
-        if reject_reason == "SCRAP FROM PREVIOUS PROCESS":
-            sap_reject_qty = 0
-        #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY
-        if int(sap_reject_qty) == 0 and int(good_qty) == 0:
-            a = 0
-        else:
-            insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,sap_reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- CONFIRM : LOG
-        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason)
+        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason, scrap_at)
         #-- UPDATE QTY OF CURRENT OPERATION
         updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
         #-- UPDATE PROCESS QTY OF NEXT OPERATION
@@ -1112,6 +1105,7 @@ def manual_report(request):
     reject_qty = request.GET.get('reject_qty')
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
+    scrap_at = request.GET.get('scrap_at')
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -1128,21 +1122,13 @@ def manual_report(request):
             if hasNotStartOrder(order_no):
                 #-- ORDER : START
                 updateOrderControl(order_no, "START")
-        #-- SPECIAL CASE **
-        sap_reject_qty = reject_qty
-        if reject_reason == "SCRAP FROM PREVIOUS PROCESS":
-            sap_reject_qty = 0
-        #-- IN-CASE OF REJECT SPECIAL CASE BUT NO GOOD QTY OR TIME
-        if int(sap_reject_qty) == 0 and int(good_qty) == 0 and int(setup_time) == 0 and int(operate_time) == 0 and int(labor_time) == 0:
-            a = 0
-        else:
-            # SAP : CONFIRM TIME & QTY
-            insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
+        # SAP : CONFIRM TIME & QTY
+        insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
         #-- MANUAL REPORT : LOG
         insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
         #-- CONFIRM : LOG
         if int(good_qty) > 0 or int(reject_qty) > 0:
-            insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason)
+            insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason, scrap_at)
             #-- UPDATE QTY OF CURRENT OPERATION
             updateOperationControl(order_no, operation_no, good_qty, reject_qty, "UPDATEQTY")
             #-- UPDATE PROCESS QTY OF NEXT OPERATION
@@ -1923,7 +1909,9 @@ def getHistoryOperateList(order_no, operation_no):
 
 def getHistoryConfirmList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryConfirm] WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY ConfirmDateTime DESC"
+    sql = "SELECT *, OC.OperationNo AS OPN FROM HistoryConfirm AS HC LEFT JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.ScrapAt = OC.OperationNo"
+    sql += " WHERE HC.OrderNo = '"+order_no+"' AND HC.OperationNo = '"+operation_no+"'"
+    sql += " ORDER BY ConfirmDateTime DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2775,11 +2763,11 @@ def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, typ
     conn.commit()
     return
 
-def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, accept, reject, reason):
+def insertHistoryConfirm(order_no, operation_no, operator_id, workcenter_no, accept, reject, reason, scrap_at):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[AcceptedQty],[RejectedQty],[RejectReason],[ConfirmDateTime])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "','" + str(operator_id) + "','" + workcenter_no + "','" + str(accept) + "','" + str(reject) + "','" + reason + "',CURRENT_TIMESTAMP)"
+    sql = "INSERT INTO [HistoryConfirm] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[AcceptedQty],[RejectedQty],[RejectReason],[ScrapAt],[ConfirmDateTime])"
+    sql += " VALUES ('"+order_no+"','"+operation_no+"','"+str(operator_id)+"','"+workcenter_no+"','"+str(accept)+"','"+str(reject)+"','"+reason+"','"+str(scrap_at)+"',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return
