@@ -64,8 +64,10 @@
                       <div class="nav-tabs-boxed">
                         <ul class="nav nav-tabs" role="tablist">
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#dup-rt-tab" role="tab">Duplicate Routing ({{duplicateRoutingList|length}})</a></li>
-                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#no-rt-tab" role="tab">Order No Routing ({{oderNoRoutingList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#no-rt-tab" role="tab">Order No Routing ({{orderNoRoutingList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-error-tab" role="tab">WorkCenter Error ({{workCenterErrorList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#stop-not-start-tab" role="tab">Order Stop Not Start ({{orderStopNotStartList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#remain-qty-tab" role="tab">Operation Remaining Qty ({{operationRemainQtyList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- Duplicate Routing Tab -->
@@ -105,7 +107,7 @@
                                 </tr>
                               </thead>
                               <tbody>
-                                {% for order in oderNoRoutingList %}
+                                {% for order in orderNoRoutingList %}
                                 <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                                   <td>{{order.ProductionOrderNo|default_if_none:""}}</td>
                                   <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
@@ -133,6 +135,40 @@
                                   <td>{{rt.ProductionOrderNo|default_if_none:""}}</td>
                                   <td>{{rt.OperationNumber|default_if_none:""}}</td>
                                   <td>{{rt.DateGetFromSAP|default_if_none:""}}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Order No Routing Tab -->
+                          <div class="tab-pane" id="stop-not-start-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="stop_not_start_table" style="width: 100%">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>OrderNo</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for order in orderStopNotStartList %}
+                                <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
+                                  <td>{{order.OrderNo|default_if_none:""}}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Operation Remaining Qty Tab -->
+                          <div class="tab-pane" id="remain-qty-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="remain_qty_table" style="width: 100%">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>Prod. Order - Oper. No</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for oper in operationRemainQtyList %}
+                                <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
+                                  <td>{{oper.OrderNo|default_if_none:""}}-{{oper.OperationNo|default_if_none:""}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -198,6 +234,16 @@
         });
 
         $('#wc_error_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            "displayLength": 100,
+        });
+
+        $('#stop_not_start_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            "displayLength": 100,
+        });
+
+        $('#remain_qty_table').DataTable( {
             "order": [[ 0, "asc" ]],
             "displayLength": 100,
         });

@@ -717,13 +717,17 @@ def admin_controller(request):
     return render(request, 'admin_controller.html', context)
 
 def error_data(request):
-    oderNoRoutingList = getSAPOrderNoRoutingList()
+    orderNoRoutingList = getSAPOrderNoRoutingList()
     duplicateRoutingList = getSAPDuplicateRoutingList()
     workCenterErrorList = getWorkCenterErrorList()
+    orderStopNotStartList = getOrderStopNotStart()
+    operationRemainQtyList = getOperationRemainQtyList()
     context = {
-        'oderNoRoutingList': oderNoRoutingList,
+        'orderNoRoutingList': orderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
         'workCenterErrorList': workCenterErrorList,
+        'orderStopNotStartList': orderStopNotStartList,
+        'operationRemainQtyList': operationRemainQtyList,
     }
     return render(request, 'error_data.html', context)
 
@@ -2042,7 +2046,6 @@ def getWorkCenterInGroupActiveList(work_center_group):
     return cursor.fetchall()
 
 def getAutoMachineManualReportOvertimeList(fmonth):
-    printString(fmonth)
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
@@ -2229,6 +2232,21 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, fmonth):
         sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ")) AS TB"
     sql += " GROUP BY day(CONVERT(DATE, Fdate))"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOrderStopNotStart():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OrderControl AS OC WHERE OC.ProcessStart IS NULL AND OC.ProcessStop IS NOT NULL"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOperationRemainQtyList():
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT * FROM OrderControl AS OC INNER JOIN OperationControl AS OPC ON OC.OrderNo = OPC.OrderNo
+            WHERE OC.ProcessStop IS NOT NULL AND ProcessQty - (AcceptedQty + RejectedQty) > 0
+        """
     cursor.execute(sql)
     return cursor.fetchall()
 
