@@ -565,6 +565,9 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
     max_hour_month = 0
     working_hour_month = 0
     working_hour_month_percent = 0
+    max_hour_present = 0
+    working_hour_present = 0
+    working_hour_present_percent = 0
     wcg_oper = []
     wcg_setup = []
     wc_oper_list = []
@@ -585,6 +588,15 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         max_hour_month = max_hour_day * x_size
         working_hour_month = sum(wcg_oper) + sum(wcg_setup)
         working_hour_month_percent = round((working_hour_month / max_hour_month) * 100, 2)
+        if(datetime.today().strftime('%Y-%m') == fmonth):
+            current_day = int(datetime.today().strftime('%d'))
+            max_hour_present = max_hour_day * current_day
+            working_hour_present = sum(wcg_oper[0::current_day - 1]) + sum(wcg_setup[0::current_day - 1])
+            working_hour_present_percent = round((working_hour_present / max_hour_present) * 100, 2)
+        else:
+            max_hour_present = max_hour_month
+            working_hour_present = working_hour_month
+            working_hour_present_percent = working_hour_month_percent
         for wc in workCenterInGroupList:
             temp_oper = [0] * x_size
             temp_setup = [0] * x_size
@@ -606,6 +618,9 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         'max_hour_month': max_hour_month,
         'working_hour_month': working_hour_month,
         'working_hour_month_percent': working_hour_month_percent,
+        'max_hour_present': max_hour_present,
+        'working_hour_present': working_hour_present,
+        'working_hour_present_percent': working_hour_present_percent,
         'wcg_oper': wcg_oper,
         'wcg_setup': wcg_setup,
         'workCenterInGroupList': workCenterInGroupList,

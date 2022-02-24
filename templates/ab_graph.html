@@ -100,39 +100,59 @@
                               <div class="tab-pane active" id="info-tab" role="tabpanel">
                                 <br>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">WorkCenterGroup</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Size of WorkCenter</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">Size of WorkCenter</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{workCenterInGroupList|length}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours (Day)</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours in 1 Day</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{max_hour_day}}" readonly>
                                   </div>
                                 </div>
+                                <div class="row"><div class="col-md-4"><hr></div><div class="col-md-4 text-center">Full Month</div><div class="col-md-4"><hr></div></div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Maximum Hours (Month)</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{max_hour_month}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Working Hour (Month)</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hour</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_month}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right"><strong>Working Hour (Month) (%)</strong></label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hour (%)</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_month_percent}}%" readonly>
+                                  </div>
+                                </div>
+                                <div class="row"><div class="col-md-4"><hr></div><div class="col-md-4 text-center">Present Day</div><div class="col-md-4"><hr></div></div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour_present}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hour</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_present}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hour (%)</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_present_percent}}%" readonly>
                                   </div>
                                 </div>
                               </div>
