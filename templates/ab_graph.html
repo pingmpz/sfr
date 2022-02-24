@@ -125,13 +125,13 @@
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right">Working Hour</label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hours</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_month}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right">Working Hour (%)</label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hours (%)</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_month_percent}}%" readonly>
                                   </div>
@@ -144,13 +144,13 @@
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right">Working Hour</label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hours</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_present}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
-                                  <label class="col-md-6 col-form-label text-right">Working Hour (%)</label>
+                                  <label class="col-md-6 col-form-label text-right">Working Hours (%)</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{working_hour_present_percent}}%" readonly>
                                   </div>
@@ -186,7 +186,7 @@
                         <div class="col-6">
                           <div class="card border-dard">
                             <div class="card-header">
-                              {{wc.WorkCenterNo}}
+                              <a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a>
                             </div>
                             <div class="card-body">
                               <canvas id="wc_{{forloop.counter0}}_monthly_chart" width="400" height="180"></canvas>

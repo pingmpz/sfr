@@ -55,6 +55,7 @@
             <a href="/lot_traveller/{{orderNo}}&0" class="btn btn-sm btn-link">Partial Lot Traveller</a>
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#reset_order_modal">Reset Order</button>
             |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#cancel_order_modal">Cancel Order</button>
+            |<button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_qty_modal">Set Operation Qty</button>
           </div>
           {% endif %}
           <div class="c-subheader-nav" {% if state != "FIRSTPAGE" %}hidden{% endif %}>
@@ -133,11 +134,11 @@
                         <div class="nav-tabs-boxed">
                           <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
-                              <a class="nav-link active small" data-toggle="tab" href="#info-tab" role="tab">
+                              <a class="nav-link small" data-toggle="tab" href="#info-tab" role="tab">
                                 {{operation.OperationNo}} ({{operation.WorkCenterNo}})
                               </a>
                             </li>
-                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#history-tab" role="tab">History</a></li>
                             {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
@@ -146,7 +147,7 @@
                           </ul>
                           <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
                             <!-- Info Tab -->
-                            <div class="tab-pane active" id="info-tab" role="tabpanel">
+                            <div class="tab-pane" id="info-tab" role="tabpanel">
                               <div class="nav-tabs-boxed">
                                 <ul class="nav nav-tabs" role="tablist">
                                   <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
@@ -380,7 +381,7 @@
                               </div>
                             </div>
                             <!-- Routing Sheet -->
-                            <div class="tab-pane small" id="rt-sheet-tab" role="tabpanel">
+                            <div class="tab-pane active small" id="rt-sheet-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
@@ -1741,6 +1742,49 @@
             <div class="modal-footer">
               <small>Permission: Administrator+</small>
               <button class="btn bg-darkslategray text-white" type="button" id="cc_confirm_button" onclick="cancel_order()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="set_qty_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header bg-darkslategray">
+              <h4 class="modal-title"><i class="c-icon cil-pen"></i> Set Operation Qty</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="sqty_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small text-info"><strong>Process Qty</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="number" id="sqty_process_qty" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small text-success"><strong>Accepeted Qty</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="number" id="sqty_accepted_qty" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small text-danger"><strong>Rejected Qty</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="number" id="sqty_rejected_qty" autocomplete="off">
+                </div>
+              </div>
+              <div class="text-danger text-center small" id="sqty_invalid_text"></div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Administrator+</small>
+              <button class="btn bg-darkslategray text-white" type="button" id="sqty_confirm_button" onclick="sqty_operation()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -3263,6 +3307,21 @@
     </script>
     <!-- KET RESTRICT -->
     <script>
+      $("#sqty_process_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#sqty_accepted_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#sqty_rejected_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       $("#inc_qty_amount").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -3399,7 +3458,6 @@
       });
     </script>
     <!-- ADMIN -->
-
     <script>
     function validate_admin_password(password, _callback){
       if(password.length < 4) _callback(false);
@@ -3478,7 +3536,41 @@
       });
     }
 
-
+    function sqty_operation(){
+      var order_no = $('#order_no').val();
+      var operation_no = $('#operation_no').val();
+      var password = $('#sqty_password').val();
+      if($('#sqty_process_qty').val() == "") $('#sqty_process_qty').val("0");
+      if($('#sqty_accepted_qty').val() == "") $('#sqty_accepted_qty').val("0");
+      if($('#sqty_rejected_qty').val() == "") $('#sqty_rejected_qty').val("0");
+      var confirm_id = $('#confirm_id').val();
+      var process_qty = parseFloat($('#sqty_process_qty').val());
+      var accepted_qty = parseFloat($('#sqty_accepted_qty').val());
+      var rejected_qty = parseFloat($('#sqty_rejected_qty').val());
+      validate_admin_password(password, function(isCorrect, invalid_text) {
+        if(!isCorrect){
+          invalid("sqty_password");
+          $("#sqty_invalid_text").text(invalid_text);
+        } else {
+          valid("sqty_password");
+          $('#sqty_confirm_button').prop('disabled', true);
+          $.ajax({
+            url: '/sqty_operation/',
+            data: {
+              'order_no': order_no,
+              'operation_no': operation_no,
+              'process_qty': process_qty,
+              'accepted_qty': accepted_qty,
+              'rejected_qty': rejected_qty,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
+        }
+      });
+    }
     </script>
   </body>
 </html>

@@ -591,7 +591,7 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         if(datetime.today().strftime('%Y-%m') == fmonth):
             current_day = int(datetime.today().strftime('%d'))
             max_hour_present = max_hour_day * current_day
-            working_hour_present = sum(wcg_oper[0::current_day - 1]) + sum(wcg_setup[0::current_day - 1])
+            working_hour_present = sum(wcg_oper[0:current_day - 1]) + sum(wcg_setup[0:current_day - 1])
             working_hour_present_percent = round((working_hour_present / max_hour_present) * 100, 2)
         else:
             max_hour_present = max_hour_month
@@ -1607,6 +1607,45 @@ def cancel_order(request):
     }
     return JsonResponse(data)
 
+def sqty_operation(request):
+    order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
+    process_qty = int(request.GET.get('process_qty'))
+    accepted_qty = int(request.GET.get('accepted_qty'))
+    rejected_qty = int(request.GET.get('rejected_qty'))
+    print(order_no, operation_no, process_qty, accepted_qty, rejected_qty)
+    if process_qty > 0:
+        #-- UPDATE QTY OPERATION CONTROL
+        setOperationQty(order_no, operation_no, process_qty, accepted_qty, rejected_qty)
+        #-- IF NOT START OPERATION YET
+        if hasNotStartOperation(order_no, operation_no):
+            #-- OPERATION : START
+            updateOperationControl(order_no, operation_no, 0, 0, "START")
+            #-- IF NOT START ORDER YET
+            if hasNotStartOrder(order_no):
+                #-- ORDER : START
+                updateOrderControl(order_no, "START")
+        #-- CHECK IF FULL CONFIRM QTY
+        if process_qty - (accepted_qty + rejected_qty) <= 0:
+            #-- CLEAR ALL CONTROL DATA
+            deleteAllOperatingData(order_no, operation_no)
+            #-- STOP OPERATION
+            updateOperationControl(order_no, operation_no, 0, 0, "STOP")
+            #-- IF LAST OPERATION IN ORDER or IF NO MORE REMAINING QTY IN ORDER
+            hasNoMoreQty = True
+            operationList = getOperationList(order_no)
+            for i in range(len(operationList)):
+                tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                if tempRemainQty > 0:
+                    hasNoMoreQty = False
+                    break
+            if isLastOperation(order_no, operation_no) and hasNoMoreQty:
+                #-- ORDER : STOP
+                updateOrderControl(order_no, "STOP")
+    data = {
+    }
+    return JsonResponse(data)
+
 #--------------------------------------------------------------------------- ETC
 
 def increase_lot_no(request):
@@ -2504,6 +2543,16 @@ def setOperationControlFromSAP(order_no):
             sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
         cursor.execute(sql)
         conn.commit()
+    return
+
+def setOperationQty(order_no, operation_no, process_qty, accepted_qty, rejected_qty):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OperationControl] SET ProcessQty = "+str(process_qty)+", AcceptedQty = "+str(accepted_qty)+", RejectedQty = "+str(rejected_qty)
+    sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"'"
+    print(sql)
+    cursor.execute(sql)
+    conn.commit()
     return
 
 #------------------------------------------------------------------------ INSERT
