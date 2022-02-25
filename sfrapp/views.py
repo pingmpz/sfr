@@ -1086,7 +1086,7 @@ def confirm(request):
                 if tempRemainQty > 0:
                     hasNoMoreQty = False
                     break
-            if isLastOperation(orderNo, operationNo) and hasNoMoreQty:
+            if hasNoMoreQty:
                 #-- ORDER : STOP
                 updateOrderControl(orderNo, "STOP")
     data = {
@@ -1169,7 +1169,7 @@ def manual_report(request):
                     if tempRemainQty > 0:
                         hasNoMoreQty = False
                         break
-                if isLastOperation(order_no, operation_no) and hasNoMoreQty:
+                if hasNoMoreQty:
                     #-- ORDER : STOP
                     updateOrderControl(order_no, "STOP")
     data = {
