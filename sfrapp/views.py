@@ -1034,6 +1034,8 @@ def confirm(request):
         reject_reason = ""
     elif reject_reason == "OTHER":
         reject_reason = other_reason
+    if reject_reason != "SCRAP FROM PREVIOUS PROCESS":
+        scrap_at = ""
     #-- RECHECK QTY
     oopr = getOperatorOperatingByID(confirm_id)
     orderNo = oopr.OperatorOrderNo
@@ -1110,6 +1112,8 @@ def manual_report(request):
         reject_reason = ""
     elif reject_reason == "OTHER":
         reject_reason = other_reason
+    if reject_reason != "SCRAP FROM PREVIOUS PROCESS":
+        scrap_at = ""
     #-- RECHECK QTY
     operation = getOperation(order_no, operation_no)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
@@ -1909,7 +1913,8 @@ def getHistoryOperateList(order_no, operation_no):
 
 def getHistoryConfirmList(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT *, OC.OperationNo AS OPN FROM HistoryConfirm AS HC LEFT JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.ScrapAt = OC.OperationNo"
+    sql = "SELECT HC.*, OC.OperationNo AS OPN, OC.WorkCenterNo AS WCN"
+    sql += " FROM HistoryConfirm AS HC LEFT JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.ScrapAt = OC.OperationNo"
     sql += " WHERE HC.OrderNo = '"+order_no+"' AND HC.OperationNo = '"+operation_no+"'"
     sql += " ORDER BY ConfirmDateTime DESC"
     cursor.execute(sql)
