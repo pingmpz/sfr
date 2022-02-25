@@ -167,7 +167,7 @@
                               </thead>
                               <tbody>
                                 {% for oper in operationRemainQtyList %}
-                                <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
+                                <tr style="background-color:#f{{oper.OrderNo|add:'0'|modulo:8}}f{{oper.OrderNo|add:'0'|modulo:9}}f{{oper.OrderNo|add:'0'|modulo:10}}">
                                   <td>{{oper.OrderNo|default_if_none:""}}-{{oper.OperationNo|default_if_none:""}}</td>
                                 </tr>
                                 {% endfor %}

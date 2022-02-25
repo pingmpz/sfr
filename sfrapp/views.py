@@ -1127,7 +1127,7 @@ def manual_report(request):
                 #-- ORDER : START
                 updateOrderControl(order_no, "START")
         # SAP : CONFIRM TIME & QTY
-        insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,sap_reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
+        insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
         #-- MANUAL REPORT : LOG
         insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
         #-- CONFIRM : LOG
