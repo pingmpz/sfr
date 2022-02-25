@@ -2258,6 +2258,7 @@
         $('#reject_reason').val(-1);
         $('#other_reason').val("");
         $('#confirm_id').val(id);
+        $("#scrap_at_group").prop("hidden", true);
         $('#confirm_button').prop('disabled', true);
         $.ajax({
           url: '/get_data_for_confirm/',
@@ -2290,6 +2291,7 @@
         $('#mp_reject_qty').val("");
         $('#mp_reject_reason').val(-1);
         $('#mp_other_reason').val("");
+        $("#mp_scrap_at_group").prop("hidden", true);
         $("#mp_invalid_text").text("");
         $('#mp_workcenter_no').focus();
         refresh_second_left = refresh_second;
