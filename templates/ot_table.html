@@ -77,6 +77,7 @@
                                   <th>EmpID</th>
                                   <th>EmpName</th>
                                   <th>Section</th>
+                                  <th>CostCenter</th>
                                   <th>Status</th>
                                   <th>On WorkCenter</th>
                                   <th>Prod. Order - Oper.No</th>
@@ -89,6 +90,7 @@
                                   <td><a href="/emp/{{ht.EmpID}}&NOW">{{ht.EmpID}}</a></td>
                                   <td>{{ht.EmpName}}</td>
                                   <td>{{ht.Section}}</td>
+                                  <td>{{ht.CostCenter}}</td>
                                   <td>
                                     {% if ht.Status.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
                                     {% elif ht.Status.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>

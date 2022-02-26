@@ -72,6 +72,7 @@
                         <div class="tab-content">
                           <!-- Duplicate Routing Tab -->
                           <div class="tab-pane active" id="dup-rt-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">SAP ส่ง Routing มาซ้ำ</h6>
                             <table class="table table-sm table-outline small" id="dup_rt_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -98,6 +99,7 @@
                           </div>
                           <!-- Order No Routing Tab -->
                           <div class="tab-pane" id="no-rt-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">SAP ส่ง Order ส่วน Header มาแต่ไม่มี Routing</h6>
                             <table class="table table-sm table-outline small" id="no_rt_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -119,6 +121,7 @@
                           </div>
                           <!-- WorkCenter Error Tab -->
                           <div class="tab-pane" id="wc-error-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">ไม่มี WorkCenter ในระบบ SFR</h6>
                             <table class="table table-sm table-outline small" id="wc_error_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -140,8 +143,9 @@
                               </tbody>
                             </table>
                           </div>
-                          <!-- Order No Routing Tab -->
+                          <!-- Order Stop Not Start Tab -->
                           <div class="tab-pane" id="stop-not-start-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">Order มีเวลา Stop แต่ไม่มีเวลา Start</h6>
                             <table class="table table-sm table-outline small" id="stop_not_start_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
@@ -159,6 +163,7 @@
                           </div>
                           <!-- Operation Remaining Qty Tab -->
                           <div class="tab-pane" id="remain-qty-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">Order Stop ไปแล้วแต่ Process ข้างในยัง Confirm จำนวนไม่ครบ</h6>
                             <table class="table table-sm table-outline small" id="remain_qty_table" style="width: 100%">
                               <thead class="thead-light">
                                 <tr>
