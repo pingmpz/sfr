@@ -397,7 +397,7 @@
                                       <strong class='text-info'>Ready</strong><br>
                                       <strong class='text-orangered'>Overtime</strong><br>
                                       <strong class='text-danger'>Error</strong><br>
-                                      <strong class='text-dark'>Closed</strong><br>
+                                      <strong class='text-dark'>Rejected</strong><br>
                                       ">?
                                       </a>
                                     </th>
@@ -421,7 +421,7 @@
                                       {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ready"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;" data-toggle="tooltip" data-original-title="Overtime"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'CLOSED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Closed"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'REJECTED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Rejected"></i>
                                       {% endif %}
                                     </td>
                                     <td>
@@ -886,10 +886,18 @@
                                 <br><br><br><br><br>
                                 <h1><i class="c-icon c-icon-2xl cil-puzzle" style="font-size: 10rem; width: 10rem;"></i></h1>
                                 <br>
+                                {% if order.ProcessStop != None %}
+                                <h3><strong>This Operation is Rejected</strong></h3>
+                                {% else %}
                                 <h3><strong>This Operation is Waiting</strong></h3>
+                                {% endif %}
                                 <br>
                                 {% if currentOperation != -1 %}
                                 <a href="/transaction/{{orderNo}}{{currentOperation}}" class="btn btn-pill btn-lg btn-light small"><strong>&nbsp;&nbsp;&nbsp;Go To Current Operation #{{currentOperation}}&nbsp;&nbsp;&nbsp;</strong></a>
+                                {% endif %}
+                                {% if order.ProcessStop != None %}
+                                <h6>Start Order : {{order.ProcessStart|date:"d-M-Y, H:i"}}</h6>
+                                <h6>Stop Order : {{order.ProcessStop|date:"d-M-Y, H:i"}}</h6>
                                 {% endif %}
                                 <br><br><br><br><br>
                               </div>

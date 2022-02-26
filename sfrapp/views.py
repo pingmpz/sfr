@@ -118,7 +118,7 @@ def transaction(request, orderoprno):
                         isPartial = True
                     temphasReportTime = hasReportTimeToSAP(orderNo, operationList[i].OperationNo)
                     if operationList[i].ProcessQty == 0 and hasNoMoreQty:
-                        operationStatusList.append("CLOSED")
+                        operationStatusList.append("REJECTED")
                     elif operationList[i].ProcessQty == 0:
                         operationStatusList.append("WAITING")
                     elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
@@ -505,6 +505,26 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     }
     return render(request, 'completed_order.html', context)
 
+def rejected_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    rejectedOrderList = getRejectedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    context = {
+        'ftype': ftype,
+        'fdate': fdate,
+        'fmonth': fmonth,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
+        'rejectedOrderList': rejectedOrderList,
+    }
+    return render(request, 'rejected_order.html', context)
+
 def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
@@ -722,12 +742,14 @@ def error_data(request):
     workCenterErrorList = getWorkCenterErrorList()
     orderStopNotStartList = getOrderStopNotStart()
     operationRemainQtyList = getOperationRemainQtyList()
+    lastProcessStopOrderNotStop = getLastProcessStopOrderNotStop()
     context = {
         'orderNoRoutingList': orderNoRoutingList,
         'duplicateRoutingList': duplicateRoutingList,
         'workCenterErrorList': workCenterErrorList,
         'orderStopNotStartList': orderStopNotStartList,
         'operationRemainQtyList': operationRemainQtyList,
+        'lastProcessStopOrderNotStop': lastProcessStopOrderNotStop,
     }
     return render(request, 'error_data.html', context)
 
@@ -2090,13 +2112,30 @@ def getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
     month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = "SELECT *, DATEDIFF(DAY, CONVERT(DATE, ProcessStart), CONVERT(DATE, ProcessStop)) AS 'Day' FROM OrderControl"
-    sql += " WHERE ProcessStop IS NOT NULL AND"
+    sql += " WHERE ProcessStop IS NOT NULL"
     if ftype == "DAILY":
-        sql += " ProcessStop >= '" + fdate + " 00:00:00' AND ProcessStop <= '" + fdate + " 23:59:59'"
+        sql += " AND ProcessStop >= '" + fdate + " 00:00:00' AND ProcessStop <= '" + fdate + " 23:59:59'"
     if ftype == "MONTHLY":
-        sql += " month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+        sql += " AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
     if ftype == "RANGE":
-        sql += " ProcessStop >= '" + fstartdate + " 00:00:00' AND ProcessStop <= '" + fstopdate + " 23:59:59'"
+        sql += " AND ProcessStop >= '" + fstartdate + " 00:00:00' AND ProcessStop <= '" + fstopdate + " 23:59:59'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getRejectedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT OC.OrderNo, OC.FG_MaterialCode, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop, DATEDIFF(DAY, CONVERT(DATE, OC.ProcessStart), CONVERT(DATE, OC.ProcessStop)) AS 'Day'"
+    sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
+    sql += " WHERE (OPC.ProcessStart IS NULL OR OPC.ProcessStop IS NULL ) AND OC.ProcessStop IS NOT NULL"
+    if ftype == "DAILY":
+        sql += " AND OC.ProcessStop >= '" + fdate + " 00:00:00' AND OC.ProcessStop <= '" + fdate + " 23:59:59'"
+    if ftype == "MONTHLY":
+        sql += " AND month(OC.ProcessStop) = '"+month+"' AND year(OC.ProcessStop) = '"+year+"'"
+    if ftype == "RANGE":
+        sql += " AND OC.ProcessStop >= '" + fstartdate + " 00:00:00' AND OC.ProcessStop <= '" + fstopdate + " 23:59:59'"
+    sql += " GROUP BY OC.OrderNo, OC.FG_MaterialCode, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2239,6 +2278,18 @@ def getOperationRemainQtyList():
     sql = """
             SELECT * FROM OrderControl AS OC INNER JOIN OperationControl AS OPC ON OC.OrderNo = OPC.OrderNo
             WHERE OC.ProcessStop IS NOT NULL AND ProcessQty - (AcceptedQty + RejectedQty) > 0
+        """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getLastProcessStopOrderNotStop():
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT *, OPC.ProcessStop AS LastProcessStop FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
+            WHERE CONCAT(OPC.OrderNo, OPC.OperationNo) IN
+            (SELECT CONCAT(OrderNo, MAX(OperationNo)) AS PROD FROM OperationControl
+            GROUP BY OrderNo)
+            AND OPC.ProcessStop IS NOT NULL AND OC.ProcessStop IS NULL
         """
     cursor.execute(sql)
     return cursor.fetchall()

@@ -68,6 +68,7 @@
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#wc-error-tab" role="tab">WorkCenter Error ({{workCenterErrorList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#stop-not-start-tab" role="tab">Order Stop Not Start ({{orderStopNotStartList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#remain-qty-tab" role="tab">Operation Remaining Qty ({{operationRemainQtyList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#last-stop-tab" role="tab">Last Process Stop Order Not Stop ({{lastProcessStopOrderNotStop|length}})</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- Duplicate Routing Tab -->
@@ -173,7 +174,29 @@
                               <tbody>
                                 {% for oper in operationRemainQtyList %}
                                 <tr style="background-color:#f{{oper.OrderNo|add:'0'|modulo:8}}f{{oper.OrderNo|add:'0'|modulo:9}}f{{oper.OrderNo|add:'0'|modulo:10}}">
-                                  <td>{{oper.OrderNo|default_if_none:""}}-{{oper.OperationNo|default_if_none:""}}</td>
+                                  <td><a href="/transaction/{{oper.OrderNo}}{{oper.OperationNo}}">{{oper.OrderNo}}-{{oper.OperationNo}}</a></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Last Process Stop Order Not Stop Tab -->
+                          <div class="tab-pane" id="last-stop-tab" role="tabpanel">
+                            <h6 class="text-danger text-center">Order ที่ยังไม่ Stop แต่ Last Process Stop แล้ว (มี Partial Case รวมอยู่ด้วย)</h6>
+                            <table class="table table-sm table-outline small" id="last_stop_table" style="width: 100%">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>OrderNo</th>
+                                  <th>LastProcessStopDateTime</th>
+                                  <th>Duration (LastProcessStopDateTime)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for order in lastProcessStopOrderNotStop %}
+                                <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
+                                  <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
+                                  <td>{{order.LastProcessStop}}</td>
+                                  <td>{{order.LastProcessStop|naturaltime}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -250,6 +273,11 @@
 
         $('#remain_qty_table').DataTable( {
             "order": [[ 0, "asc" ]],
+            "displayLength": 100,
+        });
+
+        $('#last_stop_table').DataTable( {
+            "order": [[ 1, "asc" ]],
             "displayLength": 100,
         });
       });
