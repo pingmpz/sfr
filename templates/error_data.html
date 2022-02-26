@@ -156,7 +156,7 @@
                               <tbody>
                                 {% for order in orderStopNotStartList %}
                                 <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
-                                  <td>{{order.OrderNo|default_if_none:""}}</td>
+                                  <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
                                 </tr>
                                 {% endfor %}
                               </tbody>

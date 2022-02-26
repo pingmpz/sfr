@@ -11,8 +11,8 @@ from dateutil import parser
 ################################################################################
 
 def blank(request):
-    # replace_rm_mat_code()
-    # replace_sec_and_cost()
+    replace_rm_mat_code()
+    replace_sec_and_cost()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -986,6 +986,11 @@ def stop_work_operating_operator(request):
         worktimeMachine = 0
     elif oopr.MachineType.strip() == 'Auto':
         worktimeMachine = 0
+    elif oopr.MachineType.strip() == 'Manual':
+        worktimeMachine = 0
+        if hasOperatorOperating(oopr.OperatingWorkCenterID) == False:
+            owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
+            worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
     if status == "EXT-WORK":
         worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
@@ -3130,68 +3135,68 @@ def get_day_count(month, year):
         return 31
     return 30
 
-# def replace_rm_mat_code():
-#     wb = load_workbook(filename = 'media/Material Bom.xlsx')
-#     ws = wb.active
-#     skip_count = 3
-#     success_count = 0
-#     temp_order_no = None
-#     for i in range(ws.max_row + 1):
-#         if i < skip_count:
-#             continue
-#         order_no = ws['A' + str(i)].value
-#         new_rm_mat_code = ws['B' + str(i)].value
-#         bom_item = ws['C' + str(i)].value
-#         if isinstance(order_no, int):
-#             if temp_order_no != order_no:
-#                 temp_order_no = order_no
-#                 cursor = get_connection().cursor()
-#                 sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+str(order_no)+"'"
-#                 cursor.execute(sql)
-#                 old_order_no = cursor.fetchone()
-#                 cursor.commit()
-#                 if old_order_no == None:
-#                     print("Order Not Found -->", order_no)
-#                 else:
-#                     old_rm_mat_code = old_order_no.RM_MaterialCode
-#                     if old_rm_mat_code == new_rm_mat_code:
-#                         print("Already Correct -->", order_no)
-#                     elif old_rm_mat_code != new_rm_mat_code:
-#                         print("Fixing -->", order_no, "| Old RM Mat Code :", old_rm_mat_code, "| New RM Mat Code :", new_rm_mat_code, "| Bom Item :", bom_item)
-#                         # conn = get_connection()
-#                         # cursor = conn.cursor()
-#                         # sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
-#                         # cursor.execute(sql)
-#                         # conn.commit()
-#                         # cursor = conn.cursor()
-#                         # sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
-#                         # cursor.execute(sql)
-#                         # conn.commit()
-#                         success_count = success_count + 1
-#     print("Data Correction Amount :", success_count)
-    # return
+def replace_rm_mat_code():
+    # wb = load_workbook(filename = 'media/Material Bom.xlsx')
+    # ws = wb.active
+    # skip_count = 3
+    # success_count = 0
+    # temp_order_no = None
+    # for i in range(ws.max_row + 1):
+    #     if i < skip_count:
+    #         continue
+    #     order_no = ws['A' + str(i)].value
+    #     new_rm_mat_code = ws['B' + str(i)].value
+    #     bom_item = ws['C' + str(i)].value
+    #     if isinstance(order_no, int):
+    #         if temp_order_no != order_no:
+    #             temp_order_no = order_no
+    #             cursor = get_connection().cursor()
+    #             sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+str(order_no)+"'"
+    #             cursor.execute(sql)
+    #             old_order_no = cursor.fetchone()
+    #             cursor.commit()
+    #             if old_order_no == None:
+    #                 print("Order Not Found -->", order_no)
+    #             else:
+    #                 old_rm_mat_code = old_order_no.RM_MaterialCode
+    #                 if old_rm_mat_code == new_rm_mat_code:
+    #                     print("Already Correct -->", order_no)
+    #                 elif old_rm_mat_code != new_rm_mat_code:
+    #                     print("Fixing -->", order_no, "| Old RM Mat Code :", old_rm_mat_code, "| New RM Mat Code :", new_rm_mat_code, "| Bom Item :", bom_item)
+    #                     # conn = get_connection()
+    #                     # cursor = conn.cursor()
+    #                     # sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
+    #                     # cursor.execute(sql)
+    #                     # conn.commit()
+    #                     # cursor = conn.cursor()
+    #                     # sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
+    #                     # cursor.execute(sql)
+    #                     # conn.commit()
+    #                     success_count = success_count + 1
+    # print("Data Correction Amount :", success_count)
+    return
 
-# def replace_sec_and_cost():
-#     wb = load_workbook(filename = 'media/Employee.xlsx')
-#     ws = wb.active
-#     skip_count = 1
-#     success_count = 0
-#     for i in range(ws.max_row + 1):
-#         if i < skip_count:
-#             continue
-#         emp_id = ws['A' + str(i)].value
-#         emp_name = ws['B' + str(i)].value
-#         section = ws['C' + str(i)].value
-#         costcenter = ws['D' + str(i)].value
-#         if emp_id != None:
-#             if section == None:
-#                 section = ""
-#             if costcenter == None:
-#                 costcenter = ""
-#             conn = get_connection()
-#             cursor = conn.cursor()
-#             sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"' WHERE EmpID = '"+str(emp_id)+"'"
-#             cursor.execute(sql)
-#             conn.commit()
-#     print("Data Correction Amount :", success_count)
-#     return
+def replace_sec_and_cost():
+    # wb = load_workbook(filename = 'media/Employee.xlsx')
+    # ws = wb.active
+    # skip_count = 1
+    # success_count = 0
+    # for i in range(ws.max_row + 1):
+    #     if i < skip_count:
+    #         continue
+    #     emp_id = ws['A' + str(i)].value
+    #     emp_name = ws['B' + str(i)].value
+    #     section = ws['C' + str(i)].value
+    #     costcenter = ws['D' + str(i)].value
+    #     if emp_id != None:
+    #         if section == None:
+    #             section = ""
+    #         if costcenter == None:
+    #             costcenter = ""
+    #         conn = get_connection()
+    #         cursor = conn.cursor()
+    #         sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"' WHERE EmpID = '"+str(emp_id)+"'"
+    #         cursor.execute(sql)
+    #         conn.commit()
+    # print("Data Correction Amount :", success_count)
+    return
