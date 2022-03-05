@@ -12,7 +12,7 @@ from dateutil import parser
 
 def blank(request):
     replace_rm_mat_code()
-    replace_sec_and_cost()
+    update_employee_master()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -990,7 +990,7 @@ def stop_work_operating_operator(request):
         worktimeMachine = 0
         if hasOperatorOperating(oopr.OperatingWorkCenterID) == False:
             owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
-            worktimeMachine = str(int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60))
+            worktimeMachine = str(int(((oopr.OperatorStopDateTime - owc.StartDateTime).total_seconds())/60))
     if status == "EXT-WORK":
         worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
@@ -2174,7 +2174,7 @@ def getSAPDelayOperationList(fwc):
 
 def getSFRDelayOperationList(fwc):
     cursor = get_connection().cursor()
-    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, DATEDIFF(DAY, CONVERT(DATE, PlanFinishDate), GETDATE()) AS 'Day', *"
+    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, DATEDIFF(DAY, CONVERT(DATE, PlanFinishDate), GETDATE()) AS 'Day', OC.Note AS OrderNote, OPC.Note AS OperationNote, *"
     sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
     sql += " WHERE (ProcessQty - (AcceptedQty + RejectedQty) > 0) AND WorkCenterNo = '"+fwc+"'"
     sql += " AND OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
@@ -3176,11 +3176,14 @@ def replace_rm_mat_code():
     # print("Data Correction Amount :", success_count)
     return
 
-def replace_sec_and_cost():
+def update_employee_master():
     # wb = load_workbook(filename = 'media/Employee.xlsx')
     # ws = wb.active
-    # skip_count = 1
-    # success_count = 0
+    # skip_count = 2
+    # row_count = 0
+    # new_emp_count = 0
+    # update_emp_count = 0
+    # error_emp_count = 0
     # for i in range(ws.max_row + 1):
     #     if i < skip_count:
     #         continue
@@ -3188,15 +3191,38 @@ def replace_sec_and_cost():
     #     emp_name = ws['B' + str(i)].value
     #     section = ws['C' + str(i)].value
     #     costcenter = ws['D' + str(i)].value
+    #     is_active = ws['E' + str(i)].value
+    #     if emp_name == None:
+    #         emp_name = ""
+    #     if section == None:
+    #         section = ""
+    #     if costcenter == None:
+    #         costcenter = ""
+    #     if is_active == None:
+    #         is_active = 0
     #     if emp_id != None:
-    #         if section == None:
-    #             section = ""
-    #         if costcenter == None:
-    #             costcenter = ""
-    #         conn = get_connection()
-    #         cursor = conn.cursor()
-    #         sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"' WHERE EmpID = '"+str(emp_id)+"'"
-    #         cursor.execute(sql)
-    #         conn.commit()
-    # print("Data Correction Amount :", success_count)
+    #         isExist = isExistOperator(str(emp_id))
+    #         if isExist:
+    #             conn = get_connection()
+    #             cursor = conn.cursor()
+    #             sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+    #             cursor.execute(sql)
+    #             conn.commit()
+    #             update_emp_count = update_emp_count + 1
+    #         if not isExist:
+    #             conn = get_connection()
+    #             cursor = conn.cursor()
+    #             sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
+    #             cursor.execute(sql)
+    #             conn.commit()
+    #             new_emp_count = new_emp_count + 1
+    #     else:
+    #         error_emp_count = error_emp_count + 1
+    #     row_count = row_count + 1
+    # print("#########################################")
+    # print("All Row #", str(row_count))
+    # print("New Employee #", str(new_emp_count))
+    # print("Update Employee #", str(update_emp_count))
+    # print("Error Row #", str(error_emp_count))
+    # print("#########################################")
     return
