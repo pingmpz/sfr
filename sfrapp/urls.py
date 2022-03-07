@@ -37,6 +37,7 @@ urlpatterns = [
     path('canceled_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.canceled_order, name='canceled_order'),
     path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
     path('ab_graph/<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
+    path('ng_operation/<str:fwc>&<str:fmonth>', views.ng_operation, name='ng_operation'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP

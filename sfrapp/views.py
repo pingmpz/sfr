@@ -649,6 +649,21 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
     }
     return render(request, 'ab_graph.html', context)
 
+def ng_operation(request, fwc, fmonth):
+    workCenterList = getWorkCenterRoutingList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    ngOperationList = getNgOperationList(fwc, fmonth)
+    context = {
+        'fwc': fwc,
+        'fmonth': fmonth,
+        'workCenterList': workCenterList,
+        'ngOperationList': ngOperationList,
+    }
+    return render(request, 'ng_operation.html', context)
+
 def zpp02(request):
 
     context = {
@@ -891,8 +906,11 @@ def add_operating_operator(request):
     insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     #-- IF OPERATION IS NOT LABOR TYPE
     if owc_id != "-1":
-        #-- WORKCENTER : WORKING/SETUP
-        updateOperatingWorkCenter(owc_id, status)
+        #-- IF MACHINE NOT START YET
+        owc = getWorkCenterOperatingByID(owc_id)
+        if owc.StartDateTime == None:
+            #-- WORKCENTER : WORKING/SETUP
+            updateOperatingWorkCenter(owc_id, status)
     #-- IF NOT START OPERATION YET
     if hasNotStartOperation(order_no, operation_no):
         refresh = True
@@ -991,6 +1009,7 @@ def stop_work_operating_operator(request):
         if hasOperatorOperating(oopr.OperatingWorkCenterID) == False:
             owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
             worktimeMachine = str(int(((oopr.OperatorStopDateTime - owc.StartDateTime).total_seconds())/60))
+            print(oopr.OperatorStopDateTime, owc.StartDateTime, worktimeMachine)
     if status == "EXT-WORK":
         worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
@@ -2296,6 +2315,17 @@ def getLastProcessStopOrderNotStop():
             GROUP BY OrderNo)
             AND OPC.ProcessStop IS NOT NULL AND OC.ProcessStop IS NULL
         """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getNgOperationList(fwc, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT ConfirmDateTime, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
+    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
+    sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
+    sql += " WHERE HC.RejectedQty > 0 AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"' AND OPC1.WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
