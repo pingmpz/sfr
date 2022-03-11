@@ -70,9 +70,9 @@
                       <table class="table table-sm table-outline small" id="delay_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
-                            <th>PlanStartDate</th>
-                            <th>PlanFinishDate</th>
-                            <th>Late From PlanFinishDate (Day)</th>
+                            <th>Request Date</th>
+                            <th>Delay (Day)</th>
+                            <th>Work Actual (Day)</th>
                             <th>Prod. Order - Oper.No</th>
                             <th>FG_MaterialCode</th>
                             <th>SalesOrderNo</th>
@@ -87,13 +87,9 @@
                         <tbody>
                           {% for op in SAPDelayOperationList %}
                             <tr>
-                              <td data-order="{{op.PlanStartDate|slice:'6:10'}}{{op.PlanStartDate|slice:'3:5'}}{{op.PlanStartDate|slice:'0:2'}}">
-                                {{op.PlanStartDate|slice:'0:2'}}-{{op.PlanStartDate|slice:'3:5'}}-{{op.PlanStartDate|slice:'6:10'}}
-                              </td>
-                              <td data-order="{{op.PlanFinishDate|slice:'6:10'}}{{op.PlanFinishDate|slice:'3:5'}}{{op.PlanFinishDate|slice:'0:2'}}">
-                                {{op.PlanFinishDate|slice:'0:2'}}-{{op.PlanFinishDate|slice:'3:5'}}-{{op.PlanFinishDate|slice:'6:10'}}
-                              </td>
-                              <td>{{op.Day}}</td>
+                              <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
+                              <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
+                              <td></td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>
@@ -107,13 +103,9 @@
                           {% endfor %}
                           {% for op in SFRDelayOperationList %}
                             <tr>
-                              <td data-order="{{op.PlanStartDate|slice:'0:4'}}{{op.PlanStartDate|slice:'5:7'}}{{op.PlanStartDate|slice:'8:10'}}">
-                                {{op.PlanStartDate|slice:'8:10'}}-{{op.PlanStartDate|slice:'5:7'}}-{{op.PlanStartDate|slice:'0:4'}}
-                              </td>
-                              <td data-order="{{op.PlanFinishDate|slice:'0:4'}}{{op.PlanFinishDate|slice:'5:7'}}{{op.PlanFinishDate|slice:'8:10'}}">
-                                {{op.PlanFinishDate|slice:'8:10'}}-{{op.PlanFinishDate|slice:'5:7'}}-{{op.PlanFinishDate|slice:'0:4'}}
-                              </td>
-                              <td>{{op.Day}}</td>
+                              <td>{{op.RequestDate|default_if_none:""}}</td>
+                              <td>{{op.DelayFromRequestDate|default_if_none:""}}</td>
+                              <td>{{op.Work_Actual|default_if_none:""}}</td>
                               <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>

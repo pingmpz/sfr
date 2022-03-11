@@ -2181,7 +2181,8 @@ def getCanceledOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
 def getSAPDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
-            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, PlanStartDate, PlanFinishDate, DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, PlanFinishDate, 104)), GETDATE()) AS 'Day'
+            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
+			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
             WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
@@ -2193,10 +2194,14 @@ def getSAPDelayOperationList(fwc):
 
 def getSFRDelayOperationList(fwc):
     cursor = get_connection().cursor()
-    sql = "SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, DATEDIFF(DAY, CONVERT(DATE, PlanFinishDate), GETDATE()) AS 'Day', OC.Note AS OrderNote, OPC.Note AS OperationNote, *"
-    sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
-    sql += " WHERE (ProcessQty - (AcceptedQty + RejectedQty) > 0) AND WorkCenterNo = '"+fwc+"'"
-    sql += " AND OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
+    sql = """
+            SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
+            CASE RequestDate WHEN NULL THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate)), GETDATE()) END AS DelayFromRequestDate,
+            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Work_Actual, *
+            FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
+            WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
+          """
+    sql += " AND WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2623,6 +2628,7 @@ def setOperationControlFromSAP(order_no):
     sql = "SELECT * FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY OperationNumber ASC"
     cursor.execute(sql)
     operations = cursor.fetchall()
+    inserted_operation_no_list = []
     for i in range(len(operations)):
         operationNo = frontZero(operations[i].OperationNumber.strip(), 4)
         #--
@@ -2633,12 +2639,15 @@ def setOperationControlFromSAP(order_no):
             date_get_from_sap = str(datetime.now())
         date_get_from_sap = str(date_get_from_sap[0:19])
         #--
-        sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
-        if i == 0:
-            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
-        else:
-            sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
-        cursor.execute(sql)
+        if operationNo not in inserted_operation_no_list:
+            inserted_operation_no_list.append(operationNo)
+            sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
+            if i == 0:
+                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+            else:
+                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+            cursor.execute(sql)
+
         conn.commit()
     return
 
