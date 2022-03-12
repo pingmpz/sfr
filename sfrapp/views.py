@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import pyodbc
 from django.http import JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser
 # FILE READER
 # from openpyxl import load_workbook, Workbook
@@ -436,12 +436,24 @@ def delay_operation(request, fwc):
         fwc = workCenterList[0].WorkCenterNo
     SAPDelayOperationList = getSAPDelayOperationList(fwc)
     SFRDelayOperationList = getSFRDelayOperationList(fwc)
+    SFRDelayWorkActualList = []
+    for op in SFRDelayOperationList:
+        if op.ProcessStart == None:
+            prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
+            if prev_op != None:
+                SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
+            else:
+                SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
+
+        else:
+            SFRDelayWorkActualList.append('')
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     context = {
         'fwc': fwc,
         'workCenterList': workCenterList,
         'SAPDelayOperationList': SAPDelayOperationList,
         'SFRDelayOperationList': SFRDelayOperationList,
+        'SFRDelayWorkActualList': SFRDelayWorkActualList,
         'delay_list_len': delay_list_len,
     }
     return render(request, 'delay_operation.html', context)
@@ -2182,7 +2194,8 @@ def getSAPDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
             SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
-			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate
+			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate,
+            DATEDIFF(DAY, CONVERT(DATE, SO.DateGetFromSAP), GETDATE()) AS Actual_Work
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
             WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
@@ -2197,7 +2210,7 @@ def getSFRDelayOperationList(fwc):
     sql = """
             SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
             CASE RequestDate WHEN NULL THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate)), GETDATE()) END AS DelayFromRequestDate,
-            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Work_Actual, *
+            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP
             FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
             WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
           """
@@ -2350,6 +2363,13 @@ def getOperation(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchone()
 
+def getPreviousOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OperationControl WHERE OrderNo = '" + order_no + "' AND OperationNo < '" + operation_no + "' ORDER BY OperationNo DESC"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+
 def getWorkCenter(workcenter_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterNo = '" + str(workcenter_no) + "'"
@@ -2449,6 +2469,8 @@ def getSizeOfMachineWorkCenterByGroup(fwcg, factive):
         sql += " AND IsActive = 1"
     cursor.execute(sql)
     return len(cursor.fetchall())
+
+
 
 #----------------------------------------------------------------------- BOOLEAN
 
