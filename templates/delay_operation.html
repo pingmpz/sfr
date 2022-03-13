@@ -86,7 +86,7 @@
                         </thead>
                         <tbody>
                           {% for op in SAPDelayOperationList %}
-                            <tr class="text-danger">
+                            <tr>
                               <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
                               <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
                               <td>{{op.Actual_Work|default_if_none:""}}</td>
