@@ -3,12 +3,14 @@ import pyodbc
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from dateutil import parser
+
 # FILE READER
 # from openpyxl import load_workbook, Workbook
 
 ################################################################################
 ##################################### PAGES ####################################
 ################################################################################
+
 
 def blank(request):
     replace_rm_mat_code()

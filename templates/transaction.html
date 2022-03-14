@@ -2074,7 +2074,11 @@
                     row += "<button type='button' class='btn btn-sm btn-pill btn-warning text-white small' id='stop_setup_operating_operator_"+oopr_id+"' onclick='stop_setup_operating_operator("+oopr_id+")'>Stop Setup & Exit</button>";
                   } else if (oopr_status == "COMPLETE" && $('#remain_qty').val() > 0){
                     if($('#join_list_length').val() == 0) {
-                      row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                      if((new Date() - new Date(oopr_stopdatetime))/(24*3600*1000) > 1){
+                        row += "<small class='text-muted'>EXPIRED</small>";
+                      } else {
+                        row += "<button type='button' class='btn btn-sm btn-pill btn-primary small' onclick='prepare_confirm("+oopr_id+")' data-toggle='modal' data-target='#confirm_modal'>Confirm</button>";
+                      }
                     } else {
                       row += "<small class='text-danger'>BREAK JOIN TO CONFIRM</small>";
                     }
