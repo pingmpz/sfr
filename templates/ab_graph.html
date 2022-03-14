@@ -48,6 +48,9 @@
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
+          <div class="c-subheader-nav">
+              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_target_modal" onclick="prepare_set_wc_target()">Set WorkCenter Target</button>
+          </div>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <select class="form-control" id="fwcg">
               {% for wcg in workCenterGroupList %}
@@ -207,6 +210,47 @@
       </div>
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
+
+      <div class="modal" id="set_wc_target_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set WorkCenter Target</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="target_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>WorkCenter</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="target_wc_no">
+                    {% for wc in workCenterInGroupList %}
+                    <option value="{{wc.WorkCenterNo}}">{{wc.WorkCenterNo}} | {{wc.WorkCenterName}} (Target: {{wc.Target}})</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Target Hour</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="target_hour" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-info" type="button" id="set_wc_target_button" onclick="set_wc_target()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -216,7 +260,7 @@
     <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
     <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
     <!-- Google Timeline JS -->
-    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script> -->
     <!-- Data Table JS -->
     <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
     <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
@@ -225,7 +269,7 @@
     <!-- <script src="{% static "js/charts.js" %}"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0-rc.1/chartjs-plugin-datalabels.min.js" integrity="sha512-+UYTD5L/bU1sgAfWA0ELK5RlQ811q8wZIocqI7+K0Lhh8yVdIoAMEs96wJAIbgFvzynPm36ZCXtkydxu1cs27w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -386,7 +430,23 @@
                 		},
                 		anchor: 'end',
                 		align: 'end'
-                	}
+                	},
+                  annotation: {
+                      annotations: [{
+                          id: 'target_line',
+                          type: 'line',
+                          mode: 'horizontal',
+                          yMin: {{wc_target_list|index:forloop.counter0}},
+                          yMax: {{wc_target_list|index:forloop.counter0}},
+                          borderColor: 'rgb(34,40,49)',
+                          borderWidth: 1,
+                          label: {
+                             enabled: true,
+                             position: "end",
+                             content: "Target: {{wc_target_list|index:forloop.counter0}}",
+                          }
+                      }]
+                  },
                 },
                 scales: {
                   x: {
@@ -410,6 +470,67 @@
           });
         {% endfor %}
       };
+    </script>
+    <!-- MODAL FUNCTION -->
+    <script>
+      $("#set_wc_target_hour").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      function prepare_set_wc_target(){
+        $("#target_password").val("");
+        $("#target_hour").val("");
+        remove_valid_many(["target_password","target_wc_no","target_hour"]);
+      }
+
+      function set_wc_target(){
+        if($('#target_hour').val() == "") $('#target_hour').val("0");
+        var password = $("#target_password").val();
+        var wc_no = $("#target_wc_no").val();
+        var target_hour = $("#target_hour").val();
+        remove_valid_many(["target_password","target_wc_no","target_hour"]);
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("target_password");
+          } else {
+            valid("target_password");
+            if(target_hour <= 0){
+              invalid("target_hour");
+            } else {
+              valid("target_hour");
+              $.ajax({
+                url: '/set_wc_target/',
+                data: {
+                  'wc_no': wc_no,
+                  'target_hour': target_hour,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      function validate_section_chief_password(password, _callback){
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
+        else {
+          $.ajax({
+            url: '/validate_section_chief_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+            }
+          });
+        }
+      }
     </script>
   </body>
 </html>

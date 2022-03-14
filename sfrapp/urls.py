@@ -93,6 +93,7 @@ urlpatterns = [
     path('validate_new_password/', views.validate_new_password, name='validate_new_password'),
     #-- ETC
     path('increase_lot_no/', views.increase_lot_no, name='increase_lot_no'),
+    path('set_wc_target/', views.set_wc_target, name='set_wc_target'),
     ## ADMIN PANEL
     path('add_new_user/', views.add_new_user, name='add_new_user'),
     path('delete_user/', views.delete_user, name='delete_user'),

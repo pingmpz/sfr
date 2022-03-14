@@ -443,7 +443,10 @@ def delay_operation(request, fwc):
         if op.ProcessStart == None:
             prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
             if prev_op != None:
-                SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
+                if prev_op.ProcessStop == None:
+                    SFRDelayWorkActualList.append('PARTIAL CONFIRM')
+                else:
+                    SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
             else:
                 SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
 
@@ -606,6 +609,7 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
     wcg_setup = []
     wc_oper_list = []
     wc_setup_list = []
+    wc_target_list = []
     if ftype == "MONTHLY":
         x_size = get_day_count(month, year)
     elif ftype == "YEARLY":
@@ -640,6 +644,7 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
                 temp_setup[rs.Fday - 1] = rs.Fsetup
             wc_oper_list.append(temp_oper)
             wc_setup_list.append(temp_setup)
+            wc_target_list.append(wc.Target)
     context = {
         'workCenterGroupList': workCenterGroupList,
         'fwcg': fwcg,
@@ -660,6 +665,7 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         'workCenterInGroupList': workCenterInGroupList,
         'wc_oper_list': wc_oper_list,
         'wc_setup_list': wc_setup_list,
+        'wc_target_list': wc_target_list,
     }
     return render(request, 'ab_graph.html', context)
 
@@ -1717,6 +1723,14 @@ def increase_lot_no(request):
     }
     return JsonResponse(data)
 
+def set_wc_target(request):
+    wc_no = request.GET.get('wc_no')
+    target_hour = request.GET.get('target_hour')
+    setWorkCenterTarget(wc_no, target_hour)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -2226,6 +2240,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     cursor = get_connection().cursor()
     sql = "SELECT day(CONVERT(DATE, Fdate)) AS Fday, CAST(ROUND(SUM(Foper)/60, 0) AS Int) AS Foper FROM"
     sql += " ("
+    # DIFF MONTH (CURRENT MONTH = STOP)
     sql += " (SELECT StopDateTime As Fdate, (Oper - ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper)) AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND month(StartDateTime) != month(StopDateTime)"
@@ -2235,6 +2250,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     elif fwctype == "WCG":
         sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1 AND IsActive = 1"
     sql += ") UNION"
+    # DIFF DAY (CURRENT MONTH = START)
     sql += " (SELECT StartDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper) AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime)"
@@ -2244,7 +2260,8 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     elif fwctype == "WCG":
         sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1 AND IsActive = 1"
     sql += ") UNION"
-    sql += " (SELECT StopDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper) AS Foper"
+    # SAME MONTH , DIFF DAY (FDAY = STOP)
+    sql += " (SELECT StopDateTime As Fdate, (Oper - ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Oper) * Oper)) AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime) AND month(StartDateTime) = month(StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
@@ -2253,6 +2270,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     elif fwctype == "WCG":
         sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
+    # SAME MONTH , SAME DAY
     sql += " (SELECT StartDateTime As Fdate, Oper AS Foper"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) = CONVERT(DATE, StopDateTime)"
@@ -2289,7 +2307,7 @@ def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, fmonth):
     elif fwctype == "WCG":
         sql += " AND WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ") UNION"
-    sql += " (SELECT StopDateTime As Fdate, ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Setup) * Setup) AS Fsetup"
+    sql += " (SELECT StopDateTime As Fdate, (Setup - ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Setup) * Setup)) AS Fsetup"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Setup != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime) AND month(StartDateTime) = month(StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
@@ -3102,6 +3120,15 @@ def updateOperationNote(order_no, operation_no, note):
     cursor.execute(sql)
     conn.commit()
     return
+
+def setWorkCenterTarget(wc_no, target_hour):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE WorkCenter SET Target = "+target_hour+" WHERE WorkCenterNo = '"+wc_no+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 
 #------------------------------------------------------------------------ DELETE
 
