@@ -69,6 +69,7 @@
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#stop-not-start-tab" role="tab">Order Stop Not Start ({{orderStopNotStartList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#remain-qty-tab" role="tab">Operation Remaining Qty ({{operationRemainQtyList|length}})</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#last-stop-tab" role="tab">Last Process Stop Order Not Stop ({{lastProcessStopOrderNotStop|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#save-code-tab" role="tab">Save Code</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- Duplicate Routing Tab -->
@@ -201,6 +202,13 @@
                                 {% endfor %}
                               </tbody>
                             </table>
+                          </div>
+                          <!-- Save Code -->
+                          <div class="tab-pane" id="save-code-tab" role="tabpanel">
+                            <br>
+                            <h6 class="text-danger text-center">Order Stop ไปแล้ว แต่ Operation ไม่มีเวลา Start หรือ Stop</h6>
+                            <p class="text-white">SELECT * FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo WHERE OC.ProcessStop IS NOT NULL AND (OPC.ProcessStart IS NULL OR OPC.ProcessStop IS NULL) AND ProcessQty != 0</p>
+                            <hr>
                           </div>
                         </div>
                       </div>
