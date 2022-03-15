@@ -86,7 +86,7 @@
                             <td>{{wc.WorkCenterType}}</td>
                             <td>{{wc.MachineType|default_if_none:""}}</td>
                             <td>{{wc.HourlyRate|floatformat:"0"}}</td>
-                            <td>{{wc.Target|default_if_none:""}}</td>
+                            <td>{% if wc.Target != 0 %}{{wc.Target}}{% endif %}</td>
                             <td>{{wc.Noted|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
