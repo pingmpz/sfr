@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load extra %}
+
+<html>
+  <body style="background-color:#ff5b5b; padding:30px; ">
+    <table width="100%">
+      <tbody>
+        <td style="background-color:#ffffff; padding:30px; border-radius: 5px;">
+          <h1 style="text-align: center; color:#ff5b5b; font-family: Helvetica, sans-serif; margin-bottom:0px;">SFR</h1>
+          <h4 style="text-align: center; color:#ffa8a8; font-family: Helvetica, sans-serif; margin-top:0px;">Shopfloor Reporting</h4>
+          <table style="border: 1px solid #d9dbdd; border-radius: 5px; width: 100%; font-family: Helvetica, sans-serif; font-size: 14px;">
+            <tbody>
+              <tr style="height:40px">
+                <td style="text-align: right; background-color:#ffffff; padding:0px;" width="25%">Email Type: </td>
+                <td style="background-color:#ffffff; padding:0px;" width="5%"></td>
+                <td style="text-align: left; background-color:#ffffff; color:#ff5419; padding:0px;" width="70%"><b>Overtime Operator</b></td>
+              </tr>
+              <tr style="height:40px">
+                <td style="text-align: right; background-color:#ffffff;">Date: </td>
+                <td style="background-color:#ffffff;"></td>
+                <td style="text-align: left; background-color:#ffffff;" width="70%">{% now "d-M-Y" %}</td>
+              </tr>
+              <tr style="height:40px">
+                <td style="text-align: right; background-color:#ffffff;">Working Operator Link: </td>
+                <td style="background-color:#ffffff;"></td>
+                <td style="text-align: left; background-color:#ffffff;" width="70%"><a href='{{host_url}}/working_emp/'>Go To Working Operator</a></td>
+              </tr>
+              <tr style="height:40px">
+                <td style="text-align: right; background-color:#ffffff;">Overtime Table Link: </td>
+                <td style="background-color:#ffffff;"></td>
+                <td style="text-align: left; background-color:#ffffff;"><a href='{{host_url}}/ot_table/NOW'>Go To Overtime Table</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <table style="border: 1px solid #d9dbdd; border-radius: 5px; width: 100%; font-family: Helvetica, sans-serif; font-size: 11px;">
+            <thead style="color:#30475e;">
+              <tr style="height:40px; text-align: left;">
+                <th style="text-align: left;">EmpID</th>
+                <th style="text-align: left;">Name</th>
+                <th style="text-align: left;">Section</th>
+                <th style="text-align: left;">CostCenter</th>
+                <th style="text-align: left;">Prod. Order - Oper. No</th>
+                <th style="text-align: left;">FG-MaterialCode</th>
+                <th style="text-align: left;">Working On..</th>
+                <th style="text-align: left;">StartDateTime</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for opr in workingOperatorList %}
+              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:12 %}
+              <tr style="height:40px; font-size: 11px;">
+                <td>{{opr.EmpID}}</td>
+                <td>{{opr.EmpName}}</td>
+                <td>{{opr.Section}}</td>
+                <td>{{opr.CostCenter}}</td>
+                <td><a href="{{host_url}}/transaction/{{opr.OrderNo}}{{opr.OperationNo}}">{{opr.OrderNo}}-{{opr.OperationNo}}</a></td>
+                <td>{{opr.FG_MaterialCode|default_if_none:""}}</td>
+                <td>{{opr.WorkCenterNo|default_if_none:""}}</td>
+                <td>{{opr.StartDateTime|date:"d-M-Y, H:i"}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+          <p style="text-align: right; color:#07031a; font-family: Helvetica, sans-serif; font-size: 11px;">This is an auto email please don't reply this email.</p>
+          <br><br>
+        </td>
+      </tbody>
+    </table>
+  </body>
+</html>
