@@ -7,10 +7,6 @@ from dateutil import parser
 # FILE READER
 # from openpyxl import load_workbook, Workbook
 
-# SCHEDULE
-import schedule
-import time
-
 # EMAIL
 from django.core.mail import EmailMessage
 from sfr.settings import EMAIL_HOST_USER
@@ -44,6 +40,7 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
+    send_email_overtime()
     #CONST
     overtimehour = 0
     canMP = False
@@ -2512,6 +2509,11 @@ def getSizeOfMachineWorkCenterByGroup(fwcg, factive):
     cursor.execute(sql)
     return len(cursor.fetchall())
 
+def getMailDate():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[AdminConfig] WHERE KeyText = 'MAIL_DATE'"
+    cursor.execute(sql)
+    return (cursor.fetchone()).Value
 
 #----------------------------------------------------------------------- BOOLEAN
 
@@ -3150,6 +3152,13 @@ def setWorkCenterTarget(wc_no, target_hour):
     conn.commit()
     return
 
+def updateMailDate(date):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [AdminConfig] SET [Value] = '"+date+"' WHERE KeyText = 'MAIL_DATE'"
+    cursor.execute(sql)
+    conn.commit()
+    return
 
 #------------------------------------------------------------------------ DELETE
 
@@ -3339,23 +3348,29 @@ def update_employee_master():
     return
 
 def send_email_overtime():
-    print('Sending Overtime Email:' , datetime.now())
-    subject = '[SFR] Overtime Operator'
-    workingOperatorList = getWorkingOperatorList()
-    mgs = getMailgroup()
-    send_to = []
-    cc_to = []
-    for mg in mgs:
-        if mg.IsCC == 0:
-            send_to.append(mg.Email)
+    today_date = datetime.now().strftime("%Y%m%d")
+    if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
+        updateMailDate(today_date)
+        workingOperatorList = getWorkingOperatorList()
+        if workingOperatorList.length > 0:
+            print('Sending Overtime Email:' , datetime.now())
+            subject = '[SFR] Overtime Operator'
+            mgs = getMailgroup()
+            send_to = []
+            cc_to = []
+            for mg in mgs:
+                if mg.IsCC == 0:
+                    send_to.append(mg.Email)
+                else:
+                    cc_to.append(mg.Email)
+            email_template = get_template(TEMPLATE_OVERTIME)
+            email_content = email_template.render({
+                'workingOperatorList' : workingOperatorList,
+                'host_url' : HOST_URL,
+            })
+            # send_email(subject, email_content, send_to, cc_to)
         else:
-            cc_to.append(mg.Email)
-    email_template = get_template(TEMPLATE_OVERTIME)
-    email_content = email_template.render({
-        'workingOperatorList' : workingOperatorList,
-        'host_url' : HOST_URL,
-    })
-    send_email(subject, email_content, send_to, cc_to)
+            print('No Overtime Operator Email:' , datetime.now())
 
 class EmailThread(threading.Thread):
 
@@ -3374,10 +3389,3 @@ def send_email(subject, email_content, send_to, cc_to):
     except Exception:
         traceback.print_exc()
     return
-
-schedule.every().day.at("08:00").do(send_email_overtime)
-
-while True:
-    schedule.run_pending()
-    # print(datetime.now())
-    time.sleep(1)
