@@ -5,15 +5,15 @@ from datetime import datetime, timedelta
 from dateutil import parser
 
 # FILE READER
-from openpyxl import load_workbook, Workbook
+# from openpyxl import load_workbook, Workbook
 
 # EMAIL
-from django.core.mail import EmailMessage
-from sfr.settings import EMAIL_HOST_USER
-import smtplib
-import traceback
-import threading
-from django.template.loader import get_template
+# from django.core.mail import EmailMessage
+# from sfr.settings import EMAIL_HOST_USER
+# import smtplib
+# import traceback
+# import threading
+# from django.template.loader import get_template
 
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
@@ -26,7 +26,6 @@ TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 
 
 def blank(request):
-    replace_rm_mat_code()
     update_employee_master()
     context = {
     }
@@ -40,7 +39,7 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
-    send_email_overtime()
+    # send_email_overtime()
     #CONST
     overtimehour = 0
     canMP = False
@@ -454,6 +453,7 @@ def delay_operation(request, fwc):
     SFRDelayOperationList = getSFRDelayOperationList(fwc)
     SFRDelayWorkActualList = []
     for op in SFRDelayOperationList:
+        print(op.OrderNo, op.DateGetFromSAP)
         if op.ProcessStart == None:
             prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
             if prev_op != None:
@@ -461,6 +461,8 @@ def delay_operation(request, fwc):
                     SFRDelayWorkActualList.append('PARTIAL CONFIRM')
                 else:
                     SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
+            elif op.DateGetFromSAP == None:
+                SFRDelayWorkActualList.append(str((datetime.today() - op.Order_DGFS).days))
             else:
                 SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
 
@@ -1838,7 +1840,7 @@ def getOperatorList():
 
 def getRejectReasonList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [RejectReason]"
+    sql = "SELECT * FROM [RejectReason] ORDER BY Name ASC"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2240,7 +2242,7 @@ def getSFRDelayOperationList(fwc):
     sql = """
             SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
             CASE RequestDate WHEN NULL THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate)), GETDATE()) END AS DelayFromRequestDate,
-            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP
+            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP, OC.DateGetFromSAP AS Order_DGFS
             FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
             WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
           """
@@ -3255,137 +3257,96 @@ def get_day_count(month, year):
         return 31
     return 30
 
-def replace_rm_mat_code():
-    # wb = load_workbook(filename = 'media/Material Bom.xlsx')
+def update_employee_master():
+    # wb = load_workbook(filename = 'media/Employee.xlsx')
     # ws = wb.active
-    # skip_count = 3
-    # success_count = 0
-    # temp_order_no = None
+    # skip_count = 2
+    # row_count = 0
+    # new_emp_count = 0
+    # update_emp_count = 0
+    # error_emp_count = 0
     # for i in range(ws.max_row + 1):
     #     if i < skip_count:
     #         continue
-    #     order_no = ws['A' + str(i)].value
-    #     new_rm_mat_code = ws['B' + str(i)].value
-    #     bom_item = ws['C' + str(i)].value
-    #     if isinstance(order_no, int):
-    #         if temp_order_no != order_no:
-    #             temp_order_no = order_no
-    #             cursor = get_connection().cursor()
-    #             sql = "SELECT ProductionOrderNo, RM_MaterialCode FROM [SAP_Order] WHERE ProductionOrderNo = '"+str(order_no)+"'"
+    #     emp_id = ws['A' + str(i)].value
+    #     emp_name = ws['B' + str(i)].value
+    #     section = ws['C' + str(i)].value
+    #     costcenter = ws['D' + str(i)].value
+    #     is_active = ws['E' + str(i)].value
+    #     if emp_name == None:
+    #         emp_name = ""
+    #     if section == None:
+    #         section = ""
+    #     if costcenter == None:
+    #         costcenter = ""
+    #     if is_active == None:
+    #         is_active = 0
+    #     if emp_id != None:
+    #         isExist = isExistOperator(str(emp_id))
+    #         # if isExist:
+    #         #     conn = get_connection()
+    #         #     cursor = conn.cursor()
+    #         #     sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+    #         #     cursor.execute(sql)
+    #         #     conn.commit()
+    #         #     update_emp_count = update_emp_count + 1
+    #         if not isExist:
+    #             conn = get_connection()
+    #             cursor = conn.cursor()
+    #             sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
     #             cursor.execute(sql)
-    #             old_order_no = cursor.fetchone()
-    #             cursor.commit()
-    #             if old_order_no == None:
-    #                 print("Order Not Found -->", order_no)
-    #             else:
-    #                 old_rm_mat_code = old_order_no.RM_MaterialCode
-    #                 if old_rm_mat_code == new_rm_mat_code:
-    #                     print("Already Correct -->", order_no)
-    #                 elif old_rm_mat_code != new_rm_mat_code:
-    #                     print("Fixing -->", order_no, "| Old RM Mat Code :", old_rm_mat_code, "| New RM Mat Code :", new_rm_mat_code, "| Bom Item :", bom_item)
-    #                     # conn = get_connection()
-    #                     # cursor = conn.cursor()
-    #                     # sql = "UPDATE [OrderControl] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE OrderNo = '"+order_no+"'"
-    #                     # cursor.execute(sql)
-    #                     # conn.commit()
-    #                     # cursor = conn.cursor()
-    #                     # sql = "UPDATE [SAP_Order] SET [RM_MaterialCode] = '"+new_rm_mat_code+"' WHERE ProductionOrderNo = '"+order_no+"'"
-    #                     # cursor.execute(sql)
-    #                     # conn.commit()
-    #                     success_count = success_count + 1
-    # print("Data Correction Amount :", success_count)
+    #             conn.commit()
+    #             new_emp_count = new_emp_count + 1
+    #     else:
+    #         error_emp_count = error_emp_count + 1
+    #     row_count = row_count + 1
+    # print("#########################################")
+    # print("All Row #", str(row_count))
+    # print("New Employee #", str(new_emp_count))
+    # print("Update Employee #", str(update_emp_count))
+    # print("Error Row #", str(error_emp_count))
+    # print("#########################################")
     return
 
-def update_employee_master():
-    wb = load_workbook(filename = 'media/Employee.xlsx')
-    ws = wb.active
-    skip_count = 2
-    row_count = 0
-    new_emp_count = 0
-    update_emp_count = 0
-    error_emp_count = 0
-    for i in range(ws.max_row + 1):
-        if i < skip_count:
-            continue
-        emp_id = ws['A' + str(i)].value
-        emp_name = ws['B' + str(i)].value
-        section = ws['C' + str(i)].value
-        costcenter = ws['D' + str(i)].value
-        is_active = ws['E' + str(i)].value
-        if emp_name == None:
-            emp_name = ""
-        if section == None:
-            section = ""
-        if costcenter == None:
-            costcenter = ""
-        if is_active == None:
-            is_active = 0
-        if emp_id != None:
-            isExist = isExistOperator(str(emp_id))
-            # if isExist:
-            #     conn = get_connection()
-            #     cursor = conn.cursor()
-            #     sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
-            #     cursor.execute(sql)
-            #     conn.commit()
-            #     update_emp_count = update_emp_count + 1
-            if not isExist:
-                conn = get_connection()
-                cursor = conn.cursor()
-                sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
-                cursor.execute(sql)
-                conn.commit()
-                new_emp_count = new_emp_count + 1
-        else:
-            error_emp_count = error_emp_count + 1
-        row_count = row_count + 1
-    print("#########################################")
-    print("All Row #", str(row_count))
-    print("New Employee #", str(new_emp_count))
-    print("Update Employee #", str(update_emp_count))
-    print("Error Row #", str(error_emp_count))
-    print("#########################################")
-    return
-
-def send_email_overtime():
-    today_date = datetime.now().strftime("%Y%m%d")
-    if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
-        updateMailDate(today_date)
-        workingOperatorList = getWorkingOperatorList()
-        if workingOperatorList.length > 0:
-            print('Sending Overtime Email:' , datetime.now())
-            subject = '[SFR] Overtime Operator'
-            mgs = getMailgroup()
-            send_to = []
-            cc_to = []
-            for mg in mgs:
-                if mg.IsCC == 0:
-                    send_to.append(mg.Email)
-                else:
-                    cc_to.append(mg.Email)
-            email_template = get_template(TEMPLATE_OVERTIME)
-            email_content = email_template.render({
-                'workingOperatorList' : workingOperatorList,
-                'host_url' : HOST_URL,
-            })
-            # send_email(subject, email_content, send_to, cc_to)
-        else:
-            print('No Overtime Operator Email:' , datetime.now())
-
-class EmailThread(threading.Thread):
-
-    def __init__(self, email):
-        self.email = email
-        threading.Thread.__init__(self)
-
-    def run(self):
-        self.email.send(fail_silently=False)
-
-def send_email(subject, email_content, send_to, cc_to):
-    try:
-        email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
-        email.content_subtype = "html"
-        EmailThread(email).start()
-    except Exception:
-        traceback.print_exc()
-    return
+# def send_email_overtime():
+#     today_date = datetime.now().strftime("%Y%m%d")
+#     if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
+#         updateMailDate(today_date)
+#         workingOperatorList = getWorkingOperatorList()
+#         if len(workingOperatorList) > 0:
+#             print('Sending Overtime Email:' , datetime.now())
+#             subject = '[SFR] Overtime Operator'
+#             mgs = getMailgroup()
+#             send_to = []
+#             cc_to = []
+#             for mg in mgs:
+#                 if mg.IsCC == 0:
+#                     send_to.append(mg.Email)
+#                 else:
+#                     cc_to.append(mg.Email)
+#             email_template = get_template(TEMPLATE_OVERTIME)
+#             email_content = email_template.render({
+#                 'workingOperatorList' : workingOperatorList,
+#                 'host_url' : HOST_URL,
+#             })
+#             # send_email(subject, email_content, send_to, cc_to)
+#         else:
+#             print('No Overtime Operator Email:' , datetime.now())
+#
+# class EmailThread(threading.Thread):
+#
+#     def __init__(self, email):
+#         self.email = email
+#         threading.Thread.__init__(self)
+#
+#     def run(self):
+#         self.email.send(fail_silently=False)
+#
+# def send_email(subject, email_content, send_to, cc_to):
+#     try:
+#         email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
+#         email.content_subtype = "html"
+#         EmailThread(email).start()
+#     except Exception:
+#         traceback.print_exc()
+#     return

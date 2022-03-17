@@ -1,0 +1,12 @@
+<b class="text-warning blink">★</b> ขอให้ทุกแผนก ทุกกระบวนการผลิต  หยุดบันทึกการทำงาน และจำนวนชิ้นงานผ่านระบบ SAP ทุกกรณี <u>ให้ทำผ่านระบบ SFR เท่านั้น</u> (ยกเว้นการได้รับอนุญาติจาก <b class="text-orangered">SFR Team</b> นะครับ)<hr>
+<b class="text-warning blink">★</b> CASE การแก้ไขข้อมูลต่าง ๆ <u>โปรดส่งเมลมาเท่านั้น</u> ส่งถึง <b>yashawantatul.man@ccsadvancetech.co.th, warissara@ccsadvancetech.co.th, puchong.nan@ccsadvancetech.co.th</b> และ CC ถึง <b>atul@ccsgroups.com</b><hr>
+
+หาก Process ก่อนหน้ามีงานเสีย แต่ไม่ได้ทำการคอนเฟิร์มงานเสีย, ให้ Process ถัดไป คอนเฟิร์มงานเสียแทน
+แล้วเลือกเหตุผลว่า <b class="text-danger">SCRAP FROM PREVIOUS PROCESS</b> แล้วเลือก <b>Scrap At</b> เป็น Process ที่ทำงานเสีย<br>
+(สำหรับเคสที่ Scrap ไปก่อนหน้าแต่ Process ที่เสียจริงไม่มีใน SFR ให้ติดต่อมาที่ 6624 เพื่อทำการอัพเดทข้อมูลก่อนนะครับ)<i class="text-muted">──17-Mar-2022 10:45</i>
+<hr>
+ฟังค์ชั่น <b class="text-skyblue">Inc. Qty</b> (เพิ่มจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนครบ</u><br>
+ฟังค์ชั่น <b class="text-lightpink">Dec. Qty</b> (ลดจำนวนชิ้นงาน) สามารถทำได้โดยที่ <u>Process แรกยังไม่ได้ Confirm จำนวนเลย</u><br>
+โดยทั้ง 2 ฟังค์ชั่นนี้ จะต้องแก้ไขที่ SAP เองด้วย<br>
+..ส่วนการลดจำนวนชิ้นงานโดยที่ทำเลยไป Process อื่นๆ แล้ว จะต้อง Reject ชิ้นงานโดยให้เหตุผลว่า <b class="text-danger">MATERIAL QUANTITY ADJUSTMENT</b><br>
+หากมีข้อสงสัยติดต่อ 6624 หรือ 1345<i class="text-muted">──10-Feb-2022 10:10</i><hr>

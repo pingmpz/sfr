@@ -196,7 +196,7 @@
                                 {% for order in lastProcessStopOrderNotStop %}
                                 <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
                                   <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
-                                  <td>{{order.LastProcessStop}}</td>
+                                  <td data-order="{{order.LastProcessStop|date:"U"}}">{{order.LastProcessStop}}</td>
                                   <td>{{order.LastProcessStop|naturaltime}}</td>
                                 </tr>
                                 {% endfor %}
