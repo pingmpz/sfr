@@ -66,7 +66,7 @@
                             <th>Work Center</th>
                             <th>Work Center Name</th>
                             <th>Last StopDateTime</th>
-                            <th>Duration Since Last StopDateTime</th>
+                            <th>Duration</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -76,7 +76,7 @@
                             <td><a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a></td>
                             <td>{{wc.WorkCenterName}}</td>
                             <td data-order="{{wc.StopDateTime|date:"U"}}">{{wc.StopDateTime|date:"d-M-Y, H:i"}}</td>
-                            <td>{{wc.StopDateTime|naturaltime|default_if_none:""}}</td>
+                            <td data-order="{{wc.StopDateTime|date:"U"}}">{{wc.StopDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
