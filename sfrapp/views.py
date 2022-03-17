@@ -1924,9 +1924,10 @@ def getWorkingOperatorList():
 def getNoneWorkingWorkCenterList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT * FROM WorkCenter WHERE WorkCenterNo NOT IN
-            (SELECT WorkCenterNo FROM OperatingWorkCenter WHERE Status <> 'COMPLETE' AND Status <> 'WAITING')
-            AND IsRouting = 0 AND IsActive = 1 AND WorkCenterType = 'Machine'
+            SELECT * FROM WorkCenter AS WC LEFT JOIN
+            (SELECT WorkCenterNo, MAX(StopDateTime) AS StopDateTime FROM HistoryOperate GROUP BY WorkCenterNo) AS TB ON WC.WorkCenterNo = TB.WorkCenterNo
+            WHERE WC.WorkCenterNo NOT IN (SELECT WorkCenterNo FROM OperatingWorkCenter WHERE Status <> 'COMPLETE' AND Status <> 'WAITING')
+            AND WC.IsRouting = 0 AND WC.IsActive = 1 AND WC.WorkCenterType = 'Machine'
             """
     cursor.execute(sql)
     return cursor.fetchall()

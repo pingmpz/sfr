@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 {% load extra %}
+{% load humanize %}
 <!--
 * CoreUI Pro based Bootstrap Admin Template
 * @version v3.2.0
@@ -64,6 +65,8 @@
                             <th>Work Center Group</th>
                             <th>Work Center</th>
                             <th>Work Center Name</th>
+                            <th>Last StopDateTime</th>
+                            <th>Duration Since Last StopDateTime</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -72,6 +75,8 @@
                             <td>{{wc.WorkCenterGroup}}</td>
                             <td><a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a></td>
                             <td>{{wc.WorkCenterName}}</td>
+                            <td data-order="{{wc.StopDateTime|date:"U"}}">{{wc.StopDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td>{{wc.StopDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
