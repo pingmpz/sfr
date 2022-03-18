@@ -65,6 +65,7 @@
                         <thead class="thead-light">
                           <tr>
                             <th>ProductionOrderNo</th>
+                            <th>FG-MaterialCode</th>
                             <th>Registered to SFR</th>
                             <th>DateGetFromSAP</th>
                             <th>Duration</th>
@@ -74,6 +75,7 @@
                           {% for order in noneStartOrderList %}
                           <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                             <td><a href="/transaction/{{order.ProductionOrderNo}}0000">{{order.ProductionOrderNo|default_if_none:""}}</a></td>
+                            <td>{{order.FG_MaterialCode|default_if_none:""}}</td>
                             <td>{% if order.OrderNo != None %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
                             <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
                             <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>

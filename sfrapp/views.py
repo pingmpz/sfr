@@ -2104,7 +2104,7 @@ def getSAPDuplicateRoutingList():
 def getNoneStartOrderList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT ProductionOrderNo, OrderNo, SO.DateGetFromSAP FROM SAP_Order AS SO
+            SELECT ProductionOrderNo, OrderNo, SO.FG_MaterialCode, SO.DateGetFromSAP FROM SAP_Order AS SO
             LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo
             WHERE (OC.OrderNo IS NULL OR (OC.ProcessStart IS NULL)) AND ProductionOrderNo NOT IN (SELECT OrderNo From CanceledOrder)
           """
