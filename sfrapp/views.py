@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from dateutil import parser
 
 # FILE READER
-# from openpyxl import load_workbook, Workbook
+from openpyxl import load_workbook, Workbook
 
 # EMAIL
 # from django.core.mail import EmailMessage
@@ -3282,54 +3282,54 @@ def get_day_count(month, year):
     return 30
 
 def update_employee_master():
-    # wb = load_workbook(filename = 'media/Employee.xlsx')
-    # ws = wb.active
-    # skip_count = 2
-    # row_count = 0
-    # new_emp_count = 0
-    # update_emp_count = 0
-    # error_emp_count = 0
-    # for i in range(ws.max_row + 1):
-    #     if i < skip_count:
-    #         continue
-    #     emp_id = ws['A' + str(i)].value
-    #     emp_name = ws['B' + str(i)].value
-    #     section = ws['C' + str(i)].value
-    #     costcenter = ws['D' + str(i)].value
-    #     is_active = ws['E' + str(i)].value
-    #     if emp_name == None:
-    #         emp_name = ""
-    #     if section == None:
-    #         section = ""
-    #     if costcenter == None:
-    #         costcenter = ""
-    #     if is_active == None:
-    #         is_active = 0
-    #     if emp_id != None:
-    #         isExist = isExistOperator(str(emp_id))
-    #         # if isExist:
-    #         #     conn = get_connection()
-    #         #     cursor = conn.cursor()
-    #         #     sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
-    #         #     cursor.execute(sql)
-    #         #     conn.commit()
-    #         #     update_emp_count = update_emp_count + 1
-    #         if not isExist:
-    #             conn = get_connection()
-    #             cursor = conn.cursor()
-    #             sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
-    #             cursor.execute(sql)
-    #             conn.commit()
-    #             new_emp_count = new_emp_count + 1
-    #     else:
-    #         error_emp_count = error_emp_count + 1
-    #     row_count = row_count + 1
-    # print("#########################################")
-    # print("All Row #", str(row_count))
-    # print("New Employee #", str(new_emp_count))
-    # print("Update Employee #", str(update_emp_count))
-    # print("Error Row #", str(error_emp_count))
-    # print("#########################################")
+    wb = load_workbook(filename = 'media/Employee.xlsx')
+    ws = wb.active
+    skip_count = 2
+    row_count = 0
+    new_emp_count = 0
+    update_emp_count = 0
+    error_emp_count = 0
+    for i in range(ws.max_row + 1):
+        if i < skip_count:
+            continue
+        emp_id = ws['A' + str(i)].value
+        emp_name = ws['B' + str(i)].value
+        section = ws['C' + str(i)].value
+        costcenter = ws['D' + str(i)].value
+        is_active = ws['E' + str(i)].value
+        if emp_name == None:
+            emp_name = ""
+        if section == None:
+            section = ""
+        if costcenter == None:
+            costcenter = ""
+        if is_active == None:
+            is_active = 0
+        if emp_id != None:
+            isExist = isExistOperator(str(emp_id))
+            # if isExist:
+            #     conn = get_connection()
+            #     cursor = conn.cursor()
+            #     sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+            #     cursor.execute(sql)
+            #     conn.commit()
+            #     update_emp_count = update_emp_count + 1
+            if not isExist:
+                conn = get_connection()
+                cursor = conn.cursor()
+                sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
+                cursor.execute(sql)
+                conn.commit()
+                new_emp_count = new_emp_count + 1
+        else:
+            error_emp_count = error_emp_count + 1
+        row_count = row_count + 1
+    print("#########################################")
+    print("All Row #", str(row_count))
+    print("New Employee #", str(new_emp_count))
+    print("Update Employee #", str(update_emp_count))
+    print("Error Row #", str(error_emp_count))
+    print("#########################################")
     return
 
 # def send_email_overtime():

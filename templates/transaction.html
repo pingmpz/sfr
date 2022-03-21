@@ -152,6 +152,7 @@
                                 <ul class="nav nav-tabs" role="tablist">
                                   <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#operation-tab" role="tab">Operation</a></li>
                                   <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#order-tab" role="tab">Production Order</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#bom-tab" role="tab">BOM</a></li>
                                 </ul>
                               </div>
                               <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
@@ -376,6 +377,34 @@
                                     <div class="col-md-7">
                                       <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
                                     </div>
+                                  </div>
+                                </div>
+                                <!-- BOM Tab -->
+                                <div class="tab-pane small" id="bom-tab" role="tabpanel">
+                                  <div class="form-group row">
+                                    <label class="col-md-5 col-form-label text-right"><strong>Date Get From SAP</strong></label>
+                                    <div class="col-md-7">
+                                      <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
+                                    </div>
+                                    <br><br><br>
+                                    <table class="table table-sm table-responsive-sm table-outline text-center" width="100%" style="margin-left: 18px; margin-right: 18px;">
+                                      <thead class="bg-darkslategray">
+                                        <tr>
+                                          <th>RM_MaterialCode</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr>
+                                          <td>TEST-0123456789-SFR</td>
+                                        </tr>
+                                        <tr>
+                                          <td>TEST-0123456789-SFR</td>
+                                        </tr>
+                                        <tr>
+                                          <td>TEST-0123456789-SFR</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
                                   </div>
                                 </div>
                               </div>
