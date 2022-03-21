@@ -17,7 +17,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>SAP Routing | Shopfloor Reporting Application</title>
+    <title>SAP Component | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -40,11 +40,11 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">SAP Routing ({{sapRoutingList|length}})</li>
+            <li class="breadcrumb-item">SAP Component ({{sapComponentList|length}})</li>
             <!-- Breadcrumb Menu-->
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            <a href="/sap_component/{{fdate}}&{{fhour}}"><i class="c-icon c-icon-sm cil-swap-horizontal"></i></a>&nbsp;&nbsp;&nbsp;
+            <a href="/sap_order/{{fdate}}&{{fhour}}"><i class="c-icon c-icon-sm cil-swap-horizontal"></i></a>&nbsp;&nbsp;&nbsp;
             <select class="form-control" id="fhour">
               <option value="ALLDAY" {% if fhour == 'ALLDAY' %}style="color:blue" selected{% endif %}>All Day</option>
               <option value="00" {% if fhour == '00' %}style="color:blue" selected{% endif %}>00:30</option>
@@ -89,45 +89,24 @@
                     <div class="card-body">
                       <div class="text-center">
                           <a class="toggle-vis small text-primary" data-column="0">ProductionOrderNo</a> |
-                          <a class="toggle-vis small text-primary" data-column="1">OperationNumber</a> |
-                          <a class="toggle-vis small text-primary" data-column="2">WorkCenter</a> |
-                          <a class="toggle-vis small text-primary" data-column="3">PlanStartDate</a> |
-                          <a class="toggle-vis small text-primary" data-column="4">PlanFinishDate</a> |
-                          <a class="toggle-vis small text-primary" data-column="5">EstimateSetTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="6">EstimateOperationTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="7">EstimateLaborTime</a> |
-                          <a class="toggle-vis small text-primary" data-column="8">SystemStatus</a> |
-                          <a class="toggle-vis small text-primary" data-column="9">DateGetFromSAP</a>
+                          <a class="toggle-vis small text-primary" data-column="1">RM_MaterialCode</a> |
+                          <a class="toggle-vis small text-primary" data-column="2">DateGetFromSAP</a>
                       </div>
                       <br>
-                      <table class="table table-sm table-outline small" id="sap_routing_table" style="width: 100%">
+                      <table class="table table-sm table-outline small" id="sap_component_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
                             <th>ProductionOrderNo</th>
-                            <th>OperationNumber</th>
-                            <th>WorkCenter</th>
-                            <th>PlanStartDate</th>
-                            <th>PlanFinishDate</th>
-                            <th>EstimateSetTime</th>
-                            <th>EstimateOperationTime</th>
-                            <th>EstimateLaborTime</th>
-                            <th>SystemStatus</th>
+                            <th>RM_MaterialCode</th>
                             <th>DateGetFromSAP</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for routing in sapRoutingList %}
-                          <tr style="background-color:#f{{routing.ProductionOrderNo|add:'0'|modulo:8}}f{{routing.ProductionOrderNo|add:'0'|modulo:9}}f{{routing.ProductionOrderNo|add:'0'|modulo:10}}">
-                            <td>{{routing.ProductionOrderNo|default_if_none:""}}</td>
-                            <td>{{routing.OperationNumber|default_if_none:""}}</td>
-                            <td>{{routing.WorkCenter|default_if_none:""}}</td>
-                            <td>{{routing.PlanStartDate|default_if_none:""}}</td>
-                            <td>{{routing.PlanFinishDate|default_if_none:""}}</td>
-                            <td>{{routing.EstimateSetTime|default_if_none:""}}</td>
-                            <td>{{routing.EstimateOperationTime|default_if_none:""}}</td>
-                            <td>{{routing.EstimateLaborTime|default_if_none:""}}</td>
-                            <td>{{routing.SystemStatus|default_if_none:""}}</td>
-                            <td>{{routing.DateGetFromSAP|default_if_none:""}}</td>
+                          {% for com in sapComponentList %}
+                          <tr style="background-color:#f{{com.ProductionOrderNo|add:'0'|modulo:8}}f{{com.ProductionOrderNo|add:'0'|modulo:9}}f{{com.ProductionOrderNo|add:'0'|modulo:10}}">
+                            <td>{{com.ProductionOrderNo|default_if_none:""}}</td>
+                            <td>{{com.RM_MaterialCode|default_if_none:""}}</td>
+                            <td>{{com.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -165,7 +144,7 @@
       var groupColumn = 0;
       var table;
       $(document).ready(function() {
-        table = $('#sap_routing_table').DataTable( {
+        table = $('#sap_component_table').DataTable( {
             // "order": [[ 0, "asc" ],[ 1, "asc" ]],
             // 'iDisplayLength': 100,
             "columnDefs": [{ "visible": true, "targets": groupColumn }],
@@ -196,11 +175,11 @@
       });
 
       $('#fdate').change(function() {
-        window.location.href =  "/sap_routing/" + ($("#fdate").val() + "&" + $("#fhour").val());
+        window.location.href =  "/sap_component/" + ($("#fdate").val() + "&" + $("#fhour").val());
       });
 
       $('#fhour').change(function() {
-        window.location.href =  "/sap_routing/" + ($("#fdate").val() + "&" + $("#fhour").val());
+        window.location.href =  "/sap_component/" + ($("#fdate").val() + "&" + $("#fhour").val());
       });
     </script>
   </body>

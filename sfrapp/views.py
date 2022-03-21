@@ -742,6 +742,19 @@ def sap_routing(request, fdate, fhour):
     }
     return render(request, 'sap_routing.html', context)
 
+def sap_component(request, fdate, fhour):
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    if fhour == "NOW":
+        fhour = datetime.today().strftime('%H')
+    sapComponentList = getSAPComponentList(fdate, fhour)
+    context = {
+        'fdate' : fdate,
+        'fhour' : fhour,
+        'sapComponentList' : sapComponentList,
+    }
+    return render(request, 'sap_component.html', context)
+
 def sap_report(request, fdate, fhour):
     if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
@@ -1776,6 +1789,16 @@ def getSAPRoutingList(fdate, fhour):
         sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
     else:
         sql = "SELECT * FROM [SAP_Routing] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getSAPComponentList(fdate, fhour):
+    cursor = get_connection().cursor()
+    sql = ""
+    if fhour == "ALLDAY":
+        sql = "SELECT * FROM [SAP_Component] WHERE DateGetFromSAP >= '" + fdate + " 00:00:00' AND DateGetFromSAP <= '" + fdate + " 23:59:59' ORDER BY DateGetFromSAP DESC"
+    else:
+        sql = "SELECT * FROM [SAP_Component] WHERE DateGetFromSAP >= '" + fdate + " " + fhour + ":00:00' AND DateGetFromSAP <= '" + fdate + " " + fhour + ":59:59' ORDER BY DateGetFromSAP DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
