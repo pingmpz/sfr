@@ -1752,6 +1752,14 @@ def increase_lot_no(request):
     }
     return JsonResponse(data)
 
+def fix_rm_mat_code(request):
+    order_no = request.GET.get('order_no')
+    rm_mat_code = request.GET.get('rm_mat_code')
+    fixRMMaterialCode(order_no, rm_mat_code)
+    data = {
+    }
+    return JsonResponse(data)
+
 def set_wc_target(request):
     wc_no = request.GET.get('wc_no')
     target_hour = request.GET.get('target_hour')
@@ -3196,6 +3204,14 @@ def updateMailDate(date):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [AdminConfig] SET [Value] = '"+date+"' WHERE KeyText = 'MAIL_DATE'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def fixRMMaterialCode(order_no, rm_mat_code):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET RM_MaterialCode = '"+str(rm_mat_code)+"' WHERE OrderNo = '"+str(order_no)+"'"
     cursor.execute(sql)
     conn.commit()
     return

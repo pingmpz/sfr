@@ -51,6 +51,7 @@
           <div class="c-subheader-nav">
             {% if state == "DATAFOUND" %}
               <a href="/transaction/{{orderNo}}0000" class="btn btn-sm btn-link">Transaction</a>
+                |<button class="btn btn-sm btn-link" data-toggle="modal" data-target="#fix_rm_mat_code_modal" onclick="prepare_frm()">Fix RM-MaterialCode</button>
                 |<button class="btn btn-sm btn-link" data-toggle="modal" data-target="#increase_lot_no_modal" onclick="prepare_increase_lot_no()">Create Partial Lot</button>
                 {% if LotNo != '0' %}
                 |<button class="btn btn-sm btn-link" onclick="printDiv()">Print</button>
@@ -738,6 +739,36 @@
           </div>
         </div>
       </div>
+      <div class="modal" id="fix_rm_mat_code_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-warning" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-pen"></i> Fix RM-MaterialCode</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="frm_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>New RM-MaterialCode</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="frm_rm_mat_code" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-warning" type="button" id="frm_confirm_button" onclick="fix_rm_mat_code()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -797,6 +828,43 @@
                   'lot_qty': lot_qty,
                   'type': type,
                   'final_lot_no': final_lot_no,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      function prepare_frm(){
+        $("#frm_password").val("");
+        $("#frm_rm_mat_code").val("");
+        remove_valid_many(["frm_password","frm_rm_mat_code"]);
+      }
+
+      function fix_rm_mat_code(){
+        var order_no = $("#order_no").val();
+        var password = $("#frm_password").val();
+        var rm_mat_code = $("#frm_rm_mat_code").val();
+        remove_valid_many(["frm_password","frm_rm_mat_code"]);
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("frm_password");
+          } else {
+            valid("frm_password");
+            if(rm_mat_code == ""){
+              invalid("frm_rm_mat_code");
+            } else {
+              valid("frm_rm_mat_code");
+              $.ajax({
+                url: '/fix_rm_mat_code/',
+                data: {
+                  'order_no': order_no,
+                  'password': password,
+                  'rm_mat_code': rm_mat_code,
                 },
                 dataType: 'json',
                 success: function (data) {
