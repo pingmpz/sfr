@@ -47,8 +47,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for opr in workingOperatorList %}
-              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:12 %}
+              {% for opr in overtimeOperatorForEmailList %}
               <tr style="height:40px; font-size: 11px;">
                 <td>{{opr.EmpID}}</td>
                 <td>{{opr.EmpName}}</td>
@@ -59,7 +58,6 @@
                 <td>{{opr.WorkCenterNo|default_if_none:""}}</td>
                 <td>{{opr.StartDateTime|date:"d-M-Y, H:i"}}</td>
               </tr>
-              {% endif %}
               {% endfor %}
             </tbody>
           </table>

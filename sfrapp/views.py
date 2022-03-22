@@ -8,12 +8,12 @@ from dateutil import parser
 from openpyxl import load_workbook, Workbook
 
 # EMAIL
-# from django.core.mail import EmailMessage
-# from sfr.settings import EMAIL_HOST_USER
-# import smtplib
-# import traceback
-# import threading
-# from django.template.loader import get_template
+from django.core.mail import EmailMessage
+from sfr.settings import EMAIL_HOST_USER
+import smtplib
+import traceback
+import threading
+from django.template.loader import get_template
 
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
@@ -39,7 +39,6 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
-    # send_email_overtime()
     #CONST
     overtimehour = 0
     canMP = False
@@ -435,6 +434,7 @@ def working_wc(request):
     return render(request, 'working_wc.html', context)
 
 def working_emp(request):
+    send_email_overtime()
     overtimehour = getOvertimeHour()
     warninghour = overtimehour - 2
     workingOperatorList = getWorkingOperatorList()
@@ -1944,6 +1944,20 @@ def getWorkingOperatorList():
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getOvertimeOperatorForEmailList():
+    cursor = get_connection().cursor()
+    sql = """
+        SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode
+        FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID
+        INNER JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo
+        INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo
+        LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID
+        LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo
+    """
+    sql += " WHERE OOPR.Status <> 'COMPLETE' AND OOPR.Status <> 'EXT-WORK' AND DATEDIFF(HOUR, OOPR.StartDateTime, CURRENT_TIMESTAMP) > "+str(getOvertimeHour())+" ORDER BY OOPR.StartDateTime ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getNoneWorkingWorkCenterList():
     cursor = get_connection().cursor()
     sql = """
@@ -3332,45 +3346,49 @@ def update_employee_master():
     print("#########################################")
     return
 
-# def send_email_overtime():
-#     today_date = datetime.now().strftime("%Y%m%d")
-#     if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
-#         updateMailDate(today_date)
-#         workingOperatorList = getWorkingOperatorList()
-#         if len(workingOperatorList) > 0:
-#             print('Sending Overtime Email:' , datetime.now())
-#             subject = '[SFR] Overtime Operator'
-#             mgs = getMailgroup()
-#             send_to = []
-#             cc_to = []
-#             for mg in mgs:
-#                 if mg.IsCC == 0:
-#                     send_to.append(mg.Email)
-#                 else:
-#                     cc_to.append(mg.Email)
-#             email_template = get_template(TEMPLATE_OVERTIME)
-#             email_content = email_template.render({
-#                 'workingOperatorList' : workingOperatorList,
-#                 'host_url' : HOST_URL,
-#             })
-#             # send_email(subject, email_content, send_to, cc_to)
-#         else:
-#             print('No Overtime Operator Email:' , datetime.now())
-#
-# class EmailThread(threading.Thread):
-#
-#     def __init__(self, email):
-#         self.email = email
-#         threading.Thread.__init__(self)
-#
-#     def run(self):
-#         self.email.send(fail_silently=False)
-#
-# def send_email(subject, email_content, send_to, cc_to):
-#     try:
-#         email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
-#         email.content_subtype = "html"
-#         EmailThread(email).start()
-#     except Exception:
-#         traceback.print_exc()
-#     return
+def send_email_overtime():
+    today_date = datetime.now().strftime("%Y%m%d")
+    if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
+        updateMailDate(today_date)
+        overtimeOperatorForEmailList = getOvertimeOperatorForEmailList()
+        if len(overtimeOperatorForEmailList) > 0:
+            print('Sending Overtime Email:' , datetime.now())
+            subject = '[SFR] Overtime Operator'
+            mgs = getMailgroup()
+            send_to = []
+            cc_to = []
+            for mg in mgs:
+                if mg.IsCC == 0:
+                    send_to.append(mg.Email)
+                else:
+                    cc_to.append(mg.Email)
+            email_template = get_template(TEMPLATE_OVERTIME)
+            email_content = email_template.render({
+                'overtimeOperatorForEmailList' : overtimeOperatorForEmailList,
+                'host_url' : HOST_URL,
+            })
+            send_to = ['yashawantatul.man@ccsadvancetech.co.th']
+            cc_to = []
+            send_email(subject, email_content, send_to, cc_to)
+        else:
+            print('No Overtime Operator Email:' , datetime.now())
+    # else:
+    #     updateMailDate('20220320')
+
+class EmailThread(threading.Thread):
+
+    def __init__(self, email):
+        self.email = email
+        threading.Thread.__init__(self)
+
+    def run(self):
+        self.email.send(fail_silently=False)
+
+def send_email(subject, email_content, send_to, cc_to):
+    try:
+        email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
+        email.content_subtype = "html"
+        EmailThread(email).start()
+    except Exception:
+        traceback.print_exc()
+    return
