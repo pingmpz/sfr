@@ -8,12 +8,12 @@ from dateutil import parser
 from openpyxl import load_workbook, Workbook
 
 # EMAIL
-from django.core.mail import EmailMessage
-from sfr.settings import EMAIL_HOST_USER
-import smtplib
-import traceback
-import threading
-from django.template.loader import get_template
+# from django.core.mail import EmailMessage
+# from sfr.settings import EMAIL_HOST_USER
+# import smtplib
+# import traceback
+# import threading
+# from django.template.loader import get_template
 
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
@@ -3362,49 +3362,49 @@ def update_employee_master():
     print("#########################################")
     return
 
-def send_email_overtime():
-    today_date = datetime.now().strftime("%Y%m%d")
-    if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
-        updateMailDate(today_date)
-        overtimeOperatorForEmailList = getOvertimeOperatorForEmailList()
-        if len(overtimeOperatorForEmailList) > 0:
-            print('Sending Overtime Email:' , datetime.now())
-            subject = '[SFR] Overtime Operator'
-            mgs = getMailgroup()
-            send_to = []
-            cc_to = []
-            for mg in mgs:
-                if mg.IsCC == 0:
-                    send_to.append(mg.Email)
-                else:
-                    cc_to.append(mg.Email)
-            email_template = get_template(TEMPLATE_OVERTIME)
-            email_content = email_template.render({
-                'overtimeOperatorForEmailList' : overtimeOperatorForEmailList,
-                'host_url' : HOST_URL,
-            })
-            send_to = ['yashawantatul.man@ccsadvancetech.co.th']
-            cc_to = []
-            send_email(subject, email_content, send_to, cc_to)
-        else:
-            print('No Overtime Operator Email:' , datetime.now())
-    # else:
-    #     updateMailDate('20220320')
-
-class EmailThread(threading.Thread):
-
-    def __init__(self, email):
-        self.email = email
-        threading.Thread.__init__(self)
-
-    def run(self):
-        self.email.send(fail_silently=False)
-
-def send_email(subject, email_content, send_to, cc_to):
-    try:
-        email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
-        email.content_subtype = "html"
-        EmailThread(email).start()
-    except Exception:
-        traceback.print_exc()
-    return
+# def send_email_overtime():
+#     today_date = datetime.now().strftime("%Y%m%d")
+#     if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
+#         updateMailDate(today_date)
+#         overtimeOperatorForEmailList = getOvertimeOperatorForEmailList()
+#         if len(overtimeOperatorForEmailList) > 0:
+#             print('Sending Overtime Email:' , datetime.now())
+#             subject = '[SFR] Overtime Operator'
+#             mgs = getMailgroup()
+#             send_to = []
+#             cc_to = []
+#             for mg in mgs:
+#                 if mg.IsCC == 0:
+#                     send_to.append(mg.Email)
+#                 else:
+#                     cc_to.append(mg.Email)
+#             email_template = get_template(TEMPLATE_OVERTIME)
+#             email_content = email_template.render({
+#                 'overtimeOperatorForEmailList' : overtimeOperatorForEmailList,
+#                 'host_url' : HOST_URL,
+#             })
+#             send_to = ['yashawantatul.man@ccsadvancetech.co.th']
+#             cc_to = []
+#             send_email(subject, email_content, send_to, cc_to)
+#         else:
+#             print('No Overtime Operator Email:' , datetime.now())
+#     # else:
+#     #     updateMailDate('20220320')
+#
+# class EmailThread(threading.Thread):
+#
+#     def __init__(self, email):
+#         self.email = email
+#         threading.Thread.__init__(self)
+#
+#     def run(self):
+#         # self.email.send(fail_silently=False)
+#
+# def send_email(subject, email_content, send_to, cc_to):
+#     try:
+#         email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
+#         email.content_subtype = "html"
+#         EmailThread(email).start()
+#     except Exception:
+#         traceback.print_exc()
+#     # return
