@@ -513,12 +513,23 @@
                                   {% if historyOperateList|length == 0 %}
                                   <h5 class="text-center">NO DATA</h5>
                                   {% else %}
-                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                  <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
                                       <tr>
+                                        <th>Type
+                                          <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
+                                          data-content="
+                                          <strong class='text-success'>Working</strong><br>
+                                          <strong class='text-yellowgreen'>Setup</strong><br>
+                                          <strong class='text-primary'>Manual Report</strong><br>
+                                          <strong class='text-warning'>Working</strong><br>
+                                          <strong class='text-plum'>Ext-Work</strong><br>
+                                          <strong class='text-dark'>Skip</strong><br>
+                                          ">?
+                                          </a>
+                                        </th>
                                         <th>Operator</th>
                                         <th>Work Center</th>
-                                        <th>Type</th>
                                         <th>Setup</th>
                                         <th>Oper</th>
                                         <th>Labor</th>
@@ -530,16 +541,16 @@
                                       {% for operate in historyOperateList %}
                                       {% if operate.EmpID != None %}
                                       <tr>
-                                        <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
-                                        <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
                                         <td>
-                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-plum"><strong>Ext-Work</strong></span>
-                                          {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<span class="text-muted"><strong>Skip</strong></span>
-                                          {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><strong>Working</strong></span>
-                                          {% elif operate.Type.strip == 'SETUP' %}<span class="text-yellowgreen"><strong>Setup</strong></span>
-                                          {% elif operate.Type.strip == 'MANUAL' %}<span class="text-primary"><strong>Manual Report</strong></span>
+                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-discover text-plum" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ext-Work">
+                                          {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Skip">
+                                          {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working">
+                                          {% elif operate.Type.strip == 'SETUP' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Setup">
+                                          {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% endif %}
                                         </td>
+                                        <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
+                                        <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
                                         <td>{%if operate.Setup != 0.00 %}{{operate.Setup.normalize}}{% endif %}</td>
                                         <td>{%if operate.Oper != 0.00 %}{{operate.Oper.normalize}}{% endif %}</td>
                                         <td>{%if operate.Labor != 0.00 %}{{operate.Labor.normalize}}{% endif %}</td>
@@ -557,13 +568,13 @@
                                   {% if historyConfirmList|length == 0 %}
                                   <h5 class="text-center">NO DATA</h5>
                                   {% else %}
-                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                  <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
                                       <tr>
                                         <th>Operator</th>
                                         <th>Work Center</th>
-                                        <th class="text-success">Good Qty</th>
-                                        <th class="text-danger">Reject Qty</th>
+                                        <th class="text-success">Accepted</th>
+                                        <th class="text-danger">Rejected</th>
                                         <th>Reason</th>
                                         <th>Confirm Time</th>
                                       </tr>
@@ -592,7 +603,7 @@
                                   {% if historyJoinList|length == 0 %}
                                   <h5 class="text-center">NO DATA</h5>
                                   {% else %}
-                                  <table class="table table-sm table-responsive-sm table-outline small">
+                                  <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
                                       <tr>
                                         <th>Join To</th>
@@ -624,7 +635,7 @@
                                   {% if modList|length == 0 %}
                                   <h5 class="text-center">NO DATA</h5>
                                   {% else %}
-                                  <table class="table table-sm table-responsive-sm table-outline text-center small">
+                                  <table class="table table-sm table-responsive-sm table-outline text-center small text-center">
                                     <thead class="bg-darkslategray">
                                       <tr>
                                         <th>Action</th>

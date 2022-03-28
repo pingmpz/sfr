@@ -89,7 +89,7 @@
                             <tr>
                               <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
                               <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
-                              <td>{{op.Actual_Work|default_if_none:""}}</td>
+                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">{{op.Actual_Work|default_if_none:""}}</td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>
@@ -105,7 +105,9 @@
                             <tr>
                               <td>{{op.RequestDate|default_if_none:""}}</td>
                               <td>{{op.DelayFromRequestDate|default_if_none:""}}</td>
-                              <td>{{op.Actual_Work|default_if_none:""}} {{SFRDelayWorkActualList|index:forloop.counter0}}</td>
+                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}{% if SFRDelayWorkActualList|index:forloop.counter0 == 'PARTIAL CONFIRM' %}9999{% else %}{{SFRDelayWorkActualList|index:forloop.counter0}}{% endif %}">
+                                {{op.Actual_Work|default_if_none:""}}{{SFRDelayWorkActualList|index:forloop.counter0}}
+                              </td>
                               <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>
