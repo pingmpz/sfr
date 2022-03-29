@@ -37,6 +37,7 @@
       <!-- *** HEADER *** -->
       <header class="c-header c-header-light c-header-fixed">
         {% include 'header.html' %}
+        {% include 'aside.html' %}
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
@@ -1022,7 +1023,6 @@
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
 
-      {% include 'aside.html' %}
       <!-- *** MODAL *** -->
       <div class="modal" id="inc_qty_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -1855,6 +1855,7 @@
           </div>
         </div>
       </div>
+
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
