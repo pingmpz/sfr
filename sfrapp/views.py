@@ -954,8 +954,9 @@ def add_operating_operator(request):
     owc_id = request.GET.get('owc_id')
     status = request.GET.get('status')
     refresh = False
-    #-- INSERT EMP FOR IP
-    insertIPAddress(operator_id, getClientIP(request))
+    #-- INSERT EMP AT COMPUTER (IF NOT EXT-WORK)
+    if status != 'EXT-WORK':
+        insertEmpAtComputer(operator_id, getClientIP(request))
     #-- OPERATOR : WORKING/SETUP/EXT-WORK
     insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     #-- IF OPERATION IS NOT LABOR TYPE
@@ -1020,8 +1021,10 @@ def stop_setup_operating_operator(request):
     id = request.GET.get('id')
     #-- OPERATOR : SAVE SETUP TIME
     updateOperatingOperator(id, "COMPLETE")
-    #-- WORKCENTER : SAVE SETUP TIME
     oopr = getOperatorOperatingByID(id)
+    #-- DELETE EMP AT COMPUTER
+    deleteEmpAtComputer(oopr.EmpID)
+    #-- WORKCENTER : SAVE SETUP TIME
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETE")
     #-- SAP : SETUP TIME
     setuptime = int(((oopr.OperatorStopDateTime - oopr.OperatorStartDateTime).total_seconds())/60)
@@ -1046,6 +1049,8 @@ def stop_work_operating_operator(request):
     oopr = getOperatorOperatingByID(id)
     status = oopr.OperatorStatus
     type = "WORKING"
+    #-- DELETE EMP AT COMPUTER
+    deleteEmpAtComputer(oopr.EmpID)
     #-- OPERATOR : SAVE WORKING TIME
     updateOperatingOperator(id, "COMPLETE")
     #-- SAP : WORKING TIME
@@ -3055,7 +3060,7 @@ def insertOvertimeOperator(oopr):
     conn.commit()
     return
 
-def insertIPAddress(emp_id, ip_address):
+def insertEmpAtComputer(emp_id, ip_address):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [dbo].[EmpAtComputer] ([DateTimeStamp],[EmpID],[IPAddress]) VALUES "
@@ -3294,6 +3299,14 @@ def deleteOrderControl(order_no):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [OrderControl] WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteEmpAtComputer(emp_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [EmpAtComputer] WHERE EmpID = '" + str(emp_id) + "'"
     cursor.execute(sql)
     conn.commit()
     return
