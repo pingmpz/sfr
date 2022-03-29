@@ -43,9 +43,9 @@
             <li class="breadcrumb-item">Transaction</li>
             {% if state != "FIRSTPAGE" %}
             <li class="breadcrumb-item active">
-              {% if operationBefore != -1 %}<a href="/transaction/{{orderNo}}{{operationBefore}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
+              {% if operationBefore != -1 %}<a href="/transaction/{{orderNo}}{{operationBefore}}" class="text-primary pt-1"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
               <span id="bc_order_no">{{orderNo}}</span>&nbsp;-&nbsp;<span id="bc_operation_no">{{operationNo}}</span>
-              {% if operationAfter != -1 %}&nbsp;<a href="/transaction/{{orderNo}}{{operationAfter}}" class="text-primary" style="padding-top: 3px;"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
+              {% if operationAfter != -1 %}&nbsp;<a href="/transaction/{{orderNo}}{{operationAfter}}" class="text-primary pt-1"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
             </li>
             {% endif %}
           </ol>
@@ -97,19 +97,19 @@
               {% if state == "DATAFOUND" %}
               <div class="row" id="main_body">
                   <!-- Left Content -->
-                  <div class="col-sm-12 col-md-4" style="padding:0px;">
+                  <div class="col-sm-12 col-md-4 p-0">
                     <div class="card border-secondary">
                       <!-- <div class="card-header text-right">
                         <i class="c-icon c-icon-sm cil-user"></i>
                       </div> -->
-                      <div class="card-body" style="padding-left: 5px; padding-right: 5px;">
+                      <div class="card-body px-1">
                         <!-- Quantity -->
                         <div hidden>
                           \\129.1.100.188\Drawingsap\DRAWING\ABRIC\FG-ABRIC-BD0000003-1A.JPG
                         </div>
                         <div class="row">
-                          <div class="col text-right" style="padding-left:0px; padding-right:5px;">
-                            <div class="ui-widget-info fade-in" style="margin-bottom:20px">
+                          <div class="col text-right px-1">
+                            <div class="ui-widget-info fade-in mb-3">
                               <h1 class="ui-value text-info"><strong><small>{{operation.ProcessQty.normalize}}</small></strong></h1>
                               <span class="ui-label text-info">Process</span>
                             </div>
@@ -118,8 +118,8 @@
                               <span class="ui-label text-warning">Remain</span>
                             </div>
                           </div>
-                          <div class="col text-left" style="padding:0px;">
-                            <div class="ui-widget-success fade-in" style="margin-bottom:20px">
+                          <div class="col text-left p-0">
+                            <div class="ui-widget-success fade-in mb-3">
                               <h1 class="ui-value text-success"><strong><small>{{operation.AcceptedQty.normalize}}</small></strong></h1>
                               <span class="ui-label text-success">Accept</span>
                             </div>
@@ -145,7 +145,7 @@
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
                             {% endif %}
                           </ul>
-                          <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                          <div class="tab-content px-1">
                             <!-- Info Tab -->
                             <div class="tab-pane" id="info-tab" role="tabpanel">
                               <div class="nav-tabs-boxed">
@@ -155,7 +155,7 @@
                                   <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#bom-tab" role="tab">BOM</a></li>
                                 </ul>
                               </div>
-                              <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                              <div class="tab-content px-1">
                                 <!-- Operation Tab -->
                                 <div class="tab-pane small active" id="operation-tab" role="tabpanel">
                                   <div class="form-group row">
@@ -387,7 +387,7 @@
                                       <input class="form-control form-control-sm" type="text" id="order_date_get_from_sap" value="{{order.DateGetFromSAP|default_if_none:""|date:"d-M-Y, H:i"}}" readonly>
                                     </div>
                                     <br><br><br>
-                                    <table class="table table-sm table-responsive-sm table-outline text-center" width="100%" style="margin-left: 18px; margin-right: 18px;">
+                                    <table class="table table-sm table-responsive-sm table-outline text-center mx-2" width="100%">
                                       <thead class="bg-darkslategray">
                                         <tr>
                                           <th>RM_MaterialCode</th>
@@ -441,16 +441,16 @@
                                   {% for item in operationList %}
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>
-                                      {% if item.WorkCenterNo == None %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Complete"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue" style="padding-top:5px" data-toggle="tooltip" data-original-title="Complete (No Working Time Report)"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Partial Complete"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Joining"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ready"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered" style="padding-top:5px;" data-toggle="tooltip" data-original-title="Overtime"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px" data-toggle="tooltip" data-original-title="Error"></i>
-                                      {% elif operationStatusList|index:forloop.counter0 == 'REJECTED' %}<i class="c-icon c-icon-sm cib-discover text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Rejected"></i>
+                                      {% if item.WorkCenterNo == None %}<i class="c-icon c-icon-sm cib-discover text-danger pt-1" data-toggle="tooltip" data-original-title="Error"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-success pt-1" data-toggle="tooltip" data-original-title="Complete"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue pt-1" data-toggle="tooltip" data-original-title="Complete (No Working Time Report)"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'PARTIALCOMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-yellowgreen pt-1" data-toggle="tooltip" data-original-title="Partial Complete"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'JOINING' %}<i class="c-icon c-icon-sm cib-discover text-primary pt-1" data-toggle="tooltip" data-original-title="Joining"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'WORKING' %}<i class="c-icon c-icon-sm cib-discover text-warning pt-1" data-toggle="tooltip" data-original-title="Working"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'READY' %}<i class="c-icon c-icon-sm cib-discover text-info pt-1" data-toggle="tooltip" data-original-title="Ready"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'OVERTIME' %}<i class="c-icon c-icon-sm cib-discover text-orangered pt-1" data-toggle="tooltip" data-original-title="Overtime"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger pt-1" data-toggle="tooltip" data-original-title="Error"></i>
+                                      {% elif operationStatusList|index:forloop.counter0 == 'REJECTED' %}<i class="c-icon c-icon-sm cib-discover text-dark pt-1" data-toggle="tooltip" data-original-title="Rejected"></i>
                                       {% endif %}
                                     </td>
                                     <td>
@@ -461,9 +461,9 @@
                                       {% endif %}
                                     </td>
                                     <td>{{item.WorkCenterNo|default_if_none:""}}</td>
-                                    <td>{{item.ProcessQty.normalize}}</td>
-                                    <td>{{item.AcceptedQty.normalize}}</td>
-                                    <td>{{item.RejectedQty.normalize}}</td>
+                                    <td>{%if item.ProcessQty.normalize != 0 %}{{item.ProcessQty.normalize}}{% endif %}</td>
+                                    <td>{%if item.AcceptedQty.normalize != 0 %}{{item.AcceptedQty.normalize}}{% endif %}</td>
+                                    <td>{%if item.RejectedQty.normalize != 0 %}{{item.RejectedQty.normalize}}{% endif %}</td>
                                   </tr>
                                   {% endfor %}
                                 </tbody>
@@ -501,17 +501,17 @@
                             <div class="tab-pane" id="history-tab" role="tabpanel">
                               <div class="nav-tabs-boxed">
                                 <ul class="nav nav-tabs" role="tablist">
-                                  <li class="nav-item"><a class="nav-link small active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate ({{historyOperateList|length}})</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm ({{historyConfirmList|length}})</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join ({{historyJoinList|length}})</a></li>
-                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified ({{modList|length}})</a></li>
+                                  <li class="nav-item"><a class="nav-link small active" data-toggle="tab" href="#operate-tab" role="tab" aria-controls="home">Operate {% if historyOperateList|length != 0 %}({{historyOperateList|length}}){% endif %}</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm {% if historyConfirmList|length != 0 %}({{historyConfirmList|length}}){% endif %}</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join {% if historyJoinList|length != 0 %}({{historyJoinList|length}}){% endif %}</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified {% if modList|length != 0 %}({{modList|length}}){% endif %}</a></li>
                                 </ul>
                               </div>
-                              <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                              <div class="tab-content px-1">
                                 <!-- Operate Tab -->
                                 <div class="tab-pane active" id="operate-tab" role="tabpanel">
                                   {% if historyOperateList|length == 0 %}
-                                  <h5 class="text-center">NO DATA</h5>
+                                  <h5 class="text-center mt-3">NO DATA</h5>
                                   {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
@@ -541,11 +541,11 @@
                                       {% if operate.EmpID != None %}
                                       <tr>
                                         <td>
-                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum" style="padding-top:5px" data-toggle="tooltip" data-original-title="Ext-Work">
-                                          {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-dark" style="padding-top:5px" data-toggle="tooltip" data-original-title="Skip">
-                                          {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><i class="c-icon c-icon-sm cib-zalando text-success" style="padding-top:5px" data-toggle="tooltip" data-original-title="Working">
-                                          {% elif operate.Type.strip == 'SETUP' %}<i class="c-icon c-icon-sm cib-zalando text-yellowgreen" style="padding-top:5px" data-toggle="tooltip" data-original-title="Setup">
-                                          {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary" style="padding-top:5px" data-toggle="tooltip" data-original-title="Manual Report">
+                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum pt-1" data-toggle="tooltip" data-original-title="Ext-Work">
+                                          {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-dark pt-1" data-toggle="tooltip" data-original-title="Skip">
+                                          {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><i class="c-icon c-icon-sm cib-zalando text-success pt-1" data-toggle="tooltip" data-original-title="Working">
+                                          {% elif operate.Type.strip == 'SETUP' %}<i class="c-icon c-icon-sm cib-zalando text-yellowgreen pt-1" data-toggle="tooltip" data-original-title="Setup">
+                                          {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary pt-1" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% endif %}
                                         </td>
                                         <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
@@ -565,7 +565,7 @@
                                 <!-- Confirm Tab -->
                                 <div class="tab-pane" id="confirm-tab" role="tabpanel">
                                   {% if historyConfirmList|length == 0 %}
-                                  <h5 class="text-center">NO DATA</h5>
+                                  <h5 class="text-center mt-3">NO DATA</h5>
                                   {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
@@ -600,7 +600,7 @@
                                 <!-- Join Tab -->
                                 <div class="tab-pane" id="join-tab" role="tabpanel">
                                   {% if historyJoinList|length == 0 %}
-                                  <h5 class="text-center">NO DATA</h5>
+                                  <h5 class="text-center mt-3">NO DATA</h5>
                                   {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline small text-center">
                                     <thead class="bg-darkslategray">
@@ -632,7 +632,7 @@
                                 <!-- Mod Tab -->
                                 <div class="tab-pane" id="mod-tab" role="tabpanel">
                                   {% if modList|length == 0 %}
-                                  <h5 class="text-center">NO DATA</h5>
+                                  <h5 class="text-center mt-3">NO DATA</h5>
                                   {% else %}
                                   <table class="table table-sm table-responsive-sm table-outline text-center small text-center">
                                     <thead class="bg-darkslategray">
@@ -728,7 +728,7 @@
                   </div>
 
                   <!-- Right Content -->
-                  <div class="col-sm-12 col-md-8" style="padding-left: 10px; padding-right: 0px;">
+                  <div class="col-sm-12 col-md-8 pr-0">
                     <div class="row">
                       <!-- Button Group -->
                       <div class="col-md-6 text-left">
@@ -780,7 +780,7 @@
                                   {% endif %}
                                 </div>
                               </div>
-                              <div class="card-body" style="padding-left: 5px; padding-right: 5px;">
+                              <div class="card-body px-1">
                                 {% if operation.WorkCenterType == 'Machine' %}
                                 <div class="form-group row">
                                   <label class="col-md-2 col-form-label text-right"><strong><i class="c-icon c-icon-sm cil-plus"></i> WorkCenter</strong></label>
@@ -1021,6 +1021,8 @@
       </div>
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
+
+      {% include 'aside.html' %}
       <!-- *** MODAL *** -->
       <div class="modal" id="inc_qty_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -3275,6 +3277,24 @@
         if (e.code === "Enter" || e.code == "NumpadEnter") fp_emp_search();
       });
 
+      function fp_emp_at_com_search(emp_id){
+        $.ajax({
+          url: '/fp_emp_search/',
+          data: {
+            'operator_id': emp_id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data.path == ""){
+              window.open('/transaction/0', '_self');
+            } else {
+              valid("fp_operator_id");
+              window.open('/transaction/' + data.path, '_self');
+            }
+          }
+        });
+      }
+
       function fp_emp_search(){
           remove_valid_many(["fp_operator_id"]);
           var operator_id =  $("#fp_operator_id").val();
@@ -3544,118 +3564,119 @@
     </script>
     <!-- ADMIN -->
     <script>
-    function validate_admin_password(password, _callback){
-      if(password.length < 4) _callback(false);
-      else {
-        $.ajax({
-          url: '/validate_admin_password/',
-          data: {
-            'password': password,
-          },
-          dataType: 'json',
-          success: function (data) {
-            if(data.isCorrect) _callback(true);
-            else _callback(false);
+
+      function validate_admin_password(password, _callback){
+        if(password.length < 4) _callback(false);
+        else {
+          $.ajax({
+            url: '/validate_admin_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.isCorrect) _callback(true);
+              else _callback(false);
+            }
+          });
+        }
+      }
+
+      function clear_validate_reset_order(){
+        $("#rso_invalid_text").text("");
+        remove_valid_many(["rso_password"]);
+      }
+
+      function reset_order(){
+        var order_no = $('#order_no').val();
+        var start_operation_no = $('#rso_start_operation_no').val();
+        var password = $('#rso_password').val();
+        validate_admin_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("rso_password");
+            $("#rso_invalid_text").text(invalid_text);
+          } else {
+            valid("rso_password");
+            $('#rso_confirm_button').prop('disabled', true);
+            $.ajax({
+              url: '/reset_order/',
+              data: {
+                'order_no': order_no,
+                'start_operation_no' : start_operation_no,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
           }
         });
       }
-    }
 
-    function clear_validate_reset_order(){
-      $("#rso_invalid_text").text("");
-      remove_valid_many(["rso_password"]);
-    }
+      function clear_validate_cancel_order(){
+        $("#cc_invalid_text").text("");
+        remove_valid_many(["cc_password"]);
+      }
 
-    function reset_order(){
-      var order_no = $('#order_no').val();
-      var start_operation_no = $('#rso_start_operation_no').val();
-      var password = $('#rso_password').val();
-      validate_admin_password(password, function(isCorrect, invalid_text) {
-        if(!isCorrect){
-          invalid("rso_password");
-          $("#rso_invalid_text").text(invalid_text);
-        } else {
-          valid("rso_password");
-          $('#rso_confirm_button').prop('disabled', true);
-          $.ajax({
-            url: '/reset_order/',
-            data: {
-              'order_no': order_no,
-              'start_operation_no' : start_operation_no,
-            },
-            dataType: 'json',
-            success: function (data) {
-              location.reload();
-            }
-          });
-        }
-      });
-    }
+      function cancel_order(){
+        var order_no = $('#order_no').val();
+        var password = $('#cc_password').val();
+        validate_admin_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("cc_password");
+            $("#cc_invalid_text").text(invalid_text);
+          } else {
+            valid("cc_password");
+            $('#cc_confirm_button').prop('disabled', true);
+            $.ajax({
+              url: '/cancel_order/',
+              data: {
+                'order_no': order_no,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+          }
+        });
+      }
 
-    function clear_validate_cancel_order(){
-      $("#cc_invalid_text").text("");
-      remove_valid_many(["cc_password"]);
-    }
-
-    function cancel_order(){
-      var order_no = $('#order_no').val();
-      var password = $('#cc_password').val();
-      validate_admin_password(password, function(isCorrect, invalid_text) {
-        if(!isCorrect){
-          invalid("cc_password");
-          $("#cc_invalid_text").text(invalid_text);
-        } else {
-          valid("cc_password");
-          $('#cc_confirm_button').prop('disabled', true);
-          $.ajax({
-            url: '/cancel_order/',
-            data: {
-              'order_no': order_no,
-            },
-            dataType: 'json',
-            success: function (data) {
-              location.reload();
-            }
-          });
-        }
-      });
-    }
-
-    function sqty_operation(){
-      var order_no = $('#order_no').val();
-      var operation_no = $('#operation_no').val();
-      var password = $('#sqty_password').val();
-      if($('#sqty_process_qty').val() == "") $('#sqty_process_qty').val("0");
-      if($('#sqty_accepted_qty').val() == "") $('#sqty_accepted_qty').val("0");
-      if($('#sqty_rejected_qty').val() == "") $('#sqty_rejected_qty').val("0");
-      var confirm_id = $('#confirm_id').val();
-      var process_qty = parseFloat($('#sqty_process_qty').val());
-      var accepted_qty = parseFloat($('#sqty_accepted_qty').val());
-      var rejected_qty = parseFloat($('#sqty_rejected_qty').val());
-      validate_admin_password(password, function(isCorrect, invalid_text) {
-        if(!isCorrect){
-          invalid("sqty_password");
-          $("#sqty_invalid_text").text(invalid_text);
-        } else {
-          valid("sqty_password");
-          $('#sqty_confirm_button').prop('disabled', true);
-          $.ajax({
-            url: '/sqty_operation/',
-            data: {
-              'order_no': order_no,
-              'operation_no': operation_no,
-              'process_qty': process_qty,
-              'accepted_qty': accepted_qty,
-              'rejected_qty': rejected_qty,
-            },
-            dataType: 'json',
-            success: function (data) {
-              location.reload();
-            }
-          });
-        }
-      });
-    }
+      function sqty_operation(){
+        var order_no = $('#order_no').val();
+        var operation_no = $('#operation_no').val();
+        var password = $('#sqty_password').val();
+        if($('#sqty_process_qty').val() == "") $('#sqty_process_qty').val("0");
+        if($('#sqty_accepted_qty').val() == "") $('#sqty_accepted_qty').val("0");
+        if($('#sqty_rejected_qty').val() == "") $('#sqty_rejected_qty').val("0");
+        var confirm_id = $('#confirm_id').val();
+        var process_qty = parseFloat($('#sqty_process_qty').val());
+        var accepted_qty = parseFloat($('#sqty_accepted_qty').val());
+        var rejected_qty = parseFloat($('#sqty_rejected_qty').val());
+        validate_admin_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("sqty_password");
+            $("#sqty_invalid_text").text(invalid_text);
+          } else {
+            valid("sqty_password");
+            $('#sqty_confirm_button').prop('disabled', true);
+            $.ajax({
+              url: '/sqty_operation/',
+              data: {
+                'order_no': order_no,
+                'operation_no': operation_no,
+                'process_qty': process_qty,
+                'accepted_qty': accepted_qty,
+                'rejected_qty': rejected_qty,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+          }
+        });
+      }
     </script>
   </body>
 </html>

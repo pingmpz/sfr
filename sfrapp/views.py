@@ -24,7 +24,6 @@ TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 ##################################### PAGES ####################################
 ################################################################################
 
-
 def blank(request):
     update_employee_master()
     context = {
@@ -40,6 +39,8 @@ def index(request):
 
 def transaction(request, orderoprno):
     #CONST
+    ip_address = getClientIP(request)
+    empAtComputerList = getEmpAtComputerList(ip_address)
     overtimehour = 0
     canMP = False
     refreshSecond = 300
@@ -179,6 +180,8 @@ def transaction(request, orderoprno):
             #     deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
+        'empAtComputerList' : empAtComputerList,
+        'ip_address' : ip_address,
         'overtimehour' : overtimehour,
         'canMP' : canMP,
         'refreshSecond' : refreshSecond,
@@ -951,6 +954,8 @@ def add_operating_operator(request):
     owc_id = request.GET.get('owc_id')
     status = request.GET.get('status')
     refresh = False
+    #-- INSERT EMP FOR IP
+    insertIPAddress(operator_id, getClientIP(request))
     #-- OPERATOR : WORKING/SETUP/EXT-WORK
     insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
     #-- IF OPERATION IS NOT LABOR TYPE
@@ -2435,6 +2440,12 @@ def getMailgroup():
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getEmpAtComputerList(ip_address):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM EmpAtComputer WHERE IPAddress = '"+ ip_address +"' ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 #-------------------------------------------------------------------------- ITEM
 def getOrder(order_no):
     cursor = get_connection().cursor()
@@ -3040,6 +3051,15 @@ def insertOvertimeOperator(oopr):
     cursor = conn.cursor()
     sql = "INSERT INTO [OvertimeOperator] ([DateTimeStamp],[OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Status],[StartDateTime])"
     sql += " VALUES (CURRENT_TIMESTAMP,'"+oopr.OrderNo+"','"+oopr.OperationNo+"','"+oopr.EmpID+"','"+WorkCenter+"','"+oopr.Status+"','"+startDateTime+"')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertIPAddress(emp_id, ip_address):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[EmpAtComputer] ([DateTimeStamp],[EmpID],[IPAddress]) VALUES "
+    sql += " (CURRENT_TIMESTAMP,'"+str(emp_id)+"','"+str(ip_address)+"')"
     cursor.execute(sql)
     conn.commit()
     return
