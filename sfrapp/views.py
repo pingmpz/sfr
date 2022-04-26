@@ -909,6 +909,9 @@ def get_operator_data(request):
         if isOperatorOperating(operator_id):
             oopr = getOperatorOperatingByEmpID(operator_id)
             invalid_text = operator_id + ' is working at ' + str(oopr.OperatorOrderNo) + "-" + str(oopr.OperatorOperationNo) + "."
+        elif isNotFixedOvertime(operator_id):
+            ot = getNotFixedOvertime(operator_id)
+            invalid_text = operator_id + ' is not fixed overtime of ' + str(ot.OrderNo) + "-" + str(ot.OperationNo) + "."
         elif operator.IsActive == False:
             invalid_text = operator_id + " is In-Active."
         else:
@@ -1235,6 +1238,8 @@ def manual_report(request):
         insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
         #-- MANUAL REPORT : LOG
         insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
+        #-- CLEAR OVERTIME IS FIXED
+        fixOvertimeReported(emp_id)
         #-- CONFIRM : LOG
         if int(good_qty) > 0 or int(reject_qty) > 0:
             insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason, scrap_at)
@@ -2579,6 +2584,12 @@ def getMailDate():
     cursor.execute(sql)
     return (cursor.fetchone()).Value
 
+def getNotFixedOvertime(operator_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OvertimeOperator WHERE EmpID = '" + operator_id + "' AND isFixed = 0"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
 #----------------------------------------------------------------------- BOOLEAN
 
 def isExistSAPOrder(order_no):
@@ -2706,6 +2717,12 @@ def hasReportTimeToSAP(order_no, operation_no):
 def isCanceledOrder(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [CanceledOrder] WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isNotFixedOvertime(operator_id):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [OvertimeOperator] WHERE EmpID = '" + operator_id + "'  AND isFixed = 0"
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
@@ -3237,6 +3254,14 @@ def fixRMMaterialCode(order_no, rm_mat_code):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [OrderControl] SET RM_MaterialCode = '"+str(rm_mat_code)+"' WHERE OrderNo = '"+str(order_no)+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def fixOvertimeReported(emp_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE OvertimeOperator SET isFixed = 1 WHERE EmpID = '"+str(emp_id)+"'"
     cursor.execute(sql)
     conn.commit()
     return

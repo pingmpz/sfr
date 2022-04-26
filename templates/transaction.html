@@ -44,6 +44,9 @@
             <li class="breadcrumb-item active">
               {% if operationBefore != -1 %}<a href="/transaction/{{orderNo}}{{operationBefore}}" class="text-primary pt-1"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
               <span id="bc_order_no">{{orderNo}}</span>&nbsp;-&nbsp;<span id="bc_operation_no">{{operationNo}}</span>
+              {% if state == "DATAFOUND" %}
+              <span>&nbsp;({{operation.WorkCenterNo}})</span>
+              {% endif%}
               {% if operationAfter != -1 %}&nbsp;<a href="/transaction/{{orderNo}}{{operationAfter}}" class="text-primary pt-1"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
             </li>
             {% endif %}

@@ -81,6 +81,7 @@
                                   <th>Status</th>
                                   <th>On WorkCenter</th>
                                   <th>Prod. Order - Oper.No</th>
+                                  <th>isFixed</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -98,6 +99,7 @@
                                   </td>
                                   <td>{% if ht.WorkCenterNo.strip != "-1" %}<a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a>{% endif %}</td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
+                                  <td>{% if ht.isFixed == 1 %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
