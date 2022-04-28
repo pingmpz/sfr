@@ -32,6 +32,7 @@ urlpatterns = [
     #-- REPORT
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
+    path('oper_no_time/<str:fmonth>', views.oper_no_time, name='oper_no_time'),
     path('completed_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.completed_order, name='completed_order'),
     path('rejected_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.rejected_order, name='rejected_order'),
     path('canceled_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.canceled_order, name='canceled_order'),

@@ -521,6 +521,16 @@ def mp_ot_auto_machine(request, fmonth):
     }
     return render(request, 'mp_ot_auto_machine.html', context)
 
+def oper_no_time(request, fmonth):
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    operationNoTimeList = getOperationNoTimeList(fmonth)
+    context = {
+        'fmonth': fmonth,
+        'operationNoTimeList': operationNoTimeList,
+    }
+    return render(request, 'oper_no_time.html', context)
+
 def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
         fdate = datetime.today().strftime('%Y-%m-%d')
@@ -2135,6 +2145,22 @@ def getOvertimeOperatorList(fmonth):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeOperator] AS OO LEFT JOIN Employee AS EMP ON OO.EmpID = EMP.EmpID"
     sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOperationNoTimeList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT * FROM OperationControl WHERE
+            CONCAT(OrderNo, OperationNo) NOT IN
+            (SELECT CONCAT(OrderNo, OperationNo) AS orderoprno FROM
+            (SELECT OrderNo, OperationNo, SUM(Oper) AS Oper, SUM(Labor) AS Labor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB
+            WHERE Oper + Labor != 0) AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND ProcessStop IS NOT NULL
+          """
+    sql += "AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"' "
+    sql += "ORDER BY ProcessStop DESC"
     cursor.execute(sql)
     return cursor.fetchall()
 
