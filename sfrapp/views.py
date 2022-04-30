@@ -1958,7 +1958,7 @@ def getWorkingOrderList():
 
 def getWorkingWorkCenterList():
     cursor = get_connection().cursor()
-    sql = "SELECT OWC.WorkCenterNo AS WCN, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql = "SELECT OWC.WorkCenterNo AS WCN, OC.Note AS OperationNote, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
     sql += " INNER JOIN [OrderControl] as ORDC ON OWC.OrderNo = ORDC.OrderNo"
     sql += " WHERE Status <> 'COMPLETE' ORDER BY OWC.OperatingWorkCenterID ASC"
@@ -2153,11 +2153,13 @@ def getOperationNoTimeList(fmonth):
     month = fmonth[5:7]
     cursor = get_connection().cursor()
     sql = """
-            SELECT * FROM OperationControl WHERE
+            SELECT * FROM OperationControl AS OC INNER JOIN WorkCenter AS WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE
             CONCAT(OrderNo, OperationNo) NOT IN
             (SELECT CONCAT(OrderNo, OperationNo) AS orderoprno FROM
             (SELECT OrderNo, OperationNo, SUM(Oper) AS Oper, SUM(Labor) AS Labor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB
-            WHERE Oper + Labor != 0) AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND ProcessStop IS NOT NULL
+            WHERE Oper + Labor != 0) AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)
+            AND ProcessStop IS NOT NULL
+            AND IsExternalProcess = 0
           """
     sql += "AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"' "
     sql += "ORDER BY ProcessStop DESC"

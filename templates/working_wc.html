@@ -114,7 +114,7 @@
                             </td>
                             <td><a href="/transaction/{{wc.OrderNo}}{{wc.OperationNo}}">{{wc.OrderNo}}-{{wc.OperationNo}}</a></td>
                             <td>{{wc.FG_MaterialCode|default_if_none:""}}</td>
-                            <td>{{wc.Note|default_if_none:""}}</td>
+                            <td>{{wc.OperationNote|default_if_none:""}}</td>
                             <td data-order="{{wc.StartDateTime|date:"U"}}">{{wc.StartDateTime|date:"d-M-Y, H:i"}}</td>
                             <td>{{wc.StartDateTime|naturaltime|default_if_none:""}}</td>
                           </tr>
