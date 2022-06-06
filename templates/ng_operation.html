@@ -49,6 +49,7 @@
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <select class="form-control" id="fwc">
+              <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option>
               {% for wc in workCenterList %}
               <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
               {% endfor %}

@@ -49,6 +49,7 @@
           </ol>
           <div class="c-subheader-nav d-md-down-none mfe-2">
             <select class="form-control" id="fwc">
+              <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option>
               {% for wc in workCenterList %}
               <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
               {% endfor %}
@@ -67,6 +68,17 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
+                      <div class="row">
+                        <div class="col-3">
+
+                        </div>
+                        <div class="col-6">
+                          <input type="text" class="form-control" id="ms_text">
+                        </div>
+                        <div class="col-3">
+                          <button type="button" class="btn btn-success" onclick="ms()">Multiple Search</button>
+                        </div>
+                      </div>
                       <table class="table table-sm table-outline small" id="delay_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
@@ -89,7 +101,7 @@
                             <tr>
                               <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
                               <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
-                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">{{op.Actual_Work|default_if_none:""}}</td>
+                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">ORDER NOT COMFIRM</td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
                               <td>{{op.SalesOrderNo}}</td>
@@ -105,8 +117,8 @@
                             <tr>
                               <td>{{op.RequestDate|default_if_none:""}}</td>
                               <td>{{op.DelayFromRequestDate|default_if_none:""}}</td>
-                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}{% if SFRDelayWorkActualList|index:forloop.counter0 == 'PARTIAL CONFIRM' %}9999{% else %}{{SFRDelayWorkActualList|index:forloop.counter0}}{% endif %}">
-                                {{op.Actual_Work|default_if_none:""}}{{SFRDelayWorkActualList|index:forloop.counter0}}
+                              <td data-order="{{SFRDelayWorkActualList|index:forloop.counter0}}">
+                                {{SFRDelayWorkActualList|index:forloop.counter0}}
                               </td>
                               <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
                               <td>{{op.FG_MaterialCode}}</td>
@@ -153,13 +165,28 @@
           document.body.classList.remove('c-no-layout-transition')
         }, 2000);
       });
+      //
+      // $(document).ready(function() {
+      //   $('#delay_operation_table').DataTable( {
+      //       "order": [[ 2, "desc" ]],
+      //       'iDisplayLength': 100,
+      //       "search": {
+      //         regex: true
+      //       }}).column().search(val.join('|'), true, false).draw();
+      //   });
+      // });
 
-      $(document).ready(function() {
-        $('#delay_operation_table').DataTable( {
-            "order": [[ 2, "desc" ]],
-            'iDisplayLength': 100,
-        });
+      var table = $('#delay_operation_table').DataTable({
+        "iDisplayLength": 100,
+        "order": [[ 2, "desc" ]],
+        "search": {regex: true, smart: false}
       });
+
+      function ms(){
+        var value = $('#ms_text').val().replaceAll(" ", "|");
+        $('input[type="search"]').val(value);
+        table.search(value).draw();
+      }
 
       $('#fwc').change(function() {
         window.location.href = "/delay_operation/" + $("#fwc").val();

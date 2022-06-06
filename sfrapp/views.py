@@ -456,21 +456,29 @@ def delay_operation(request, fwc):
     SFRDelayOperationList = getSFRDelayOperationList(fwc)
     SFRDelayWorkActualList = []
     for op in SFRDelayOperationList:
-        print(op.OrderNo, op.DateGetFromSAP)
-        if op.ProcessStart == None:
-            prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
-            if prev_op != None:
-                if prev_op.ProcessStop == None:
-                    SFRDelayWorkActualList.append('PARTIAL CONFIRM')
-                else:
-                    SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
-            elif op.DateGetFromSAP == None:
-                SFRDelayWorkActualList.append(str((datetime.today() - op.Order_DGFS).days))
+        # if op.ProcessStart == None:
+        #     prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
+        #     if prev_op != None:
+        #         if prev_op.ProcessStop == None:
+        #             SFRDelayWorkActualList.append('PARTIAL CONFIRM')
+        #         else:
+        #             SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
+        #     elif op.DateGetFromSAP == None:
+        #         SFRDelayWorkActualList.append(str((datetime.today() - op.Order_DGFS).days))
+        #     else:
+        #         SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
+        #
+        # else:
+        #     SFRDelayWorkActualList.append('')
+        prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
+        if prev_op != None:
+            first_con = getFirstConfirmTime(prev_op.OrderNo, prev_op.OperationNo)
+            if first_con != None:
+                SFRDelayWorkActualList.append(str((datetime.today() - first_con.ConfirmDateTime).days))
             else:
-                SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
-
+                SFRDelayWorkActualList.append('ERROR')
         else:
-            SFRDelayWorkActualList.append('')
+            SFRDelayWorkActualList.append('ORDER NOT COMFIRM')
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     context = {
         'fwc': fwc,
@@ -2159,6 +2167,8 @@ def getOperationNoTimeList(fmonth):
             (SELECT OrderNo, OperationNo, SUM(Oper) AS Oper, SUM(Labor) AS Labor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB
             WHERE Oper + Labor != 0) AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)
             AND ProcessStop IS NOT NULL
+            AND OC.WorkCenterNo != 'MT_AS' AND OC.WorkCenterNo != 'MT' AND OC.WorkCenterNo != 'PK' AND OC.WorkCenterNo != 'PK_AS'
+            AND OC.WorkCenterNo != 'MT_CNF'  AND OC.WorkCenterNo != 'MT-MD' AND OC.WorkCenterNo != 'JP_AS' AND OC.WorkCenterNo != 'HT'
             AND IsExternalProcess = 0
           """
     sql += "AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"' "
@@ -2322,7 +2332,8 @@ def getSAPDelayOperationList(fwc):
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
             INNER JOIN SAP_Order AS SO ON SO.ProductionOrderNo = RT.ProductionOrderNo
         """
-    sql += " WHERE RT.WorkCenter = '"+fwc+"'"
+    if fwc != 'ALL':
+        sql += " WHERE RT.WorkCenter = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2335,7 +2346,8 @@ def getSFRDelayOperationList(fwc):
             FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
             WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
           """
-    sql += " AND WorkCenterNo = '"+fwc+"'"
+    if fwc != 'ALL':
+        sql += " AND WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2468,7 +2480,9 @@ def getNgOperationList(fwc, fmonth):
     sql = "SELECT ConfirmDateTime, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
     sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
     sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
-    sql += " WHERE HC.RejectedQty > 0 AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"' AND OPC1.WorkCenterNo = '"+fwc+"'"
+    sql += " WHERE HC.RejectedQty > 0 AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
+    if fwc != 'ALL':
+        sql += " AND OPC1.WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2615,6 +2629,12 @@ def getMailDate():
 def getNotFixedOvertime(operator_id):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM OvertimeOperator WHERE EmpID = '" + operator_id + "' AND isFixed = 0"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getFirstConfirmTime(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM HistoryConfirm WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY ConfirmDateTime"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -3423,13 +3443,13 @@ def update_employee_master():
             is_active = 0
         if emp_id != None:
             isExist = isExistOperator(str(emp_id))
-            # if isExist:
-            #     conn = get_connection()
-            #     cursor = conn.cursor()
-            #     sql = "UPDATE Employee SET Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
-            #     cursor.execute(sql)
-            #     conn.commit()
-            #     update_emp_count = update_emp_count + 1
+            if isExist:
+                conn = get_connection()
+                cursor = conn.cursor()
+                sql = "UPDATE Employee SET EmpName = '"+emp_name+"', Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+                cursor.execute(sql)
+                conn.commit()
+                update_emp_count = update_emp_count + 1
             if not isExist:
                 conn = get_connection()
                 cursor = conn.cursor()
