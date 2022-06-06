@@ -74,6 +74,7 @@
                         <thead class="thead-light">
                           <tr>
                             <th>ConfirmDateTime</th>
+                            <th>WorkCenter</th>
                             <th>Prod. Order - Oper.No</th>
                             <th>EmpID</th>
                             <th>ProcessQty</th>
@@ -86,6 +87,7 @@
                           {% for ng in ngOperationList %}
                             <tr>
                               <td data-order="{{ng.ConfirmDateTime|date:"U"}}">{{ng.ConfirmDateTime}}</td>
+                              <td>{{ng.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{ng.OrderNo}}{{ng.OperationNo}}">{{ng.OrderNo}}-{{ng.OperationNo}}</a></td>
                               <td><a href="/emp/{{ng.EmpID}}&NOW">{{ng.EmpID}}</a></td>
                               <td>{{ng.ProcessQty.normalize}}</td>
@@ -117,8 +119,16 @@
     <!-- Google Timeline JS -->
     <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
     <!-- Data Table JS -->
-    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
-    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script> -->
+    <!-- Export -->
+    <script src="https://cdn.datatables.net/1.12.0/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
     <!-- Custom -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
@@ -133,6 +143,10 @@
         $('#ng_operation_table').DataTable( {
             "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
         });
       });
 
