@@ -544,10 +544,10 @@
                                       <tr>
                                         <td>
                                           {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum pt-1" data-toggle="tooltip" data-original-title="Ext-Work">
+                                          {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary pt-1" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-dark pt-1" data-toggle="tooltip" data-original-title="Skip">
                                           {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><i class="c-icon c-icon-sm cib-zalando text-success pt-1" data-toggle="tooltip" data-original-title="Working">
                                           {% elif operate.Type.strip == 'SETUP' %}<i class="c-icon c-icon-sm cib-zalando text-yellowgreen pt-1" data-toggle="tooltip" data-original-title="Setup">
-                                          {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary pt-1" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% endif %}
                                         </td>
                                         <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>

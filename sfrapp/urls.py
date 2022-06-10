@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = [
     ### PAGE
+    path('', views.first_page, name='first_page'),
     path('index/', views.index, name='index'),
     path('transaction/<str:orderoprno>', views.transaction, name='transaction'),
     path('join_activity/<str:orderoprno>', views.join_activity, name='join_activity'),

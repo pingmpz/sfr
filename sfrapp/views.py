@@ -30,10 +30,11 @@ def blank(request):
     }
     return render(request, 'blank.html', context)
 
+def first_page(request):
+    return redirect('/transaction/0')
+
 def index(request):
-    context = {
-    }
-    return render(request, 'index.html', context)
+    return redirect('/transaction/0')
 
 #------------------------------------------------------------------- TRANSACTION
 
