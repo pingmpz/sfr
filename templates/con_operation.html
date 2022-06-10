@@ -18,7 +18,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>NG Operation | Shopfloor Reporting Application</title>
+    <title>Confirm Operation | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -43,7 +43,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">NG Operation ({{ngOperationList|length}})</li>
+            <li class="breadcrumb-item">Confirm Operation ({{confirmOperationList|length}})</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
@@ -70,7 +70,7 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="ng_operation_table" style="width: 100%">
+                      <table class="table table-sm table-outline small" id="con_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
                             <th>ConfirmDateTime</th>
@@ -78,22 +78,24 @@
                             <th>Prod. Order - Oper.No</th>
                             <th>EmpID</th>
                             <th>ProcessQty</th>
+                            <th>AcceptedQty</th>
                             <th>RejectedQty</th>
                             <th>RejectedReason</th>
                             <th>Scrap At</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for ng in ngOperationList %}
+                          {% for con in confirmOperationList %}
                             <tr>
-                              <td data-order="{{ng.ConfirmDateTime|date:"U"}}">{{ng.ConfirmDateTime}}</td>
-                              <td>{{ng.WorkCenterNo}}</td>
-                              <td><a href="/transaction/{{ng.OrderNo}}{{ng.OperationNo}}">{{ng.OrderNo}}-{{ng.OperationNo}}</a></td>
-                              <td><a href="/emp/{{ng.EmpID}}&NOW">{{ng.EmpID}}</a></td>
-                              <td>{{ng.ProcessQty.normalize}}</td>
-                              <td>{{ng.RejectedQty.normalize}}</td>
-                              <td>{{ng.RejectReason}}</td>
-                              <td>{% if ng.ScrapAt != None and ng.ScrapAt.strip != "" %}{{ng.ScrapAt}} ({{ng.ScrapAtWorkCenter}}){% endif %}</td>
+                              <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
+                              <td>{{con.WorkCenterNo}}</td>
+                              <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
+                              <td><a href="/emp/{{con.EmpID}}&NOW">{{con.EmpID}}</a></td>
+                              <td>{{con.ProcessQty.normalize}}</td>
+                              <td>{{con.AcceptedQty.normalize}}</td>
+                              <td>{{con.RejectedQty.normalize}}</td>
+                              <td>{{con.RejectReason}}</td>
+                              <td>{% if con.ScrapAt != None and con.ScrapAt.strip != "" %}{{con.ScrapAt}} ({{con.ScrapAtWorkCenter}}){% endif %}</td>
                             </tr>
                           {% endfor %}
                         </tbody>
@@ -140,7 +142,7 @@
       });
 
       $(document).ready(function() {
-        $('#ng_operation_table').DataTable( {
+        $('#con_operation_table').DataTable( {
             "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
             dom: 'Bfrtip',
@@ -151,11 +153,11 @@
       });
 
       $('#fwc').change(function() {
-        window.location.href = "/ng_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+        window.location.href = "/con_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
       });
 
       $('#fmonth').change(function() {
-        window.location.href = "/ng_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+        window.location.href = "/con_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
       });
 
     </script>

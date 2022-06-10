@@ -707,20 +707,20 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
     }
     return render(request, 'ab_graph.html', context)
 
-def ng_operation(request, fwc, fmonth):
+def con_operation(request, fwc, fmonth):
     workCenterList = getWorkCenterRoutingList()
     if fwc == "FIRST":
         fwc = workCenterList[0].WorkCenterNo
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    ngOperationList = getNgOperationList(fwc, fmonth)
+    confirmOperationList = getConfirmOperationList(fwc, fmonth)
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
         'workCenterList': workCenterList,
-        'ngOperationList': ngOperationList,
+        'confirmOperationList': confirmOperationList,
     }
-    return render(request, 'ng_operation.html', context)
+    return render(request, 'con_operation.html', context)
 
 def zpp02(request):
 
@@ -2474,14 +2474,14 @@ def getLastProcessStopOrderNotStop():
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getNgOperationList(fwc, fmonth):
+def getConfirmOperationList(fwc, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
+    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
     sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
     sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
-    sql += " WHERE HC.RejectedQty > 0 AND month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
+    sql += " WHERE month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
     if fwc != 'ALL':
         sql += " AND OPC1.WorkCenterNo = '"+fwc+"'"
     cursor.execute(sql)
