@@ -76,6 +76,7 @@
                             <th>ConfirmDateTime</th>
                             <th>WorkCenter</th>
                             <th>Prod. Order - Oper.No</th>
+                            <th>FG_MaterialCode</th>
                             <th>EmpID</th>
                             <th>ProcessQty</th>
                             <th>AcceptedQty</th>
@@ -90,6 +91,7 @@
                               <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
                               <td>{{con.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
+                              <td>{{con.FG_MaterialCode}}</td>
                               <td><a href="/emp/{{con.EmpID}}&NOW">{{con.EmpID}}</a></td>
                               <td>{{con.ProcessQty.normalize}}</td>
                               <td>{{con.AcceptedQty.normalize}}</td>

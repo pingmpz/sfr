@@ -15,6 +15,9 @@ from openpyxl import load_workbook, Workbook
 # import threading
 # from django.template.loader import get_template
 
+import webbrowser
+import subprocess
+
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 
@@ -25,7 +28,10 @@ TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 ################################################################################
 
 def blank(request):
-    update_employee_master()
+    path = "file://129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
+    webbrowser.open_new_tab(path)
+    # subprocess.Popen(r'explorer /select,"J:\DRAWING\ABRIC\"')
+    # update_employee_master()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -550,6 +556,11 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fstopdate == "NOW":
         fstopdate = datetime.today().strftime('%Y-%m-%d')
     completedOrderList = getCompletedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    process_qtys = []
+    accepted_qtys = []
+    for ord in completedOrderList:
+        process_qtys.append(getFirstOperation(ord.OrderNo).ProcessQty)
+        accepted_qtys.append(getLastOperation(ord.OrderNo).AcceptedQty)
     context = {
         'ftype': ftype,
         'fdate': fdate,
@@ -557,6 +568,8 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'fstartdate': fstartdate,
         'fstopdate': fstopdate,
         'completedOrderList': completedOrderList,
+        'process_qtys': process_qtys,
+        'accepted_qtys': accepted_qtys,
     }
     return render(request, 'completed_order.html', context)
 
@@ -2478,8 +2491,9 @@ def getConfirmOperationList(fwc, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
+    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, ORD.FG_MaterialCode, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
     sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
+    sql += " INNER JOIN OrderControl AS ORD ON HC.OrderNo = ORD.OrderNo"
     sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
     sql += " WHERE month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
     if fwc != 'ALL':
@@ -2518,6 +2532,18 @@ def getOperation(order_no, operation_no):
 def getPreviousOperation(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM OperationControl WHERE OrderNo = '" + order_no + "' AND OperationNo < '" + operation_no + "' ORDER BY OperationNo DESC"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getFirstOperation(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OperationControl WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo ASC"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getLastOperation(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM OperationControl WHERE OrderNo = '" + order_no + "' ORDER BY OperationNo DESC"
     cursor.execute(sql)
     return cursor.fetchone()
 
