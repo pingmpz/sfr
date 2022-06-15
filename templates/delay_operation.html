@@ -93,6 +93,7 @@
                             <th>RemainingQty</th>
                             <th>OrderNote</th>
                             <th>OperationNote</th>
+                            <th>Process Start ?</th>
                             <!-- <th>Registered to SFR</th> -->
                           </tr>
                         </thead>
@@ -110,6 +111,7 @@
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
                               <td></td>
                               <td></td>
+                              <td><b class="text-danger">No</b></td>
                               <!-- <td><b class="text-danger">No</b></td> -->
                             </tr>
                           {% endfor %}
@@ -128,6 +130,7 @@
                               <td>{{op.RemainingQty.normalize}}</td>
                               <td>{{op.OrderNote|default_if_none:""}}</td>
                               <td>{{op.OperationNote|default_if_none:""}}</td>
+                              <td>{% if op.ProcessStart %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
                               <!-- <td><b class="text-success">Yes</b></td> -->
                             </tr>
                           {% endfor %}

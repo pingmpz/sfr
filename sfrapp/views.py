@@ -17,6 +17,7 @@ from openpyxl import load_workbook, Workbook
 
 import webbrowser
 import subprocess
+import wget
 
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
@@ -28,10 +29,13 @@ TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 ################################################################################
 
 def blank(request):
-    path = "file://129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
-    webbrowser.open_new_tab(path)
+    # path = "file://129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
+    # webbrowser.open_new_tab(path)
     # subprocess.Popen(r'explorer /select,"J:\DRAWING\ABRIC\"')
-    # update_employee_master()
+    # url = "//129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
+    # wget.download(url, 'FG-ABRIC-BD0000003-1A.JPG')
+
+    update_employee_master()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -2831,11 +2835,11 @@ def setOrderControlFromSAP(order_no):
     else:
         ReleaseDate = "CONVERT(DATETIME,'"+order.ReleaseDate+"',104)"
     cursor = conn.cursor()
-    sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP]) VALUES "
+    sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP],[FG_Drawing]) VALUES "
     sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName.replace("'", " ")+"','"+order.SalesOrderNo+"',"
     sql += SalesOrderNo+","+str(order.SalesOrderQuantity)+","+str(order.ProductionOrderQuatity)+",'"+order.FG_MaterialCode+"','"+order.RM_MaterialCode+"',"
     sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+order.AeroSpace+"',"
-    sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"')"
+    sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"','"+order.FG_Drawing+"')"
     cursor.execute(sql)
     conn.commit()
     return
