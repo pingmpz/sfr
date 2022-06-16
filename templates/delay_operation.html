@@ -104,7 +104,11 @@
                               <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
                               <td data-order="{{op.Actual_Work|default_if_none:'0'}}">ORDER NOT COMFIRM</td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
-                              <td>{{op.FG_MaterialCode}}</td>
+                              <td>
+                                <a href="http://129.1.100.188:8080/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{op.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
                               <td>{{op.SalesOrderNo}}</td>
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
@@ -123,7 +127,11 @@
                                 {{SFRDelayWorkActualList|index:forloop.counter0}}
                               </td>
                               <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
-                              <td>{{op.FG_MaterialCode}}</td>
+                              <td>
+                                <a href="http://129.1.100.188:8080/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{op.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
                               <td>{{op.SalesOrderNo}}</td>
                               <td>{{op.DrawingNo}}</td>
                               <td>{{op.ProcessQty.normalize}}</td>

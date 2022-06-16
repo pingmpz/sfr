@@ -76,7 +76,11 @@
                           {% for order in workingOrderList %}
                           <tr style="background-color:#f{{order.ProcessStart|date:'md'|add:'0'|modulo:8}}f{{order.ProcessStart|date:'md'|add:'0'|modulo:9}}f{{order.ProcessStart|date:'md'|add:'0'|modulo:10}}">
                             <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
-                            <td>{{order.FG_MaterialCode}}</td>
+                            <td>
+                              <a href="http://129.1.100.188:8080/{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
+                              {{order.FG_MaterialCode|default_if_none:""}}
+                              </a>
+                            </td>
                             <td>{{order.Note|default_if_none:""}}</td>
                             <td>{% if order.LotNo != 0 %}{{order.LotNo}}{% endif %}</td>
                             <td data-order="{{order.ProcessStart|date:"U"}}">{{order.ProcessStart|date:"d-M-Y, H:i"}}</td>

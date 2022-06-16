@@ -113,7 +113,11 @@
                               </strong>
                             </td>
                             <td><a href="/transaction/{{opr.OrderNo}}{{opr.OperationNo}}">{{opr.OrderNo}}-{{opr.OperationNo}}</a></td>
-                            <td>{{opr.FG_MaterialCode|default_if_none:""}}</td>
+                            <td>
+                              <a href="http://129.1.100.188:8080/{%if opr.FG_Drawing == '' %}None{%else%}{{opr.FG_Drawing}}{%endif%}&{%if opr.FG_MaterialCode == ''%}None{%else%}{{opr.FG_MaterialCode}}{%endif%}" target="_blank">
+                              {{opr.FG_MaterialCode|default_if_none:""}}
+                              </a>
+                            </td>
                             <td>{{opr.Note|default_if_none:""}}</td>
                             <td><a href="/wc/{{opr.WorkCenterNo}}&NOW">{{opr.WorkCenterNo|default_if_none:""}}</a></td>
                             <td data-order="{% if opr.Status == 'EXT-WORK' %}1{% else%}0{% endif %}{{opr.StartDateTime|date:"U"}}">{{opr.StartDateTime|date:"d-M-Y, H:i"}}</td>

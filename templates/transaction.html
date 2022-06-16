@@ -109,10 +109,6 @@
                       </div> -->
                       <div class="card-body px-1">
                         <!-- Quantity -->
-                        <div hidden>
-                          \\129.1.100.188\Drawingsap\DRAWING\ABRIC\FG-ABRIC-BD0000003-1A.JPG
-                          /129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG
-                        </div>
                         <div class="row">
                           <div class="col text-right px-1">
                             <div class="ui-widget-info fade-in mb-3">
@@ -293,7 +289,10 @@
                                     <div class="col-md-5">
                                       <input class="form-control form-control-sm" type="text" id="fg_material_code" value="{{order.FG_MaterialCode|default_if_none:""}}" readonly>
                                     </div>
-                                    <label class="col-md-2 col-form-label"><a href="http://129.1.100.188:8080/{{order.FG_Drawing}}&{{order.FG_MaterialCode}}" target="_blank">See Drawing</a></label>
+                                    <label class="col-md-2 col-form-label">
+                                      <a href="http://129.1.100.188:8080/{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
+                                      See Drawing</a>
+                                    </label>
                                   </div>
                                   <div class="form-group row">
                                     <label class="col-md-5 col-form-label text-right"><strong>FG Drawing Dir</strong></label>

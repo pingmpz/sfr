@@ -467,20 +467,6 @@ def delay_operation(request, fwc):
     SFRDelayOperationList = getSFRDelayOperationList(fwc)
     SFRDelayWorkActualList = []
     for op in SFRDelayOperationList:
-        # if op.ProcessStart == None:
-        #     prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
-        #     if prev_op != None:
-        #         if prev_op.ProcessStop == None:
-        #             SFRDelayWorkActualList.append('PARTIAL CONFIRM')
-        #         else:
-        #             SFRDelayWorkActualList.append(str((datetime.today() - prev_op.ProcessStop).days))
-        #     elif op.DateGetFromSAP == None:
-        #         SFRDelayWorkActualList.append(str((datetime.today() - op.Order_DGFS).days))
-        #     else:
-        #         SFRDelayWorkActualList.append(str((datetime.today() - op.DateGetFromSAP).days))
-        #
-        # else:
-        #     SFRDelayWorkActualList.append('')
         prev_op = getPreviousOperation(op.OrderNo, op.OperationNo)
         if prev_op != None:
             first_con = getFirstConfirmTime(prev_op.OrderNo, prev_op.OperationNo)
@@ -1993,7 +1979,7 @@ def getWorkingWorkCenterList():
 
 def getWorkingOperatorList():
     cursor = get_connection().cursor()
-    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode "
+    sql = "SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode, ORDC.FG_Drawing "
     sql += " FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID"
     sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo"
     sql += " INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo"
@@ -2220,7 +2206,7 @@ def getSAPDuplicateRoutingList():
 def getNoneStartOrderList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT ProductionOrderNo, OrderNo, SO.FG_MaterialCode, SO.DateGetFromSAP FROM SAP_Order AS SO
+            SELECT ProductionOrderNo, OrderNo, SO.FG_MaterialCode, SO.FG_Drawing, SO.DateGetFromSAP FROM SAP_Order AS SO
             LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo
             WHERE (OC.OrderNo IS NULL OR (OC.ProcessStart IS NULL)) AND ProductionOrderNo NOT IN (SELECT OrderNo From CanceledOrder)
           """
@@ -2311,7 +2297,7 @@ def getRejectedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT OC.OrderNo, OC.FG_MaterialCode, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop, DATEDIFF(DAY, CONVERT(DATE, OC.ProcessStart), CONVERT(DATE, OC.ProcessStop)) AS 'Day'"
+    sql = "SELECT OC.OrderNo, OC.FG_MaterialCode, OC.FG_Drawing, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop, DATEDIFF(DAY, CONVERT(DATE, OC.ProcessStart), CONVERT(DATE, OC.ProcessStop)) AS 'Day'"
     sql += " FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo"
     sql += " WHERE (OPC.ProcessStart IS NULL OR OPC.ProcessStop IS NULL ) AND OC.ProcessStop IS NOT NULL"
     if ftype == "DAILY":
@@ -2320,7 +2306,7 @@ def getRejectedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
         sql += " AND month(OC.ProcessStop) = '"+month+"' AND year(OC.ProcessStop) = '"+year+"'"
     if ftype == "RANGE":
         sql += " AND OC.ProcessStop >= '" + fstartdate + " 00:00:00' AND OC.ProcessStop <= '" + fstopdate + " 23:59:59'"
-    sql += " GROUP BY OC.OrderNo, OC.FG_MaterialCode, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop"
+    sql += " GROUP BY OC.OrderNo, OC.FG_MaterialCode, OC.FG_Drawing, OC.Note, OC.LotNo, OC.ProcessStart, OC.ProcessStop"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2344,7 +2330,7 @@ def getSAPDelayOperationList(fwc):
     sql = """
             SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
 			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate,
-            DATEDIFF(DAY, CONVERT(DATE, SO.DateGetFromSAP), GETDATE()) AS Actual_Work
+            DATEDIFF(DAY, CONVERT(DATE, SO.DateGetFromSAP), GETDATE()) AS Actual_Work, SO.FG_Drawing
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
             WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber
@@ -2360,7 +2346,7 @@ def getSFRDelayOperationList(fwc):
     sql = """
             SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
             CASE RequestDate WHEN NULL THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate)), GETDATE()) END AS DelayFromRequestDate,
-            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP, OC.DateGetFromSAP AS Order_DGFS
+            DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, FG_Drawing, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP, OC.DateGetFromSAP AS Order_DGFS
             FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
             WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
           """
@@ -2495,7 +2481,7 @@ def getConfirmOperationList(fwc, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, ORD.FG_MaterialCode, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
+    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, ORD.FG_MaterialCode, ORD.FG_Drawing, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
     sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
     sql += " INNER JOIN OrderControl AS ORD ON HC.OrderNo = ORD.OrderNo"
     sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
@@ -2821,6 +2807,7 @@ def setOrderControlFromSAP(order_no):
     SalesOrderNo = ""
     RequestDate = ""
     ReleaseDate = ""
+    FG_Drawing = ""
     DateGetFromSAP = order.DateGetFromSAP.strftime("%Y-%m-%d %H:%M:%S")
     if order.SalesCreateDate == "00.00.0000":
         SalesOrderNo = "NULL"
@@ -2834,12 +2821,16 @@ def setOrderControlFromSAP(order_no):
         ReleaseDate = "NULL"
     else:
         ReleaseDate = "CONVERT(DATETIME,'"+order.ReleaseDate+"',104)"
+    if order.FG_Drawing == None:
+        FG_Drawing = ""
+    else:
+        FG_Drawing = order.FG_Drawing
     cursor = conn.cursor()
     sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP],[FG_Drawing]) VALUES "
     sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName.replace("'", " ")+"','"+order.SalesOrderNo+"',"
     sql += SalesOrderNo+","+str(order.SalesOrderQuantity)+","+str(order.ProductionOrderQuatity)+",'"+order.FG_MaterialCode+"','"+order.RM_MaterialCode+"',"
     sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+order.AeroSpace+"',"
-    sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"','"+order.FG_Drawing+"')"
+    sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"','"+FG_Drawing+"')"
     cursor.execute(sql)
     conn.commit()
     return

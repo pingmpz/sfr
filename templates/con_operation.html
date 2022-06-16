@@ -91,7 +91,11 @@
                               <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
                               <td>{{con.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
-                              <td>{{con.FG_MaterialCode}}</td>
+                              <td>
+                                <a href="http://129.1.100.188:8080/{%if con.FG_Drawing == '' %}None{%else%}{{con.FG_Drawing}}{%endif%}&{%if con.FG_MaterialCode == ''%}None{%else%}{{con.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{con.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
                               <td><a href="/emp/{{con.EmpID}}&NOW">{{con.EmpID}}</a></td>
                               <td>{{con.ProcessQty.normalize}}</td>
                               <td>{{con.AcceptedQty.normalize}}</td>
