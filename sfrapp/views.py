@@ -72,6 +72,7 @@ def transaction(request, orderoprno):
     overTimeOperatorList = []
     overTimeWorkCenterList = []
     joinList = []
+    bomList = []
     #-- History
     historyOperateList = []
     historyConfirmList = []
@@ -169,6 +170,8 @@ def transaction(request, orderoprno):
                             operationBefore = operationList[i-1].OperationNo
                         if i != len(operationList) - 1:
                             operationAfter = operationList[i+1].OperationNo
+                #-- BOM TAB
+                bomList = getBomList(orderNo)
                 #-- HISTORY TAB
                 historyOperateList = getHistoryOperateList(orderNo, operationNo)
                 historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
@@ -212,6 +215,7 @@ def transaction(request, orderoprno):
         'overTimeOperatorList' : overTimeOperatorList,
         'overTimeWorkCenterList' : overTimeWorkCenterList,
         'joinList' : joinList,
+        'bomList' : bomList,
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
         'historyJoinList' : historyJoinList,
@@ -1903,6 +1907,12 @@ def getOperatorList():
             LEFT JOIN HistoryOperate AS HO ON EMP.EmpID = HO.EmpID
             GROUP BY EMP.EmpId, EmpName, Section, CostCenter, IsActive
         """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getBomList(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [SAP_Component] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
     return cursor.fetchall()
 
