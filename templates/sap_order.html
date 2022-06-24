@@ -106,7 +106,8 @@
                           <a class="toggle-vis small text-primary" data-column="15">RoutingGroup</a> |
                           <a class="toggle-vis small text-primary" data-column="16">RoutingGroupCounter</a> |
                           <a class="toggle-vis small text-primary" data-column="17">Plant</a> |
-                          <a class="toggle-vis small text-primary" data-column="18">DateGetFromSAP</a>
+                          <a class="toggle-vis small text-primary" data-column="18">FG_Drawing</a> |
+                          <a class="toggle-vis small text-primary" data-column="19">DateGetFromSAP</a>
                       </div>
                       <br>
                       <table class="table table-sm table-outline small" id="sap_order_table" style="width: 100%">
@@ -130,6 +131,7 @@
                             <th>RoutingGroup</th>
                             <th>RoutingGroupCounter</th>
                             <th>Plant</th>
+                            <th>FG_Drawing</th>
                             <th>DateGetFromSAP</th>
                           </tr>
                         </thead>
@@ -154,6 +156,7 @@
                             <td>{{order.RoutingGroup|default_if_none:""}}</td>
                             <td>{{order.RoutingGroupCounter|default_if_none:""}}</td>
                             <td>{{order.Plant|default_if_none:""}}</td>
+                            <td>{{order.FG_Drawing|default_if_none:""}}</td>
                             <td>{{order.DateGetFromSAP|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}

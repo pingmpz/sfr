@@ -52,6 +52,7 @@ def transaction(request, orderoprno):
     #CONST
     ip_address = getClientIP(request)
     empAtComputerList = getEmpAtComputerList(ip_address)
+    drawingAppPath = getDrawingAppPath()
     overtimehour = 0
     canMP = False
     refreshSecond = 300
@@ -197,6 +198,7 @@ def transaction(request, orderoprno):
         'empAtComputerList' : empAtComputerList,
         'ip_address' : ip_address,
         'overtimehour' : overtimehour,
+        'drawingAppPath' : drawingAppPath,
         'canMP' : canMP,
         'refreshSecond' : refreshSecond,
         'orderNo' : orderNo,
@@ -435,6 +437,7 @@ def emp(request, empid, fmonth):
 
 def working_order(request):
     workingOrderList = getWorkingOrderList()
+    drawingAppPath = getDrawingAppPath()
     context = {
         'workingOrderList': workingOrderList,
     }
@@ -444,10 +447,12 @@ def working_wc(request):
     overtimehour = getOvertimeHour()
     warninghour = overtimehour - 2
     workingWorkCenterList = getWorkingWorkCenterList()
+    drawingAppPath = getDrawingAppPath()
     context = {
         'overtimehour': overtimehour,
         'warninghour': warninghour,
         'workingWorkCenterList': workingWorkCenterList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'working_wc.html', context)
 
@@ -456,10 +461,12 @@ def working_emp(request):
     overtimehour = getOvertimeHour()
     warninghour = overtimehour - 2
     workingOperatorList = getWorkingOperatorList()
+    drawingAppPath = getDrawingAppPath()
     context = {
         'overtimehour': overtimehour,
         'warninghour': warninghour,
         'workingOperatorList': workingOperatorList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'working_emp.html', context)
 
@@ -481,6 +488,7 @@ def delay_operation(request, fwc):
         else:
             SFRDelayWorkActualList.append('ORDER NOT COMFIRM')
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
+    drawingAppPath = getDrawingAppPath()
     context = {
         'fwc': fwc,
         'workCenterList': workCenterList,
@@ -488,6 +496,7 @@ def delay_operation(request, fwc):
         'SFRDelayOperationList': SFRDelayOperationList,
         'SFRDelayWorkActualList': SFRDelayWorkActualList,
         'delay_list_len': delay_list_len,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'delay_operation.html', context)
 
@@ -500,8 +509,10 @@ def none_working_wc(request):
 
 def none_start_order(request):
     noneStartOrderList = getNoneStartOrderList()
+    drawingAppPath = getDrawingAppPath()
     context = {
         'noneStartOrderList': noneStartOrderList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'none_start_order.html', context)
 
@@ -555,6 +566,7 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     for ord in completedOrderList:
         process_qtys.append(getFirstOperation(ord.OrderNo).ProcessQty)
         accepted_qtys.append(getLastOperation(ord.OrderNo).AcceptedQty)
+    drawingAppPath = getDrawingAppPath()
     context = {
         'ftype': ftype,
         'fdate': fdate,
@@ -564,6 +576,7 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'completedOrderList': completedOrderList,
         'process_qtys': process_qtys,
         'accepted_qtys': accepted_qtys,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'completed_order.html', context)
 
@@ -577,6 +590,7 @@ def rejected_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fstopdate == "NOW":
         fstopdate = datetime.today().strftime('%Y-%m-%d')
     rejectedOrderList = getRejectedOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    drawingAppPath = getDrawingAppPath()
     context = {
         'ftype': ftype,
         'fdate': fdate,
@@ -584,6 +598,7 @@ def rejected_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'fstartdate': fstartdate,
         'fstopdate': fstopdate,
         'rejectedOrderList': rejectedOrderList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'rejected_order.html', context)
 
@@ -597,6 +612,7 @@ def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fstopdate == "NOW":
         fstopdate = datetime.today().strftime('%Y-%m-%d')
     canceledOrderList = getCanceledOrderList(ftype, fdate, fmonth, fstartdate, fstopdate)
+    drawingAppPath = getDrawingAppPath()
     context = {
         'ftype': ftype,
         'fdate': fdate,
@@ -604,6 +620,7 @@ def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'fstartdate': fstartdate,
         'fstopdate': fstopdate,
         'canceledOrderList': canceledOrderList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'canceled_order.html', context)
 
@@ -721,11 +738,13 @@ def con_operation(request, fwc, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     confirmOperationList = getConfirmOperationList(fwc, fmonth)
+    drawingAppPath = getDrawingAppPath()
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
         'workCenterList': workCenterList,
         'confirmOperationList': confirmOperationList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'con_operation.html', context)
 
@@ -2639,6 +2658,12 @@ def getRefreshSecond():
     cursor.execute(sql)
     return int((cursor.fetchone()).Value)
 
+def getDrawingAppPath():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [dbo].[AdminConfig] WHERE KeyText = 'DRAWING_APP_PATH'"
+    cursor.execute(sql)
+    return str((cursor.fetchone()).Value).strip()
+
 def getSizeOfMachineWorkCenterByGroup(fwcg, factive):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM WorkCenter WHERE WorkCenterGroup = '"+fwcg+"' AND WorkCenterType = 'Machine'"
@@ -2646,12 +2671,6 @@ def getSizeOfMachineWorkCenterByGroup(fwcg, factive):
         sql += " AND IsActive = 1"
     cursor.execute(sql)
     return len(cursor.fetchall())
-
-def getMailDate():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM [dbo].[AdminConfig] WHERE KeyText = 'MAIL_DATE'"
-    cursor.execute(sql)
-    return (cursor.fetchone()).Value
 
 def getNotFixedOvertime(operator_id):
     cursor = get_connection().cursor()

@@ -105,7 +105,7 @@
                               <td data-order="{{op.Actual_Work|default_if_none:'0'}}">ORDER NOT COMFIRM</td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>
-                                <a href="http://129.1.100.188:8080/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                <a href="{{drawingAppPath}}{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
                                 {{op.FG_MaterialCode|default_if_none:""}}
                                 </a>
                               </td>

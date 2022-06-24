@@ -76,7 +76,7 @@
                           <tr style="background-color:#f{{order.ProductionOrderNo|add:'0'|modulo:8}}f{{order.ProductionOrderNo|add:'0'|modulo:9}}f{{order.ProductionOrderNo|add:'0'|modulo:10}}">
                             <td><a href="/transaction/{{order.ProductionOrderNo}}0000">{{order.ProductionOrderNo|default_if_none:""}}</a></td>
                             <td>
-                              <a href="http://129.1.100.188:8080/{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
+                              <a href="{{drawingAppPath}}{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
                               {{order.FG_MaterialCode|default_if_none:""}}
                               </a>
                             </td>
