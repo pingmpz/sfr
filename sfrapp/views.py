@@ -839,12 +839,14 @@ def admin_controller(request):
     overtimehour = getOvertimeHour()
     canMP = getManualReportAllow()
     refreshSecond = getRefreshSecond()
+    drawingAppPath = getDrawingAppPath()
     context = {
         'userList': userList,
         'empNameList': empNameList,
         'overtimehour': overtimehour,
         'canMP': canMP,
         'refreshSecond': refreshSecond,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'admin_controller.html', context)
 
