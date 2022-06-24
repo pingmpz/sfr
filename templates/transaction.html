@@ -526,6 +526,7 @@
                                           <strong class='text-primary'>Manual Report</strong><br>
                                           <strong class='text-plum'>Ext-Work</strong><br>
                                           <strong class='text-dark'>Skip</strong><br>
+                                          <strong style='color:#e5e5e5'>Auto Machine</strong><br>
                                           ">?
                                           </a>
                                         </th>
@@ -540,17 +541,17 @@
                                     </thead>
                                     <tbody>
                                       {% for operate in historyOperateList %}
-                                      {% if operate.EmpID != None %}
                                       <tr>
                                         <td>
-                                          {% if operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum pt-1" data-toggle="tooltip" data-original-title="Ext-Work">
+                                          {% if operate.EmpID == None %}<i class="c-icon c-icon-sm cib-zalando pt-1" style="color:#e5e5e5" data-toggle="tooltip" data-original-title="Auto Machine">
+                                          {% elif operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum pt-1" data-toggle="tooltip" data-original-title="Ext-Work">
                                           {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary pt-1" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-dark pt-1" data-toggle="tooltip" data-original-title="Skip">
                                           {% elif operate.Type.strip == 'WORKING' %}<span class="text-success"><i class="c-icon c-icon-sm cib-zalando text-success pt-1" data-toggle="tooltip" data-original-title="Working">
                                           {% elif operate.Type.strip == 'SETUP' %}<i class="c-icon c-icon-sm cib-zalando text-yellowgreen pt-1" data-toggle="tooltip" data-original-title="Setup">
                                           {% endif %}
                                         </td>
-                                        <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID}}</a></td>
+                                        <td><a href="/emp/{{operate.EmpID}}&NOW">{{operate.EmpID|default_if_none:""}}</a></td>
                                         <td><a href="/wc/{{operate.WorkCenterNo}}&NOW">{{operate.WorkCenterNo}}</a></td>
                                         <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Setup != 0.00 %}{{operate.Setup.normalize}}{% endif %}</td>
                                         <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Oper != 0.00 %}{{operate.Oper.normalize}}{% endif %}</td>
@@ -558,7 +559,6 @@
                                         <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                         <td>{{operate.StopDateTime|date:"d-M-Y, H:i"}}</td>
                                       </tr>
-                                      {% endif %}
                                       {% endfor %}
                                     </tbody>
                                   </table>
