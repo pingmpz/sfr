@@ -1453,6 +1453,17 @@ def delete_operation(request):
     insertHistoryModifier("DELETE", order_no, operation_no, emp_id, user.UserID)
     #-- DELETE THIS OPERATION
     deleteOperationControl(order_no, operation_no)
+    #-- IF NO MORE REMAINING QTY IN ORDER
+    hasNoMoreQty = True
+    operationList = getOperationList(order_no)
+    for i in range(len(operationList)):
+        tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+        if tempRemainQty > 0:
+            hasNoMoreQty = False
+            break
+    if hasNoMoreQty:
+        #-- ORDER : STOP
+        updateOrderControl(order_no, "STOP")
     data = {
         'nextlink' : nextlink,
     }
@@ -1933,7 +1944,7 @@ def getOperatorList():
 
 def getBomList(order_no):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [SAP_Component] WHERE ProductionOrderNo = '" + order_no + "'"
+    sql = "SELECT * FROM [SAP_Component] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY DateGetFromSAP"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -3481,28 +3492,23 @@ def update_employee_master():
     for i in range(ws.max_row + 1):
         if i < skip_count:
             continue
-        emp_id = ws['A' + str(i)].value
-        emp_name = ws['B' + str(i)].value
-        section = ws['C' + str(i)].value
-        costcenter = ws['D' + str(i)].value
-        is_active = ws['E' + str(i)].value
-        if emp_name == None:
-            emp_name = ""
-        if section == None:
-            section = ""
-        if costcenter == None:
-            costcenter = ""
-        if is_active == None:
-            is_active = 0
+        emp_id = "" if emp_name == None else ws['A' + str(i)].value
+        emp_name = "" if section == None else ws['B' + str(i)].value
+        section = "" if section == None else ws['C' + str(i)].value
+        costcenter = "" if costcenter == None else ws['D' + str(i)].value
+        is_active = 0 if is_active == None else ws['E' + str(i)].value
         if emp_id != None:
             isExist = isExistOperator(str(emp_id))
             if isExist:
-                conn = get_connection()
-                cursor = conn.cursor()
-                sql = "UPDATE Employee SET EmpName = '"+emp_name+"', Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
-                cursor.execute(sql)
-                conn.commit()
-                update_emp_count = update_emp_count + 1
+                emp = getEmpIDByUserID(emp_id)
+                if emp.EmpName != emp_name or emp.Section != section or emp.CostCenter != costcenter or is_active != emp.IsActive:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    sql = "UPDATE Employee SET EmpName = '"+emp_name+"', Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+                    cursor.execute(sql)
+                    conn.commit()
+                    update_emp_count = update_emp_count + 1
+                    print('# UPDATE #', emp_id, emp_name, section, costcenter, is_active)
             if not isExist:
                 conn = get_connection()
                 cursor = conn.cursor()
@@ -3510,6 +3516,7 @@ def update_employee_master():
                 cursor.execute(sql)
                 conn.commit()
                 new_emp_count = new_emp_count + 1
+                print('# NEW #', emp_id, emp_name, section, costcenter, is_active)
         else:
             error_emp_count = error_emp_count + 1
         row_count = row_count + 1
@@ -3520,50 +3527,3 @@ def update_employee_master():
     print("Error Row #", str(error_emp_count))
     print("#########################################")
     return
-
-# def send_email_overtime():
-#     today_date = datetime.now().strftime("%Y%m%d")
-#     if int(today_date) != int(getMailDate()) and datetime.now().hour > 8:
-#         updateMailDate(today_date)
-#         overtimeOperatorForEmailList = getOvertimeOperatorForEmailList()
-#         if len(overtimeOperatorForEmailList) > 0:
-#             print('Sending Overtime Email:' , datetime.now())
-#             subject = '[SFR] Overtime Operator'
-#             mgs = getMailgroup()
-#             send_to = []
-#             cc_to = []
-#             for mg in mgs:
-#                 if mg.IsCC == 0:
-#                     send_to.append(mg.Email)
-#                 else:
-#                     cc_to.append(mg.Email)
-#             email_template = get_template(TEMPLATE_OVERTIME)
-#             email_content = email_template.render({
-#                 'overtimeOperatorForEmailList' : overtimeOperatorForEmailList,
-#                 'host_url' : HOST_URL,
-#             })
-#             send_to = ['yashawantatul.man@ccsadvancetech.co.th']
-#             cc_to = []
-#             send_email(subject, email_content, send_to, cc_to)
-#         else:
-#             print('No Overtime Operator Email:' , datetime.now())
-#     # else:
-#     #     updateMailDate('20220320')
-#
-# class EmailThread(threading.Thread):
-#
-#     def __init__(self, email):
-#         self.email = email
-#         threading.Thread.__init__(self)
-#
-#     def run(self):
-#         # self.email.send(fail_silently=False)
-#
-# def send_email(subject, email_content, send_to, cc_to):
-#     try:
-#         email = EmailMessage(subject, email_content, EMAIL_HOST_USER, send_to, cc_to)
-#         email.content_subtype = "html"
-#         EmailThread(email).start()
-#     except Exception:
-#         traceback.print_exc()
-#     # return

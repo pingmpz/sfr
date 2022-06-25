@@ -397,12 +397,14 @@
                                       <thead class="bg-darkslategray">
                                         <tr>
                                           <th>RM_MaterialCode</th>
+                                          <th>DateGetFromSAP</th>
                                         </tr>
                                       </thead>
                                       <tbody>
                                         {% for bom in bomList %}
                                         <tr>
                                           <td>{{bom.RM_MaterialCode}}</td>
+                                          <td>{{bom.DateGetFromSAP}}</td>
                                         </tr>
                                         {% endfor %}
                                       </tbody>
