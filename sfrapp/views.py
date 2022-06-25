@@ -2649,7 +2649,7 @@ def getPTL(order_no, lot_no):
 
 def getEmpIDByUserID(user_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [dbo].[Employee] WHERE EmpID = '"+ user_id + "'"
+    sql = "SELECT * FROM [dbo].[Employee] WHERE EmpID = '"+ str(user_id) + "'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -3489,14 +3489,17 @@ def update_employee_master():
     new_emp_count = 0
     update_emp_count = 0
     error_emp_count = 0
+    print("#########################################")
     for i in range(ws.max_row + 1):
         if i < skip_count:
             continue
-        emp_id = "" if emp_name == None else ws['A' + str(i)].value
-        emp_name = "" if section == None else ws['B' + str(i)].value
-        section = "" if section == None else ws['C' + str(i)].value
-        costcenter = "" if costcenter == None else ws['D' + str(i)].value
-        is_active = 0 if is_active == None else ws['E' + str(i)].value
+        emp_id = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
+        emp_name = "" if ws['B' + str(i)].value == None else ws['B' + str(i)].value
+        section = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
+        costcenter = "" if ws['D' + str(i)].value == None else ws['D' + str(i)].value
+        is_active = 0 if ws['E' + str(i)].value == None else ws['E' + str(i)].value
+        is_active_txt = 'Active' if is_active == 1 else 'InActive'
+        # print('# SFR -->', emp_id, '|', emp_name, '(', section, '/', costcenter, ') ::', is_active_txt)
         if emp_id != None:
             isExist = isExistOperator(str(emp_id))
             if isExist:
@@ -3508,7 +3511,7 @@ def update_employee_master():
                     cursor.execute(sql)
                     conn.commit()
                     update_emp_count = update_emp_count + 1
-                    print('# UPDATE #', emp_id, emp_name, section, costcenter, is_active)
+                    print('# Update -->', emp_id, '|', emp_name, '|', section, '|', costcenter, '|', is_active_txt)
             if not isExist:
                 conn = get_connection()
                 cursor = conn.cursor()
@@ -3516,14 +3519,14 @@ def update_employee_master():
                 cursor.execute(sql)
                 conn.commit()
                 new_emp_count = new_emp_count + 1
-                print('# NEW #', emp_id, emp_name, section, costcenter, is_active)
+                print('# New -->', emp_id, '|', emp_name, '|', section, '|', costcenter, '|', is_active_txt)
         else:
             error_emp_count = error_emp_count + 1
         row_count = row_count + 1
     print("#########################################")
-    print("All Row #", str(row_count))
-    print("New Employee #", str(new_emp_count))
-    print("Update Employee #", str(update_emp_count))
-    print("Error Row #", str(error_emp_count))
+    print("All Row :", str(row_count))
+    print("New Employee :", str(new_emp_count))
+    print("Update Employee :", str(update_emp_count))
+    print("Error Row :", str(error_emp_count))
     print("#########################################")
     return
