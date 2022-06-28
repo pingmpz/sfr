@@ -440,6 +440,7 @@ def working_order(request):
     drawingAppPath = getDrawingAppPath()
     context = {
         'workingOrderList': workingOrderList,
+        'drawingAppPath': drawingAppPath,
     }
     return render(request, 'working_order.html', context)
 
@@ -2850,6 +2851,7 @@ def setOrderControlFromSAP(order_no):
     RequestDate = ""
     ReleaseDate = ""
     FG_Drawing = ""
+    Aero = ""
     DateGetFromSAP = order.DateGetFromSAP.strftime("%Y-%m-%d %H:%M:%S")
     if order.SalesCreateDate == "00.00.0000":
         SalesOrderNo = "NULL"
@@ -2863,15 +2865,17 @@ def setOrderControlFromSAP(order_no):
         ReleaseDate = "NULL"
     else:
         ReleaseDate = "CONVERT(DATETIME,'"+order.ReleaseDate+"',104)"
-    if order.FG_Drawing == None:
-        FG_Drawing = ""
+    if order.FG_Drawing != None:
+        FG_Drawing = order.FG_Drawing
+    if order.AeroSpace != None:
+        Aero = order.AeroSpace
     else:
         FG_Drawing = order.FG_Drawing
     cursor = conn.cursor()
     sql = "INSERT INTO [OrderControl] ([OrderNo],[LotNo],[CustomerPONo],[PartNo],[PartName],[SalesOrderNo],[SalesCreateDate],[SalesOrderQuantity],[ProductionOrderQuatity],[FG_MaterialCode],[RM_MaterialCode],[MRP_Controller],[RequestDate],[ReleaseDate],[DrawingNo],[AeroSpace],[RoutingGroup],[RoutingGroupCounter],[Plant],[DateGetFromSAP],[FG_Drawing]) VALUES "
     sql += "('"+order_no+"',0,'"+order.CustomerPONo+"','"+order.PartNo+"','"+order.PartName.replace("'", " ")+"','"+order.SalesOrderNo+"',"
     sql += SalesOrderNo+","+str(order.SalesOrderQuantity)+","+str(order.ProductionOrderQuatity)+",'"+order.FG_MaterialCode+"','"+order.RM_MaterialCode+"',"
-    sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+order.AeroSpace+"',"
+    sql += "'"+order.MRP_Controller+"',"+RequestDate+","+ReleaseDate+",'"+order.DrawingNo+"','"+Aero+"',"
     sql += "'"+order.RoutingGroup+"','"+order.RoutingGroupCounter+"','"+order.Plant+"','"+DateGetFromSAP+"','"+FG_Drawing+"')"
     cursor.execute(sql)
     conn.commit()
