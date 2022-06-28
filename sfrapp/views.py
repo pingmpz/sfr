@@ -1119,7 +1119,6 @@ def stop_work_operating_operator(request):
         if hasOperatorOperating(oopr.OperatingWorkCenterID) == False:
             owc = getWorkCenterOperatingByID(oopr.OperatingWorkCenterID)
             worktimeMachine = str(int(((oopr.OperatorStopDateTime - owc.StartDateTime).total_seconds())/60))
-            print(oopr.OperatorStopDateTime, owc.StartDateTime, worktimeMachine)
     if status == "EXT-WORK":
         worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
@@ -1776,7 +1775,6 @@ def sqty_operation(request):
     process_qty = int(request.GET.get('process_qty'))
     accepted_qty = int(request.GET.get('accepted_qty'))
     rejected_qty = int(request.GET.get('rejected_qty'))
-    print(order_no, operation_no, process_qty, accepted_qty, rejected_qty)
     if process_qty > 0:
         #-- UPDATE QTY OPERATION CONTROL
         setOperationQty(order_no, operation_no, process_qty, accepted_qty, rejected_qty)
@@ -2918,7 +2916,6 @@ def setOperationQty(order_no, operation_no, process_qty, accepted_qty, rejected_
     cursor = conn.cursor()
     sql = "UPDATE [OperationControl] SET ProcessQty = "+str(process_qty)+", AcceptedQty = "+str(accepted_qty)+", RejectedQty = "+str(rejected_qty)
     sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"'"
-    print(sql)
     cursor.execute(sql)
     conn.commit()
     return
