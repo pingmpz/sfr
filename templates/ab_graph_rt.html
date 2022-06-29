@@ -17,7 +17,7 @@
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>AB Graph | Shopfloor Reporting Application</title>
+    <title>AB Graph (Routing) | Shopfloor Reporting Application</title>
     <!-- Main styles for this application-->
     <link rel="stylesheet" href="{% static "css/style.css" %}">
     <!-- Icon CSS -->
@@ -44,17 +44,18 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">AB Graph (Yearly Not Working)</li>
+            <li class="breadcrumb-item">AB Graph (Routing)</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
           <div class="c-subheader-nav">
-              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_target_modal" onclick="prepare_set_wc_target()">Set WorkCenter Target</button>
+              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_target_modal" onclick="prepare_set_wc_target()">Set Target</button>
+              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_cap_modal" onclick="prepare_set_wc_cap()">Set Capacity</button>
           </div>
           <div class="c-subheader-nav d-md-down-none mfe-2">
-            <select class="form-control" id="fwcg">
-              {% for wcg in workCenterGroupList %}
-              <option value="{{wcg.WorkCenterGroup}}" {% if fwcg == wcg.WorkCenterGroup %}style="color:blue" selected{% endif %}>{{wcg.WorkCenterGroup}}</option>
+            <select class="form-control" id="frt">
+              {% for rt in onRoutingList %}
+              <option value="{{rt.WorkCenterNo}}" {% if frt == rt.WorkCenterNo %}style="color:blue" selected{% endif %}>{{rt.WorkCenterNo}}</option>
               {% endfor %}
             </select>&nbsp;
             <select class="form-control" id="ftype">
@@ -85,7 +86,7 @@
                                 <h6 class="text-danger text-center">* ข้อมูลของเครื่องจักประเภท Manual ตั้งแต่เริ่มใช้ SFR จนถึง วันที่ 5 มีนาคม 2022 อาจมีความไม่ถูกต้อง (เวลาเกิน)</h6>
                                 <h6 class="text-danger text-center">* ข้อมูลของเครื่องจักประเภท Auto ตั้งแต่เริ่มใช้ SFR จนถึง วันที่ 5 มีนาคม 2022 อาจมีความไม่ถูกต้อง (เวลาน้อยกว่าความจริง)</h6>
                                 <div class="card-header">
-                                  {{fwcg}}
+                                  {{frt}}
                                 </div>
                                 <div class="card-body">
                                   <canvas id="wcg_monthly_chart" width="400" height="180"></canvas>
@@ -107,7 +108,7 @@
                                 <div class="form-group row">
                                   <label class="col-md-6 col-form-label text-right">WorkCenterGroup</label>
                                   <div class="col-md-6">
-                                    <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
+                                    <input class="form-control form-control" type="text" value="{{frt}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
@@ -127,6 +128,12 @@
                                   <label class="col-md-6 col-form-label text-right">Maximum Hours</label>
                                   <div class="col-md-6">
                                     <input class="form-control form-control" type="text" value="{{max_hour_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Capacity</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_cap_month}}" readonly>
                                   </div>
                                 </div>
                                 <div class="form-group row">
@@ -215,7 +222,7 @@
         <div class="modal-dialog modal-info" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set WorkCenter Target</h4>
+              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set Target</h4>
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -246,6 +253,47 @@
             <div class="modal-footer">
               <small>Permission: Section Chief+</small>
               <button class="btn btn-info" type="button" id="set_wc_target_button" onclick="set_wc_target()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="set_wc_cap_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set Capacity</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="cap_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>WorkCenter</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="cap_wc_no">
+                    {% for wc in workCenterInGroupList %}
+                    <option value="{{wc.WorkCenterNo}}">{{wc.WorkCenterNo}} | {{wc.WorkCenterName}} (Capacity: {{wc.Capacity}})</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Capacity Hour</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="cap_hour" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-info" type="button" id="set_wc_cap_button" onclick="set_wc_cap()">Confirm</button>
               <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -285,7 +333,7 @@
 
       });
 
-      $('#fwcg').change(function() {
+      $('#frt').change(function() {
         filter();
       });
 
@@ -313,11 +361,11 @@
       }
 
       function filter(){
-        var fwcg = ($("#fwcg").val() != "")?$("#fwcg").val():"FIRST";
+        var frt = ($("#frt").val() != "")?$("#frt").val():"FIRST";
         var ftype = $("#ftype").val();
         var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
         var fyear = ($("#fyear").val() != "" && ftype == "YEARLY")?$("#fyear").val():"NOW";
-        window.location.href = "/ab_graph_rt/" + fwcg + "&" + ftype + "&" + fmonth + "&" + fyear;
+        window.location.href = "/ab_graph_rt/" + frt + "&" + ftype + "&" + fmonth + "&" + fyear;
       }
     </script>
     <!-- OTHER FUNCTION -->
@@ -399,13 +447,13 @@
               data: {
                   labels: getXAxisSize(),
                   datasets: [{
-                      label: 'WORK',
+                      label: 'Work',
                       data: {{wc_oper_list|index:forloop.counter0}},
                       backgroundColor: 'rgb(46,184,92, 0.2)',
                       borderColor: 'rgb(46,184,92, 1)',
                       borderWidth: 1
                   },{
-                      label: 'SETUP',
+                      label: 'Setup',
                       data: {{wc_setup_list|index:forloop.counter0}},
                       backgroundColor: 'rgb(157,208,77, 0.2)',
                       borderColor: 'rgb(157,208,77, 1)',
@@ -438,12 +486,25 @@
                           mode: 'horizontal',
                           yMin: {{wc_target_list|index:forloop.counter0}},
                           yMax: {{wc_target_list|index:forloop.counter0}},
-                          borderColor: 'rgb(34,40,49)',
+                          borderColor: 'rgb(0,0,0,0.5)',
                           borderWidth: 1,
                           label: {
                              enabled: true,
                              position: "end",
                              content: "Target: {{wc_target_list|index:forloop.counter0}}",
+                          }
+                      },{
+                          id: 'cap_line',
+                          type: 'line',
+                          mode: 'horizontal',
+                          yMin: {{wc_cap_list|index:forloop.counter0}},
+                          yMax: {{wc_cap_list|index:forloop.counter0}},
+                          borderColor: 'rgb(0,0,0,0.5)',
+                          borderWidth: 1,
+                          label: {
+                             enabled: true,
+                             position: "start",
+                             content: "Capacity: {{wc_cap_list|index:forloop.counter0}}",
                           }
                       }]
                   },
@@ -478,10 +539,21 @@
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
+      $("#set_wc_cap_hour").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
       function prepare_set_wc_target(){
         $("#target_password").val("");
         $("#target_hour").val("");
         remove_valid_many(["target_password","target_wc_no","target_hour"]);
+      }
+
+      function prepare_set_wc_cap(){
+        $("#cap_password").val("");
+        $("#cap_hour").val("");
+        remove_valid_many(["cap_password","cap_wc_no","cap_hour"]);
       }
 
       function set_wc_target(){
@@ -504,6 +576,37 @@
                 data: {
                   'wc_no': wc_no,
                   'target_hour': target_hour,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      function set_wc_cap(){
+        if($('#cap_hour').val() == "") $('#cap_hour').val("0");
+        var password = $("#cap_password").val();
+        var wc_no = $("#cap_wc_no").val();
+        var cap_hour = $("#cap_hour").val();
+        remove_valid_many(["cap_password","cap_wc_no","cap_hour"]);
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("cap_password");
+          } else {
+            valid("cap_password");
+            if(target_hour <= 0){
+              invalid("cap_hour");
+            } else {
+              valid("cap_hour");
+              $.ajax({
+                url: '/set_wc_cap/',
+                data: {
+                  'wc_no': wc_no,
+                  'cap_hour': cap_hour,
                 },
                 dataType: 'json',
                 success: function (data) {
