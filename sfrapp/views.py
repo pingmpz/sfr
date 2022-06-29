@@ -2660,12 +2660,6 @@ def getConfirmOperationList(fwc, fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getMailgroup():
-    cursor = get_connection().cursor()
-    sql = "SELECT * FROM MailGroup"
-    cursor.execute(sql)
-    return cursor.fetchall()
-
 def getEmpAtComputerList(ip_address):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM EmpAtComputer WHERE IPAddress = '"+ ip_address +"' ORDER BY DateTimeStamp DESC"

@@ -106,14 +106,30 @@
                             <input class="form-control form-control-sm" type="text" value="{{workCenter.WorkCenterType}}" readonly>
                           </div>
                         </div>
-                        {% if workCenter.WorkCenterType == 'Machine' %}
                         <div class="form-group row">
                           <label class="col-md-4 col-form-label text-right"><strong>Machine Type</strong></label>
                           <div class="col-md-8">
                             <input class="form-control form-control-sm" type="text" value="{{workCenter.MachineType|default_if_none:""}}" readonly>
                           </div>
                         </div>
-                        {% endif %}
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>On Routing</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.OnRouting|default_if_none:""}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Target (Hour)</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.Target}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-4 col-form-label text-right"><strong>Capacity (Hour)</strong></label>
+                          <div class="col-md-8">
+                            <input class="form-control form-control-sm" type="text" value="{{workCenter.Capacity}}" readonly>
+                          </div>
+                        </div>
                         <div class="form-group row">
                           <label class="col-md-4 col-form-label text-right"><strong>Hourly Rate</strong></label>
                           <div class="col-md-8">
