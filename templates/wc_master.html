@@ -64,29 +64,33 @@
                             <th>Work Center Group</th>
                             <th>Work Center</th>
                             <th>Work Center Name</th>
-                            <th>Routing</th>
+                            <th>Is/On Routing</th>
                             <th>External Process</th>
                             <th>Work Center Type</th>
                             <th>Machine Type</th>
                             <th>Hourly Rate</th>
                             <th>Target (Hour)</th>
+                            <th>Capacity (Hour)</th>
                             <th>Noted</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for wc in workCenterList %}
-                          <tr class="{% if wc.IsActive == False %}text-danger{% endif %}"
+                          <tr
+                          {% if wc.IsActive %}
                           style="background-color:#f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:8}}f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:9}}f{{wc.WorkCenterGroup|make_list|last|convert_char|modulo:10}}"
+                          {% else %}style="background-color:#ff9999;"{% endif %}
                           >
                             <td>{{wc.WorkCenterGroup}}</td>
                             <td>{% if wc.IsActive %}<a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a>{% else %}{{wc.WorkCenterNo}}{% endif %}</td>
                             <td>{{wc.WorkCenterName}}</td>
-                            <td>{% if wc.IsRouting %}<i class="c-icon cil-check {% if wc.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
-                            <td>{% if wc.IsExternalProcess %}<i class="c-icon cil-check {% if wc.IsActive %}text-success{% else %}text-danger{% endif %}"></i>{% endif %}</td>
+                            <td>{% if wc.IsRouting %}<i class="c-icon cil-check text-success"></i>{% elif wc.OnRouting %}{{wc.OnRouting}}{% endif %}</td>
+                            <td>{% if wc.IsExternalProcess %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
                             <td>{{wc.WorkCenterType}}</td>
                             <td>{{wc.MachineType|default_if_none:""}}</td>
                             <td>{{wc.HourlyRate|floatformat:"0"}}</td>
                             <td>{% if wc.Target != 0 %}{{wc.Target}}{% endif %}</td>
+                            <td>{% if wc.Capacity != 0 %}{{wc.Capacity}}{% endif %}</td>
                             <td>{{wc.Noted|default_if_none:""}}</td>
                           </tr>
                           {% endfor %}

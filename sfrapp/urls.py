@@ -38,7 +38,8 @@ urlpatterns = [
     path('rejected_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.rejected_order, name='rejected_order'),
     path('canceled_order/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.canceled_order, name='canceled_order'),
     path('work_records/<str:ftype>&<str:fdate>&<str:fmonth>&<str:fstartdate>&<str:fstopdate>', views.work_records, name='work_records'),
-    path('ab_graph/<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph, name='ab_graph'),
+    path('ab_graph_wcg/<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph_wcg, name='ab_graph_wcg'),
+    path('ab_graph_rt/<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph_rt, name='ab_graph_rt'),
     path('con_operation/<str:fwc>&<str:fmonth>', views.con_operation, name='con_operation'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
@@ -98,6 +99,7 @@ urlpatterns = [
     path('increase_lot_no/', views.increase_lot_no, name='increase_lot_no'),
     path('fix_rm_mat_code/', views.fix_rm_mat_code, name='fix_rm_mat_code'),
     path('set_wc_target/', views.set_wc_target, name='set_wc_target'),
+    path('set_wc_cap/', views.set_wc_cap, name='set_wc_cap'),
     ## ADMIN PANEL
     path('add_new_user/', views.add_new_user, name='add_new_user'),
     path('delete_user/', views.delete_user, name='delete_user'),

@@ -29,13 +29,8 @@ TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 ################################################################################
 
 def blank(request):
-    # path = "file://129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
-    # webbrowser.open_new_tab(path)
-    # subprocess.Popen(r'explorer /select,"J:\DRAWING\ABRIC\"')
-    # url = "//129.1.100.188/Drawingsap/DRAWING/ABRIC/FG-ABRIC-BD0000003-1A.JPG"
-    # wget.download(url, 'FG-ABRIC-BD0000003-1A.JPG')
-
     update_employee_master()
+    # update_on_rt()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -647,7 +642,95 @@ def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     }
     return render(request, 'work_records.html', context)
 
-def ab_graph(request,fwcg, ftype, fmonth, fyear):
+def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
+    workCenterGroupList = getMachineWorkCenterGroupList()
+    if fwcg == "FIRST":
+        fwcg = workCenterGroupList[0].WorkCenterGroup
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if fyear == "NOW":
+        fyear = datetime.today().strftime('%Y')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    workCenterInGroupList = getWorkCenterInGroupActiveList(fwcg)
+    #-- INITIALIZE
+    x_size = 0
+    y_size = 0
+    max_hour_day = 0
+    max_hour_month = 0
+    working_hour_month = 0
+    working_hour_month_percent = 0
+    max_hour_present = 0
+    working_hour_present = 0
+    working_hour_present_percent = 0
+    wcg_oper = []
+    wcg_setup = []
+    wc_oper_list = []
+    wc_setup_list = []
+    wc_target_list = []
+    wc_cap_list = []
+    if ftype == "MONTHLY":
+        x_size = get_day_count(month, year)
+    elif ftype == "YEARLY":
+        x_size = 12
+    wcg_oper = [0] * x_size
+    wcg_setup = [0] * x_size
+    if ftype == "MONTHLY":
+        for rs in getMonthlyWorkCenterOperForABGraph('WCG', '', fwcg, fmonth):
+            wcg_oper[rs.Fday - 1] = rs.Foper
+        for rs in getMonthlyWorkCenterSetupForABGraph('WCG', '', fwcg, fmonth):
+            wcg_setup[rs.Fday - 1] = rs.Fsetup
+        y_size = 1.25 * (max(wcg_oper) + max(wcg_setup))
+        max_hour_day = 24 * len(workCenterInGroupList)
+        max_hour_month = max_hour_day * x_size
+        working_hour_month = sum(wcg_oper) + sum(wcg_setup)
+        working_hour_month_percent = round((working_hour_month / max_hour_month) * 100, 2)
+        if(datetime.today().strftime('%Y-%m') == fmonth):
+            current_day = int(datetime.today().strftime('%d'))
+            max_hour_present = max_hour_day * current_day
+            working_hour_present = sum(wcg_oper[0:current_day - 1]) + sum(wcg_setup[0:current_day - 1])
+            working_hour_present_percent = round((working_hour_present / max_hour_present) * 100, 2)
+        else:
+            max_hour_present = max_hour_month
+            working_hour_present = working_hour_month
+            working_hour_present_percent = working_hour_month_percent
+        for wc in workCenterInGroupList:
+            temp_oper = [0] * x_size
+            temp_setup = [0] * x_size
+            for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, '', fmonth):
+                temp_oper[rs.Fday - 1] = rs.Foper
+            for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, '', fmonth):
+                temp_setup[rs.Fday - 1] = rs.Fsetup
+            wc_oper_list.append(temp_oper)
+            wc_setup_list.append(temp_setup)
+            wc_target_list.append(wc.Target)
+            wc_cap_list.append(wc.Capacity)
+    context = {
+        'workCenterGroupList': workCenterGroupList,
+        'fwcg': fwcg,
+        'ftype': ftype,
+        'fmonth': fmonth,
+        'fyear': fyear,
+        'x_size': x_size,
+        'y_size': y_size,
+        'max_hour_day': max_hour_day,
+        'max_hour_month': max_hour_month,
+        'working_hour_month': working_hour_month,
+        'working_hour_month_percent': working_hour_month_percent,
+        'max_hour_present': max_hour_present,
+        'working_hour_present': working_hour_present,
+        'working_hour_present_percent': working_hour_present_percent,
+        'wcg_oper': wcg_oper,
+        'wcg_setup': wcg_setup,
+        'workCenterInGroupList': workCenterInGroupList,
+        'wc_oper_list': wc_oper_list,
+        'wc_setup_list': wc_setup_list,
+        'wc_target_list': wc_target_list,
+        'wc_cap_list': wc_cap_list,
+    }
+    return render(request, 'ab_graph_wcg.html', context)
+
+def ab_graph_rt(request,fwcg, ftype, fmonth, fyear):
     workCenterGroupList = getMachineWorkCenterGroupList()
     if fwcg == "FIRST":
         fwcg = workCenterGroupList[0].WorkCenterGroup
@@ -680,9 +763,9 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
     wcg_oper = [0] * x_size
     wcg_setup = [0] * x_size
     if ftype == "MONTHLY":
-        for rs in getMonthlyWorkCenterOperForABGrap('WCG', '', fwcg, fmonth):
+        for rs in getMonthlyWorkCenterOperForABGraph('WCG', '', fwcg, fmonth):
             wcg_oper[rs.Fday - 1] = rs.Foper
-        for rs in getMonthlyWorkCenterSetupForABGrap('WCG', '', fwcg, fmonth):
+        for rs in getMonthlyWorkCenterSetupForABGraph('WCG', '', fwcg, fmonth):
             wcg_setup[rs.Fday - 1] = rs.Fsetup
         y_size = 1.25 * (max(wcg_oper) + max(wcg_setup))
         max_hour_day = 24 * len(workCenterInGroupList)
@@ -701,9 +784,9 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         for wc in workCenterInGroupList:
             temp_oper = [0] * x_size
             temp_setup = [0] * x_size
-            for rs in getMonthlyWorkCenterOperForABGrap('WC', wc.WorkCenterNo, '', fmonth):
+            for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, '', fmonth):
                 temp_oper[rs.Fday - 1] = rs.Foper
-            for rs in getMonthlyWorkCenterSetupForABGrap('WC', wc.WorkCenterNo, '', fmonth):
+            for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, '', fmonth):
                 temp_setup[rs.Fday - 1] = rs.Fsetup
             wc_oper_list.append(temp_oper)
             wc_setup_list.append(temp_setup)
@@ -730,7 +813,7 @@ def ab_graph(request,fwcg, ftype, fmonth, fyear):
         'wc_setup_list': wc_setup_list,
         'wc_target_list': wc_target_list,
     }
-    return render(request, 'ab_graph.html', context)
+    return render(request, 'ab_graph_rt.html', context)
 
 def con_operation(request, fwc, fmonth):
     workCenterList = getWorkCenterRoutingList()
@@ -1840,6 +1923,14 @@ def set_wc_target(request):
     }
     return JsonResponse(data)
 
+def set_wc_cap(request):
+    wc_no = request.GET.get('wc_no')
+    cap_hour = request.GET.get('cap_hour')
+    setWorkCenterCapacity(wc_no, cap_hour)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -2396,7 +2487,7 @@ def getSFRDelayOperationList(fwc):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
+def getMonthlyWorkCenterOperForABGraph(fwctype, fwc, fwcg, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
@@ -2446,7 +2537,7 @@ def getMonthlyWorkCenterOperForABGrap(fwctype, fwc, fwcg, fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getMonthlyWorkCenterSetupForABGrap(fwctype, fwc, fwcg, fmonth):
+def getMonthlyWorkCenterSetupForABGraph(fwctype, fwc, fwcg, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
@@ -3355,6 +3446,14 @@ def setWorkCenterTarget(wc_no, target_hour):
     conn.commit()
     return
 
+def setWorkCenterCapacity(wc_no, cap_hour):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE WorkCenter SET Capacity = "+cap_hour+" WHERE WorkCenterNo = '"+wc_no+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 def updateMailDate(date):
     conn = get_connection()
     cursor = conn.cursor()
@@ -3530,4 +3629,23 @@ def update_employee_master():
     print("Update Employee :", str(update_emp_count))
     print("Error Row :", str(error_emp_count))
     print("#########################################")
+    return
+
+def update_on_rt():
+    wb = load_workbook(filename = 'media/OnRouting.xlsx')
+    ws = wb.active
+    skip_count = 2
+    for i in range(ws.max_row + 1):
+        if i < skip_count:
+            continue
+        wc_no = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
+        on_rt = "" if ws['B' + str(i)].value == None else ws['B' + str(i)].value
+        if wc_no and on_rt:
+            wc = getWorkCenter(wc_no)
+            if wc:
+                conn = get_connection()
+                cursor = conn.cursor()
+                sql = "UPDATE WorkCenter SET OnRouting = '"+on_rt+"' WHERE WorkCenterNo = '"+wc_no+"'"
+                cursor.execute(sql)
+                conn.commit()
     return
