@@ -660,6 +660,7 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
     max_hour_month = 0
     working_hour_month = 0
     working_hour_month_percent = 0
+    max_cap_month = 0
     max_hour_present = 0
     working_hour_present = 0
     working_hour_present_percent = 0
@@ -705,6 +706,7 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
             wc_setup_list.append(temp_setup)
             wc_target_list.append(wc.Target)
             wc_cap_list.append(wc.Capacity)
+            max_cap_month = sum(wc_cap_list * x_size)
     context = {
         'workCenterGroupList': workCenterGroupList,
         'fwcg': fwcg,
@@ -717,6 +719,7 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
         'max_hour_month': max_hour_month,
         'working_hour_month': working_hour_month,
         'working_hour_month_percent': working_hour_month_percent,
+        'max_cap_month': max_cap_month,
         'max_hour_present': max_hour_present,
         'working_hour_present': working_hour_present,
         'working_hour_present_percent': working_hour_present_percent,
