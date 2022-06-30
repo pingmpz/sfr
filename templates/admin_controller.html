@@ -58,6 +58,15 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="card">
+                    <div class="card-body small">
+                      MANUAL_REPORT_ALLOWDANCE :
+                      {% if canMP %}<span class="text-success"> Allow</span>{% else %}<span class="text-danger"> Not Allow</span>{% endif %}<br>
+                      REFRESH_SECOND : {{refreshSecond}}<br>
+                      OVERTIME_HOUR : {{overtimehour}}<br>
+                      DRAWING_APP_PATH : {{drawingAppPath}}
+                    </div>
+                  </div>
+                  <div class="card">
                     <div class="card-header"><strong>Controller</strong></div>
                     <div class="card-body">
                       <div class="form-group row">
@@ -189,170 +198,40 @@
                       </div>
                     </div>
                   </div>
-                  <div class="card">
-                    <div class="card-header">
-                      <strong>User Permission</strong>
-                    </div>
-                    <div class="card-body">
-                      <table class="table table-sm table-outline text-center small" style="table-layout: fixed;">
-                        <thead class="thead-light">
-                          <tr>
-                            <th></th>
-                            <th>Officer</th>
-                            <th>Section Chief</th>
-                            <th>Administrator</th>
-                            <th>Super Administrator</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Add Operation</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Change Operation</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Delete Operation</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Increase Production Order Quantity</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Decrease Production Order Quantity</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Do Partial Lot</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Set Machine Target</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Reset Production Order</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Cancel Production Order</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Manual Report Allowdance</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Add New User</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Change User Password</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                          <tr>
-                            <td>Delete User</td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-x text-danger"></i></td>
-                            <td><i class="c-icon cil-check-alt text-success"></i></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="card">
-                    <div class="card-body small">
-                      MANUAL_REPORT_ALLOWDANCE :
-                      {% if canMP %}<span class="text-success"> Allow</span>{% else %}<span class="text-danger"> Not Allow</span>{% endif %}<br>
-                      REFRESH_SECOND : {{refreshSecond}}<br>
-                      OVERTIME_HOUR : {{overtimehour}}<br>
-                      DRAWING_APP_PATH : {{drawingAppPath}}
-                    </div>
-                  </div>
                   <!-- ALL List -->
                   <div class="card">
                     <div class="card-header">
-                      <strong>All List</strong>
+                      <strong>User List ({{userList|length}})</strong>
                     </div>
                     <div class="card-body">
-                      <div class="nav-tabs-boxed">
-                        <ul class="nav nav-tabs" role="tablist">
-                          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#user-list-tab" role="tab">User List ({{userList|length}})</a></li>
-                        </ul>
-                        <div class="tab-content">
-                          <!-- User List Tab -->
-                          <div class="tab-pane active" id="user-list-tab" role="tabpanel">
-                            <table class="table table-sm table-outline small" id="user_master_table" style="table-layout: fixed;">
-                              <thead class="thead-light">
-                                <tr>
-                                  <th>User ID</th>
-                                  <th>EmpName</th>
-                                  <th>Section</th>
-                                  <th>Role</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for user in userList %}
-                                <tr>
-                                  <td>{{user.UserID}}</td>
-                                  <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
-                                  <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:2}}{% endif %}</td>
-                                  <td>
-                                    {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
-                                    {% elif user.UserRole == 'ADMIN' %}Administrator
-                                    {% elif user.UserRole == 'CHIEF' %}Section Chief
-                                    {% elif user.UserRole == 'OFFICER' %}Officer
-                                    {% endif %}
-                                  </td>
-                                </tr>
-                                {% endfor %}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
+                      <table class="table table-sm table-outline small" id="user_master_table" style="table-layout: fixed;">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>User ID</th>
+                            <th>EmpName</th>
+                            <th>Section</th>
+                            <th>Role</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for user in userList %}
+                          <tr>
+                            <td>{{user.UserID}}</td>
+                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:1}}{% endif %}</td>
+                            <td>{% if empNameList|index:forloop.counter0 != None %}{{empNameList|index:forloop.counter0|index:2}}{% endif %}</td>
+                            <td>
+                              {% if user.UserRole == 'SUPERADMIN' %}Super Administrator
+                              {% elif user.UserRole == 'ADMIN' %}Administrator
+                              {% elif user.UserRole == 'CHIEF' %}Section Chief
+                              {% elif user.UserRole == 'OFFICER' %}Officer
+                              {% endif %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
