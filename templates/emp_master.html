@@ -70,8 +70,10 @@
                         </thead>
                         <tbody>
                           {% for opr in operatorList %}
-                          <tr class="{% if opr.IsActive == False %}text-danger{% endif %}"
+                          <tr
+                          {% if opr.IsActive %}
                           style="background-color:#f{{opr.Section|make_list|first|convert_char|modulo:8}}f{{opr.Section|make_list|first|convert_char|modulo:9}}f{{opr.Section|make_list|last|convert_char|modulo:10}}"
+                          {% else %}style="background-color:#ff9999;"{% endif %}
                           >
                             <td>{{opr.Section|default_if_none:""}}</td>
                             <td>{{opr.CostCenter|default_if_none:""}}</td>

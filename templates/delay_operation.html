@@ -74,6 +74,7 @@
                         </div>
                         <div class="col-6">
                           <input type="text" class="form-control" id="ms_text">
+                          <small>สามารถใช้ ช่องว่าง หรือเครื่องหมายเหล่านี้ , | / \ & ในการคั่นได้เช่น 5000123456,50009999</small>
                         </div>
                         <div class="col-3">
                           <button type="button" class="btn btn-success" onclick="ms()">Multiple Search</button>
@@ -194,7 +195,7 @@
       });
 
       function ms(){
-        var value = $('#ms_text').val().replaceAll(" ", "|");
+        var value = $('#ms_text').val().replaceAll(" ", "|").replaceAll(",", "|").replaceAll("/", "|").replaceAll("\\", "|").replaceAll("&", "|");
         $('input[type="search"]').val(value);
         table.search(value).draw();
       }

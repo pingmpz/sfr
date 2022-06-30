@@ -590,7 +590,6 @@
                                         <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty.normalize}}{% endif %}</td>
                                         <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty.normalize}}{% endif %}</td>
                                         <td>
-
                                           {% if confirm.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
                                             {% if confirm.OPN %}
                                               SCRAP FROM → {{confirm.OPN}} ({{confirm.WCN}})
