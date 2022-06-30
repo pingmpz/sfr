@@ -82,12 +82,11 @@
                             <th>AcceptedQty</th>
                             <th>RejectedQty</th>
                             <th>RejectedReason</th>
-                            <th>Scrap At</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for con in confirmOperationList %}
-                            <tr>
+                            <tr style="background-color:#f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:8}}f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:9}}f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:10}}">
                               <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
                               <td>{{con.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
@@ -100,8 +99,17 @@
                               <td>{{con.ProcessQty.normalize}}</td>
                               <td>{{con.AcceptedQty.normalize}}</td>
                               <td>{{con.RejectedQty.normalize}}</td>
-                              <td>{{con.RejectReason}}</td>
-                              <td>{% if con.ScrapAt != None and con.ScrapAt.strip != "" %}{{con.ScrapAt}} ({{con.ScrapAtWorkCenter}}){% endif %}</td>
+                              <td>
+                                {% if con.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
+                                  {% if con.ScrapAt.strip != '' %}
+                                    SCRAP FROM → {{con.ScrapAt}} ({{con.ScrapAtWorkCenter}})
+                                  {% else %}
+                                    {{con.RejectReason.strip}}
+                                  {% endif %}
+                                {% else %}
+                                  {{con.RejectReason}}
+                                {% endif %}
+                              </td>
                             </tr>
                           {% endfor %}
                         </tbody>

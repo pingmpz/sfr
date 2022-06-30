@@ -590,9 +590,16 @@
                                         <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty.normalize}}{% endif %}</td>
                                         <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty.normalize}}{% endif %}</td>
                                         <td>
+
                                           {% if confirm.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
-                                          SCRAP FROM → {{confirm.OPN}} ({{confirm.WCN}})
-                                          {% else %}{{confirm.RejectReason}}{% endif %}
+                                            {% if confirm.OPN %}
+                                              SCRAP FROM → {{confirm.OPN}} ({{confirm.WCN}})
+                                            {% else %}
+                                              {{confirm.RejectReason.strip}}
+                                            {% endif %}
+                                          {% else %}
+                                            {{confirm.RejectReason}}
+                                          {% endif %}
                                         </td>
                                         <td>{{confirm.ConfirmDateTime|date:"d-M-Y, H:i"}}</td>
                                       </tr>
