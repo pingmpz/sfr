@@ -195,7 +195,7 @@
                               <tbody>
                                 {% for order in lastProcessStopOrderNotStop %}
                                 <tr style="background-color:#f{{order.OrderNo|add:'0'|modulo:8}}f{{order.OrderNo|add:'0'|modulo:9}}f{{order.OrderNo|add:'0'|modulo:10}}">
-                                  <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
+                                  <td><a href="/transaction/{{order.OrderNo}}0000" target="_blank">{{order.OrderNo}}</a></td>
                                   <td data-order="{{order.LastProcessStop|date:"U"}}">{{order.LastProcessStop}}</td>
                                   <td>{{order.LastProcessStop|naturaltime}}</td>
                                 </tr>
@@ -210,7 +210,10 @@
                             <p class="text-white">SELECT * FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo WHERE OC.ProcessStop IS NOT NULL AND (OPC.ProcessStart IS NULL OR OPC.ProcessStop IS NULL) AND ProcessQty != 0</p>
                             <hr>
                             <h6 class="text-danger text-center">ใช้ Update ProcessStop ของ Order ให้ตรงกับ ProcessStop ของ Last Process</h6>
-                            <p class="text-white">UPDATE OrderControl SET ProcessStop = (SELECT TOP (1) ProcessStop FROM OperationControl WHERE OrderNo = '#####' ORDER BY OperationNo DESC) WHERE OrderNo = '#####'</p>
+                            <p class="text-white">UPDATE OrderControl SET ProcessStop = (SELECT TOP (1) ProcessStop FROM OperationControl WHERE OrderNo = '99999999' ORDER BY OperationNo DESC) WHERE OrderNo = '99999999'</p>
+                            <hr>
+                            <h6 class="text-danger text-center">SAP Component ที่ซ้ำกัน</h6>
+                            <p class="text-white">SELECT * FROM SAP_Component AS SC1 INNER JOIN SAP_Component AS SC2 ON SC1.ProductionOrderNo = SC2.ProductionOrderNo AND SC1.RM_MaterialCode = SC2.RM_MaterialCode AND SC1.DateGetFromSAP != SC2.DateGetFromSAP</p>
                             <hr>
                           </div>
                         </div>
