@@ -519,10 +519,12 @@ def ot_table(request, fmonth):
         fmonth = datetime.today().strftime('%Y-%m')
     overtimeOperatorList = getOvertimeOperatorList(fmonth)
     overtimeWorkCenterList = getOvertimeWorkCenterList(fmonth)
+    overtimeCounterList = getOvertimeCounterList(fmonth)
     context = {
         'fmonth': fmonth,
         'overtimeOperatorList': overtimeOperatorList,
         'overtimeWorkCenterList': overtimeWorkCenterList,
+        'overtimeCounterList': overtimeCounterList,
     }
     return render(request, 'ot_table.html', context)
 
@@ -2136,20 +2138,6 @@ def getWorkingOperatorList():
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getOvertimeOperatorForEmailList():
-    cursor = get_connection().cursor()
-    sql = """
-        SELECT OOPR.EmpID, EMP.EmpName, EMP.Section, EMP.CostCenter, OOPR.Status, OOPR.OrderNo, OOPR.OperationNo, OOPR.StartDateTime, OWC.WorkCenterNo, OC.Note, ORDC.FG_MaterialCode
-        FROM [OperatingOperator] as OOPR INNER JOIN [Employee] as EMP ON OOPR.EmpID = EMP.EmpID
-        INNER JOIN [OperationControl] as OC ON OC.OrderNo = OOPR.OrderNo AND OC.OperationNo = OOPR.OperationNo
-        INNER JOIN [OrderControl] as ORDC ON OOPR.OrderNo = ORDC.OrderNo
-        LEFT JOIN [OperatingWorkCenter] as OWC ON OOPR.OperatingWorkCenterID = OWC.OperatingWorkCenterID
-        LEFT JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo
-    """
-    sql += " WHERE OOPR.Status <> 'COMPLETE' AND OOPR.Status <> 'EXT-WORK' AND DATEDIFF(HOUR, OOPR.StartDateTime, CURRENT_TIMESTAMP) > "+str(getOvertimeHour())+" ORDER BY OOPR.StartDateTime ASC"
-    cursor.execute(sql)
-    return cursor.fetchall()
-
 def getNoneWorkingWorkCenterList():
     cursor = get_connection().cursor()
     sql = """
@@ -2304,6 +2292,15 @@ def getOvertimeOperatorList(fmonth):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [OvertimeOperator] AS OO LEFT JOIN Employee AS EMP ON OO.EmpID = EMP.EmpID"
     sql += " WHERE month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOvertimeCounterList(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT O.EmpID, E.EmpName, E.Section, E.CostCenter, COUNT(*) AS Counter From OvertimeOperator AS O INNER JOIN Employee AS E ON O.EmpID = E.EmpID"
+    sql += " WHERE MONTH(StartDateTime) = '"+month+"' AND YEAR(StartDateTime) = '"+year+"' GROUP BY O.EmpID, E.EmpName, E.Section, E.CostCenter"
     cursor.execute(sql)
     return cursor.fetchall()
 

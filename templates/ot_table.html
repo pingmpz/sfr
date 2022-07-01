@@ -65,6 +65,7 @@
                       <div class="nav-tabs-boxed">
                         <ul class="nav nav-tabs" role="tablist">
                           <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#ot-opr-tab" role="tab">Overtime Operator ({{overtimeOperatorList|length}})</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#ot-ct-tab" role="tab">Overtime Counter</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#ot-wc-tab" role="tab">Overtime WorkCenter [Auto Machine] ({{overtimeWorkCenterList|length}})</a></li>
                         </ul>
                         <div class="tab-content">
@@ -100,6 +101,31 @@
                                   <td>{% if ht.WorkCenterNo.strip != "-1" %}<a href="/wc/{{ht.WorkCenterNo}}&NOW">{{ht.WorkCenterNo}}</a>{% endif %}</td>
                                   <td><a href="/transaction/{{ht.OrderNo}}{{ht.OperationNo}}">{{ht.OrderNo}}-{{ht.OperationNo}}</a></td>
                                   <td>{% if ht.isFixed == 1 %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Overtime Operator Tab -->
+                          <div class="tab-pane" id="ot-ct-tab" role="tabpanel">
+                            <table class="table table-sm table-outline small" id="ot_ct_table" style="width: 100%">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th>EmpID</th>
+                                  <th>EmpName</th>
+                                  <th>Section</th>
+                                  <th>CostCenter</th>
+                                  <th>Counter</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for ot in overtimeCounterList %}
+                                <tr style="background-color:#f{{ot.Counter|modulo:8}}f{{ot.Counter|modulo:9}}f{{ot.Counter|modulo:10}}">
+                                  <td><a href="/emp/{{ot.EmpID}}&NOW">{{ot.EmpID}}</a></td>
+                                  <td>{{ot.EmpName}}</td>
+                                  <td>{{ot.Section}}</td>
+                                  <td>{{ot.CostCenter}}</td>
+                                  <td>{{ot.Counter}}</td>
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -164,6 +190,10 @@
       $(document).ready(function() {
         $('#ot_opr_table').DataTable( {
             "order": [[ 0, "desc" ]],
+            'iDisplayLength': 100,
+        });
+        $('#ot_ct_table').DataTable( {
+            "order": [[ 4, "desc" ]],
             'iDisplayLength': 100,
         });
         $('#ot_wc_table').DataTable( {
