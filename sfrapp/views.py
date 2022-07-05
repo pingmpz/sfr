@@ -480,9 +480,9 @@ def delay_operation(request, fwc):
             if first_con != None:
                 SFRDelayWorkActualList.append(str((datetime.today() - first_con.ConfirmDateTime).days))
             else:
-                SFRDelayWorkActualList.append('ERROR')
+                SFRDelayWorkActualList.append('Error')
         else:
-            SFRDelayWorkActualList.append('ORDER NOT COMFIRM')
+            SFRDelayWorkActualList.append('Order Not Confirm')
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     drawingAppPath = getDrawingAppPath()
     context = {
