@@ -91,7 +91,7 @@
                               <td>{{con.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
                               <td>
-                                <a href="{{drawingAppPath}}{%if con.FG_Drawing == '' %}None{%else%}{{con.FG_Drawing}}{%endif%}&{%if con.FG_MaterialCode == ''%}None{%else%}{{con.FG_MaterialCode}}{%endif%}" target="_blank">
+                                <a href="/drawing/{%if con.FG_Drawing == '' %}None{%else%}{{con.FG_Drawing}}{%endif%}&{%if con.FG_MaterialCode == ''%}None{%else%}{{con.FG_MaterialCode}}{%endif%}" target="_blank">
                                 {{con.FG_MaterialCode|default_if_none:""}}
                                 </a>
                               </td>

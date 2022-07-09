@@ -109,5 +109,6 @@ urlpatterns = [
     path('reset_order/', views.reset_order, name='reset_order'),
     path('cancel_order/', views.cancel_order, name='cancel_order'),
     path('sqty_operation/', views.sqty_operation, name='sqty_operation'),
+    path('drawing/<str:dir>&<str:fg_code>', views.drawing, name='drawing'),
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT, }),
 ]+ static(settings.MEDIA_URL, serve, document_root=settings.MEDIA_ROOT)

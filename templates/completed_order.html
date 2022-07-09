@@ -93,7 +93,7 @@
                             <td>{{order.Day}}</td>
                             <td><a href="/transaction/{{order.OrderNo}}0000">{{order.OrderNo}}</a></td>
                             <td>
-                              <a href="{{drawingAppPath}}{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
+                              <a href="/drawing/{%if order.FG_Drawing == '' %}None{%else%}{{order.FG_Drawing}}{%endif%}&{%if order.FG_MaterialCode == ''%}None{%else%}{{order.FG_MaterialCode}}{%endif%}" target="_blank">
                               {{order.FG_MaterialCode|default_if_none:""}}
                               </a>
                             </td>

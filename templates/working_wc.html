@@ -114,7 +114,7 @@
                             </td>
                             <td><a href="/transaction/{{wc.OrderNo}}{{wc.OperationNo}}">{{wc.OrderNo}}-{{wc.OperationNo}}</a></td>
                             <td>
-                              <a href="{{drawingAppPath}}{%if wc.FG_Drawing == '' %}None{%else%}{{wc.FG_Drawing}}{%endif%}&{%if wc.FG_MaterialCode == ''%}None{%else%}{{wc.FG_MaterialCode}}{%endif%}" target="_blank">
+                              <a href="/drawing/{%if wc.FG_Drawing == '' %}None{%else%}{{wc.FG_Drawing}}{%endif%}&{%if wc.FG_MaterialCode == ''%}None{%else%}{{wc.FG_MaterialCode}}{%endif%}" target="_blank">
                               {{wc.FG_MaterialCode|default_if_none:""}}
                               </a>
                             </td>
