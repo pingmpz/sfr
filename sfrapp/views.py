@@ -1544,6 +1544,10 @@ def delete_operation(request):
     if hasNoMoreQty:
         #-- ORDER : STOP
         updateOrderControl(order_no, "STOP")
+    #-- IF NO MORE ROUTING: DELETE ALL THING
+    operationList = getOperationList(order_no)
+    if len(operationList) == 0:
+        deleteAllSFRAndSAPOrder(order_no)
     data = {
         'nextlink' : nextlink,
     }
@@ -3558,6 +3562,23 @@ def deleteEmpAtComputer(emp_id):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "DELETE FROM [EmpAtComputer] WHERE EmpID = '" + str(emp_id) + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteAllSFRAndSAPOrder(order_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [OperationControl] WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "DELETE FROM [OrderControl] WHERE OrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "DELETE FROM [SAP_Routing] WHERE ProductionOrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "DELETE FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
     cursor.execute(sql)
     conn.commit()
     return
