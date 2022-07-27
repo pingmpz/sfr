@@ -474,7 +474,8 @@ def delay_operation(request, fwc):
             else:
                 SFRDelayWorkActualList.append('Error')
         else:
-            SFRDelayWorkActualList.append('Order Not Confirm')
+            release_date = datetime.strptime(getOrder(op.OrderNo).ReleaseDate, '%Y-%m-%d')
+            SFRDelayWorkActualList.append(str((datetime.today() - release_date).days))
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     context = {
         'fwc': fwc,
@@ -1678,6 +1679,9 @@ def validate_routing(request):
     elif work_center.IsRouting == False:
         canUse = False
         invalidText = "This Work Center is not a routing."
+    elif work_center.IsActive == False:
+        canUse = False
+        invalidText = "This Work Center is In-Active."
     else:
         isExt = work_center.IsExternalProcess
     data = {
@@ -2470,7 +2474,7 @@ def getSAPDelayOperationList(fwc):
     sql = """
             SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
 			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate,
-            DATEDIFF(DAY, CONVERT(DATE, SO.DateGetFromSAP), GETDATE()) AS Actual_Work, SO.FG_Drawing
+            DATEDIFF(DAY, CONVERT(DATE, SO.ReleaseDate, 104), GETDATE()) AS Actual_Work, SO.FG_Drawing
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
             WHERE ProductionOrderNo IN (SELECT ProductionOrderNo FROM SAP_Order AS SO LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo WHERE OC.OrderNo IS NULL)
             GROUP BY ProductionOrderNo) AS TB ON RT.ProductionOrderNo = TB.ProductionOrderNo AND RT.OperationNumber = TB.OperationNumber

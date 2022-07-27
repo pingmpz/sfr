@@ -103,7 +103,7 @@
                             <tr>
                               <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
                               <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
-                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">Order Not Confirm</td>
+                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">{{op.Actual_Work}}</td>
                               <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
                               <td>
                                 <a href="/drawing/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
