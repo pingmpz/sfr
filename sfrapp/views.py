@@ -3633,10 +3633,12 @@ def update_employee_master():
         if i < skip_count:
             continue
         emp_id = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
-        emp_name = "" if ws['B' + str(i)].value == None else ws['B' + str(i)].value
-        section = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
-        costcenter = "" if ws['D' + str(i)].value == None else ws['D' + str(i)].value
-        is_active = 0 if ws['E' + str(i)].value == None else ws['E' + str(i)].value
+        first_name = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
+        last_name = "" if ws['D' + str(i)].value == None else ws['D' + str(i)].value
+        emp_name = first_name + " " + last_name
+        section = "" if ws['E' + str(i)].value == None else ws['E' + str(i)].value
+        costcenter = "" if ws['F' + str(i)].value == None else ws['F' + str(i)].value
+        is_active = 1 if ws['H' + str(i)].value == '01' or str(i)].value == '1' else ws['H' + str(i)].value
         is_active_txt = 'Active' if is_active == 1 else 'InActive'
         # print('# SFR -->', emp_id, '|', emp_name, '(', section, '/', costcenter, ') ::', is_active_txt)
         if emp_id != None:
