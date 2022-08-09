@@ -3638,9 +3638,8 @@ def update_employee_master():
         emp_name = first_name + " " + last_name
         section = "" if ws['E' + str(i)].value == None else ws['E' + str(i)].value
         costcenter = "" if ws['F' + str(i)].value == None else ws['F' + str(i)].value
-        is_active = 1 if ws['H' + str(i)].value == '01' or str(i)].value == '1' else ws['H' + str(i)].value
+        is_active = 1 if ws['H' + str(i)].value == 1 or ws['H' + str(i)].value == '1' else 0
         is_active_txt = 'Active' if is_active == 1 else 'InActive'
-        # print('# SFR -->', emp_id, '|', emp_name, '(', section, '/', costcenter, ') ::', is_active_txt)
         if emp_id != None:
             isExist = isExistOperator(str(emp_id))
             if isExist:
