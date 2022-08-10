@@ -3629,6 +3629,8 @@ def update_employee_master():
     update_emp_count = 0
     error_emp_count = 0
     print("#########################################")
+    print("SFR Employee Update Result")
+    print("#########################################")
     for i in range(ws.max_row + 1):
         if i < skip_count:
             continue
@@ -3639,7 +3641,7 @@ def update_employee_master():
         section = "" if ws['E' + str(i)].value == None else ws['E' + str(i)].value
         costcenter = "" if ws['F' + str(i)].value == None else ws['F' + str(i)].value
         is_active = 1 if ws['H' + str(i)].value == 1 or ws['H' + str(i)].value == '1' else 0
-        is_active_txt = 'Active' if is_active == 1 else 'InActive'
+        is_active_txt = 'Active' if is_active == 1 else 'In-Active'
         if emp_id != None:
             isExist = isExistOperator(str(emp_id))
             if isExist:
