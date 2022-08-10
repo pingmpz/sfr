@@ -3635,9 +3635,10 @@ def update_employee_master():
         if i < skip_count:
             continue
         emp_id = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
-        first_name = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
+        emp_name = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
         last_name = "" if ws['D' + str(i)].value == None else ws['D' + str(i)].value
-        emp_name = first_name + " " + last_name
+        if last_name != "" and last_name != "-":
+            emp_name = emp_name + " " + last_name
         section = "" if ws['E' + str(i)].value == None else ws['E' + str(i)].value
         costcenter = "" if ws['F' + str(i)].value == None else ws['F' + str(i)].value
         is_active = 1 if ws['H' + str(i)].value == 1 or ws['H' + str(i)].value == '1' else 0
