@@ -2472,7 +2472,7 @@ def getCanceledOrderList(ftype, fdate, fmonth, fstartdate, fstopdate):
 def getSAPDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
-            SELECT RT.ProductionOrderNo, RT.OperationNumber, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
+            SELECT RT.ProductionOrderNo, RT.OperationNumber, RT.WorkCenter, SO.FG_MaterialCode, SO.ProductionOrderQuatity, SO.SalesOrderNo, SO.DrawingNo, RequestDate,
 			CASE RequestDate WHEN '00.00.0000' THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate, 104)), GETDATE()) END AS DelayFromRequestDate,
             DATEDIFF(DAY, CONVERT(DATE, SO.ReleaseDate, 104), GETDATE()) AS Actual_Work, SO.FG_Drawing
             FROM SAP_Routing AS RT INNER JOIN (SELECT ProductionOrderNo, MIN(OperationNumber) AS OperationNumber FROM SAP_Routing
@@ -2488,7 +2488,7 @@ def getSAPDelayOperationList(fwc):
 def getSFRDelayOperationList(fwc):
     cursor = get_connection().cursor()
     sql = """
-            SELECT OPC.OrderNo, OPC.OperationNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
+            SELECT OPC.OrderNo, OPC.OperationNo, OPC.WorkCenterNo, (ProcessQty - (AcceptedQty + RejectedQty)) AS RemainingQty, OC.Note AS OrderNote, OPC.Note AS OperationNote,
             CASE RequestDate WHEN NULL THEN 9999 ELSE DATEDIFF(DAY, CONVERT(DATE, CONVERT(DATETIME, RequestDate)), GETDATE()) END AS DelayFromRequestDate,
             DATEDIFF(DAY, CONVERT(DATE, OPC.ProcessStart), GETDATE()) AS Actual_Work, OPC.ProcessStart, FG_MaterialCode, FG_Drawing, SalesOrderNo, DrawingNo, ProcessQty, RequestDate, OPC.DateGetFromSAP, OC.DateGetFromSAP AS Order_DGFS
             FROM OperationControl AS OPC INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
