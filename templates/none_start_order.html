@@ -81,7 +81,7 @@
                               {{order.FG_MaterialCode|default_if_none:""}}
                               </a>
                             </td>
-                            <td data-order="{{req_dates|index:forloop.counter0|date:"U"}}">{{req_dates|index:forloop.counter0|default_if_none:""|date:"d/m/Y"}}</td>
+                            <td data-order="{{req_dates|index:forloop.counter0|date:"U"}}">{{req_dates|index:forloop.counter0|default_if_none:""|date:"M d, Y"}}</td>
                             <td>{% if order.OrderNo != None %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
                             <td data-order="{{order.DateGetFromSAP|date:"U"}}">{{order.DateGetFromSAP|default_if_none:""}}</td>
                             <td>{{order.DateGetFromSAP|naturaltime|default_if_none:""}}</td>
