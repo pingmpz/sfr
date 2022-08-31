@@ -496,8 +496,15 @@ def none_working_wc(request):
 
 def none_start_order(request):
     noneStartOrderList = getNoneStartOrderList()
+    req_dates = []
+    for ord in noneStartOrderList:
+        if ord.RequestDate and ord.RequestDate != '00.00.0000' and ord.RequestDate != '' and ord.RequestDate != ' ':
+            req_dates.append(datetime.strptime(ord.RequestDate, '%d.%m.%Y'))
+        else:
+            req_dates.append(None)
     context = {
         'noneStartOrderList': noneStartOrderList,
+        'req_dates': req_dates,
     }
     return render(request, 'none_start_order.html', context)
 
@@ -2344,7 +2351,7 @@ def getSAPDuplicateRoutingList():
 def getNoneStartOrderList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT ProductionOrderNo, OrderNo, SO.FG_MaterialCode, SO.FG_Drawing, SO.DateGetFromSAP FROM SAP_Order AS SO
+            SELECT ProductionOrderNo, OrderNo, SO.FG_MaterialCode, SO.RequestDate, SO.FG_Drawing, SO.DateGetFromSAP FROM SAP_Order AS SO
             LEFT JOIN OrderControl AS OC ON SO.ProductionOrderNo = OC.OrderNo
             WHERE (OC.OrderNo IS NULL OR (OC.ProcessStart IS NULL)) AND ProductionOrderNo NOT IN (SELECT OrderNo From CanceledOrder)
           """
