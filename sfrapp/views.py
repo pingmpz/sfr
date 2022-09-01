@@ -78,6 +78,14 @@ def transaction(request, orderoprno):
     materialGroupList = [] #-- All
     purchaseGroupList = [] #-- All
     currencyList = [] #-- All
+
+    actual_setup_time = 0
+    actual_oper_time = 0
+    actual_labor_time = 0
+    setup_time_percent = -1
+    oper_time_percent = -1
+    labor_time_percent = -1
+
     currentOperation = -1
     operationBefore = -1 #-- For Prev Operation Button
     operationAfter = -1 #-- For Next Operation Button
@@ -185,6 +193,14 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
+                #-- ACTUAL TIME
+                actual_time = getActualTime(orderNo, operationNo)
+                actual_setup_time = int(actual_time.Setup)
+                actual_oper_time = int(actual_time.Oper)
+                actual_labor_time = int(actual_time.Labor)
+                setup_time_percent = -1 if int(operation.EstSetupTime) == 0 else int(actual_setup_time/int(operation.EstSetupTime) * 100)
+                oper_time_percent = -1 if int(operation.EstOperationTime) == 0 else int(actual_oper_time/int(operation.EstOperationTime) * 100)
+                labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
             # else:
             #     deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
@@ -219,6 +235,12 @@ def transaction(request, orderoprno):
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
         'currencyList' : currencyList,
+        'actual_setup_time': actual_setup_time,
+        'actual_oper_time': actual_oper_time,
+        'actual_labor_time': actual_labor_time,
+        'setup_time_percent': setup_time_percent,
+        'oper_time_percent': oper_time_percent,
+        'labor_time_percent': labor_time_percent,
         'currentOperation' : currentOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -2813,6 +2835,12 @@ def getNotFixedOvertime(operator_id):
 def getFirstConfirmTime(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM HistoryConfirm WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY ConfirmDateTime"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getActualTime(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(Setup) AS Setup , SUM(Oper) AS Oper, SUM(Labor) AS Labor  FROM HistoryOperate WHERE OrderNo = '" + str(order_no) + "' AND OperationNo = '" + str(operation_no) + "' GROUP BY OrderNo"
     cursor.execute(sql)
     return cursor.fetchone()
 
