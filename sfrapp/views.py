@@ -205,7 +205,7 @@ def transaction(request, orderoprno):
                     labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
                 if setup_time_percent > 100 or oper_time_percent > 100 or labor_time_percent > 100:
                     is_over_est_time = True
-                if (actual_setup_time > 0 and int(operation.EstSetupTime) == 0) or (actual_oper_time > 0 and int(operation.EstOperationTime) == 0) and (actual_labor_time > 0 and int(operation.EstLaborTime) == 0):
+                if (actual_setup_time > 0 and int(operation.EstSetupTime) == 0) or (actual_oper_time > 0 and int(operation.EstOperationTime) == 0) or (actual_labor_time > 0 and int(operation.EstLaborTime) == 0):
                     is_over_est_time = True
             # else:
             #     deleteOrderControl(orderNo)

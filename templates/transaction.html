@@ -505,7 +505,7 @@
                               </table>
                             </div>
                             <!-- Over Estimate Time Tab -->
-                            <div class="tab-pane small {% if operation.OverEstNote|default_if_none:"" == "" %}active{% endif %}" id="over-est-tab" role="tabpanel">
+                            <div class="tab-pane small {% if is_over_est_time and operation.OverEstNote|default_if_none:"" == "" %}active{% endif %}" id="over-est-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
