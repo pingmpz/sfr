@@ -78,13 +78,14 @@ def transaction(request, orderoprno):
     materialGroupList = [] #-- All
     purchaseGroupList = [] #-- All
     currencyList = [] #-- All
-
+    #-- OVER EST TIME
     actual_setup_time = 0
     actual_oper_time = 0
     actual_labor_time = 0
     setup_time_percent = -1
     oper_time_percent = -1
     labor_time_percent = -1
+    is_over_est_time = False
 
     currentOperation = -1
     operationBefore = -1 #-- For Prev Operation Button
@@ -193,14 +194,17 @@ def transaction(request, orderoprno):
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
-                #-- ACTUAL TIME
+                #-- OVER EST TIME
                 actual_time = getActualTime(orderNo, operationNo)
-                actual_setup_time = int(actual_time.Setup)
-                actual_oper_time = int(actual_time.Oper)
-                actual_labor_time = int(actual_time.Labor)
-                setup_time_percent = -1 if int(operation.EstSetupTime) == 0 else int(actual_setup_time/int(operation.EstSetupTime) * 100)
-                oper_time_percent = -1 if int(operation.EstOperationTime) == 0 else int(actual_oper_time/int(operation.EstOperationTime) * 100)
-                labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
+                if actual_time != None:
+                    actual_setup_time = int(actual_time.Setup)
+                    actual_oper_time = int(actual_time.Oper)
+                    actual_labor_time = int(actual_time.Labor)
+                    setup_time_percent = -1 if int(operation.EstSetupTime) == 0 else int(actual_setup_time/int(operation.EstSetupTime) * 100)
+                    oper_time_percent = -1 if int(operation.EstOperationTime) == 0 else int(actual_oper_time/int(operation.EstOperationTime) * 100)
+                    labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
+                    if setup_time_percent > 100 or oper_time_percent > 100 or labor_time_percent > 100:
+                        is_over_est_time = True
             # else:
             #     deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
@@ -241,6 +245,7 @@ def transaction(request, orderoprno):
         'setup_time_percent': setup_time_percent,
         'oper_time_percent': oper_time_percent,
         'labor_time_percent': labor_time_percent,
+        'is_over_est_time': is_over_est_time,
         'currentOperation' : currentOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
@@ -1670,6 +1675,14 @@ def save_note(request):
     updateOrderNote(order_no, order_note)
     for i in range(len(operationList)):
         updateOperationNote(order_no, operationList[i].OperationNo, operation_note_list[i])
+    data = {
+    }
+    return JsonResponse(data)
+
+def save_over_est_note(request):
+    order_no = request.GET.get('order_no')
+    over_est_note = request.GET.get('over_est_note').strip()
+    updateOverEstNote(order_no, over_est_note)
     data = {
     }
     return JsonResponse(data)
@@ -3491,6 +3504,14 @@ def updateOperationNote(order_no, operation_no, note):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "UPDATE [OperationControl] SET [Note] = '"+note+"' WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateOverEstNote(order_no, note):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OrderControl] SET [OverEstNote] = '"+ str(note) +"' WHERE OrderNo = '"+ str(order_no) +"'"
     cursor.execute(sql)
     conn.commit()
     return

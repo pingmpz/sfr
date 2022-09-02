@@ -137,9 +137,12 @@
                                 {{operation.OperationNo}} ({{operation.WorkCenterNo}})
                               </a>
                             </li>
-                            <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link small {% if not is_over_est_time %}active{% elif is_over_est_time and order.OverEstNote|default_if_none:"" != "" %}active{% endif %}" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#history-tab" role="tab">History</a></li>
+                            {% if is_over_est_time %}
+                            <li class="nav-item"><a class="nav-link small {% if order.OverEstNote|default_if_none:"" == "" %}active{% endif %}" data-toggle="tab" href="#over-est-tab" role="tab">{% if order.OverEstNote|default_if_none:"" == "" %}<i class="cil cil-warning text-danger"></i>{% else %}<i class="cil cil-check-alt text-success"></i>{% endif %} Over Est. Time</a></li>
+                            {% endif %}
                             {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
                             {% endif %}
@@ -239,21 +242,21 @@
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Actual/Est. Setup Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{% if setup_time_percent != -1 %}{{actual_setup_time}}/{{operation.EstSetupTime.normalize}} ({{setup_time_percent}}%){% else %}{{operation.EstSetupTime.normalize}}{% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime.normalize}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Actual/Est. Operation Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{% if oper_time_percent != -1 %}{{actual_oper_time}}/{{operation.EstOperationTime.normalize}} ({{oper_time_percent}}%){% else %}{{operation.EstOperationTime.normalize}}{% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime.normalize}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Actual/Est. Labor Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{% if labor_time_percent != -1 %}{{actual_labor_time}}/{{operation.EstLaborTime.normalize}} ({{labor_time_percent}}%){% else %}{{operation.EstLaborTime.normalize}}{% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime.normalize}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
@@ -414,7 +417,7 @@
                               </div>
                             </div>
                             <!-- Routing Sheet -->
-                            <div class="tab-pane active small" id="rt-sheet-tab" role="tabpanel">
+                            <div class="tab-pane small {% if not is_over_est_time %}active{% elif is_over_est_time and order.OverEstNote|default_if_none:"" != "" %}active{% endif %}" id="rt-sheet-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
@@ -500,6 +503,51 @@
                                   {% endfor %}
                                 </tbody>
                               </table>
+                            </div>
+                            <!-- Over Estimate Time Tab -->
+                            <div class="tab-pane small {% if order.OverEstNote|default_if_none:"" == "" %}active{% endif %}" id="over-est-tab" role="tabpanel">
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th></th>
+                                    <th class="text-right">
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_over_est_note()" id="open_over_est_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_over_est_note()" id="save_over_est_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
+                                      <button type="button" class="btn btn-sm btn-pill btn-link" onclick="close_over_est_note()" id="close_over_est_note_button" hidden><strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong></button>
+                                      &nbsp;
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                    <td>Reason</td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="over_est_note" readonly>{{order.OverEstNote|default_if_none:""}}</textarea></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              <div class="form-group row mx-1">
+                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
+                                <div class="col-md-7">
+                                  <input type="text" class="form-control form-control-sm {% if setup_time_percent > 100 %}text-danger{% endif %}"
+                                  value="{{operation.EstSetupTime.normalize}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row mx-1">
+                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
+                                <div class="col-md-7">
+                                  <input type="text" class="form-control form-control-sm {% if oper_time_percent > 100 %}text-danger{% endif %}"
+                                  value="{{operation.EstOperationTime.normalize}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
+                                </div>
+                              </div>
+                              <div class="form-group row mx-1">
+                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
+                                <div class="col-md-7">
+                                  <input type="text" class="form-control form-control-sm {% if labor_time_percent > 100 %}text-danger{% endif %}"
+                                  value="{{operation.EstLaborTime.normalize}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
+                                </div>
+                              </div>
+
                             </div>
                             <!-- History Tab -->
                             <div class="tab-pane" id="history-tab" role="tabpanel">
@@ -3161,6 +3209,40 @@
             'order_no': order_no,
             'order_note': order_note,
             'operation_note_list': operation_note_list,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+    </script>
+    <!-- OVER EST. NOTE -->
+    <script>
+      function open_over_est_note(){
+        $("#over_est_note").prop("readonly", false);
+        $("#save_over_est_note_button").prop("hidden", false);
+        $("#close_over_est_note_button").prop("hidden", false);
+        $("#open_over_est_note_button").prop("hidden", true);
+      }
+
+      function close_over_est_note(){
+        $("#over_est_note").prop("readonly", true);
+        $("#save_over_est_note_button").prop("hidden", true);
+        $("#close_over_est_note_button").prop("hidden", true);
+        $("#open_over_est_note_button").prop("hidden", false);
+      }
+
+      function save_over_est_note(){
+        $("#save_over_est_note_button").prop("hidden", true);
+        $("#close_over_est_note_button").prop("hidden", true);
+        var order_no = $("#order_no").val();
+        var over_est_note = $("#over_est_note").val();
+        $.ajax({
+          url: '/save_over_est_note/',
+          data: {
+            'order_no': order_no,
+            'over_est_note': over_est_note,
           },
           dataType: 'json',
           success: function (data) {
