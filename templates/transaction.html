@@ -137,11 +137,11 @@
                                 {{operation.OperationNo}} ({{operation.WorkCenterNo}})
                               </a>
                             </li>
-                            <li class="nav-item"><a class="nav-link small {% if not is_over_est_time %}active{% elif is_over_est_time and order.OverEstNote|default_if_none:"" != "" %}active{% endif %}" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
+                            <li class="nav-item"><a class="nav-link small {% if not is_over_est_time %}active{% elif is_over_est_time and operation.OverEstNote|default_if_none:"" != "" %}active{% endif %}" data-toggle="tab" href="#rt-sheet-tab" role="tab">Routing Sheet ({{operationList|length}})</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#note-tab" role="tab">Note</a></li>
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#history-tab" role="tab">History</a></li>
                             {% if is_over_est_time %}
-                            <li class="nav-item"><a class="nav-link small {% if order.OverEstNote|default_if_none:"" == "" %}active{% endif %}" data-toggle="tab" href="#over-est-tab" role="tab">{% if order.OverEstNote|default_if_none:"" == "" %}<i class="cil cil-warning text-danger"></i>{% else %}<i class="cil cil-check-alt text-success"></i>{% endif %} Over Est. Time</a></li>
+                            <li class="nav-item"><a class="nav-link small {% if operation.OverEstNote|default_if_none:"" == "" %}active{% endif %}" data-toggle="tab" href="#over-est-tab" role="tab">{% if operation.OverEstNote|default_if_none:"" == "" %}<i class="cil cil-warning text-danger"></i>{% else %}<i class="cil cil-check-alt text-success"></i>{% endif %} Over Est. Time</a></li>
                             {% endif %}
                             {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
@@ -417,7 +417,7 @@
                               </div>
                             </div>
                             <!-- Routing Sheet -->
-                            <div class="tab-pane small {% if not is_over_est_time %}active{% elif is_over_est_time and order.OverEstNote|default_if_none:"" != "" %}active{% endif %}" id="rt-sheet-tab" role="tabpanel">
+                            <div class="tab-pane small {% if not is_over_est_time %}active{% elif is_over_est_time and operation.OverEstNote|default_if_none:"" != "" %}active{% endif %}" id="rt-sheet-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
@@ -505,7 +505,7 @@
                               </table>
                             </div>
                             <!-- Over Estimate Time Tab -->
-                            <div class="tab-pane small {% if order.OverEstNote|default_if_none:"" == "" %}active{% endif %}" id="over-est-tab" role="tabpanel">
+                            <div class="tab-pane small {% if operation.OverEstNote|default_if_none:"" == "" %}active{% endif %}" id="over-est-tab" role="tabpanel">
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
@@ -521,7 +521,7 @@
                                 <tbody>
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>Reason</td>
-                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="over_est_note" readonly>{{order.OverEstNote|default_if_none:""}}</textarea></td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="over_est_note" readonly>{{operation.OverEstNote|default_if_none:""}}</textarea></td>
                                   </tr>
                                 </tbody>
                               </table>

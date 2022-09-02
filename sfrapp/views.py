@@ -858,6 +858,21 @@ def con_operation(request, fwc, fmonth):
     }
     return render(request, 'con_operation.html', context)
 
+def over_est_operation(request, fwc, fmonth):
+    workCenterList = getWorkCenterRoutingList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    context = {
+        'fwc': fwc,
+        'fmonth': fmonth,
+        'workCenterList': workCenterList,
+        'overEstOperationList': overEstOperationList,
+    }
+    return render(request, 'over_est_operation.html', context)
+
 def zpp02(request):
 
     context = {
@@ -1681,8 +1696,9 @@ def save_note(request):
 
 def save_over_est_note(request):
     order_no = request.GET.get('order_no')
+    operation_no = request.GET.get('operation_no')
     over_est_note = request.GET.get('over_est_note').strip()
-    updateOverEstNote(order_no, over_est_note)
+    updateOverEstNote(order_no, operation_no, over_est_note)
     data = {
     }
     return JsonResponse(data)
@@ -2693,6 +2709,20 @@ def getConfirmOperationList(fwc, fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getOverEstOperationList(fwc, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, ORD.FG_MaterialCode, ORD.FG_Drawing, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
+    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
+    sql += " INNER JOIN OrderControl AS ORD ON HC.OrderNo = ORD.OrderNo"
+    sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
+    sql += " WHERE month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
+    if fwc != 'ALL':
+        sql += " AND OPC1.WorkCenterNo = '"+fwc+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getEmpAtComputerList(ip_address):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM EmpAtComputer WHERE IPAddress = '"+ ip_address +"' ORDER BY DateTimeStamp DESC"
@@ -3508,10 +3538,10 @@ def updateOperationNote(order_no, operation_no, note):
     conn.commit()
     return
 
-def updateOverEstNote(order_no, note):
+def updateOverEstNote(order_no,  operation_no, note):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [OrderControl] SET [OverEstNote] = '"+ str(note) +"' WHERE OrderNo = '"+ str(order_no) +"'"
+    sql = "UPDATE [OperationControl] SET [OverEstNote] = '"+ str(note) +"' WHERE OrderNo = '"+ str(order_no) +"' AND OperationNo = '" + str(operation_no) + "'"
     cursor.execute(sql)
     conn.commit()
     return
