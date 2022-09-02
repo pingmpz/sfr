@@ -203,8 +203,10 @@ def transaction(request, orderoprno):
                     setup_time_percent = -1 if int(operation.EstSetupTime) == 0 else int(actual_setup_time/int(operation.EstSetupTime) * 100)
                     oper_time_percent = -1 if int(operation.EstOperationTime) == 0 else int(actual_oper_time/int(operation.EstOperationTime) * 100)
                     labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
-                    if setup_time_percent > 100 or oper_time_percent > 100 or labor_time_percent > 100:
-                        is_over_est_time = True
+                if setup_time_percent > 100 or oper_time_percent > 100 or labor_time_percent > 100:
+                    is_over_est_time = True
+                if (actual_setup_time > 0 and int(operation.EstSetupTime) == 0) or (actual_oper_time > 0 and int(operation.EstOperationTime) == 0) and (actual_labor_time > 0 and int(operation.EstLaborTime) == 0):
+                    is_over_est_time = True
             # else:
             #     deleteOrderControl(orderNo)
     printString(orderNo + "-" + operationNo + " (" + state + ")")
@@ -864,7 +866,8 @@ def over_est_operation(request, fwc, fmonth):
         fwc = workCenterList[0].WorkCenterNo
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    # overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    overEstOperationList = []
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
@@ -2696,20 +2699,6 @@ def getLastProcessStopOrderNotStop():
     return cursor.fetchall()
 
 def getConfirmOperationList(fwc, fmonth):
-    year = fmonth[0:4]
-    month = fmonth[5:7]
-    cursor = get_connection().cursor()
-    sql = "SELECT ConfirmDateTime, OPC1.WorkCenterNo, ORD.FG_MaterialCode, ORD.FG_Drawing, HC.OrderNo, HC.OperationNo, EmpID, OPC1.ProcessQty, HC.AcceptedQty, HC.RejectedQty, RejectReason, ScrapAt, OPC2.WorkCenterNo  As ScrapAtWorkCenter"
-    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OPC1 ON HC.OrderNo = OPC1.OrderNo AND HC.OperationNo = OPC1.OperationNo"
-    sql += " INNER JOIN OrderControl AS ORD ON HC.OrderNo = ORD.OrderNo"
-    sql += " LEFT JOIN OperationControl AS OPC2 ON HC.OrderNo = OPC2.OrderNo AND HC.ScrapAt = OPC2.OperationNo"
-    sql += " WHERE month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
-    if fwc != 'ALL':
-        sql += " AND OPC1.WorkCenterNo = '"+fwc+"'"
-    cursor.execute(sql)
-    return cursor.fetchall()
-
-def getOverEstOperationList(fwc, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()

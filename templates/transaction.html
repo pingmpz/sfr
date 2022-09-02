@@ -529,21 +529,21 @@
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if setup_time_percent > 100 %}text-danger{% endif %}"
+                                  <input type="text" class="form-control form-control-sm {% if setup_time_percent > 100 %}text-danger{% elif operation.EstSetupTime.normalize == 0 and actual_setup_time > 0 %}text-danger{% endif %}"
                                   value="{{operation.EstSetupTime.normalize}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if oper_time_percent > 100 %}text-danger{% endif %}"
+                                  <input type="text" class="form-control form-control-sm {% if oper_time_percent > 100 %}text-danger{% elif operation.EstOperationTime.normalize == 0 and actual_oper_time > 0 %}text-danger{% endif %}"
                                   value="{{operation.EstOperationTime.normalize}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if labor_time_percent > 100 %}text-danger{% endif %}"
+                                  <input type="text" class="form-control form-control-sm {% if labor_time_percent > 100 %}text-danger{% elif operation.EstLaborTime.normalize == 0 and actual_labor_time > 0 %}text-danger{% endif %}"
                                   value="{{operation.EstLaborTime.normalize}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
@@ -3237,11 +3237,13 @@
         $("#save_over_est_note_button").prop("hidden", true);
         $("#close_over_est_note_button").prop("hidden", true);
         var order_no = $("#order_no").val();
+        var operation_no = $('#operation_no').val();
         var over_est_note = $("#over_est_note").val();
         $.ajax({
           url: '/save_over_est_note/',
           data: {
             'order_no': order_no,
+            'operation_no': operation_no,
             'over_est_note': over_est_note,
           },
           dataType: 'json',
