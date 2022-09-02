@@ -82,6 +82,9 @@ def transaction(request, orderoprno):
     actual_setup_time = 0
     actual_oper_time = 0
     actual_labor_time = 0
+    est_setup_time_sum = 0
+    est_oper_time_sum = 0
+    est_labor_time_sum = 0
     setup_time_percent = -1
     oper_time_percent = -1
     labor_time_percent = -1
@@ -195,17 +198,18 @@ def transaction(request, orderoprno):
                 purchaseGroupList = getPurchaseGroupList()
                 currencyList = getCurrencyList()
                 #-- OVER EST TIME
+                est_setup_time_sum = int(operation.EstSetupTime) * int(operation.ProcessQty)
+                est_oper_time_sum = int(operation.EstOperationTime) * int(operation.ProcessQty)
+                est_labor_time_sum = int(operation.EstLaborTime) * int(operation.ProcessQty)
                 actual_time = getActualTime(orderNo, operationNo)
                 if actual_time != None:
                     actual_setup_time = int(actual_time.Setup)
                     actual_oper_time = int(actual_time.Oper)
                     actual_labor_time = int(actual_time.Labor)
-                    setup_time_percent = -1 if int(operation.EstSetupTime) == 0 else int(actual_setup_time/int(operation.EstSetupTime) * 100)
-                    oper_time_percent = -1 if int(operation.EstOperationTime) == 0 else int(actual_oper_time/int(operation.EstOperationTime) * 100)
-                    labor_time_percent = -1 if int(operation.EstLaborTime) == 0 else int(actual_labor_time/int(operation.EstLaborTime) * 100)
-                if setup_time_percent > 100 or oper_time_percent > 100 or labor_time_percent > 100:
-                    is_over_est_time = True
-                if (actual_setup_time > 0 and int(operation.EstSetupTime) == 0) or (actual_oper_time > 0 and int(operation.EstOperationTime) == 0) or (actual_labor_time > 0 and int(operation.EstLaborTime) == 0):
+                    setup_time_percent = -1 if est_setup_time_sum == 0 else int(actual_setup_time/est_setup_time_sum * 100)
+                    oper_time_percent = -1 if est_oper_time_sum == 0 else int(actual_oper_time/est_oper_time_sum * 100)
+                    labor_time_percent = -1 if est_labor_time_sum == 0 else int(actual_labor_time/est_labor_time_sum * 100)
+                if (actual_setup_time > est_setup_time_sum) or (actual_oper_time > est_oper_time_sum) or (actual_labor_time > est_labor_time_sum):
                     is_over_est_time = True
             # else:
             #     deleteOrderControl(orderNo)
@@ -244,6 +248,9 @@ def transaction(request, orderoprno):
         'actual_setup_time': actual_setup_time,
         'actual_oper_time': actual_oper_time,
         'actual_labor_time': actual_labor_time,
+        'est_setup_time_sum': est_setup_time_sum,
+        'est_oper_time_sum': est_oper_time_sum,
+        'est_labor_time_sum': est_labor_time_sum,
         'setup_time_percent': setup_time_percent,
         'oper_time_percent': oper_time_percent,
         'labor_time_percent': labor_time_percent,

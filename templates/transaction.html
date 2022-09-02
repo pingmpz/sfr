@@ -242,21 +242,21 @@
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Setup Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime.normalize}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_setup_time" value="{{operation.EstSetupTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Operation Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime.normalize}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_operate_time" value="{{operation.EstOperationTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>Est. Labor Time</strong></label>
                                     <div class="col-md-7">
-                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime.normalize}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
+                                      <input class="form-control form-control-sm" type="text" id="est_labor_time" value="{{operation.EstLaborTime.normalize}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
@@ -529,22 +529,22 @@
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if setup_time_percent > 100 %}text-danger{% elif operation.EstSetupTime.normalize == 0 and actual_setup_time > 0 %}text-danger{% endif %}"
-                                  value="{{operation.EstSetupTime.normalize}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
+                                  <input type="text" class="form-control form-control-sm {% if actual_setup_time > est_setup_time_sum %}text-danger{% endif %}"
+                                  value="{{est_setup_time_sum}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if oper_time_percent > 100 %}text-danger{% elif operation.EstOperationTime.normalize == 0 and actual_oper_time > 0 %}text-danger{% endif %}"
-                                  value="{{operation.EstOperationTime.normalize}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
+                                  <input type="text" class="form-control form-control-sm {% if actual_oper_time > est_oper_time_sum %}text-danger{% endif %}"
+                                  value="{{est_oper_time_sum}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
                               <div class="form-group row mx-1">
                                 <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
                                 <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if labor_time_percent > 100 %}text-danger{% elif operation.EstLaborTime.normalize == 0 and actual_labor_time > 0 %}text-danger{% endif %}"
-                                  value="{{operation.EstLaborTime.normalize}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
+                                  <input type="text" class="form-control form-control-sm {% if actual_labor_time > est_labor_time_sum %}text-danger{% endif %}"
+                                  value="{{est_labor_time_sum}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
                                 </div>
                               </div>
 
