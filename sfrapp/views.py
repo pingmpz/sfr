@@ -874,9 +874,13 @@ def over_est_operation(request, fwc, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    temp = []
     est_setup_sum = []
     est_oper_sum = []
     est_labor_sum = []
+    actual_setup = []
+    actual_oper = []
+    actual_labor = []
     setup_percent = []
     oper_percent = []
     labor_percent = []
@@ -887,24 +891,24 @@ def over_est_operation(request, fwc, fmonth):
         est_setup_sum.append(est_setup)
         est_oper_sum.append(est_oper)
         est_labor_sum.append(est_labor)
-        actual_setup = op.ActualSetup if op.ActualSetup else 0
-        actual_oper = op.ActualOper if op.ActualOper else 0
-        actual_labor = op.ActualLabor if op.ActualLabor else 0
-
+        act_setup = op.ActualSetup if op.ActualSetup else 0
+        act_oper = op.ActualOper if op.ActualOper else 0
+        act_labor = op.ActualLabor if op.ActualLabor else 0
+        actual_setup.append(int(act_setup))
+        actual_oper.append(int(act_oper))
+        actual_labor.append(int(act_labor))
         if est_setup > 0:
-            setup_per = int(actual_setup / (op.EstSetupTime * op.ProcessQty) * 100)
+            setup_per = int(act_setup / (op.EstSetupTime * op.ProcessQty) * 100)
             setup_percent.append(str(setup_per) + "%")
         else:
             setup_percent.append("-")
-
         if est_oper > 0:
-            oper_per = int(actual_oper / (op.EstOperationTime * op.ProcessQty) * 100)
+            oper_per = int(act_oper / (op.EstOperationTime * op.ProcessQty) * 100)
             oper_percent.append(str(oper_per) + "%")
         else:
             oper_percent.append("-")
-
         if est_labor > 0:
-            labor_per = int(actual_labor / (op.EstLaborTime * op.ProcessQty) * 100)
+            labor_per = int(act_labor / (op.EstLaborTime * op.ProcessQty) * 100)
             labor_percent.append(str(labor_per) + "%")
         else:
             labor_percent.append("-")
@@ -917,6 +921,9 @@ def over_est_operation(request, fwc, fmonth):
         'est_setup_sum': est_setup_sum,
         'est_oper_sum': est_oper_sum,
         'est_labor_sum': est_labor_sum,
+        'actual_setup': actual_setup,
+        'actual_oper': actual_oper,
+        'actual_labor': actual_labor,
         'setup_percent': setup_percent,
         'oper_percent': oper_percent,
         'labor_percent': labor_percent,

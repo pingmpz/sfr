@@ -43,7 +43,7 @@
         <div class="c-subheader justify-content-between px-3">
           <!-- Breadcrumb-->
           <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
-            <li class="breadcrumb-item">Over Est. Time Operation ({{overEstOperationList|length}})</li>
+            <li class="breadcrumb-item">Over Est. Time Operation</li>
             <!-- Breadcrumb Menu-->
             <!-- <li class="breadcrumb-item active"></li> -->
           </ol>
@@ -85,20 +85,21 @@
                           <tr>
                             <!-- SETUP -->
                             <th>Est. Time</th>
-                            <th>Actual Time</th>
+                            <th>Act. Time</th>
                             <th>%</th>
                             <!-- OPER -->
                             <th>Est. Time</th>
-                            <th>Actual Time</th>
+                            <th>Act. Time</th>
                             <th>%</th>
                             <!-- LABOR -->
                             <th>Est. Time</th>
-                            <th>Actual Time</th>
+                            <th>Act. Time</th>
                             <th>%</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for op in overEstOperationList %}
+                            {% if est_setup_sum|index:forloop.counter0 < actual_setup|index:forloop.counter0 or est_oper_sum|index:forloop.counter0 < actual_oper|index:forloop.counter0 or est_labor_sum|index:forloop.counter0 < actual_labor|index:forloop.counter0 %}
                             <tr style="background-color:#f{{op.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:10}}">
                               <td data-order="{{op.ProcessStop|date:"U"}}">{{op.ProcessStop}}</td>
                               <td>{{op.WorkCenterNo}}</td>
@@ -110,24 +111,25 @@
                               </td> -->
                               <!-- SETUP -->
                               <td>{{est_setup_sum|index:forloop.counter0}}</td>
-                              <td class="{% if op.ActualSetup and est_setup_sum|index:forloop.counter0 < op.ActualSetup %}text-danger{% endif %}">
-                                {% if op.ActualSetup %}{{op.ActualSetup.normalize}}{% else %}0{% endif %}
+                              <td class="{% if est_setup_sum|index:forloop.counter0 < actual_setup|index:forloop.counter0 %}text-danger{% endif %}">
+                                {{actual_setup|index:forloop.counter0}}
                               </td>
                               <td>{{setup_percent|index:forloop.counter0}}</td>
                               <!-- OPER -->
                               <td>{{est_oper_sum|index:forloop.counter0}}</td>
-                              <td class="{% if op.ActualOper and est_oper_sum|index:forloop.counter0 < op.ActualOper %}text-danger{% endif %}">
-                                {% if op.ActualOper %}{{op.ActualOper.normalize}}{% else %}0{% endif %}
+                              <td class="{% if est_oper_sum|index:forloop.counter0 < actual_oper|index:forloop.counter0 %}text-danger{% endif %}">
+                                {{actual_oper|index:forloop.counter0}}
                               </td>
                               <td>{{oper_percent|index:forloop.counter0}}</td>
                               <!-- LABOR -->
                               <td>{{est_labor_sum|index:forloop.counter0}}</td>
-                              <td class="{% if op.ActualLabor and est_labor_sum|index:forloop.counter0 < op.ActualLabor %}text-danger{% endif %}">
-                                {% if op.ActualLabor %}{{op.ActualLabor.normalize}}{% else %}0{% endif %}
+                              <td class="{% if est_labor_sum|index:forloop.counter0 < actual_labor|index:forloop.counter0 %}text-danger{% endif %}">
+                                {{actual_labor|index:forloop.counter0}}
                               </td>
                               <td>{{labor_percent|index:forloop.counter0}}</td>
                               <td>{{op.OverEstNote|default_if_none:""}}</td>
                             </tr>
+                            {% endif %}
                           {% endfor %}
                         </tbody>
                       </table>
