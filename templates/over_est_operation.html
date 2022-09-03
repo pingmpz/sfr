@@ -111,19 +111,19 @@
                               </td> -->
                               <!-- SETUP -->
                               <td>{{est_setup_sum|index:forloop.counter0}}</td>
-                              <td class="{% if est_setup_sum|index:forloop.counter0 < actual_setup|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="{% if red_setup|index:forloop.counter0 %}text-danger{% endif %}">
                                 {{actual_setup|index:forloop.counter0}}
                               </td>
                               <td>{{setup_percent|index:forloop.counter0}}</td>
                               <!-- OPER -->
                               <td>{{est_oper_sum|index:forloop.counter0}}</td>
-                              <td class="{% if est_oper_sum|index:forloop.counter0 < actual_oper|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="{% if red_oper|index:forloop.counter0 %}text-danger{% endif %}">
                                 {{actual_oper|index:forloop.counter0}}
                               </td>
                               <td>{{oper_percent|index:forloop.counter0}}</td>
                               <!-- LABOR -->
                               <td>{{est_labor_sum|index:forloop.counter0}}</td>
-                              <td class="{% if est_labor_sum|index:forloop.counter0 < actual_labor|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="{% if red_labor|index:forloop.counter0 %}text-danger{% endif %}">
                                 {{actual_labor|index:forloop.counter0}}
                               </td>
                               <td>{{labor_percent|index:forloop.counter0}}</td>

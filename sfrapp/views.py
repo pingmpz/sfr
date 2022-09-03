@@ -874,7 +874,7 @@ def over_est_operation(request, fwc, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     overEstOperationList = getOverEstOperationList(fwc, fmonth)
-    temp = []
+    rate = 1.5
     est_setup_sum = []
     est_oper_sum = []
     est_labor_sum = []
@@ -884,6 +884,9 @@ def over_est_operation(request, fwc, fmonth):
     setup_percent = []
     oper_percent = []
     labor_percent = []
+    red_setup = []
+    red_oper = []
+    red_labor = []
     for op in overEstOperationList:
         est_setup = int(op.EstSetupTime * op.ProcessQty)
         est_oper = int(op.EstOperationTime * op.ProcessQty)
@@ -912,7 +915,9 @@ def over_est_operation(request, fwc, fmonth):
             labor_percent.append(str(labor_per) + "%")
         else:
             labor_percent.append("-")
-
+        red_setup.append(True if est_setup == 0 and act_setup > 0 or act_setup > est_setup * rate else False)
+        red_oper.append(True if est_oper == 0 and act_oper > 0 or act_oper > est_oper * rate else False)
+        red_labor.append(True if est_labor == 0 and act_labor > 0 or act_labor > est_labor * rate else False)
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
@@ -927,6 +932,9 @@ def over_est_operation(request, fwc, fmonth):
         'setup_percent': setup_percent,
         'oper_percent': oper_percent,
         'labor_percent': labor_percent,
+        'red_setup': red_setup,
+        'red_oper': red_oper,
+        'red_labor': red_labor,
     }
     return render(request, 'over_est_operation.html', context)
 
