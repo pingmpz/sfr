@@ -70,46 +70,63 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="con_operation_table" style="width: 100%">
+                      <table class="table table-sm table-outline small" id="over_est_operation_table" style="width: 100%">
                         <thead class="thead-light">
                           <tr>
-                            <th>ConfirmDateTime</th>
-                            <th>WorkCenter</th>
-                            <th>Prod. Order - Oper.No</th>
-                            <th>FG_MaterialCode</th>
-                            <th>EmpID</th>
-                            <th>ProcessQty</th>
-                            <th>AcceptedQty</th>
-                            <th>RejectedQty</th>
-                            <th>RejectedReason</th>
+                            <th rowspan="2">ProcessStopDateTime</th>
+                            <th rowspan="2">WorkCenter</th>
+                            <th rowspan="2">Prod. Order - Oper.No</th>
+                            <!-- <th rowspan="2">FG_MaterialCode</th> -->
+                            <th colspan="3" class="text-center" style="boarder">Setup</th>
+                            <th colspan="3" class="text-center">Oper</th>
+                            <th colspan="3" class="text-center">Labor</th>
+                            <th rowspan="2">Over Est. Time Reason</th>
+                          </tr>
+                          <tr>
+                            <!-- SETUP -->
+                            <th>Est. Time</th>
+                            <th>Actual Time</th>
+                            <th>%</th>
+                            <!-- OPER -->
+                            <th>Est. Time</th>
+                            <th>Actual Time</th>
+                            <th>%</th>
+                            <!-- LABOR -->
+                            <th>Est. Time</th>
+                            <th>Actual Time</th>
+                            <th>%</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for con in confirmOperationList %}
-                            <tr style="background-color:#f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:8}}f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:9}}f{{con.ConfirmDateTime|date:'md'|add:'0'|modulo:10}}">
-                              <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
-                              <td>{{con.WorkCenterNo}}</td>
-                              <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
-                              <td>
-                                <a href="/drawing/{%if con.FG_Drawing == '' %}None{%else%}{{con.FG_Drawing}}{%endif%}&{%if con.FG_MaterialCode == ''%}None{%else%}{{con.FG_MaterialCode}}{%endif%}" target="_blank">
-                                {{con.FG_MaterialCode|default_if_none:""}}
+                          {% for op in overEstOperationList %}
+                            <tr style="background-color:#f{{op.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:10}}">
+                              <td data-order="{{op.ProcessStop|date:"U"}}">{{op.ProcessStop}}</td>
+                              <td>{{op.WorkCenterNo}}</td>
+                              <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
+                              <!-- <td>
+                                <a href="/drawing/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{op.FG_MaterialCode|default_if_none:""}}
                                 </a>
+                              </td> -->
+                              <!-- SETUP -->
+                              <td>{{est_setup_sum|index:forloop.counter0}}</td>
+                              <td class="{% if op.ActualSetup and est_setup_sum|index:forloop.counter0 < op.ActualSetup %}text-danger{% endif %}">
+                                {% if op.ActualSetup %}{{op.ActualSetup.normalize}}{% else %}0{% endif %}
                               </td>
-                              <td><a href="/emp/{{con.EmpID}}&NOW">{{con.EmpID}}</a></td>
-                              <td>{{con.ProcessQty.normalize}}</td>
-                              <td>{{con.AcceptedQty.normalize}}</td>
-                              <td>{{con.RejectedQty.normalize}}</td>
-                              <td>
-                                {% if con.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
-                                  {% if con.ScrapAt.strip != '' %}
-                                    SCRAP FROM → {{con.ScrapAt}} ({{con.ScrapAtWorkCenter}})
-                                  {% else %}
-                                    {{con.RejectReason.strip}}
-                                  {% endif %}
-                                {% else %}
-                                  {{con.RejectReason}}
-                                {% endif %}
+                              <td>{{setup_percent|index:forloop.counter0}}</td>
+                              <!-- OPER -->
+                              <td>{{est_oper_sum|index:forloop.counter0}}</td>
+                              <td class="{% if op.ActualOper and est_oper_sum|index:forloop.counter0 < op.ActualOper %}text-danger{% endif %}">
+                                {% if op.ActualOper %}{{op.ActualOper.normalize}}{% else %}0{% endif %}
                               </td>
+                              <td>{{oper_percent|index:forloop.counter0}}</td>
+                              <!-- LABOR -->
+                              <td>{{est_labor_sum|index:forloop.counter0}}</td>
+                              <td class="{% if op.ActualLabor and est_labor_sum|index:forloop.counter0 < op.ActualLabor %}text-danger{% endif %}">
+                                {% if op.ActualLabor %}{{op.ActualLabor.normalize}}{% else %}0{% endif %}
+                              </td>
+                              <td>{{labor_percent|index:forloop.counter0}}</td>
+                              <td>{{op.OverEstNote|default_if_none:""}}</td>
                             </tr>
                           {% endfor %}
                         </tbody>
@@ -156,7 +173,7 @@
       });
 
       $(document).ready(function() {
-        $('#con_operation_table').DataTable( {
+        $('#over_est_operation_table').DataTable( {
             "order": [[ 0, "desc" ]],
             'iDisplayLength': 100,
             dom: 'Bfrtip',
@@ -167,11 +184,11 @@
       });
 
       $('#fwc').change(function() {
-        window.location.href = "/con_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
       });
 
       $('#fmonth').change(function() {
-        window.location.href = "/con_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
       });
 
     </script>

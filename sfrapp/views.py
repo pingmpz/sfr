@@ -873,13 +873,53 @@ def over_est_operation(request, fwc, fmonth):
         fwc = workCenterList[0].WorkCenterNo
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
-    # overEstOperationList = getOverEstOperationList(fwc, fmonth)
-    overEstOperationList = []
+    overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    est_setup_sum = []
+    est_oper_sum = []
+    est_labor_sum = []
+    setup_percent = []
+    oper_percent = []
+    labor_percent = []
+    for op in overEstOperationList:
+        est_setup = int(op.EstSetupTime * op.ProcessQty)
+        est_oper = int(op.EstOperationTime * op.ProcessQty)
+        est_labor = int(op.EstLaborTime * op.ProcessQty)
+        est_setup_sum.append(est_setup)
+        est_oper_sum.append(est_oper)
+        est_labor_sum.append(est_labor)
+        actual_setup = op.ActualSetup if op.ActualSetup else 0
+        actual_oper = op.ActualOper if op.ActualOper else 0
+        actual_labor = op.ActualLabor if op.ActualLabor else 0
+
+        if est_setup > 0:
+            setup_per = int(actual_setup / (op.EstSetupTime * op.ProcessQty) * 100)
+            setup_percent.append(str(setup_per) + "%")
+        else:
+            setup_percent.append("-")
+
+        if est_oper > 0:
+            oper_per = int(actual_oper / (op.EstOperationTime * op.ProcessQty) * 100)
+            oper_percent.append(str(oper_per) + "%")
+        else:
+            oper_percent.append("-")
+
+        if est_labor > 0:
+            labor_per = int(actual_labor / (op.EstLaborTime * op.ProcessQty) * 100)
+            labor_percent.append(str(labor_per) + "%")
+        else:
+            labor_percent.append("-")
+
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
         'workCenterList': workCenterList,
         'overEstOperationList': overEstOperationList,
+        'est_setup_sum': est_setup_sum,
+        'est_oper_sum': est_oper_sum,
+        'est_labor_sum': est_labor_sum,
+        'setup_percent': setup_percent,
+        'oper_percent': oper_percent,
+        'labor_percent': labor_percent,
     }
     return render(request, 'over_est_operation.html', context)
 
@@ -2716,6 +2756,22 @@ def getConfirmOperationList(fwc, fmonth):
     sql += " WHERE month(ConfirmDateTime) = '"+month+"' AND year(ConfirmDateTime) = '"+year+"'"
     if fwc != 'ALL':
         sql += " AND OPC1.WorkCenterNo = '"+fwc+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOverEstOperationList(fwc, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing FROM"
+    sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
+    sql += " AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+    if fwc != 'ALL':
+        sql += " AND WorkCenterNo = '"+fwc+"'"
+    sql += ") AS TB1 LEFT JOIN"
+    sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
+    sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo"
+    print(sql)
     cursor.execute(sql)
     return cursor.fetchall()
 
