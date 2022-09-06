@@ -21,6 +21,7 @@ import wget
 
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
+OVER_EST_RATING = 1.5
 
 #------------------------------------------------------------------------ EMAIL
 
@@ -209,10 +210,10 @@ def transaction(request, orderoprno):
                     setup_time_percent = -1 if est_setup_time_sum == 0 else int(actual_setup_time/est_setup_time_sum * 100)
                     oper_time_percent = -1 if est_oper_time_sum == 0 else int(actual_oper_time/est_oper_time_sum * 100)
                     labor_time_percent = -1 if est_labor_time_sum == 0 else int(actual_labor_time/est_labor_time_sum * 100)
-                if (actual_setup_time > est_setup_time_sum) or (actual_oper_time > est_oper_time_sum) or (actual_labor_time > est_labor_time_sum):
+                if (actual_setup_time > est_setup_time_sum and est_setup_time_sum == 0) or (actual_oper_time > est_oper_time_sum and est_oper_time_sum == 0) or (actual_labor_time > est_labor_time_sum and est_labor_time_sum == 0):
                     is_over_est_time = True
-            # else:
-            #     deleteOrderControl(orderNo)
+                elif (actual_setup_time > est_setup_time_sum * OVER_EST_RATING) or (actual_oper_time > est_oper_time_sum * OVER_EST_RATING) or (actual_labor_time > est_labor_time_sum * OVER_EST_RATING):
+                    is_over_est_time = True
     printString(orderNo + "-" + operationNo + " (" + state + ")")
     context = {
         'empAtComputerList' : empAtComputerList,
@@ -874,7 +875,6 @@ def over_est_operation(request, fwc, fmonth):
     if fmonth == "NOW":
         fmonth = datetime.today().strftime('%Y-%m')
     overEstOperationList = getOverEstOperationList(fwc, fmonth)
-    rate = 1.5
     est_setup_sum = []
     est_oper_sum = []
     est_labor_sum = []
@@ -915,9 +915,9 @@ def over_est_operation(request, fwc, fmonth):
             labor_percent.append(str(labor_per) + "%")
         else:
             labor_percent.append("-")
-        red_setup.append(True if est_setup == 0 and act_setup > 0 or act_setup > est_setup * rate else False)
-        red_oper.append(True if est_oper == 0 and act_oper > 0 or act_oper > est_oper * rate else False)
-        red_labor.append(True if est_labor == 0 and act_labor > 0 or act_labor > est_labor * rate else False)
+        red_setup.append(True if est_setup == 0 and act_setup > 0 or act_setup > est_setup * OVER_EST_RATING else False)
+        red_oper.append(True if est_oper == 0 and act_oper > 0 or act_oper > est_oper * OVER_EST_RATING else False)
+        red_labor.append(True if est_labor == 0 and act_labor > 0 or act_labor > est_labor * OVER_EST_RATING else False)
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
