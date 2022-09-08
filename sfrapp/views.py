@@ -884,6 +884,9 @@ def over_est_operation(request, fwc, fmonth):
     setup_percent = []
     oper_percent = []
     labor_percent = []
+    yellow_setup = []
+    yellow_oper = []
+    yellow_labor = []
     red_setup = []
     red_oper = []
     red_labor = []
@@ -918,6 +921,9 @@ def over_est_operation(request, fwc, fmonth):
         red_setup.append(True if est_setup == 0 and act_setup > 0 or act_setup > est_setup * OVER_EST_RATING else False)
         red_oper.append(True if est_oper == 0 and act_oper > 0 or act_oper > est_oper * OVER_EST_RATING else False)
         red_labor.append(True if est_labor == 0 and act_labor > 0 or act_labor > est_labor * OVER_EST_RATING else False)
+        yellow_setup.append(True if act_setup > est_setup else False)
+        yellow_oper.append(True if act_oper > est_oper else False)
+        yellow_labor.append(True if act_labor > est_labor else False)
     context = {
         'fwc': fwc,
         'fmonth': fmonth,
@@ -932,6 +938,9 @@ def over_est_operation(request, fwc, fmonth):
         'setup_percent': setup_percent,
         'oper_percent': oper_percent,
         'labor_percent': labor_percent,
+        'yellow_setup': yellow_setup,
+        'yellow_oper': yellow_oper,
+        'yellow_labor': yellow_labor,
         'red_setup': red_setup,
         'red_oper': red_oper,
         'red_labor': red_labor,
@@ -2778,7 +2787,7 @@ def getOverEstOperationList(fwc, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing FROM"
+    sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing, CONVERT(int, TB3.ProductionOrderQuatity) AS OrderQty FROM"
     sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
     sql += " AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
     if fwc != 'ALL':
@@ -2786,7 +2795,7 @@ def getOverEstOperationList(fwc, fmonth):
     sql += ") AS TB1 LEFT JOIN"
     sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
     sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo"
-    print(sql)
+    # print(sql)
     cursor.execute(sql)
     return cursor.fetchall()
 

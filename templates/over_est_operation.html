@@ -70,37 +70,47 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <table class="table table-sm table-outline small" id="over_est_operation_table" style="width: 100%">
+                      <table class="table table-sm table-outline small" id="over_est_operation_table" style="width: 100%;">
                         <thead class="thead-light">
                           <tr>
                             <th rowspan="2">ProcessStopDateTime</th>
                             <th rowspan="2">WorkCenter</th>
-                            <th rowspan="2">Prod. Order - Oper.No</th>
+                            <th rowspan="2">Order-Oper.No</th>
                             <!-- <th rowspan="2">FG_MaterialCode</th> -->
-                            <th colspan="3" class="text-center" style="boarder">Setup</th>
-                            <th colspan="3" class="text-center">Oper</th>
-                            <th colspan="3" class="text-center">Labor</th>
+                            <th colspan="4" class="text-center">Quantity</th>
+                            <th colspan="4" class="text-center">Setup</th>
+                            <th colspan="4" class="text-center">Oper</th>
+                            <th colspan="4" class="text-center">Labor</th>
                             <th rowspan="2">Over Est. Time Reason</th>
                           </tr>
                           <tr>
+                            <!-- QTY -->
+                            <th class="text-primary">Order</th>
+                            <th class="text-info">Process</th>
+                            <th class="text-success">Accepted</th>
+                            <th class="text-danger">Rejected</th>
                             <!-- SETUP -->
-                            <th>Est. Time</th>
-                            <th>Act. Time</th>
+                            <th>Est/Unit</th>
+                            <th>Est.</th>
+                            <th>Act.</th>
                             <th>%</th>
                             <!-- OPER -->
-                            <th>Est. Time</th>
-                            <th>Act. Time</th>
+                            <th>Est/Unit</th>
+                            <th>Est.</th>
+                            <th>Act.</th>
                             <th>%</th>
                             <!-- LABOR -->
-                            <th>Est. Time</th>
-                            <th>Act. Time</th>
+                            <th>Est/Unit</th>
+                            <th>Est.</th>
+                            <th>Act.</th>
                             <th>%</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for op in overEstOperationList %}
                             {% if est_setup_sum|index:forloop.counter0 < actual_setup|index:forloop.counter0 or est_oper_sum|index:forloop.counter0 < actual_oper|index:forloop.counter0 or est_labor_sum|index:forloop.counter0 < actual_labor|index:forloop.counter0 %}
-                            <tr style="background-color:#f{{op.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:10}}">
+                            <!-- <tr style="background-color:#f{{op.ProcessStop|date:'md'|add:'0'|modulo:8}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:9}}f{{op.ProcessStop|date:'md'|add:'0'|modulo:10}}"> -->
+                            <tr>
                               <td data-order="{{op.ProcessStop|date:"U"}}">{{op.ProcessStop}}</td>
                               <td>{{op.WorkCenterNo}}</td>
                               <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
@@ -109,25 +119,35 @@
                                 {{op.FG_MaterialCode|default_if_none:""}}
                                 </a>
                               </td> -->
+                              <!-- QTY -->
+                              <td class="bg-light text-dark">{{op.OrderQty}}</td>
+                              <td class="bg-light text-dark">{{op.ProcessQty.normalize}}</td>
+                              <td class="bg-light text-dark">{{op.AcceptedQty.normalize}}</td>
+                              <td class="bg-light text-dark">{{op.RejectedQty.normalize}}</td>
                               <!-- SETUP -->
+                              <td>{{op.EstSetupTime.normalize}}</td>
                               <td>{{est_setup_sum|index:forloop.counter0}}</td>
-                              <td class="{% if red_setup|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="{% if red_setup|index:forloop.counter0 %}text-danger{% elif yellow_setup|index:forloop.counter0 %}text-warning{% endif %}">
                                 {{actual_setup|index:forloop.counter0}}
                               </td>
                               <td>{{setup_percent|index:forloop.counter0}}</td>
                               <!-- OPER -->
-                              <td>{{est_oper_sum|index:forloop.counter0}}</td>
-                              <td class="{% if red_oper|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="bg-light text-dark">{{op.EstOperationTime.normalize}}</td>
+                              <td class="bg-light text-dark">{{est_oper_sum|index:forloop.counter0}}</td>
+                              <td class="bg-light {% if red_oper|index:forloop.counter0 %}text-danger{% elif yellow_oper|index:forloop.counter0 %}text-warning{% else %}text-dark{% endif %}">
                                 {{actual_oper|index:forloop.counter0}}
                               </td>
-                              <td>{{oper_percent|index:forloop.counter0}}</td>
+                              <td class="bg-light text-dark">{{oper_percent|index:forloop.counter0}}</td>
                               <!-- LABOR -->
+                              <td>{{op.EstLaborTime.normalize}}</td>
                               <td>{{est_labor_sum|index:forloop.counter0}}</td>
-                              <td class="{% if red_labor|index:forloop.counter0 %}text-danger{% endif %}">
+                              <td class="{% if red_labor|index:forloop.counter0 %}text-danger{% elif yellow_labor|index:forloop.counter0 %}text-warning{% endif %}">
                                 {{actual_labor|index:forloop.counter0}}
                               </td>
                               <td>{{labor_percent|index:forloop.counter0}}</td>
-                              <td>{{op.OverEstNote|default_if_none:""}}</td>
+                              <td class="bg-light text-dark">
+                                {{op.OverEstNote|default_if_none:""}}
+                              </td>
                             </tr>
                             {% endif %}
                           {% endfor %}
