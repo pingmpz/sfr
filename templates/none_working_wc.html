@@ -63,6 +63,7 @@
                         <thead class="thead-light">
                           <tr>
                             <th>Work Center Group</th>
+                            <th>On Routing</th>
                             <th>Work Center</th>
                             <th>Work Center Name</th>
                             <th>Last StopDateTime</th>
@@ -73,6 +74,7 @@
                           {% for wc in workCenterList %}
                           <tr style="background-color:#f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:8}}f{{wc.WorkCenterGroup|make_list|first|convert_char|modulo:9}}f{{wc.WorkCenterGroup|make_list|last|convert_char|modulo:10}}">
                             <td>{{wc.WorkCenterGroup}}</td>
+                            <td>{% if wc.OnRouting %}{{wc.OnRouting}}{% endif %}</td>
                             <td><a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a></td>
                             <td>{{wc.WorkCenterName}}</td>
                             <td data-order="{{wc.StopDateTime|date:"U"}}">{{wc.StopDateTime|date:"d-M-Y, H:i"}}</td>
