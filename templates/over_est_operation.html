@@ -128,21 +128,21 @@
                               <!-- SETUP -->
                               <td>{{op.EstSetupTime.normalize}}</td>
                               <td>{{est_setup_sum|index:forloop.counter0}}</td>
-                              <td class="{% if red_setup|index:forloop.counter0 %}text-danger{% elif yellow_setup|index:forloop.counter0 %}text-warning{% endif %}">
+                              <td class="{% if red_setup|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_setup|index:forloop.counter0 %}text-warning font-weight-bold{% endif %}">
                                 {{actual_setup|index:forloop.counter0}}
                               </td>
                               <td>{{setup_percent|index:forloop.counter0}}</td>
                               <!-- OPER -->
                               <td class="bg-light text-dark">{{op.EstOperationTime.normalize}}</td>
                               <td class="bg-light text-dark">{{est_oper_sum|index:forloop.counter0}}</td>
-                              <td class="bg-light {% if red_oper|index:forloop.counter0 %}text-danger{% elif yellow_oper|index:forloop.counter0 %}text-warning{% else %}text-dark{% endif %}">
+                              <td class="bg-light {% if red_oper|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_oper|index:forloop.counter0 %}text-warning font-weight-bold{% else %}text-dark{% endif %}">
                                 {{actual_oper|index:forloop.counter0}}
                               </td>
                               <td class="bg-light text-dark">{{oper_percent|index:forloop.counter0}}</td>
                               <!-- LABOR -->
                               <td>{{op.EstLaborTime.normalize}}</td>
                               <td>{{est_labor_sum|index:forloop.counter0}}</td>
-                              <td class="{% if red_labor|index:forloop.counter0 %}text-danger{% elif yellow_labor|index:forloop.counter0 %}text-warning{% endif %}">
+                              <td class="{% if red_labor|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_labor|index:forloop.counter0 %}text-warning font-weight-bold{% endif %}">
                                 {{actual_labor|index:forloop.counter0}}
                               </td>
                               <td>{{labor_percent|index:forloop.counter0}}</td>
