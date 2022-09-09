@@ -1981,6 +1981,7 @@
     <script>
       $("#workcenter_no").on("change keyup", function() {
         var routing_no = $('#work_center').val();
+        var routing_wcg = $('#work_center_group').val();
         $('#workcenter_name').val('');
         $('#workcenter_add_button').prop('disabled', true);
         remove_valid('workcenter_name');
@@ -1992,6 +1993,7 @@
             url: '/get_workcenter_data/',
             data: {
               'routing_no': routing_no,
+              'routing_wcg': routing_wcg,
               'workcenter_no': workcenter_no,
             },
             dataType: 'json',

@@ -1115,6 +1115,7 @@ def get_operating_operator_list(request):
 
 def get_workcenter_data(request):
     routing_no = request.GET.get('routing_no') # Routing
+    routing_wcg = request.GET.get('routing_wcg') # Routing
     workcenter_no = request.GET.get('workcenter_no') # Machine
     canAdd = False
     invalid_text = ''
@@ -1126,8 +1127,8 @@ def get_workcenter_data(request):
         WorkCenterName = workcenter.WorkCenterName
         if workcenter.IsRouting:
             invalid_text = WorkCenterNo + " is a rounting."
-        elif workcenter.OnRouting != routing_no:
-            invalid_text = WorkCenterNo + " is on " + workcenter.OnRouting + "."
+        elif workcenter.WorkCenterGroup != routing_wcg:
+            invalid_text = WorkCenterNo + " is in " + workcenter.WorkCenterGroup + " Group."
         elif workcenter.IsActive == False:
             invalid_text = WorkCenterNo + " is In-Active."
         elif isWorkCenterOperating(workcenter_no):
