@@ -872,6 +872,7 @@ def over_est_operation(request, fwc, fweek):
     if fweek == "NOW":
         fweek = datetime.today().strftime('%Y-W%W')
     overEstOperationList = getOverEstOperationList(fwc, fweek)
+    start_date, end_date = get_date_between_week(fweek)
     est_setup_sum = []
     est_oper_sum = []
     est_labor_sum = []
@@ -926,6 +927,8 @@ def over_est_operation(request, fwc, fweek):
         'fweek': fweek,
         'workCenterList': workCenterList,
         'overEstOperationList': overEstOperationList,
+        'start_date': start_date,
+        'end_date': end_date,
         'est_setup_sum': est_setup_sum,
         'est_oper_sum': est_oper_sum,
         'est_labor_sum': est_labor_sum,
@@ -2780,18 +2783,10 @@ def getConfirmOperationList(fwc, fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
-# def first_monday(year):
-#     day = (8 - datetime.date(year, 1, 1).weekday()) % 7
-#     return datetime.date(year, 1, day)
-
 def getOverEstOperationList(fwc, fweek):
-    year = int(fweek[0:4])
-    week = int(fweek[6:len(fweek)])
-    start_date = datetime(year, 1, 1) + relativedelta(weeks=+week)
-    end_date = start_date + relativedelta(days=+7)
+    start_date, end_date = get_date_between_week(fweek)
     start_date = str(start_date)[0:10]
     end_date = str(end_date)[0:10]
-    print(start_date, end_date)
     cursor = get_connection().cursor()
     sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing, CONVERT(int, TB3.ProductionOrderQuatity) AS OrderQty FROM"
     sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
@@ -3860,3 +3855,13 @@ def update_on_rt():
                 cursor.execute(sql)
                 conn.commit()
     return
+
+def get_date_between_week(fweek):
+    year = int(fweek[0:4])
+    week = int(fweek[6:len(fweek)])
+    start_date = datetime(year, 1, 1)
+    while start_date.weekday() != 0:
+        start_date = start_date + relativedelta(days=+1)
+    start_date = start_date + relativedelta(weeks=+week) + relativedelta(days=-7)
+    end_date = start_date + relativedelta(days=+6)
+    return start_date, end_date
