@@ -212,19 +212,13 @@
                                   </div>
                                   <hr>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Work Center</strong></label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>WorkCenter/Routing</strong></label>
                                     <div class="col-md-7">
                                       <input class="form-control form-control-sm" type="text" id="work_center" value="{{operation.WorkCenterNo|default_if_none:""}}" readonly>
                                     </div>
                                   </div>
                                   <div class="form-group row">
-                                    <label class="col-md-5 col-form-label text-right"><strong>Work Center Group</strong>
-                                      {% if workCenterInGroupList|length != 0 %}
-                                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true"
-                                      title="WorkCenter(s) in <span class='text-info'>{{operation.WorkCenterGroup}}</span> Group."
-                                      data-content="{% for wc in workCenterInGroupList %}{{wc.WorkCenterNo}}<br>{% endfor %}">?</a>
-                                      {% endif %}
-                                    </label>
+                                    <label class="col-md-5 col-form-label text-right"><strong>WorkCenterGroup</strong></label>
                                     <div class="col-md-7">
                                       <input class="form-control form-control-sm" type="text" id="work_center_group" value="{{operation.WorkCenterGroup|default_if_none:""}}" readonly>
                                     </div>
@@ -1986,7 +1980,7 @@
     <!-- MAIN TABLE -->
     <script>
       $("#workcenter_no").on("change keyup", function() {
-        var work_center_group = $('#work_center_group').val();
+        var routing_no = $('#work_center').val();
         $('#workcenter_name').val('');
         $('#workcenter_add_button').prop('disabled', true);
         remove_valid('workcenter_name');
@@ -1997,8 +1991,8 @@
           $.ajax({
             url: '/get_workcenter_data/',
             data: {
+              'routing_no': routing_no,
               'workcenter_no': workcenter_no,
-              'work_center_group' : work_center_group,
             },
             dataType: 'json',
             success: function (data) {

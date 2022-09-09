@@ -55,7 +55,7 @@
               {% endfor %}
             </select>
             &nbsp;
-            <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="week" class="form-control" id="fweek" value="{{fweek}}" onkeydown="return false" required>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
             <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
           </div>
@@ -206,11 +206,11 @@
       });
 
       $('#fwc').change(function() {
-        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fweek").val();
       });
 
-      $('#fmonth').change(function() {
-        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fmonth").val();
+      $('#fweek').change(function() {
+        window.location.href = "/over_est_operation/" + $("#fwc").val() + "&"  + $("#fweek").val();
       });
 
     </script>

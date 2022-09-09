@@ -61,10 +61,10 @@
                       <table class="table table-sm table-outline small" id="wc_master_table">
                         <thead class="thead-light">
                           <tr>
-                            <th>Work Center Group</th>
-                            <th>Work Center</th>
-                            <th>Work Center Name</th>
+                            <th>WorkCenterGroup</th>
                             <th>Is/On Routing</th>
+                            <th>WorkCenter</th>
+                            <th>WorkCenterName</th>
                             <th>External Process</th>
                             <th>Work Center Type</th>
                             <th>Machine Type</th>
@@ -82,9 +82,9 @@
                           {% else %}style="background-color:#ff9999;"{% endif %}
                           >
                             <td>{{wc.WorkCenterGroup}}</td>
+                            <td>{% if wc.IsRouting %}<i class="c-icon cil-check text-success"></i>{% elif wc.OnRouting %}{{wc.OnRouting}}{% endif %}</td>
                             <td>{% if wc.IsActive %}<a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a>{% else %}{{wc.WorkCenterNo}}{% endif %}</td>
                             <td>{{wc.WorkCenterName}}</td>
-                            <td>{% if wc.IsRouting %}<i class="c-icon cil-check text-success"></i>{% elif wc.OnRouting %}{{wc.OnRouting}}{% endif %}</td>
                             <td>{% if wc.IsExternalProcess %}<i class="c-icon cil-check text-success"></i>{% endif %}</td>
                             <td>{{wc.WorkCenterType}}</td>
                             <td>{{wc.MachineType|default_if_none:""}}</td>

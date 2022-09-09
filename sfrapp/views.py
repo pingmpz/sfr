@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 import pyodbc
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from dateutil import parser
 
 # FILE READER
@@ -74,7 +75,6 @@ def transaction(request, orderoprno):
     historyConfirmList = []
     historyJoinList = []
     #-- ETC
-    workCenterInGroupList = [] #-- What work center can be used in the same group (Only Machine)
     rejectReasonList = [] #-- All
     materialGroupList = [] #-- All
     purchaseGroupList = [] #-- All
@@ -192,8 +192,6 @@ def transaction(request, orderoprno):
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
                 #-- ETC LIST
-                if operation.WorkCenterType == 'Machine':
-                    workCenterInGroupList = getWorkCenterInGroupList(operation.WorkCenterGroup)
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
@@ -241,7 +239,6 @@ def transaction(request, orderoprno):
         'historyOperateList' : historyOperateList,
         'historyConfirmList' : historyConfirmList,
         'historyJoinList' : historyJoinList,
-        'workCenterInGroupList' : workCenterInGroupList,
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
@@ -868,13 +865,13 @@ def con_operation(request, fwc, fmonth):
     }
     return render(request, 'con_operation.html', context)
 
-def over_est_operation(request, fwc, fmonth):
+def over_est_operation(request, fwc, fweek):
     workCenterList = getWorkCenterRoutingList()
     if fwc == "FIRST":
         fwc = workCenterList[0].WorkCenterNo
-    if fmonth == "NOW":
-        fmonth = datetime.today().strftime('%Y-%m')
-    overEstOperationList = getOverEstOperationList(fwc, fmonth)
+    if fweek == "NOW":
+        fweek = datetime.today().strftime('%Y-W%W')
+    overEstOperationList = getOverEstOperationList(fwc, fweek)
     est_setup_sum = []
     est_oper_sum = []
     est_labor_sum = []
@@ -926,7 +923,7 @@ def over_est_operation(request, fwc, fmonth):
         yellow_labor.append(True if act_labor > est_labor else False)
     context = {
         'fwc': fwc,
-        'fmonth': fmonth,
+        'fweek': fweek,
         'workCenterList': workCenterList,
         'overEstOperationList': overEstOperationList,
         'est_setup_sum': est_setup_sum,
@@ -1114,8 +1111,8 @@ def get_operating_operator_list(request):
     return JsonResponse(data)
 
 def get_workcenter_data(request):
-    workcenter_no = request.GET.get('workcenter_no')
-    work_center_group = request.GET.get('work_center_group')
+    routing_no = request.GET.get('routing_no') # Routing
+    workcenter_no = request.GET.get('workcenter_no') # Machine
     canAdd = False
     invalid_text = ''
     WorkCenterNo = None
@@ -1126,8 +1123,8 @@ def get_workcenter_data(request):
         WorkCenterName = workcenter.WorkCenterName
         if workcenter.IsRouting:
             invalid_text = WorkCenterNo + " is a rounting."
-        elif workcenter.WorkCenterGroup != work_center_group:
-            invalid_text = WorkCenterNo + " is in " + workcenter.WorkCenterGroup + " Group."
+        elif workcenter.OnRouting != routing_no:
+            invalid_text = WorkCenterNo + " is on " + workcenter.OnRouting + "."
         elif workcenter.IsActive == False:
             invalid_text = WorkCenterNo + " is In-Active."
         elif isWorkCenterOperating(workcenter_no):
@@ -2783,13 +2780,22 @@ def getConfirmOperationList(fwc, fmonth):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getOverEstOperationList(fwc, fmonth):
-    year = fmonth[0:4]
-    month = fmonth[5:7]
+# def first_monday(year):
+#     day = (8 - datetime.date(year, 1, 1).weekday()) % 7
+#     return datetime.date(year, 1, day)
+
+def getOverEstOperationList(fwc, fweek):
+    year = int(fweek[0:4])
+    week = int(fweek[6:len(fweek)])
+    start_date = datetime(year, 1, 1) + relativedelta(weeks=+week)
+    end_date = start_date + relativedelta(days=+7)
+    start_date = str(start_date)[0:10]
+    end_date = str(end_date)[0:10]
+    print(start_date, end_date)
     cursor = get_connection().cursor()
     sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing, CONVERT(int, TB3.ProductionOrderQuatity) AS OrderQty FROM"
     sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
-    sql += " AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"'"
+    sql += " AND (ProcessStop BETWEEN '"+str(start_date)+"' AND '"+str(end_date)+"')"
     if fwc != 'ALL':
         sql += " AND WorkCenterNo = '"+fwc+"'"
     sql += ") AS TB1 LEFT JOIN"

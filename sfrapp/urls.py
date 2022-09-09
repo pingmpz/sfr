@@ -41,7 +41,7 @@ urlpatterns = [
     path('ab_graph_wcg/<str:fwcg>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph_wcg, name='ab_graph_wcg'),
     path('ab_graph_rt/<str:frt>&<str:ftype>&<str:fmonth>&<str:fyear>', views.ab_graph_rt, name='ab_graph_rt'),
     path('con_operation/<str:fwc>&<str:fmonth>', views.con_operation, name='con_operation'),
-    path('over_est_operation/<str:fwc>&<str:fmonth>', views.over_est_operation, name='over_est_operation'),
+    path('over_est_operation/<str:fwc>&<str:fweek>', views.over_est_operation, name='over_est_operation'),
     path('zpp02/', views.zpp02, name='zpp02'),
     path('zpp04/', views.zpp04, name='zpp04'),
     #-- SAP
