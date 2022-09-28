@@ -1668,8 +1668,8 @@
                       <div class="col-md-8">
                         <select class="form-control" id="scrap_at">
                           {% for opr in operationList %}
-                            {% if opr.OperationNo <= operation.OperationNo %}
-                            <option value="{{opr.OperationNo}}" {% if opr.OperationNo == operation.OperationNo %}selected{% endif %}>{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
+                            {% if opr.OperationNo < operation.OperationNo %}
+                            <option value="{{opr.OperationNo}}">{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
                             {% endif %}
                           {% endfor %}
                         </select>
@@ -1802,8 +1802,8 @@
                       <div class="col-md-8">
                         <select class="form-control" id="mp_scrap_at">
                           {% for opr in operationList %}
-                            {% if opr.OperationNo <= operation.OperationNo %}
-                            <option value="{{opr.OperationNo}}" {% if opr.OperationNo == operation.OperationNo %}selected{% endif %}>{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
+                            {% if opr.OperationNo < operation.OperationNo %}
+                            <option value="{{opr.OperationNo}}">{{opr.OperationNo}} | {{opr.WorkCenterNo}}</option>
                             {% endif %}
                           {% endfor %}
                         </select>
