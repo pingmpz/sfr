@@ -1645,7 +1645,7 @@
                         <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title=""data-content="<u>SCRAP FROM PREVIOUS PROCESS</u><br>Rejected quantity will not be reported to SAP.">!</a>
                       </label>
                       <div class="col-md-10">
-                        <select class="form-control" id="reject_reason">
+                        <select class="form-control" id="reject_reason" {% if rejectReason.Name.strip == 'OTHER' or rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}class="text-primary"{% endif %}>
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
                           <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
@@ -1654,11 +1654,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-6" id="other_group" hidden>
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="text" id="other_reason" autocomplete="off" readonly>
+                        <input class="form-control" type="text" id="other_reason" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -1773,26 +1773,28 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-12">
+                  <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-2 col-form-label text-right">
+                      <label class="col-md-4 col-form-label text-right">
                         <strong>Reason</strong>
                       </label>
-                      <div class="col-md-10">
+                      <div class="col-md-8">
                         <select class="form-control" id="mp_reject_reason" {% if operation.ProcessStop != None and remainQty == 0 %}readonly{% endif %}>
                           <option value="-1" selected>-</option>
                           {% for rejectReason in rejectReasonList %}
-                          <option value="{{rejectReason.Name.strip}}">{{rejectReason.Name}}</option>
+                          <option value="{{rejectReason.Name.strip}}" {% if rejectReason.Name.strip == 'OTHER' or rejectReason.Name.strip == 'SCRAP FROM PREVIOUS PROCESS' %}class="text-primary"{% endif %}>
+                            {{rejectReason.Name}}
+                          </option>
                           {% endfor %}
                         </select>
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-6" id="mp_other_group" hidden>
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right"><strong>Other</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control" type="text" id="mp_other_reason" autocomplete="off" readonly>
+                        <input class="form-control" type="text" id="mp_other_reason" autocomplete="off">
                       </div>
                     </div>
                   </div>
@@ -3479,31 +3481,25 @@
 
       $('#reject_reason').on("change", function() {
         var reason = $('#reject_reason').val();
+        $("#other_group").prop("hidden", true);
+        $("#scrap_at_group").prop("hidden", true);
+        $("#other_reason").val("");
         if(reason == "OTHER"){
-          $("#other_reason").prop("readonly", false);
-          $("#scrap_at_group").prop("hidden", true);
+          $("#other_group").prop("hidden", false);
         } else if (reason == "SCRAP FROM PREVIOUS PROCESS"){
-          $("#other_reason").prop("readonly", true);
           $("#scrap_at_group").prop("hidden", false);
-        } else {
-          $("#other_reason").prop("readonly", true);
-          $("#scrap_at_group").prop("hidden", true);
-          $("#other_reason").val("");
         }
       });
 
       $('#mp_reject_reason').on("change", function() {
         var reason = $('#mp_reject_reason').val();
+        $("#mp_other_group").prop("hidden", true);
+        $("#mp_scrap_at_group").prop("hidden", true);
+        $("#mp_other_reason").val("");
         if(reason == "OTHER"){
-          $("#mp_other_reason").prop("readonly", false);
-          $("#mp_scrap_at_group").prop("hidden", true);
+          $("#mp_other_group").prop("hidden", false);
         } else if (reason == "SCRAP FROM PREVIOUS PROCESS"){
-          $("#mp_other_reason").prop("readonly", true);
           $("#mp_scrap_at_group").prop("hidden", false);
-        } else {
-          $("#mp_other_reason").prop("readonly", true);
-          $("#mp_scrap_at_group").prop("hidden", true);
-          $("#mp_other_reason").val("");
         }
       });
 
