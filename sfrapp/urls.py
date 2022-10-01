@@ -97,6 +97,7 @@ urlpatterns = [
     path('validate_super_admin_password/', views.validate_super_admin_password, name='validate_super_admin_password'),
     path('validate_new_user_id/', views.validate_new_user_id, name='validate_new_user_id'),
     path('validate_new_password/', views.validate_new_password, name='validate_new_password'),
+    path('validate_wc_no/', views.validate_wc_no, name='validate_wc_no'),
     #-- ETC
     path('increase_lot_no/', views.increase_lot_no, name='increase_lot_no'),
     path('fix_rm_mat_code/', views.fix_rm_mat_code, name='fix_rm_mat_code'),
@@ -107,6 +108,7 @@ urlpatterns = [
     path('delete_user/', views.delete_user, name='delete_user'),
     path('change_user_password/', views.change_user_password, name='change_user_password'),
     path('mpa/', views.mpa, name='mpa'),
+    path('add_wc/', views.add_wc, name='add_wc'),
     # path('reset_all/', views.reset_all, name='reset_all'),
     path('reset_order/', views.reset_order, name='reset_order'),
     path('cancel_order/', views.cancel_order, name='cancel_order'),

@@ -1848,6 +1848,16 @@ def validate_work_center(request):
     }
     return JsonResponse(data)
 
+def validate_wc_no(request):
+    wc_no = request.GET.get('wc_no').strip()
+    canUse = True
+    if isExistWorkCentrNo(wc_no):
+        canUse = False
+    data = {
+        'canUse': canUse,
+    }
+    return JsonResponse(data)
+
 def validate_operator(request):
     emp_id = request.GET.get('emp_id')
     isExist = isExistOperator(emp_id)
@@ -1950,6 +1960,19 @@ def change_user_password(request):
 def mpa(request):
     status = request.GET.get('status')
     updateManualReportAllowdance(status)
+    data = {
+    }
+    return JsonResponse(data)
+
+def add_wc(request):
+    type = request.GET.get('type')
+    wc_no = request.GET.get('wc_no').strip()
+    wc_name = request.GET.get('wc_name').strip()
+    wcg = request.GET.get('wcg').strip()
+    on_rt = request.GET.get('on_rt').strip()
+    target = request.GET.get('target').strip()
+    capacity = request.GET.get('capacity').strip()
+    insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity)
     data = {
     }
     return JsonResponse(data)
@@ -3101,6 +3124,12 @@ def isNotFixedOvertime(operator_id):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
+def isExistWorkCentrNo(wc_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterNo = '" + wc_no + "'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 #--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
@@ -3464,6 +3493,29 @@ def insertEmpAtComputer(emp_id, ip_address):
     cursor = conn.cursor()
     sql = "INSERT INTO [dbo].[EmpAtComputer] ([DateTimeStamp],[EmpID],[IPAddress]) VALUES "
     sql += " (CURRENT_TIMESTAMP,'"+str(emp_id)+"','"+str(ip_address)+"')"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity):
+    is_rt = 0 if type == 'auto_mc' or type == 'manual_mc' else 1
+    wc_type = 'Labor' if type == 'labor_rt' or type == 'ext_rt' else 'Machine'
+    is_ext = 1 if type == 'ext_rt' else 0
+    mc_type = "NULL"
+    if wc_type == 'Machine':
+        mc_type = 'Auto' if type == 'auto_mc' or type == 'auto_mc_rt' else 'Manual'
+    hour_rate = 600 if wc_type == 'Machine' else 150
+    target = target if wc_type == 'Machine' else 0
+    capacity = capacity if wc_type == 'Machine' else 0
+    # NULLABLE
+    if mc_type != "NULL":
+        mc_type = "'"+str(mc_type)+"'"
+    on_rt = "NULL" if on_rt == "" else "'"+str(on_rt)+"'"
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[WorkCenter]([WorkCenterNo],[WorkCenterName],[WorkCenterGroup],[IsRouting],[WorkCenterType],[IsExternalProcess],[MachineType],[HourlyRate],[IsActive],[Noted],[Target],[Capacity],[OnRouting]) VALUES "
+    sql += "('"+str(wc_no)+"','"+str(wc_name)+"','"+str(wcg)+"',"+str(is_rt)+",'"+str(wc_type)+"',"+str(is_ext)+","+str(mc_type)+","+str(hour_rate)+",1,NULL,"+str(target)+","+str(capacity)+","+str(on_rt)+")"
+    print(sql)
     cursor.execute(sql)
     conn.commit()
     return

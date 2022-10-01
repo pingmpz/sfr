@@ -81,6 +81,7 @@
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#change-password-tab" role="tab">Change Password</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#delete-user-tab" role="tab">Delete User</a></li>
                           <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mpa-tab" role="tab">Manual Report</a></li>
+                          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#add-wc-tab" role="tab">Add WorkCenter</a></li>
                         </ul>
                         <div class="tab-content">
                           <!-- New User Tab -->
@@ -190,6 +191,65 @@
                             <div class="form-group row">
                               <div class="col-md-12 text-center">
                                 <button type="button" class="btn btn-pill btn-info" id="mpa_confirm_button" onclick="mpa()">&nbsp;Confirm&nbsp;</button>
+                              </div>
+                            </div>
+                            <small>Permission : Administrator+</small>
+                          </div>
+                          <!-- Add WorkCenter Tab -->
+                          <div class="tab-pane" id="add-wc-tab" role="tabpanel">
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Type</strong></label>
+                              <div class="col-md-8">
+                                <select class="form-control" id="add_wc_type">
+                                  <option value="auto_mc">Auto Machine</option>
+                                  <option value="manual_mc">Manual Machine</option>
+                                  <option value="labor_rt">Labor Routing</option>
+                                  <option value="auto_mc_rt">Auto Machine Routing</option>
+                                  <option value="manual_mc_rt">Manual Machine Routing</option>
+                                  <option value="ext_rt">External Routing</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>WorkCenter</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="add_wc_no" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>WorkCenter Name</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="add_wc_name" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>WorkCenter Group</strong></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="add_wc_wcg" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>On Routing</strong><br>(can be empty)</label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="text" id="add_wc_on_rt" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Target</strong><br>(only machine & machine routing)</label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="number" id="add_wc_target" autocomplete="off">
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-md-4 col-form-label text-right"><strong>Capacity</strong><br>(only machine & machine routing)</label>
+                              <div class="col-md-8">
+                                <input class="form-control" type="number" id="add_wc_capacity" autocomplete="off">
+                              </div>
+                            </div>
+
+                            <div class="form-group row">
+                              <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-pill btn-success" id="add_wc_confirm_button" onclick="add_wc()">&nbsp;Confirm&nbsp;</button>
                               </div>
                             </div>
                             <small>Permission : Administrator+</small>
@@ -394,6 +454,68 @@
         });
       }
 
+      function add_wc(){
+        var admin_password = $("#admin_password").val();
+        var type = $("#add_wc_type").val().trim();
+        var wc_no = $("#add_wc_no").val().trim();
+        var wc_name = $("#add_wc_name").val().trim();
+        var wcg = $("#add_wc_wcg").val().trim();
+        var on_rt = $("#add_wc_on_rt").val().trim();
+        var target = $("#add_wc_target").val().trim();
+        var capacity = $("#add_wc_capacity").val().trim();
+        remove_valid_many(["admin_password","add_wc_no","add_wc_name","add_wc_wcg","add_wc_on_rt","add_wc_target","add_wc_capacity"]);
+        validate_admin_password(admin_password, function(isCorrect) {
+          if(!isCorrect){
+            invalid("admin_password");
+          } else {
+            valid("admin_password");
+            validate_wc_no(wc_no, function(canUse) {
+              if(!canUse){
+                invalid("add_wc_no");
+              } else {
+                valid("add_wc_no");
+                if(wc_name.length == 0){
+                  invalid("add_wc_name");
+                } else {
+                  valid("add_wc_name");
+                  if(wcg.length == 0){
+                    invalid("add_wc_wcg");
+                  } else {
+                    valid("add_wc_wcg");
+                    if(target.length == 0 && (type == 'auto_mc' || type == 'manual_mc' || type == 'auto_mc_rt' || type == 'manual_mc_rt')){
+                      invalid("add_wc_target");
+                    } else {
+                      valid("add_wc_target");
+                      if(capacity.length == 0 && (type == 'auto_mc' || type == 'manual_mc' || type == 'auto_mc_rt' || type == 'manual_mc_rt')){
+                        invalid("add_wc_capacity");
+                      } else {
+                        valid("add_wc_capacity");
+                        $.ajax({
+                          url: '/add_wc/',
+                          data: {
+                            'type': type,
+                            'wc_no': wc_no,
+                            'wc_name': wc_name,
+                            'wcg': wcg,
+                            'on_rt': on_rt,
+                            'target': target,
+                            'capacity': capacity,
+                          },
+                          dataType: 'json',
+                          success: function (data) {
+                            location.reload();
+                          }
+                        });
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          }
+        });
+      }
+
       function clear_all(){
         remove_valid_many(["new_user_id","new_user_password", "change_user_password"]);
         emptyInputs(["new_user_id","new_user_password", "change_user_password"]);
@@ -461,6 +583,24 @@
             url: '/validate_new_password/',
             data: {
               'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.canUse) _callback(true);
+              else _callback(false);
+            }
+          });
+        }
+      }
+
+      function validate_wc_no(wc_no, _callback){
+        if(wc_no.length == 0){
+          _callback(false);
+        } else {
+          $.ajax({
+            url: '/validate_wc_no/',
+            data: {
+              'wc_no': wc_no,
             },
             dataType: 'json',
             success: function (data) {
