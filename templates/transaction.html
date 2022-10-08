@@ -1001,7 +1001,13 @@
                   <h1><strong>Canceled Production Order</strong></h1>
                   <br>
                   <p>
-                    <strong>Production Order No</strong><br><span class="text-danger"><strong>{{orderNo}}</strong></span>
+                    <strong>Production Order No</strong><br><span class="text-danger"><strong>{{orderNo}}</strong></span><br>
+                    <strong>EmpID (Requester)</strong><br>
+                    <span class="text-dark">{{cancelInfo.Requester|default_if_none:""}}
+                      {% if cancelInfo.EmpName %}| {{cancelInfo.EmpName}} ({{cancelInfo.Section}} - {{cancelInfo.CostCenter}}) {% endif %}
+                    </span><br>
+                    <strong>Reason</strong><br><span class="text-dark">{{cancelInfo.Reason|default_if_none:""}}</span><br>
+                    <strong>DateTimeStamp</strong><br><span class="text-dark">{{cancelInfo.DateTimeStamp}}</span>
                   </p>
                 </div>
               </div>
@@ -1862,6 +1868,18 @@
                 <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
                 <div class="col-md-8">
                   <input class="form-control form-control-sm my-password" type="text" id="cc_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>EmpID (Requester)</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="cc_emp_id" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Reason</strong></label>
+                <div class="col-md-8">
+                  <textarea class="form-control" rows="3" cols="80" id="cc_reason"></textarea>
                 </div>
               </div>
               <div class="text-danger text-center small" id="cc_invalid_text"></div>
@@ -3709,12 +3727,14 @@
 
       function clear_validate_cancel_order(){
         $("#cc_invalid_text").text("");
-        remove_valid_many(["cc_password"]);
+        remove_valid_many(["cc_password","cc_emp_id","cc_reason"]);
       }
 
       function cancel_order(){
         var order_no = $('#order_no').val();
         var password = $('#cc_password').val();
+        var emp_id = $('#cc_emp_id').val();
+        var reason = $('#cc_reason').val();
         validate_admin_password(password, function(isCorrect, invalid_text) {
           if(!isCorrect){
             invalid("cc_password");
@@ -3726,6 +3746,8 @@
               url: '/cancel_order/',
               data: {
                 'order_no': order_no,
+                'emp_id': emp_id,
+                'reason': reason,
               },
               dataType: 'json',
               success: function (data) {

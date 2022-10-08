@@ -62,6 +62,7 @@ def transaction(request, orderoprno):
     hasReportTime = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
+    cancelInfo = None
     #-- Left Content List
     operationList = []
     operationStatusList = []
@@ -122,6 +123,7 @@ def transaction(request, orderoprno):
             #-- Check Cancel Order
             if isCanceledOrder(orderNo):
                  state = "CANCEL"
+                 cancelInfo = getCanceledOrderInfo(orderNo)
             elif isExistOperation(orderNo, operationNo):
                 state = "DATAFOUND"
                 #-- CONST
@@ -222,6 +224,7 @@ def transaction(request, orderoprno):
         'orderNo' : orderNo,
         'operationNo' : operationNo,
         'state' : state,
+        'cancelInfo': cancelInfo,
         'order' : order,
         'operation' : operation,
         'isFirst' : isFirst,
@@ -2004,9 +2007,11 @@ def reset_order(request):
 
 def cancel_order(request):
     order_no = request.GET.get('order_no')
+    emp_id = request.GET.get('emp_id').strip()
+    reason = request.GET.get('reason').strip()
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO CanceledOrder ([OrderNo],[DateTimeStamp]) VALUES ('"+order_no+"',CURRENT_TIMESTAMP)"
+    sql = "INSERT INTO CanceledOrder ([OrderNo],[EmpID],[Reason],[DateTimeStamp]) VALUES ('"+order_no+"','"+emp_id+"','"+reason+"',CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     data = {
@@ -2985,6 +2990,12 @@ def getFirstConfirmTime(order_no, operation_no):
 def getActualTime(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT SUM(Setup) AS Setup , SUM(Oper) AS Oper, SUM(Labor) AS Labor  FROM HistoryOperate WHERE OrderNo = '" + str(order_no) + "' AND OperationNo = '" + str(operation_no) + "' GROUP BY OrderNo"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getCanceledOrderInfo(order_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT *, CO.EmpID as Requester FROM CanceledOrder AS CO LEFT JOIN Employee AS EM ON CO.EmpID = EM.EmpID WHERE OrderNo = '"+order_no+"'"
     cursor.execute(sql)
     return cursor.fetchone()
 

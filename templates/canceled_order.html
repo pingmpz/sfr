@@ -78,6 +78,8 @@
                             <th>Production Order No</th>
                             <th>FG-MaterialCode</th>
                             <th>Order Note</th>
+                            <th>EmpID (Requester)</th>
+                            <th>Reason</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -91,6 +93,8 @@
                               </a>
                             </td>
                             <td>{{order.Note|default_if_none:""}}</td>
+                            <td>{{order.EmpID|default_if_none:""}}</td>
+                            <td>{{order.Reason|default_if_none:""}}</td>
                           {% endfor %}
                         </tbody>
                       </table>
