@@ -1459,6 +1459,9 @@ def confirm(request):
             if hasNoMoreQty:
                 #-- ORDER : STOP
                 updateOrderControl(orderNo, "STOP")
+                #-- PENDING PLN_FAI
+                if operation.WorkCenter.strip() == 'PLN_FAI':
+                    addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     data = {
     }
     return JsonResponse(data)
@@ -1544,6 +1547,9 @@ def manual_report(request):
                 if hasNoMoreQty:
                     #-- ORDER : STOP
                     updateOrderControl(order_no, "STOP")
+                    #-- PENDING PLN_FAI
+                    if operation.WorkCenter.strip() == 'PLN_FAI':
+                        addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     data = {
     }
     return JsonResponse(data)
@@ -1661,6 +1667,9 @@ def delete_operation(request):
     else:
         #-- ORDER : STOP
         updateOrderControl(operation_no, "STOP")
+        #-- PENDING PLN_FAI
+        if operation.WorkCenter.strip() == 'PLN_FAI':
+            addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
     #-- HISTORY : DELETE OPERATION
@@ -3547,6 +3556,15 @@ def insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity):
     sql = "INSERT INTO [dbo].[WorkCenter]([WorkCenterNo],[WorkCenterName],[WorkCenterGroup],[IsRouting],[WorkCenterType],[IsExternalProcess],[MachineType],[HourlyRate],[IsActive],[Noted],[Target],[Capacity],[OnRouting]) VALUES "
     sql += "('"+str(wc_no)+"','"+str(wc_name)+"','"+str(wcg)+"',"+str(is_rt)+",'"+str(wc_type)+"',"+str(is_ext)+","+str(mc_type)+","+str(hour_rate)+",1,NULL,"+str(target)+","+str(capacity)+","+str(on_rt)+")"
     print(sql)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def addPendingPLNFAI(order_no, operation_no, qty):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[PendingPLNFAI] ([OrderNo],[OperationNo],[Quantity],[DateTimeStamp]) VALUES "
+    sql += " ('"+str(order_no)+"','"+str(operation_no)+"',"+qty+",CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return
