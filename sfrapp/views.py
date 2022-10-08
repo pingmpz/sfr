@@ -545,6 +545,13 @@ def none_start_order(request):
     }
     return render(request, 'none_start_order.html', context)
 
+def pending_pln_fai(request):
+    pendingPLNFAIList = getPendingPLNFAIList()
+    context = {
+        'pendingPLNFAIList': pendingPLNFAIList,
+    }
+    return render(request, 'pending_pln_fai.html', context)
+
 #------------------------------------------------------------------------ REPORT
 
 def ot_table(request, fmonth):
@@ -2097,6 +2104,13 @@ def set_wc_cap(request):
     }
     return JsonResponse(data)
 
+def clear_pln_fai(request):
+    order_no = request.GET.get('order_no')
+    clearPLNFAI(order_no)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
@@ -2832,6 +2846,12 @@ def getOverEstOperationList(fwc, fweek):
 def getEmpAtComputerList(ip_address):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM EmpAtComputer WHERE IPAddress = '"+ ip_address +"' ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getPendingPLNFAIList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM PendingPLNFAI"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -3810,6 +3830,14 @@ def deleteAllSFRAndSAPOrder(order_no):
     cursor.execute(sql)
     conn.commit()
     sql = "DELETE FROM [SAP_Order] WHERE ProductionOrderNo = '" + order_no + "'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def clearPLNFAI(order_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [PendingPLNFAI] WHERE OrderNo = '"+order_no+"'"
     cursor.execute(sql)
     conn.commit()
     return

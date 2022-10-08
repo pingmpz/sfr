@@ -30,6 +30,7 @@ urlpatterns = [
     path('delay_operation/<str:fwc>', views.delay_operation, name='delay_operation'),
     path('none_working_wc/', views.none_working_wc, name='none_working_wc'),
     path('none_start_order/', views.none_start_order, name='none_start_order'),
+    path('pending_pln_fai/', views.pending_pln_fai, name='pending_pln_fai'),
     #-- REPORT
     path('ot_table/<str:fmonth>', views.ot_table, name='ot_table'),
     path('mp_ot_auto_machine/<str:fmonth>', views.mp_ot_auto_machine, name='mp_ot_auto_machine'),
@@ -103,6 +104,7 @@ urlpatterns = [
     path('fix_rm_mat_code/', views.fix_rm_mat_code, name='fix_rm_mat_code'),
     path('set_wc_target/', views.set_wc_target, name='set_wc_target'),
     path('set_wc_cap/', views.set_wc_cap, name='set_wc_cap'),
+    path('clear_pln_fai/', views.clear_pln_fai, name='clear_pln_fai'),
     ## ADMIN PANEL
     path('add_new_user/', views.add_new_user, name='add_new_user'),
     path('delete_user/', views.delete_user, name='delete_user'),
