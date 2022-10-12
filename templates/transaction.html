@@ -601,7 +601,12 @@
                                         <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Oper != 0.00 %}{{operate.Oper.normalize}}{% endif %}</td>
                                         <td>{%if operate.Labor != 0.00 %}{{operate.Labor.normalize}}{% endif %}</td>
                                         <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
-                                        <td>{{operate.StopDateTime|date:"d-M-Y, H:i"}}</td>
+                                        <td>
+                                          {{operate.StopDateTime|date:"d-M-Y, H:i"}}
+                                          {% if operate.Type.strip == 'MANUAL' %}
+                                          <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="ConfirmDateTime" data-content="{{operate.DateTimeStamp}}">?</a>
+                                          {% endif %}
+                                        </td>
                                       </tr>
                                       {% endfor %}
                                     </tbody>

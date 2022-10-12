@@ -1460,7 +1460,7 @@ def confirm(request):
                 #-- ORDER : STOP
                 updateOrderControl(orderNo, "STOP")
                 #-- PENDING PLN_FAI
-                if operation.WorkCenter.strip() == 'PLN_FAI':
+                if operation.WorkCenterNo.strip() == 'PLN_FAI':
                     addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     data = {
     }
@@ -1548,7 +1548,7 @@ def manual_report(request):
                     #-- ORDER : STOP
                     updateOrderControl(order_no, "STOP")
                     #-- PENDING PLN_FAI
-                    if operation.WorkCenter.strip() == 'PLN_FAI':
+                    if operation.WorkCenterNo.strip() == 'PLN_FAI':
                         addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     data = {
     }
@@ -1668,7 +1668,7 @@ def delete_operation(request):
         #-- ORDER : STOP
         updateOrderControl(operation_no, "STOP")
         #-- PENDING PLN_FAI
-        if operation.WorkCenter.strip() == 'PLN_FAI':
+        if operation.WorkCenterNo.strip() == 'PLN_FAI':
             addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
@@ -2393,7 +2393,10 @@ def getHistoryOperateList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] AS HO"
     sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN SFR2SAP_Report AS SAP"
+    sql += " ON HO.OrderNo = SAP.ProductionOrderNo AND HO.OperationNo = SAP.OperationNumber AND HO.Type = 'MANUAL' AND Ho.Setup = SAP.SetupTime AND HO.Oper = SAP.OperTime AND HO.Labor = SAP.LaborTime"
     sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY StopDateTime DESC"
+    print(sql)
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -3564,7 +3567,7 @@ def addPendingPLNFAI(order_no, operation_no, qty):
     conn = get_connection()
     cursor = conn.cursor()
     sql = "INSERT INTO [dbo].[PendingPLNFAI] ([OrderNo],[OperationNo],[Quantity],[DateTimeStamp]) VALUES "
-    sql += " ('"+str(order_no)+"','"+str(operation_no)+"',"+qty+",CURRENT_TIMESTAMP)"
+    sql += " ('"+str(order_no)+"','"+str(operation_no)+"',"+str(qty)+",CURRENT_TIMESTAMP)"
     cursor.execute(sql)
     conn.commit()
     return
