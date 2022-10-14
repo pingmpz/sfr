@@ -2394,7 +2394,10 @@ def getHistoryOperateList(order_no, operation_no):
     sql = "SELECT * FROM [HistoryOperate] AS HO"
     sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " LEFT JOIN SFR2SAP_Report AS SAP"
-    sql += " ON HO.OrderNo = SAP.ProductionOrderNo AND HO.OperationNo = SAP.OperationNumber AND HO.Type = 'MANUAL' AND Ho.Setup = SAP.SetupTime AND HO.Oper = SAP.OperTime AND HO.Labor = SAP.LaborTime"
+    sql += " ON HO.OrderNo = SAP.ProductionOrderNo AND HO.OperationNo = SAP.OperationNumber AND HO.Type = 'MANUAL'"
+    sql += " AND Ho.Setup = SAP.SetupTime AND HO.Oper = SAP.OperTime AND HO.Labor = SAP.LaborTime AND HO.EmpID = SAP.EmployeeID"
+    sql += " AND SAP.StartDate = CONVERT(NVARCHAR(MAX), HO.StartDateTime, 112) AND SAP.StartTime = REPLACE(CONVERT(NVARCHAR(MAX), HO.StartDateTime, 8), ':', '')"
+    sql += " AND SAP.FinishDate = CONVERT(NVARCHAR(MAX), HO.StopDateTime, 112) AND SAP.FinishTime = REPLACE(CONVERT(NVARCHAR(MAX), HO.StopDateTime, 8), ':', '')"
     sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY StopDateTime DESC"
     print(sql)
     cursor.execute(sql)
