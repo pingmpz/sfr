@@ -2399,7 +2399,6 @@ def getHistoryOperateList(order_no, operation_no):
     sql += " AND SAP.StartDate = CONVERT(NVARCHAR(MAX), HO.StartDateTime, 112) AND SAP.StartTime = REPLACE(CONVERT(NVARCHAR(MAX), HO.StartDateTime, 8), ':', '')"
     sql += " AND SAP.FinishDate = CONVERT(NVARCHAR(MAX), HO.StopDateTime, 112) AND SAP.FinishTime = REPLACE(CONVERT(NVARCHAR(MAX), HO.StopDateTime, 8), ':', '')"
     sql += " WHERE OrderNo = '"+order_no+"' AND OperationNo = '"+operation_no+"' ORDER BY StopDateTime DESC"
-    print(sql)
     cursor.execute(sql)
     return cursor.fetchall()
 
