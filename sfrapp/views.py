@@ -6322,7 +6322,8 @@ def update_employee_master():
                 print(f'--- Employement Type : {employment_type}')
                 print(f'--- Position : {position}')
                 print(f'--- Job Function : {jobfunc}')
-                print(f'--- Is Active : {is_active}')
+                is_active_tmp = 'Active' if is_active == 1 else 'In-Active'
+                print(f'--- Is Active : {is_active_tmp}')
         else:
             error_emp_count = error_emp_count + 1
         row_count = row_count + 1
