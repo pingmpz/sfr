@@ -106,7 +106,7 @@
                       </div> -->
                       <div class="card-body px-1">
                         <!-- Quantity -->
-                        <div class="row">
+                        <!-- <div class="row">
                           <div class="col text-right px-1">
                             <div class="ui-widget-info fade-in mb-3">
                               <h1 class="ui-value text-info"><strong><small>{{operation.ProcessQty.normalize}}</small></strong></h1>
@@ -127,6 +127,32 @@
                               <span class="ui-label text-danger">Reject</span>
                             </div>
                           </div>
+                        </div> -->
+                        <div class="row">
+                          <div class="col-1"></div>
+                          <div class="col-10 text-center">
+                            <div class="ui-widget-info text-center fade-in">
+                              <h1 class="ui-value text-info"><strong><small>{{operation.ProcessQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-info">PROCESS</span>
+                            </div>
+                            <div class="ui-widget-warning text-center fade-in">
+                              <h1 class="ui-value text-warning"><strong><small>{{remainQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-warning">REMAIN</span>
+                            </div>
+                            <div class="ui-widget-success text-center fade-in">
+                              <h1 class="ui-value text-success"><strong><small>{{operation.AcceptedQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-success">ACCEPT</span>
+                            </div>
+                            <div class="ui-widget-danger text-center fade-in">
+                              <h1 class="ui-value text-danger"><strong><small>{{operation.RejectedQty.normalize}}</small></strong></h1>
+                              <span class="ui-label text-danger">REJECT</span>
+                            </div>
+                            <!-- <div class="ui-widget-muted text-center fade-in">
+                              <h1 class="ui-value text-muted"><strong><small>0</small></strong></h1>
+                              <span class="ui-label text-muted">REWORK</span>
+                            </div> -->
+                          </div>
+                          <div class="col-1"></div>
                         </div>
                         <br>
                         <!-- Tab -->
@@ -142,6 +168,9 @@
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#history-tab" role="tab">History</a></li>
                             {% if is_over_est_time %}
                             <li class="nav-item"><a class="nav-link small {% if operation.OverEstNote|default_if_none:"" == "" %}active{% endif %}" data-toggle="tab" href="#over-est-tab" role="tab">{% if operation.OverEstNote|default_if_none:"" == "" %}<i class="cil cil-warning text-danger"></i>{% else %}<i class="cil cil-check-alt text-success"></i>{% endif %} Over Est. Time</a></li>
+                            {% endif %}
+                            {% if idleList|length > 0 %}
+                            <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#idle-tab" role="tab">Idle</a></li>
                             {% endif %}
                             {% if overTimeOperatorList|length > 0 or overTimeWorkCenterList|length > 0 %}
                             <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#overtime-tab" role="tab">Overtime</a></li>
@@ -415,7 +444,7 @@
                               <table class="table table-sm table-responsive-sm table-outline text-center">
                                 <thead class="bg-darkslategray">
                                   <tr>
-                                    <th>
+                                    <!-- <th>
                                       Status
                                       <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Tips"
                                       data-content="
@@ -430,18 +459,19 @@
                                       <strong class='text-dark'>Rejected</strong><br>
                                       ">?
                                       </a>
-                                    </th>
+                                    </th> -->
                                     <th>Operation No</th>
                                     <th>Work Center</th>
                                     <th class="text-info">Process</th>
-                                    <th class="text-success">Accepted</th>
-                                    <th class="text-danger">Rejected</th>
+                                    <th class="text-success">Accept</th>
+                                    <th class="text-danger">Reject</th>
+                                    <!-- <th class="text-muted">Rework</th> -->
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {% for item in operationList %}
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
-                                    <td>
+                                    <!-- <td>
                                       {% if item.WorkCenterNo == None %}<i class="c-icon c-icon-sm cib-discover text-danger pt-1" data-toggle="tooltip" data-original-title="Error"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE' %}<i class="c-icon c-icon-sm cib-discover text-success pt-1" data-toggle="tooltip" data-original-title="Complete"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'COMPLETE, NO WORKING TIME REPORT' %}<i class="c-icon c-icon-sm cib-discover text-skyblue pt-1" data-toggle="tooltip" data-original-title="Complete (No Working Time Report)"></i>
@@ -453,7 +483,7 @@
                                       {% elif operationStatusList|index:forloop.counter0 == 'ERROR' %}<i class="c-icon c-icon-sm cib-discover text-danger pt-1" data-toggle="tooltip" data-original-title="Error"></i>
                                       {% elif operationStatusList|index:forloop.counter0 == 'REJECTED' %}<i class="c-icon c-icon-sm cib-discover text-dark pt-1" data-toggle="tooltip" data-original-title="Rejected"></i>
                                       {% endif %}
-                                    </td>
+                                    </td> -->
                                     <td>
                                       {% if item.OperationNo != operationNo %}
                                       <a href="/transaction/{{orderNo}}{{item.OperationNo}}">{{item.OperationNo}}</a>
@@ -465,6 +495,7 @@
                                     <td>{%if item.ProcessQty.normalize != 0 %}{{item.ProcessQty.normalize}}{% endif %}</td>
                                     <td>{%if item.AcceptedQty.normalize != 0 %}{{item.AcceptedQty.normalize}}{% endif %}</td>
                                     <td>{%if item.RejectedQty.normalize != 0 %}{{item.RejectedQty.normalize}}{% endif %}</td>
+                                    <!-- <td></td> -->
                                   </tr>
                                   {% endfor %}
                                 </tbody>
@@ -476,7 +507,7 @@
                                 <thead class="bg-darkslategray">
                                   <tr>
                                     <th>Note</th>
-                                    <th class="text-right">
+                                    <th colspan="3" class="text-right">
                                       <button type="button" class="btn btn-sm btn-pill btn-link" onclick="open_note()" id="open_note_button"><strong><i class="c-icon c-icon-sm cil-pen text-warning"></i></strong></button>
                                       <button type="button" class="btn btn-sm btn-pill btn-link" onclick="save_note()" id="save_note_button" hidden><strong><i class="c-icon c-icon-sm cil-save text-success"></i></strong></button>
                                       <button type="button" class="btn btn-sm btn-pill btn-link" onclick="close_note()" id="close_note_button" hidden><strong><i class="c-icon c-icon-sm cil-x-circle text-danger"></i></strong></button>
@@ -487,14 +518,22 @@
                                 <tbody>
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td>Order</td>
-                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_0" readonly>{{order.Note|default_if_none:""}}</textarea></td>
+                                    <td colspan="3"><textarea class="form-control" name="name" rows="2" cols="80" id="note_0" readonly>{{order.Note|default_if_none:""}}</textarea></td>
                                   </tr>
                                   {% for item in operationList %}
                                   <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
                                     <td><strong>{{item.OperationNo}}</strong><br>{{item.WorkCenterNo}}</td>
-                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_{{forloop.counter}}" readonly>{{item.Note|default_if_none:""}}</textarea></td>
+                                    <td colspan="3"><textarea class="form-control" name="name" rows="2" cols="80" id="note_{{forloop.counter}}" readonly>{{item.Note|default_if_none:""}}</textarea></td>
                                   </tr>
                                   {% endfor %}
+                                  <tr {% if item.OperationNo.strip == operationNo %}class="bg-lavender"{% endif %}>
+                                    <td><b>Weight</b></td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_weight" readonly>{{order.Weight|default_if_none:''}}</textarea></td>
+                                    <!-- <td><input class="form-control" name="name" id="note_weight" value="{{order.Weight|default_if_none:''}}" readonly></td> -->
+                                    <td><b>Size</b></td>
+                                    <td><textarea class="form-control" name="name" rows="2" cols="80" id="note_size" readonly>{{order.Size|default_if_none:''}}</textarea></td>
+                                    <!-- <td><input class="form-control" name="name" id="note_size" value="{{order.Size|default_if_none:''}}" readonly></td> -->
+                                  </tr>
                                 </tbody>
                               </table>
                             </div>
@@ -520,28 +559,42 @@
                                 </tbody>
                               </table>
 
-                              <div class="form-group row mx-1">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Setup Time</strong></label>
-                                <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if actual_setup_time > est_setup_time_sum %}text-danger{% endif %}"
-                                  value="{{est_setup_time_sum}}/{{actual_setup_time}} {% if setup_time_percent != -1 %}({{setup_time_percent}}%){% endif %}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row mx-1">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Operation Time</strong></label>
-                                <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if actual_oper_time > est_oper_time_sum %}text-danger{% endif %}"
-                                  value="{{est_oper_time_sum}}/{{actual_oper_time}} {% if oper_time_percent != -1 %}({{oper_time_percent}}%){% endif %}" readonly>
-                                </div>
-                              </div>
-                              <div class="form-group row mx-1">
-                                <label class="col-md-5 col-form-label text-right"><strong>Est./Actual Labor Time</strong></label>
-                                <div class="col-md-7">
-                                  <input type="text" class="form-control form-control-sm {% if actual_labor_time > est_labor_time_sum %}text-danger{% endif %}"
-                                  value="{{est_labor_time_sum}}/{{actual_labor_time}} {% if labor_time_percent != -1 %}({{labor_time_percent}}%){% endif %}" readonly>
-                                </div>
-                              </div>
-
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th>Type</th>
+                                    <th>Estimate</th>
+                                    <th>Actual</th>
+                                    <th>(Act/Est * 100) %</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr class="{% if actual_setup_time > est_setup_time_sum %}text-danger{% endif %}">
+                                    <th>Setup</th>
+                                    <td>{{est_setup_time_sum}}</td>
+                                    <td>{{actual_setup_time}}</td>
+                                    <td>{% if setup_time_percent != -1 %}{{setup_time_percent}}%{% endif %}</td>
+                                  </tr>
+                                  <tr class="{% if actual_oper_time > est_oper_time_sum %}text-danger{% endif %}">
+                                    <th>Oper</th>
+                                    <td>{{est_oper_time_sum}}</td>
+                                    <td>{{actual_oper_time}}</td>
+                                    <td>{% if oper_time_percent != -1 %}{{oper_time_percent}}%{% endif %}</td>
+                                  </tr>
+                                  <tr class="{% if actual_labor_time > est_labor_time_sum %}text-danger{% endif %}">
+                                    <th>Labor</th>
+                                    <td>{{est_labor_time_sum}}</td>
+                                    <td>{{actual_labor_time}}</td>
+                                    <td>{% if labor_time_percent != -1 %}{{labor_time_percent}}%{% endif %}</td>
+                                  </tr>
+                                  <tr class="{% if ai_time > est_oper_time_sum %}text-danger{% endif %}">
+                                    <th>Oper + Idle</th>
+                                    <td>{{est_oper_time_sum}}</td>
+                                    <td>{{ai_time}}</td>
+                                    <td>{% if setup_time_percent != -1 %}{{ai_time_percent}}%{% endif %}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
                             </div>
                             <!-- History Tab -->
                             <div class="tab-pane" id="history-tab" role="tabpanel">
@@ -551,6 +604,7 @@
                                   <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#confirm-tab" role="tab" aria-controls="profile">Confirm {% if historyConfirmList|length != 0 %}({{historyConfirmList|length}}){% endif %}</a></li>
                                   <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#join-tab" role="tab" aria-controls="profile">Join {% if historyJoinList|length != 0 %}({{historyJoinList|length}}){% endif %}</a></li>
                                   <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#mod-tab" role="tab">Modified {% if modList|length != 0 %}({{modList|length}}){% endif %}</a></li>
+                                  <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#toollist-tab" role="tab">Tool {% if historyToolList|length != 0 %}({{historyToolList|length}}){% endif %}</a></li>
                                 </ul>
                               </div>
                               <div class="tab-content px-1">
@@ -570,6 +624,7 @@
                                           <strong class='text-primary'>Manual Report</strong><br>
                                           <strong class='text-plum'>Ext-Work</strong><br>
                                           <strong class='text-dark'>Skip</strong><br>
+                                          <strong class='text-warning'>Idle</strong><br>
                                           <strong style='color:#e5e5e5'>Auto Machine</strong><br>
                                           ">?
                                           </a>
@@ -579,6 +634,7 @@
                                         <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>Setup</th>
                                         <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>Oper</th>
                                         <th>Labor</th>
+                                        <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>Idle</th>
                                         <th>Start Time</th>
                                         <th>Finish Time</th>
                                       </tr>
@@ -587,7 +643,8 @@
                                       {% for operate in historyOperateList %}
                                       <tr>
                                         <td>
-                                          {% if operate.EmpID == None %}<i class="c-icon c-icon-sm cib-zalando pt-1" style="color:#e5e5e5" data-toggle="tooltip" data-original-title="Auto Machine">
+                                          {% if operate.Type.strip == 'IDLE' %}<i class="c-icon c-icon-sm cib-zalando pt-1 text-warning" data-toggle="tooltip" data-original-title="Idle"></i>
+                                          {% elif operate.EmpID == None %}<i class="c-icon c-icon-sm cib-zalando pt-1" style="color:#e5e5e5" data-toggle="tooltip" data-original-title="Auto Machine">
                                           {% elif operate.Type.strip == 'WORKING' and operate.IsExternalProcess and operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-plum pt-1" data-toggle="tooltip" data-original-title="Ext-Work">
                                           {% elif operate.Type.strip == 'MANUAL' %}<i class="c-icon c-icon-sm cib-zalando text-primary pt-1" data-toggle="tooltip" data-original-title="Manual Report">
                                           {% elif operate.Setup == 0.00 and operate.Oper == 0.00 and operate.Labor == 0.00  %}<i class="c-icon c-icon-sm cib-zalando text-dark pt-1" data-toggle="tooltip" data-original-title="Skip">
@@ -600,9 +657,13 @@
                                         <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Setup != 0.00 %}{{operate.Setup.normalize}}{% endif %}</td>
                                         <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Oper != 0.00 %}{{operate.Oper.normalize}}{% endif %}</td>
                                         <td>{%if operate.Labor != 0.00 %}{{operate.Labor.normalize}}{% endif %}</td>
+                                        <td {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{%if operate.Idle != 0.00 %}{{operate.Idle.normalize}}{% endif %}</td>
                                         <td>{{operate.StartDateTime|date:"d-M-Y, H:i"}}</td>
                                         <td>
                                           {{operate.StopDateTime|date:"d-M-Y, H:i"}}
+                                          {% if operate.Type.strip == 'IDLE' %}
+                                          <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="IdleType" data-content="{{operate.Description}}">?</a>
+                                          {% endif %}
                                           {% if operate.Type.strip == 'MANUAL' %}
                                           <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="ConfirmDateTime" data-content="{{operate.DateTimeStamp}}">?</a>
                                           {% endif %}
@@ -610,6 +671,19 @@
                                       </tr>
                                       {% endfor %}
                                     </tbody>
+                                    <tfoot class="bg-darkslategray">
+                                      <tr>
+                                        <th>Total</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{{actual_setup_time}}</th>
+                                        <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{{actual_oper_time}}</th>
+                                        <th>{{actual_labor_time}}</th>
+                                        <th {% if operation.WorkCenterType == 'Labor' %} hidden {% endif %}>{{actual_idle_time}}</th>
+                                        <th></th>
+                                        <th></th>
+                                      </tr>
+                                    </tfoot>
                                   </table>
                                   {% endif %}
                                 </div>
@@ -623,8 +697,9 @@
                                       <tr>
                                         <th>Operator</th>
                                         <th>Work Center</th>
-                                        <th class="text-success">Accepted</th>
-                                        <th class="text-danger">Rejected</th>
+                                        <th class="text-success">Accept</th>
+                                        <th class="text-danger">Reject</th>
+                                        <!-- <th class="text-muted">Rework</th> -->
                                         <th>Reason</th>
                                         <th>Confirm Time</th>
                                       </tr>
@@ -636,6 +711,7 @@
                                         <td><a href="/wc/{{confirm.WorkCenterNo}}&NOW">{{confirm.WorkCenterNo}}</a></td>
                                         <td>{%if confirm.AcceptedQty != 0.00 %}{{confirm.AcceptedQty.normalize}}{% endif %}</td>
                                         <td>{%if confirm.RejectedQty != 0.00 %}{{confirm.RejectedQty.normalize}}{% endif %}</td>
+                                        <!-- <td></td> -->
                                         <td>
                                           {% if confirm.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
                                             {% if confirm.OPN %}
@@ -723,7 +799,73 @@
                                   </table>
                                   {% endif %}
                                 </div>
+                                <!-- Tool Tab -->
+                                <div class="tab-pane" id="toollist-tab" role="tabpanel">
+                                  {% if historyToolList|length == 0 %}
+                                  <h5 class="text-center mt-3">NO DATA</h5>
+                                  {% else %}
+                                  <table class="table table-sm table-responsive-sm table-outline text-center small text-center">
+                                    <thead class="bg-darkslategray">
+                                      <tr>
+                                        <th rowspan="2">WorkCenter</th>
+                                        <th rowspan="2">No</th>
+                                        <th rowspan="2">CT Code</th>
+                                        <th rowspan="2">Tool No</th>
+                                        <th rowspan="2">Confirmed Qty</th>
+                                        <th colspan="2">Tool Life in Qty</th>
+                                        <th colspan="2">Tool Life in Min</th>
+                                        <th rowspan="2">InActiveReason</th>
+                                      </tr>
+                                      <tr>
+                                        <th>Target</th>
+                                        <th>%</th>
+                                        <th>Target</th>
+                                        <th>Actual</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for tool in historyToolList %}
+                                      <tr>
+                                        <td>{{tool.WorkCenterNo}}</td>
+                                        <td>{{tool.No}}</td>
+                                        <td>{{tool.CTCode}}</td>
+                                        <td>{{tool.ToolNo|default_if_none:""}}</td>
+                                        <td>{{tool.ConfirmedQty}}</td>
+                                        <td>{{tool.ToolLifeQty}}</td>
+                                        <td>{{historyToolLifeQtyList|index:forloop.counter0}}%</td>
+                                        <td>{{tool.ToolLifeMin}}</td>
+                                        <td>{{historyToolLifeMinList|index:forloop.counter0}}</td>
+                                        <td>{{tool.InActiveReason}}</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                  {% endif %}
+                                </div>
                               </div>
+                            </div>
+                            <!-- Idle Tab -->
+                            <div class="tab-pane small" id="idle-tab" role="tabpanel">
+                              <table class="table table-sm table-responsive-sm table-outline text-center">
+                                <thead class="bg-darkslategray">
+                                  <tr>
+                                    <th>Idle Type</th>
+                                    <th>Duration (min)</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for i in idleList %}
+                                  <tr>
+                                    <td>{{i.Description}}</td>
+                                    <td>{{i.Idle|floatformat}}</td>
+                                  </tr>
+                                  {% endfor %}
+                                  <tr>
+                                    <th style="background-color: #d8dbe0;">Total</th>
+                                    <th style="background-color: #d8dbe0;">{{total_idle_time|floatformat}}</th>
+                                  </tr>
+                                </tbody>
+                              </table>
                             </div>
                             <!-- Overtime Tab -->
                             <div class="tab-pane small" id="overtime-tab" role="tabpanel">
@@ -823,7 +965,7 @@
                               <div class="card-header">
                                 <strong>Working Area</strong>
                                 <div class="card-header-actions">
-                                  {% if overTimeOperatorList|length != 0 or overTimeWorkCenterList|length != 0 or canMP or operation.WorkCenterGroup.strip == 'STD' %}
+                                  {% if canMP %}
                                   <button class="btn btn-sm btn-link small" data-toggle="modal" data-target="#manual_report_modal" onclick="prepare_mp()" id="mp_main_button">Manual Report</button>
                                   {% endif %}
                                 </div>
@@ -992,6 +1134,207 @@
                           </div>
                         {% endif %}
                       {% endif %}
+
+                      <!-- Tool List -->
+                      {% if toolHeaderList %}
+                      <div class="col-md-12">
+                        <div class="card">
+                          <div class="card-header">
+                            <strong>Tool List</strong>
+                          </div>
+                          <div class="card-body">
+                            <input type="text" id="toolh_id" hidden>
+                            <input type="text" id="tooli_id" hidden>
+                            <!-- Machine Tab -->
+                            <div class="nav-tabs-boxed">
+                              <ul class="nav nav-tabs" role="tablist">
+                                {% for toolh in toolHeaderList %}
+                                <li class="nav-item">
+                                  <a class="nav-link small {% if forloop.counter0 == 0 %}active{% endif %}" data-toggle="tab" href="#tl-{{toolh.ID}}-tab" role="tab">
+                                    {{toolh.WorkCenterNo}}
+                                  </a>
+                                </li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                            <div class="tab-content border px-1">
+                              {% for toolh in toolHeaderList %}
+                              {% with toolh_counter=forloop.counter0 %}
+                              <div class="tab-pane py-2 {% if forloop.counter0 == 0 %}active{% endif %}" id="tl-{{toolh.ID}}-tab" role="tabpanel">
+                                <div class="my-2">
+                                  {% if not hasToolConfirmedQtyList|index:forloop.counter0 %}
+                                  <button class="btn btn-info" data-toggle="modal" data-target="#change_tool_wc_modal" onclick="pre_toolh({{toolh.ID}})">Change WorkCenter</button>
+                                  {% endif %}
+                                  <button class="btn btn-success" data-toggle="modal" data-target="#add_new_tool_modal" onclick="pre_toolh({{toolh.ID}})">Add New Tool</button>
+                                  <button class="btn btn-warning text-white" data-toggle="modal" data-target="#transfer_tool_modal" onclick="pre_toolh({{toolh.ID}})">Transfer</button>
+                                  <button class="btn btn-danger" data-toggle="modal" data-target="#return_tool_all_modal" onclick="pre_toolh({{toolh.ID}})">Return All</button>
+                                </div>
+                                <!-- Detail Tab -->
+                                <div class="nav-tabs-boxed">
+                                  <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                      <a class="nav-link small" data-toggle="tab" href="#toolh-{{toolh.ID}}-tab" role="tab">Header</a>
+                                    </li>
+                                    {% if toolStepLists|index:forloop.counter0 %}
+                                    <li class="nav-item">
+                                      <a class="nav-link small" data-toggle="tab" href="#tls-{{toolh.ID}}-tab" role="tab">Step</a>
+                                    </li>
+                                    {% endif %}
+                                    <li class="nav-item">
+                                      <a class="nav-link small active" data-toggle="tab" href="#tooli-{{toolh.ID}}-tab" role="tab">Item</a>
+                                    </li>
+                                  </ul>
+                                </div>
+                                <div class="tab-content border px-1">
+                                  <!-- Tool List Header -->
+                                  <div class="tab-pane py-2" id="toolh-{{toolh.ID}}-tab" role="tabpanel">
+                                    <div class="row mt-3">
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Drw. No./Part No.</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.DrawingNo}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Tool List No.</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.ToolListNo}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Drw. Rev./Part Rev.</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.DrawingRev}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Tool List Rev.</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.ToolListRev}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Part Name</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.PartName}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Customer</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.Customer}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>Programmer</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.Programmer}}" readonly>
+                                        </div>
+                                      </div>
+                                      <div class="form-group row col-6">
+                                        <label class="col-md-5 col-form-label text-right"><strong>File Location</strong></label>
+                                        <div class="col-md-7">
+                                          <input class="form-control form-control-sm" type="text" value="{{toolh.FileLocation}}" readonly>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <!-- Tool List Step -->
+                                  {% if toolStepLists|index:forloop.counter0 %}
+                                  <div class="tab-pane py-2" id="tls-{{toolh.ID}}-tab" role="tabpanel">
+                                    <table class="table table-sm table-outline small">
+                                      <thead class="bg-darkslategray">
+                                        <tr>
+                                          <th>Step</th>
+                                          <th>Operation</th>
+                                          <th>Remark</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for tls in toolStepLists|index:forloop.counter0 %}
+                                        <tr>
+                                          <td>{{tls.StepName}}</td>
+                                          <td>{{tls.Operation}}</td>
+                                          <td>{{tls.Remark}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                  {% endif %}
+                                  <!-- Tool List Item -->
+                                  <div class="tab-pane py-2 active" id="tooli-{{toolh.ID}}-tab" role="tabpanel">
+                                    <table class="table table-sm table-outline small text-center">
+                                      <thead class="bg-darkslategray">
+                                        <tr>
+                                          <th rowspan="2">No</th>
+                                          <th rowspan="2">CT Code</th>
+                                          <th rowspan="2">Tool No</th>
+                                          <th rowspan="2">Detail</th>
+                                          <th rowspan="2">Confirmed Qty</th>
+                                          <th colspan="2">Tool Life in Qty</th>
+                                          <th colspan="2">Tool Life in Min</th>
+                                          <th rowspan="2">Function</th>
+                                        </tr>
+                                        <tr>
+                                          <th>Target</th>
+                                          <th>%</th>
+                                          <th>Target</th>
+                                          <th>Actual</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for tooli in toolItemLists|index:forloop.counter0 %}
+                                        {% with tooli_counter=forloop.counter0 %}
+                                        <tr>
+                                          <td>{{tooli.No|floatformat}}</td>
+                                          <td>{{tooli.CTCode1}}</td>
+                                          <td>{{tooli.ToolNo|default_if_none:""}}</td>
+                                          <td>
+                                            <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Detail"
+                                              data-content="
+                                              <b>No</b> : {{tooli.No|floatformat}}<br>
+                                              <b>CT Code</b> : {{tooli.CTCode1}}<br>
+                                              <b>Tool Life in Qty</b> : {{tooli.ToolLifeQty}}<br>
+                                              <b>Tool Life in Min</b> : {{tooli.ToolLifeMin}}<br>
+                                              <b>Remark</b> : {{tooli.Remark}}<br>
+                                              <hr>
+                                              <b>Tool No</b> : {{tooli.ToolNo|default_if_none:''}}<br>
+                                              <b>Type/Mat Desc</b> : {{tooli.Type|default_if_none:''}}<br>
+                                              <b>Material</b> : {{tooli.Material|default_if_none:''}}<br>
+                                              <b>Dia.</b> : {{tooli.Dia|default_if_none:''}}<br>
+                                              <b>Flute</b> : {{tooli.Flute|default_if_none:''}}<br>
+                                              <b>Holder MA-Code</b> : {{tooli.MACode|default_if_none:''}}<br>
+                                              <b>Projection Length</b> : {{tooli.ProjLen|default_if_none:''}}<br>
+                                              <b>Flute Length</b> : {{tooli.FluteLen|default_if_none:''}}<br>
+                                              "><u>Detail</u>
+                                            </a>
+                                          </td>
+                                          <td><b>{{tooli.ConfirmedQty}}</b></td>
+                                          <td>{{tooli.ToolLifeQty}}</td>
+                                          <td>{{toolLifeQtyLists|index:toolh_counter|index:tooli_counter}}%</td>
+                                          <td>{{tooli.ToolLifeMin}}</td>
+                                          <td>{{toolLifeMinLists|index:toolh_counter|index:tooli_counter}}</td>
+                                          <td>
+                                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#change_tool_modal" onclick="pre_tooli({{tooli.ID}})">Change</button>
+                                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#return_tool_modal" onclick="pre_tooli({{tooli.ID}})">Return</button>
+                                          </td>
+                                        </tr>
+                                        {% endwith %}
+                                        {% endfor %}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endwith %}
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+
                     </div>
                   </div>
                 </div>
@@ -1009,7 +1352,7 @@
                     <strong>Production Order No</strong><br><span class="text-danger"><strong>{{orderNo}}</strong></span><br>
                     <strong>EmpID (Requester)</strong><br>
                     <span class="text-dark">{{cancelInfo.Requester|default_if_none:""}}
-                      {% if cancelInfo.EmpName %}| {{cancelInfo.EmpName}} ({{cancelInfo.Section}} - {{cancelInfo.CostCenter}}) {% endif %}
+                      {% if cancelInfo.EmpName %}| {{cancelInfo.EmpName}} ({{cancelInfo.Section}}) {% endif %}
                     </span><br>
                     <strong>Reason</strong><br><span class="text-dark">{{cancelInfo.Reason|default_if_none:""}}</span><br>
                     <strong>DateTimeStamp</strong><br><span class="text-dark">{{cancelInfo.DateTimeStamp}}</span>
@@ -1049,22 +1392,33 @@
               {% if state == "FIRSTPAGE" %}
               <div class="row">
                 <div class="col-md-12">
-                  <br><br><br>
-                  <h1 class="text-center"><i class="c-icon c-icon-2xl cil-globe-alt" style="font-size: 10rem; width: 10rem;"></i></h1>
                   <br>
-                  <h1 class="text-center"><strong>SHOPFLOOR REPORTING APPLICATION</strong></h1>
-                  <h6 class="text-center"><a href="../media/SFR Manual.pdf" target="_blank">SFR MANUAL.PDF</a></h6>
-                  <br><br><br>
+                  <h1 class="text-center"><i class="c-icon c-icon-xl cil-globe-alt" style="font-size: 10rem; width: 10rem;"></i></h1>
+                  <br>
+                  <h2 class="text-center"><strong>SHOPFLOOR REPORTING APPLICATION</strong></h2>
+                  <p class="text-center"><a href="../media/SFR Manual.pdf" target="_blank">SFR MANUAL.PDF</a></p>
+                  <br>
                   <div class="row">
-                    <div class="col-sm-1 col-md-2"></div>
-                    <div class="col-sm-10 col-md-8">
-                      <div class="card">
-                        <div class="card-body small" style="height:240px; overflow:auto;">
-                          {% include 'annoucement.html' %}
-                        </div>
+                    <div class="card col-6">
+                      <h6 class="mt-3">Annoucement</h6>
+                      <div class="card-body small" style="height:360px; overflow:auto;">
+                        {% include 'annoucement.html' %}
                       </div>
                     </div>
-                    <div class="col-sm-1 col-md-2"></div>
+                    <div class="card col-6">
+                      <h6 class="mt-3">Operator</h6>
+                      <div class="card-body small row" style="height:360px; overflow:auto;">
+                        {% for emp in empAtComputerList %}
+                        <div class="col-sm-12 col-md-12 col-lg-12">
+                          <div class="list-group-item list-group-item-accent-primary list-group-item-divider my-1">
+                            <div class="c-avatar float-right"><button type="button" class="btn btn-sm btn-info btn-pill" onclick="fp_emp_at_com_search({{emp.EmpID}})"><b>Go</b></button></div>
+                            <div><strong>{{emp.EmpID}} | {{emp.EmpName}}</strong></div>
+                            <small class="text-muted">{{emp.DateTimeStamp}}</small>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1075,8 +1429,6 @@
       </div>
       <!-- *** FOOTER *** -->
       {% include 'footer.html' %}
-      <!-- *** RIGHT SIDE BAR *** -->
-      {% include 'aside.html' %}
       <!-- *** MODAL *** -->
       <div class="modal" id="inc_qty_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -1166,23 +1518,6 @@
           </div>
         </div>
       </div>
-      <div class="modal" id="test_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-xl modal-dark" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Test</h4>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-            </div>
-            <div class="modal-body">
-              <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="!"
-              data-content="!">!
-              </a>
-            </div>
-            <div class="modal-footer">
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="modal" id="add_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl modal-success" role="document">
           <div class="modal-content">
@@ -1191,7 +1526,6 @@
               <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-              <br>
               <div class="row">
                 <div class="col-6">
                   <div class="form-group row">
@@ -1209,7 +1543,7 @@
                   <div class="form-group row">
                     <label class="col-md-4 col-form-label text-right small">
                       <strong>New Operation No</strong>
-                      <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
+                      <a class="badge badge-pill badge-secondary" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="Conditions"
                       data-content="
                       1) Not Exist Number.<br>
                       2) Only After Working/Complete Operation.<br>
@@ -1277,6 +1611,7 @@
                         <input class="form-control form-control-sm" type="number" id="add_est_labor_time" autocomplete="off">
                       </div>
                     </div>
+                    <small>* The estimated time accept a maximum of three digits. If the input exceeds three digits, the system will automatically correct it.</small>
                   </div>
                   <div id="add_pp02" hidden>
                     <div class="form-group row">
@@ -1322,16 +1657,16 @@
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right small"><strong>Price Unit</strong></label>
                       <div class="col-md-8">
-                        <input class="form-control form-control-sm" type="number" id="add_price_unit" autocomplete="off" readonly>
+                        <input class="form-control form-control-sm" type="number" id="add_price_unit" autocomplete="off">
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right small"><strong>Price</strong></label>
                       <div class="col-md-5">
-                        <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off" readonly>
+                        <input class="form-control form-control-sm" type="number" id="add_price" autocomplete="off">
                       </div>
                       <div class="col-md-3">
-                        <select class="form-control form-control-sm" id="add_currency" readonly>
+                        <select class="form-control form-control-sm" id="add_currency">
                           {% for currency in currencyList %}
                           <option value="{{currency.Name}}" {% if currency.IsDefault %}selected{% endif %}>{{currency.Name}}</option>
                           {% endfor %}
@@ -1340,8 +1675,10 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-12">
+                  <small class="text-danger text-center" id="add_invalid_text"></small>
+                </div>
               </div>
-              <div class="text-danger text-center small" id="add_invalid_text"></div>
             </div>
             <div class="modal-footer">
               <small>Permission: Section Chief+</small>
@@ -1430,6 +1767,7 @@
                         <input class="form-control form-control-sm" type="number" id="change_est_labor_time" autocomplete="off">
                       </div>
                     </div>
+                    <small>* The estimated time accept a maximum of three digits. If the input exceeds three digits, the system will automatically correct it.</small>
                   </div>
                   <div id="change_pp02" hidden>
                     <div class="form-group row">
@@ -1584,7 +1922,7 @@
         </div>
       </div>
       <div class="modal" id="confirm_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-primary" role="document">
+        <div class="modal-dialog modal-xl modal-primary" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title"><i class="c-icon cil-star"></i> Confirm</h4>
@@ -1624,19 +1962,27 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
+                      <label class="col-md-4 col-form-label text-right text-success"><strong>Accept Qty</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="number" id="good_qty" autocomplete="off">
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-group row">
                       <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="number" id="reject_qty" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right text-muted"><strong>Rework Qty</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="rework_qty" autocomplete="off" disabled>
                       </div>
                     </div>
                   </div>
@@ -1761,7 +2107,7 @@
                   <div class="col-md-5"><hr></div><div class="col-md-2 text-center"><strong>Quantity</strong></div><div class="col-md-5"><hr></div>
                   <div class="col-md-6">
                     <div class="form-group row">
-                      <label class="col-md-4 col-form-label text-right text-success"><strong>Good Qty</strong></label>
+                      <label class="col-md-4 col-form-label text-right text-success"><strong>Accept Qty</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="number" id="mp_good_qty" autocomplete="off" {% if operation.ProcessStop != None and remainQty == 0 %}readonly{% endif %}>
                       </div>
@@ -1772,6 +2118,14 @@
                       <label class="col-md-4 col-form-label text-right text-danger"><strong>Reject Qty</strong></label>
                       <div class="col-md-8">
                         <input class="form-control" type="number" id="mp_reject_qty" autocomplete="off" {% if operation.ProcessStop != None and remainQty == 0 %}readonly{% endif %}>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label class="col-md-4 col-form-label text-right text-muted"><strong>Rework Qty</strong></label>
+                      <div class="col-md-8">
+                        <input class="form-control" type="number" id="mp_rework_qty" disabled autocomplete="off" {% if operation.ProcessStop != None and remainQty == 0 %}readonly{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -1878,13 +2232,13 @@
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>EmpID (Requester)</strong></label>
                 <div class="col-md-8">
-                  <input class="form-control form-control-sm" type="text" id="cc_emp_id" autocomplete="off">
+                  <input class="form-control form-control-sm" type="text" id="cc_emp_id" autocomplete="off" value="{{lastCanceledOrder.EmpID}}">
                 </div>
               </div>
               <div class="form-group row">
                 <label class="col-md-4 col-form-label text-right small"><strong>Reason</strong></label>
                 <div class="col-md-8">
-                  <textarea class="form-control" rows="3" cols="80" id="cc_reason"></textarea>
+                  <textarea class="form-control" rows="3" cols="80" id="cc_reason">{{lastCanceledOrder.Reason}}</textarea>
                 </div>
               </div>
               <div class="text-danger text-center small" id="cc_invalid_text"></div>
@@ -1940,7 +2294,236 @@
           </div>
         </div>
       </div>
+      <div class="modal" id="return_tool_all_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Return All</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to return all tool list ?</h3><br>
+              <div class="text-center">
+                <small>* If the confirmed quantity is 0, it will not be counted as a used tool.</small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-danger" type="button" onclick="return_tool_all()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="transfer_tool_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-warning" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Transfer Tool</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Prod. Order - Oper. No</strong></label>
+                <div class="col-md-4">
+                  <input class="form-control" type="text" maxlength="10" id="transfer_tool_order_no">
+                </div>
+                -
+                <div class="col-md-3">
+                  <input class="form-control" type="text" maxlength="4" id="transfer_tool_operation_no">
+                </div>
+              </div>
+              <div class="text-center">
+                <small id="transfer_tool_invalid_text" class="text-danger"></small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-warning text-white" type="button" onclick="transfer_tool()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="return_tool_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-danger" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Return Tool</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br><h3 class="text-center">Are you sure to return this tool ?</h3><br>
+              <div class="text-center">
+                <small>* If the confirmed quantity is 0, it will not be counted as a used tool.</small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-danger" type="button" onclick="return_tool()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="change_tool_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-primary" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Change Tool</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <!-- <br><h3 class="text-center">Are you sure to change this tool ?</h3><br> -->
+              <div class="text-center">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right">Change Type</label>
+                  <div class="col-md-8 col-form-label">
+                    <div class="form-check form-check-inline mr-1">
+                      <input class="form-check-input" id="change_tool_change_type_same" type="radio" value="Same" name="change_tool_change_type" checked>
+                      <label class="form-check-label" for="change_tool_change_type_same">Same Tool</label>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="form-check form-check-inline mr-1">
+                      <input class="form-check-input" id="change_tool_change_type_diff" type="radio" value="Diff" name="change_tool_change_type">
+                      <label class="form-check-label" for="change_tool_change_type_diff">Different Tool</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">Change Reason <span class="text-danger">*</span></label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="text" id="change_tool_reason">
+                  </div>
+                </div>
+                <div id="change_tool_diff_group" hidden>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right" for="text-input">CT Code <span class="text-danger">*</span></label>
+                    <div class="col-md-8">
+                      <input class="form-control" type="text" id="change_tool_ct_code" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right" for="text-input">Tool No</label>
+                    <div class="col-md-8">
+                      <input class="form-control" type="text" id="change_tool_tool_no">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right" for="text-input">Tool Life in Qty</label>
+                    <div class="col-md-8">
+                      <input class="form-control" type="text" id="change_tool_tool_life_qty">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right" for="text-input">Tool Life in Min</label>
+                    <div class="col-md-8">
+                      <input class="form-control" type="number" id="change_tool_tool_life_min">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-md-4 col-form-label text-right" for="text-input">Remark</label>
+                    <div class="col-md-8">
+                      <textarea class="form-control" id="change_tool_remark" cols="30" rows="5"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <small id="change_tool_invalid_text" class="text-danger"></small>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" type="button" onclick="change_tool()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="change_tool_wc_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Change WorkCenter</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">WorkCenter <span class="text-danger">*</span></label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="text" id="change_tool_wc_no" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                  </div>
+                </div>
+                <div class="text-center">
+                  <small id="change_tool_wc_invalid_text" class="text-danger"></small>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-info" type="button" onclick="change_tool_wc()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="add_new_tool_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-success" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Add New Tool</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">No <span class="text-danger">*</span></label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="number" id="add_new_tool_no">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">CT Code <span class="text-danger">*</span></label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="text" id="add_new_tool_ct_code" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">Tool No</label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="text" id="add_new_tool_tool_no">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">Tool Life in Qty</label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="text" id="add_new_tool_tool_life_qty">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">Tool Life in Min</label>
+                  <div class="col-md-8">
+                    <input class="form-control" type="number" id="add_new_tool_tool_life_min">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label text-right" for="text-input">Remark</label>
+                  <div class="col-md-8">
+                    <textarea class="form-control" id="add_new_tool_remark" cols="30" rows="5"></textarea>
+                  </div>
+                </div>
 
+                <div class="text-center">
+                  <small id="add_new_tool_invalid_text" class="text-danger"></small>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-success" type="button" onclick="add_new_tool()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- *** RIGHT SIDE BAR *** -->
+      {% include 'aside.html' %}
     </div>
     <!-- CoreUI and necessary plugins-->
     <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
@@ -1957,6 +2540,9 @@
     <!-- Custom JS -->
     <script src="{% static "customize/js/custom-function.js" %}"></script>
     <script src="{% static "customize/js/clock.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
     <!-- MAIN -->
     <script>
       document.addEventListener("DOMContentLoaded", function(event) {
@@ -2096,6 +2682,7 @@
                   var stopdatetime = (owc_stopdatetime == null)?"-":getFullDateTimeFromString(owc_stopdatetime);
                   var owc_status = $.trim(owc[5]);
                   var mc_type = $.trim(owc[6]);
+                  var description = $.trim(owc[7]);
                   if(owc_status == "COMPLETE") {
                     completed_count++;
                     break;
@@ -2103,25 +2690,35 @@
                   row = "";
                   row += "<tr id='workcenter_row_"+owc_id+"'>";
                   row += "<td>";
-                  if(owc_status != "SETUP"){
+                  if(owc_status != "SETUP" && owc_status != "IDLE"){
                     row += "<input type='radio' class='my-radio' name='workcenter_radio' value='"+owc_id+"' checked>";
                   }
                   row += "</td>";
                   row += "<td class='small'>"+owc_workcenter_name+"</td>";
                   row += (owc_status == "WAITING")?"<td class='font-weight-bold'>":"<td class='blink font-weight-bold'>";
                   row += owc_status;
+                  if(owc_status == "IDLE"){
+                    row += " ("+description+")";
+                  }
                   row += "<input type='text' id='workcenter_status_"+owc_id+"' value='"+owc_status+"' hidden>";
                   row += "</td>";
                   row += "<td class='small'>";
                   if(owc_status == "WAITING"){
                     row += "<div></div>";
                   } else {
-                    row += "<div> <i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
+                    row += "<div><i class='c-icon c-icon-sm cil-power-standby text-success font-weight-bold'></i> "+startdatetime+"</div>";
                   }
                   row += "</td>";
                   row += "<td>";
                   if(owc_status == "WAITING"){
+                    row += "<div class='btn-group'><button class='btn btn-sm btn-pill btn-warning text-white dropdown-toggle' id='idle_operating_workcenter_"+owc_id+"' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Idle</button><div class='dropdown-menu bg-warning dropdown-menu-right' style='margin: 0px;'>";
+                    {% for item in idleTypeList %}
+                      row += "<button class='dropdown-item bg-warning text-white' onclick='idle_operating_workcenter("+owc_id+",{{item.Code}})'>● {{item.Description}}</button>";
+                    {% endfor %}
+                    row += "</div></div>&nbsp;";
                     row += "<button type='button' class='btn btn-sm btn-pill btn-dark small' id='delete_operating_workcenter_"+owc_id+"' onclick='delete_operating_workcenter("+owc_id+")'>Delete</button>";
+                  } else if(owc_status == "IDLE"){
+                    row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_idle_operating_workcenter_"+owc_id+"' onclick='stop_idle_operating_workcenter("+owc_id+")'>Stop Idle</button>";
                   } else if (owc_status == "WORKING" && mc_type == "Auto" && data.hasOperatorOperatingList[i] == false){
                     row += "<button type='button' class='btn btn-sm btn-pill btn-danger small' id='stop_operating_workcenter_"+owc_id+"' onclick='stop_operating_workcenter("+owc_id+")'>Stop Machine</button>";
                   }
@@ -2157,6 +2754,7 @@
               var row = "<tr><td colspan='"+((workcenter_type == 'Machine')?5:4)+"'>Please add operator above.</td></tr>";
               $("#operator_table_body").append(row);
             } else {
+              var expire_count = 0;
               for(var i = 0;i < data.OOPRList.length;i++){
                 var oopr = data.OOPRList[i];
                 var row = "";
@@ -2172,6 +2770,10 @@
                   var oopr_stopdatetime = oopr[6];
                   var stopdatetime = (oopr_stopdatetime == null)?"-":getFullDateTimeFromString(oopr_stopdatetime);
                   var oopr_status = $.trim(oopr[7]);
+                  if(oopr_status == "COMPLETE" && $('#remain_qty').val() > 0 && (new Date() - new Date(oopr_stopdatetime))/(24*3600*1000) > 1){
+                    expire_count += 1;
+                    break;
+                  }
                   row = "";
                   row += "<tr id='operator_row_"+oopr_id+"'>";
                   row += "<td class='small'><b>"+oopr_operator_id+"</b><br>"+oopr_operator_name+"</td>";
@@ -2204,6 +2806,10 @@
                   row += "</td>";
                   row += "</tr>";
                 }
+                $("#operator_table_body").append(row);
+              }
+              if(expire_count > 0){
+                row += "<tr><td class='text-center' colspan='5'><small>" + expire_count + " Expired Records</small></td></tr>";
                 $("#operator_table_body").append(row);
               }
             }
@@ -2259,6 +2865,40 @@
             $('#operator_id').val("");
             $('#operator_name').val("");
             remove_valid('operator_name');
+          }
+        });
+      }
+
+      function idle_operating_workcenter(id, code){
+        $('#idle_operating_workcenter_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/idle_operating_workcenter/',
+          data: {
+            'id': id,
+            'code': code,
+          },
+          dataType: 'json',
+          success: function (data) {
+            reload_workcenter_table();
+            $('#operator_work_button').prop('disabled', true);
+            $('#operator_setup_button').prop('disabled', true);
+            $('#operator_id').val("");
+            $('#operator_name').val("");
+            remove_valid('operator_name');
+          }
+        });
+      }
+
+      function stop_idle_operating_workcenter(id){
+        $('#stop_idle_operating_workcenter_' + id).prop('disabled', true);
+        $.ajax({
+          url: '/stop_idle_operating_workcenter/',
+          data: {
+            'id': id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            reload_workcenter_table();
           }
         });
       }
@@ -2579,19 +3219,19 @@
                                   $("#mp_invalid_text").text("At least one value need to be more than 0.");
                                 } else {
                                   valid_many(["mp_labor_time","mp_operate_time","mp_setup_time","mp_good_qty","mp_reject_qty"]);
-                                  if(labor_time > 9999){
+                                  if(labor_time > 1440){
                                     invalid("mp_labor_time");
-                                    $("#mp_invalid_text").text("Labor Time is too large.");
+                                    $("#mp_invalid_text").text("Labor Time is more than 1 day.");
                                   } else {
                                     valid("mp_labor_time");
-                                    if(setup_time > 9999){
+                                    if(setup_time > 1440){
                                       invalid("mp_setup_time");
-                                      $("#mp_invalid_text").text("Setup Time is too large.");
+                                      $("#mp_invalid_text").text("Setup Time is more than 1 day.");
                                     } else {
                                       valid("mp_setup_time");
-                                      if(operate_time > 9999){
+                                      if(operate_time > 1440){
                                         invalid("mp_operate_time");
-                                        $("#mp_invalid_text").text("Operate Time is too large.");
+                                        $("#mp_invalid_text").text("Operate Time is more than 1 day.");
                                       } else {
                                         valid("mp_operate_time");
                                         isReportable = true;
@@ -2736,9 +3376,9 @@
         var plan_start_date = $("#add_plan_start_date").val();
         var plan_finish_date = $("#add_plan_finish_date").val();
         var control_key = $("#add_control_key").val();
-        var est_setup_time = parseFloat($('#add_est_setup_time').val());
-        var est_operate_time = parseFloat($('#add_est_operate_time').val());
-        var est_labor_time = parseFloat($('#add_est_labor_time').val());
+        var est_setup_time = parseFloat($('#add_est_setup_time').val()).toFixed(3);
+        var est_operate_time = parseFloat($('#add_est_operate_time').val()).toFixed(3);
+        var est_labor_time = parseFloat($('#add_est_labor_time').val()).toFixed(3);
         var pdt = $("#add_pdt").val();
         var purchasing_org = $("#add_purchasing_org").val();
         var cost_element = $("#add_cost_element").val();
@@ -2907,9 +3547,9 @@
         var plan_start_date = $("#change_plan_start_date").val();
         var plan_finish_date = $("#change_plan_finish_date").val();
         var control_key = $("#change_control_key").val();
-        var est_setup_time = parseFloat($('#change_est_setup_time').val());
-        var est_operate_time = parseFloat($('#change_est_operate_time').val());
-        var est_labor_time = parseFloat($('#change_est_labor_time').val());
+        var est_setup_time = parseFloat($('#change_est_setup_time').val()).toFixed(3);
+        var est_operate_time = parseFloat($('#change_est_operate_time').val()).toFixed(3);
+        var est_labor_time = parseFloat($('#change_est_labor_time').val()).toFixed(3);
         var pdt = $("#change_pdt").val();
         var purchasing_org = $("#change_purchasing_org").val();
         var cost_element = $("#change_cost_element").val();
@@ -3085,7 +3725,7 @@
                   },
                   dataType: 'json',
                   success: function (data) {
-                    window.location.href = '/transaction/' + data.nextlink;
+                    window.location.href = '/transaction/' + data.nextoolink;
                   }
                 });
               }
@@ -3192,6 +3832,8 @@
         for(var i = 0;i <= operationListLength;i++){
           $("#note_" + i).prop("readonly", false);
         }
+        $("#note_weight").prop("readonly", false);
+        $("#note_size").prop("readonly", false);
         $("#save_note_button").prop("hidden", false);
         $("#close_note_button").prop("hidden", false);
         $("#open_note_button").prop("hidden", true);
@@ -3201,6 +3843,8 @@
         for(var i = 0;i <= operationListLength;i++){
           $("#note_" + i).prop("readonly", true);
         }
+        $("#note_weight").prop("readonly", true);
+        $("#note_size").prop("readonly", true);
         $("#save_note_button").prop("hidden", true);
         $("#close_note_button").prop("hidden", true);
         $("#open_note_button").prop("hidden", false);
@@ -3215,12 +3859,16 @@
         for(var i = 1;i <= operationListLength;i++){
           operation_note_list.push($("#note_" + i).val());
         }
+        var weight = $("#note_weight").val();
+        var size = $("#note_size").val();
         $.ajax({
           url: '/save_note/',
           data: {
             'order_no': order_no,
             'order_note': order_note,
             'operation_note_list': operation_note_list,
+            'weight': weight,
+            'size': size,
           },
           dataType: 'json',
           success: function (data) {
@@ -3263,6 +3911,261 @@
             location.reload();
           }
         });
+      }
+    </script>
+    <!-- TOOL LIST -->
+    <script>
+      function pre_toolh(toolh_id){
+        $('#toolh_id').val(toolh_id);
+      }
+
+      function pre_tooli(tooli_id){
+        $('#tooli_id').val(tooli_id);
+      }
+
+      function return_tool_all(){
+        var toolh_id = $('#toolh_id').val();
+        $.ajax({
+          url: '/return_tool_all/',
+          data: {
+            'toolh_id': toolh_id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+
+      function return_tool(){
+        var tooli_id = $('#tooli_id').val();
+        $.ajax({
+          url: '/return_tool/',
+          data: {
+            'tooli_id': tooli_id,
+          },
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+
+      function transfer_tool(){
+        remove_valid('transfer_tool_order_no');
+        remove_valid('transfer_tool_operation_no');
+        $("#transfer_tool_invalid_text").text("");
+        fix_transfer_tool_prod_no();
+        validate_transfer_tool(function(result) {
+					if(result){
+            var order_no =  $("#transfer_tool_order_no").val();
+            var operation_no =  $("#transfer_tool_operation_no").val();
+            var toolh_id = $('#toolh_id').val();
+						$.ajax({
+              url: '/transfer_tool/',
+              data: {
+                'order_no': order_no,
+                'operation_no': operation_no,
+                'toolh_id': toolh_id,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+					}
+				});
+      }
+
+      function change_tool(){
+        remove_valid('change_tool_reason');
+        remove_valid('change_tool_ct_code');
+        var tool_life_qty = $('#change_tool_tool_life_qty').val();
+        var tool_life_min = $('#change_tool_tool_life_min').val();
+        if(tool_life_qty == "") $('#change_tool_tool_life_qty').val(0);
+        if(tool_life_min == "") $('#change_tool_tool_life_min').val(0);
+        $("#change_tool_invalid_text").text("");
+        var tooli_id = $('#tooli_id').val();
+        var change_type = $('input[name=change_tool_change_type]:checked').val();
+        var reason = $('#change_tool_reason').val();
+        var ct_code = $('#change_tool_ct_code').val();
+        var tool_no = $('#change_tool_tool_no').val();
+        var tool_life_qty = $('#change_tool_tool_life_qty').val();
+        var tool_life_min = $('#change_tool_tool_life_min').val();
+        var remark = $('#change_tool_remark').val();
+        if(reason == ""){
+          $("#change_tool_invalid_text").text("Please give a reason.");
+          return
+        } else if (change_type == 'Diff' && ct_code == "") {
+          $("#change_tool_invalid_text").text("Please give fill CT Code.");
+        } else {
+          $.ajax({
+            url: '/change_tool/',
+            data: {
+              'tooli_id': tooli_id,
+              'change_type': change_type,
+              'reason': reason,
+              'ct_code': ct_code,
+              'tool_no': tool_no,
+              'tool_life_qty': tool_life_qty,
+              'tool_life_min': tool_life_min,
+              'remark': remark,
+            },
+            dataType: 'json',
+            success: function (data) {
+              location.reload();
+            }
+          });
+        }
+      }
+
+      function change_tool_wc(){
+        remove_valid('change_tool_wc_no');
+        $("#change_tool_wc_invalid_text").text("");
+        validate_change_tool_wc(function(result) {
+					if(result){
+            var toolh_id = $('#toolh_id').val();
+            var wc_no =  $("#change_tool_wc_no").val();
+						$.ajax({
+              url: '/change_tool_wc/',
+              data: {
+                'toolh_id': toolh_id,
+                'wc_no': wc_no,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+					}
+				});
+      }
+
+      function add_new_tool(){
+        remove_valid('add_new_tool_no');
+        remove_valid('add_new_tool_code');
+        var tool_life_qty = $('#add_new_tool_tool_life_qty').val();
+        var tool_life_min = $('#add_new_tool_tool_life_min').val();
+        if(tool_life_qty == "") $('#add_new_tool_tool_life_qty').val(0);
+        if(tool_life_min == "") $('#add_new_tool_tool_life_min').val(0);
+        $("#add_new_tool_invalid_text").text("");
+        validate_add_new_tool(function(result) {
+					if(result){
+            var toolh_id = $('#toolh_id').val();
+            var no =  $("#add_new_tool_no").val();
+            var ct_code =  $("#add_new_tool_ct_code").val();
+            var tool_no = $('#add_new_tool_tool_no').val();
+            var tool_life_qty =  $("#add_new_tool_tool_life_qty").val();
+            var tool_life_min =  $("#add_new_tool_tool_life_min").val();
+            var remark =  $("#add_new_tool_remark").val();
+						$.ajax({
+              url: '/add_new_tool/',
+              data: {
+                'toolh_id': toolh_id,
+                'no': no,
+                'ct_code': ct_code,
+                'tool_no': tool_no,
+                'tool_life_qty': tool_life_qty,
+                'tool_life_min': tool_life_min,
+                'remark': remark,
+              },
+              dataType: 'json',
+              success: function (data) {
+                location.reload();
+              }
+            });
+					}
+				});
+      }
+
+      function validate_transfer_tool(_callback){
+        var order_no =  $("#transfer_tool_order_no").val();
+        var operation_no =  $("#transfer_tool_operation_no").val();
+        var toolh_id = $('#toolh_id').val();
+        if(order_no.length < 6){
+          $("#transfer_tool_invalid_text").text("Please fill at least 6 digit for Order No.");
+          _callback(false);
+        } else {
+          $.ajax({
+            url: '/validate_transfer_tool/',
+            data: {
+              'order_no': order_no,
+              'operation_no': operation_no,
+              'toolh_id': toolh_id,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.canUse){
+                _callback(true);
+              } else {
+                $("#transfer_tool_invalid_text").text(data.invalidText);
+                _callback(false);
+              }
+            }
+          });
+        }
+      }
+
+      function fix_transfer_tool_prod_no(){
+        var order_no =  $("#transfer_tool_order_no").val();
+        var operation_no =  frontZero($("#transfer_tool_operation_no").val(), 4);
+        $("#transfer_tool_operation_no").val(operation_no);
+      }
+
+      function validate_change_tool_wc(_callback){
+        var toolh_id = $('#toolh_id').val();
+        var wc_no =  $("#change_tool_wc_no").val();
+        if(wc_no.length == 0){
+          $("#change_tool_wc_invalid_text").text("Please fill WorkCenter.");
+          _callback(false);
+        } else {
+          $.ajax({
+            url: '/validate_change_tool_wc/',
+            data: {
+              'toolh_id': toolh_id,
+              'wc_no': wc_no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.canUse){
+                _callback(true);
+              } else {
+                $("#change_tool_wc_invalid_text").text(data.invalidText);
+                _callback(false);
+              }
+            }
+          });
+        }
+      }
+
+      function validate_add_new_tool(_callback){
+        var toolh_id = $('#toolh_id').val();
+        var no =  $("#add_new_tool_no").val();
+        var ct_code =  $("#add_new_tool_ct_code").val();
+        if(no.length == 0 || no == '0'){
+          $("#add_new_tool_invalid_text").text("Please fill No and No can not be zero.");
+          _callback(false);
+        } else if(ct_code.length == 0){
+          $("#add_new_tool_invalid_text").text("Please fill CT Code.");
+          _callback(false);
+        } else {
+          $.ajax({
+            url: '/validate_add_new_tool/',
+            data: {
+              'toolh_id': toolh_id,
+              'no': no,
+            },
+            dataType: 'json',
+            success: function (data) {
+              if(data.canUse){
+                _callback(true);
+              } else {
+                $("#add_new_tool_invalid_text").text(data.invalidText);
+                _callback(false);
+              }
+            }
+          });
+        }
       }
     </script>
     <!-- VALIDATION -->
@@ -3395,7 +4298,7 @@
             remove_valid_many(["sc_order_no","sc_operation_no"]);
             window.open('/transaction/' + order_no + operation_no, '_self');
           }
-        }
+      }
 
       document.getElementById("fp_operator_id").addEventListener("keydown", function (e) {
         if (e.code === "Enter" || e.code == "NumpadEnter") fp_emp_search();
@@ -3448,6 +4351,12 @@
           dynamic_operator_setup();
       });
 
+      $('input[name=change_tool_change_type]').change(function() {
+        var selectedValue = $(this).val();
+        $('#change_tool_diff_group').prop('hidden', true);
+        if(selectedValue == 'Diff') $('#change_tool_diff_group').prop('hidden', false);
+      });
+      
       function dynamic_operator_setup(){
         if ($('input[name="workcenter_radio"]').length > 0){
           owc_id = document.querySelector('input[name="workcenter_radio"]:checked').value;
@@ -3529,6 +4438,32 @@
     </script>
     <!-- KET RESTRICT -->
     <script>
+      $("#add_new_tool_tool_life_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#change_tool_flute").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#change_tool_proj_len").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#change_tool_flute_len").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#change_tool_tool_life_qty").on("keypress keyup blur",function (event) {
+          $(this).val($(this).val().replace(/[^\d].+/, ""));
+          if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+
       $("#sqty_process_qty").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
           if((event.which < 48 || event.which > 57)) event.preventDefault();
@@ -3564,20 +4499,20 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#add_est_setup_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#add_est_setup_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
-      $("#add_est_operate_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#add_est_operate_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
-      $("#add_est_labor_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#add_est_labor_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
       $("#add_pdt").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
@@ -3594,20 +4529,20 @@
           if((event.which < 48 || event.which > 57)) event.preventDefault();
       });
 
-      $("#change_est_setup_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#change_est_setup_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
-      $("#change_est_operate_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#change_est_operate_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
-      $("#change_est_labor_time").on("keypress keyup blur",function (event) {
-          $(this).val($(this).val().replace(/[^\d].+/, ""));
-          if((event.which < 48 || event.which > 57)) event.preventDefault();
-      });
+      // $("#change_est_labor_time").on("keypress keyup blur",function (event) {
+      //     $(this).val($(this).val().replace(/[^\d].+/, ""));
+      //     if((event.which < 48 || event.which > 57)) event.preventDefault();
+      // });
 
       $("#change_pdt").on("keypress keyup blur",function (event) {
           $(this).val($(this).val().replace(/[^\d].+/, ""));
@@ -3675,6 +4610,16 @@
       });
 
       $("#fp_operator_id").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#transfer_tool_order_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#transfer_tool_operation_no").on("keypress keyup blur",function (event) {
          $(this).val($(this).val().replace(/[^\d].+/, ""));
          if((event.which < 48 || event.which > 57)) event.preventDefault();
       });

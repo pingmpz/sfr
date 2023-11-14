@@ -1,12 +1,28 @@
 from django.shortcuts import render, redirect
-import pyodbc
 from django.http import JsonResponse
+from django.http import HttpResponse
+import requests
+from dateutil import parser
+import json
+# System
+from django.conf import settings
+import pyodbc
+# Date time
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from dateutil import parser
-
-# FILE READER
+import time
+# File 
+from sfr.settings import MEDIA_ROOT
 from openpyxl import load_workbook, Workbook
+import csv
+from django.core.files.storage import FileSystemStorage
+from pathlib import Path
+import glob, os, shutil
+import io
+# Token
+import secrets
+import string
+# Other 
 
 # EMAIL
 # from django.core.mail import EmailMessage
@@ -23,6 +39,9 @@ import wget
 HOST_URL = 'http://129.1.100.190:8080/'
 TEMPLATE_OVERTIME = 'email_templates/overtime.html'
 OVER_EST_RATING = 1.5
+DEFAULT_ACTIVE_DATE = '1999-01-01'
+DEFAULT_INACTIVE_DATE = '2999-01-01'
+AB_GRAPH_LIMIT_DAY = 3
 
 #------------------------------------------------------------------------ EMAIL
 
@@ -32,7 +51,6 @@ OVER_EST_RATING = 1.5
 
 def blank(request):
     update_employee_master()
-    # update_on_rt()
     context = {
     }
     return render(request, 'blank.html', context)
@@ -46,8 +64,10 @@ def index(request):
 #------------------------------------------------------------------- TRANSACTION
 
 def transaction(request, orderoprno):
+    start_time = time.time()
     #CONST
     ip_address = getClientIP(request)
+    # ip_address = '129.1.114.149'
     empAtComputerList = getEmpAtComputerList(ip_address)
     overtimehour = 0
     canMP = False
@@ -59,6 +79,7 @@ def transaction(request, orderoprno):
     isFirst = False
     isOperating = False
     isOvertime = False
+    lastCanceledOrder = None
     hasReportTime = False
     remainQty = -1
     state = "ERROR" #-- FIRSTPAGE / NODATAFOUND / NOOPERATIONFOUND / DATAFOUND
@@ -80,21 +101,41 @@ def transaction(request, orderoprno):
     materialGroupList = [] #-- All
     purchaseGroupList = [] #-- All
     currencyList = [] #-- All
+    #-- IDLE
+    idleList = []
+    total_idle_time = 0
     #-- OVER EST TIME
     actual_setup_time = 0
     actual_oper_time = 0
     actual_labor_time = 0
+    actual_idle_time = 0
+    ai_time = 0
     est_setup_time_sum = 0
     est_oper_time_sum = 0
     est_labor_time_sum = 0
     setup_time_percent = -1
     oper_time_percent = -1
     labor_time_percent = -1
+    ai_time_percent = -1
     is_over_est_time = False
 
     currentOperation = -1
     operationBefore = -1 #-- For Prev Operation Button
     operationAfter = -1 #-- For Next Operation Button
+
+    #-- TOOL LIST
+    historyToolList = []
+    historyToolLifeQtyList = []
+    historyToolLifeMinList = []
+    hasToolConfirmedQtyList = []
+    toolHeaderList = []
+    toolStepLists = []
+    toolItemLists = []
+    toolLifeQtyLists = []
+    toolLifeMinLists = []
+
+    idleTypeList = []
+    # print(f"Init, excute time : {time.time() - start_time}")
     #--
     if orderoprno == "0":
         state = "FIRSTPAGE"
@@ -128,14 +169,15 @@ def transaction(request, orderoprno):
                 state = "DATAFOUND"
                 #-- CONST
                 overtimehour = getOvertimeHour()
-                canMP = getManualReportAllow()
+                canMP = True if getManualReportAllow() or not order.ProcessStop or (order.ProcessStop + timedelta(days=3) > datetime.today()) else False
                 refreshSecond = getRefreshSecond()
                 #-- OPRATION DETIAL
                 operation = getOperation(orderNo, operationNo)
                 isFirst = isFirstOperation(orderNo, operationNo)
                 isOperating = isOperatingOperation(orderNo, operationNo)
                 isOvertime = isOvertimeOperation(orderNo, operationNo)
-                hasReportTime = hasReportTimeToSAP(orderNo, operationNo)
+                lastCanceledOrder = getLastCanceledOrder()
+                # hasReportTime = hasReportTimeToSAP(orderNo, operationNo)
                 remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
                 #-- CHECK CLOSED
                 hasNoMoreQty = True
@@ -148,73 +190,114 @@ def transaction(request, orderoprno):
                 if hasNoMoreQty:
                     currentOperation = -1
                 #-- SET STATUS OF EACH OPERATION IN LIST
-                isPartial = False
-                for i in range(len(operationList)):
-                    tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
-                    if isPartial == False and tempRemainQty > 0:
-                        isPartial = True
-                    temphasReportTime = hasReportTimeToSAP(orderNo, operationList[i].OperationNo)
-                    if operationList[i].ProcessQty == 0 and hasNoMoreQty:
-                        operationStatusList.append("REJECTED")
-                    elif operationList[i].ProcessQty == 0:
-                        operationStatusList.append("WAITING")
-                    elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
-                        operationStatusList.append("JOINING")
-                    elif isOvertimeOperation(orderNo, operationList[i].OperationNo):
-                        operationStatusList.append("OVERTIME")
-                    elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
-                        operationStatusList.append("WORKING")
-                    elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
-                        operationStatusList.append("READY")
-                    elif tempRemainQty == 0 and isPartial == False and temphasReportTime:
-                        operationStatusList.append("COMPLETE")
-                    elif tempRemainQty == 0 and isPartial == False:
-                        operationStatusList.append("COMPLETE, NO WORKING TIME REPORT")
-                    elif tempRemainQty == 0 and isPartial == True:
-                        operationStatusList.append("PARTIALCOMPLETE")
-                    else:
-                        operationStatusList.append("ERROR")
-                    #-- GET PREV & NEXT OPERATION
-                    if operationNo == operationList[i].OperationNo.strip():
-                        if i != 0:
-                            operationBefore = operationList[i-1].OperationNo
-                        if i != len(operationList) - 1:
-                            operationAfter = operationList[i+1].OperationNo
+                # isPartial = False
+                # for i in range(len(operationList)):
+                #     tempRemainQty = operationList[i].ProcessQty - (operationList[i].AcceptedQty + operationList[i].RejectedQty)
+                #     if isPartial == False and tempRemainQty > 0:
+                #         isPartial = True
+                #     temphasReportTime = hasReportTimeToSAP(orderNo, operationList[i].OperationNo)
+                #     if operationList[i].ProcessQty == 0 and hasNoMoreQty:
+                #         operationStatusList.append("REJECTED")
+                #     elif operationList[i].ProcessQty == 0:
+                #         operationStatusList.append("WAITING")
+                #     elif operationList[i].JoinToOrderNo != None and operationList[i].JoinToOperationNo != None:
+                #         operationStatusList.append("JOINING")
+                #     elif isOvertimeOperation(orderNo, operationList[i].OperationNo):
+                #         operationStatusList.append("OVERTIME")
+                #     elif tempRemainQty > 0 and operationList[i].ProcessStart != None:
+                #         operationStatusList.append("WORKING")
+                #     elif tempRemainQty > 0 and operationList[i].ProcessStart == None:
+                #         operationStatusList.append("READY")
+                #     elif tempRemainQty == 0 and isPartial == False and temphasReportTime:
+                #         operationStatusList.append("COMPLETE")
+                #     elif tempRemainQty == 0 and isPartial == False:
+                #         operationStatusList.append("COMPLETE, NO WORKING TIME REPORT")
+                #     elif tempRemainQty == 0 and isPartial == True:
+                #         operationStatusList.append("PARTIALCOMPLETE")
+                #     else:
+                #         operationStatusList.append("ERROR")
+                #     #-- GET PREV & NEXT OPERATION
+                #     if operationNo == operationList[i].OperationNo.strip():
+                #         if i != 0:
+                #             operationBefore = operationList[i-1].OperationNo
+                #         if i != len(operationList) - 1:
+                #             operationAfter = operationList[i+1].OperationNo
                 #-- BOM TAB
                 bomList = getBomList(orderNo)
+                # print(f"Neccessory Data, excute time : {time.time() - start_time}")
                 #-- HISTORY TAB
                 historyOperateList = getHistoryOperateList(orderNo, operationNo)
                 historyConfirmList = getHistoryConfirmList(orderNo, operationNo)
                 historyJoinList = getHistoryJoinList(orderNo, operationNo)
                 modList = getModList(orderNo)
+                # print(f"History, excute time : {time.time() - start_time}")
                 #-- OVERTIME TAB
                 overTimeOperatorList = getOverTimeOperatorList(orderNo, operationNo)
                 overTimeWorkCenterList = getOverTimeWorkCenterList(orderNo, operationNo)
+                # print(f"Overtime, excute time : {time.time() - start_time}")
                 #-- JOIN LIST
                 if operation.JoinToOrderNo == None and operation.JoinToOperationNo == None:
                     joinList = getJoinList(orderNo, operationNo)
+                # print(f"Join, excute time : {time.time() - start_time}")
                 #-- ETC LIST
                 rejectReasonList = getRejectReasonList()
                 materialGroupList = getMaterialGroupList()
                 purchaseGroupList = getPurchaseGroupList()
+                idleTypeList = getIdleTypeList()
                 currencyList = getCurrencyList()
+                # print(f"ETC, excute time : {time.time() - start_time}")
+                #-- IDLE LIST
+                idleList = getIdleList(orderNo, operationNo) 
+                xIdle = getTotalIdleTime(orderNo, operationNo)  
+                total_idle_time = int(xIdle.Idle) if xIdle and xIdle.Idle else 0
+                # print(f"Idle, excute time : {time.time() - start_time}")
                 #-- OVER EST TIME
-                est_setup_time_sum = int(operation.EstSetupTime) * int(operation.ProcessQty)
-                est_oper_time_sum = int(operation.EstOperationTime) * int(operation.ProcessQty)
-                est_labor_time_sum = int(operation.EstLaborTime) * int(operation.ProcessQty)
+                est_setup_time_sum = float(operation.EstSetupTime) * int(operation.ProcessQty)
+                est_oper_time_sum = float(operation.EstOperationTime) * int(operation.ProcessQty)
+                est_labor_time_sum = float(operation.EstLaborTime) * int(operation.ProcessQty)
                 actual_time = getActualTime(orderNo, operationNo)
-                if actual_time != None:
+                if actual_time:
                     actual_setup_time = int(actual_time.Setup)
                     actual_oper_time = int(actual_time.Oper)
                     actual_labor_time = int(actual_time.Labor)
+                    actual_idle_time = int(actual_time.Idle)
+                    ai_time = int(total_idle_time + actual_oper_time)
                     setup_time_percent = -1 if est_setup_time_sum == 0 else int(actual_setup_time/est_setup_time_sum * 100)
                     oper_time_percent = -1 if est_oper_time_sum == 0 else int(actual_oper_time/est_oper_time_sum * 100)
                     labor_time_percent = -1 if est_labor_time_sum == 0 else int(actual_labor_time/est_labor_time_sum * 100)
+                    ai_time_percent = -1 if est_oper_time_sum == 0 else int((actual_oper_time + total_idle_time)/est_oper_time_sum * 100)
                 if (actual_setup_time > est_setup_time_sum and est_setup_time_sum == 0) or (actual_oper_time > est_oper_time_sum and est_oper_time_sum == 0) or (actual_labor_time > est_labor_time_sum and est_labor_time_sum == 0):
                     is_over_est_time = True
-                elif (actual_setup_time > est_setup_time_sum * OVER_EST_RATING) or (actual_oper_time > est_oper_time_sum * OVER_EST_RATING) or (actual_labor_time > est_labor_time_sum * OVER_EST_RATING):
+                elif (actual_setup_time > est_setup_time_sum * OVER_EST_RATING) or (actual_oper_time > est_oper_time_sum * OVER_EST_RATING) or (actual_labor_time > est_labor_time_sum * OVER_EST_RATING) or (ai_time > est_oper_time_sum * OVER_EST_RATING):
                     is_over_est_time = True
-    printString(orderNo + "-" + operationNo + " (" + state + ")")
+                # print(f"Over Estimate, excute time : {time.time() - start_time}")
+                #-- TOOL LIST
+                historyToolList = getHistoryToolList(orderNo, operationNo)
+                for tooli in historyToolList:
+                    historyToolLifeQty = round((tooli.ConfirmedQty / tooli.ToolLifeQty) * 100, 2) if tooli.ToolLifeQty > 0 else 'NA'
+                    historyToolLifeMin = round(tooli.ConfirmedQty * (tooli.ToolLifeMin / tooli.ToolLifeQty), 2) if tooli.ToolLifeQty > 0 else 'NA'
+                    historyToolLifeQtyList.append(historyToolLifeQty)
+                    historyToolLifeMinList.append(historyToolLifeMin)
+                toolHeaderList = getToolHeaderListByOrder(orderNo, operationNo)
+                for toolh in toolHeaderList:
+                    hasToolConfirmedQty = False
+                    toolStepLists.append(getToolStepList(toolh.ID))
+                    toolItemList = getToolItemList(toolh.ID)
+                    toolItemLists.append(toolItemList)
+                    toolLifeQtyList = []
+                    toolLifeMinList = []
+                    for tooli in toolItemList:
+                        if tooli.ConfirmedQty > 0:
+                            hasToolConfirmedQty = True
+                        toolLifeQty = round((tooli.ConfirmedQty / tooli.ToolLifeQty) * 100, 2) if tooli.ToolLifeQty > 0 else 'NA'
+                        toolLifeMin = round(tooli.ConfirmedQty * (tooli.ToolLifeMin / tooli.ToolLifeQty), 2) if tooli.ToolLifeQty > 0 else 'NA'
+                        toolLifeQtyList.append(toolLifeQty)
+                        toolLifeMinList.append(toolLifeMin)
+                    toolLifeQtyLists.append(toolLifeQtyList)
+                    toolLifeMinLists.append(toolLifeMinList)
+                    hasToolConfirmedQtyList.append(hasToolConfirmedQty)
+                # print(f"Tool, excute time : {time.time() - start_time}")
+    printString(f"{orderNo}-{operationNo} ({state}) excute time : {time.time() - start_time}")
     context = {
         'empAtComputerList' : empAtComputerList,
         'ip_address' : ip_address,
@@ -230,6 +313,7 @@ def transaction(request, orderoprno):
         'isFirst' : isFirst,
         'isOperating' : isOperating,
         'isOvertime' : isOvertime,
+        'lastCanceledOrder' : lastCanceledOrder,
         'hasReportTime' : hasReportTime,
         'remainQty' : remainQty,
         'operationList' : operationList,
@@ -245,20 +329,35 @@ def transaction(request, orderoprno):
         'rejectReasonList' : rejectReasonList,
         'materialGroupList' : materialGroupList,
         'purchaseGroupList' : purchaseGroupList,
+        'idleTypeList' : idleTypeList,
         'currencyList' : currencyList,
         'actual_setup_time': actual_setup_time,
         'actual_oper_time': actual_oper_time,
         'actual_labor_time': actual_labor_time,
+        'actual_idle_time': actual_idle_time,
+        'ai_time': ai_time,
         'est_setup_time_sum': est_setup_time_sum,
         'est_oper_time_sum': est_oper_time_sum,
         'est_labor_time_sum': est_labor_time_sum,
         'setup_time_percent': setup_time_percent,
         'oper_time_percent': oper_time_percent,
         'labor_time_percent': labor_time_percent,
+        'ai_time_percent': ai_time_percent,
         'is_over_est_time': is_over_est_time,
+        'idleList': idleList,
+        'total_idle_time': total_idle_time,
         'currentOperation' : currentOperation,
         'operationBefore' : operationBefore,
         'operationAfter' : operationAfter,
+        'historyToolList': historyToolList,
+        'historyToolLifeQtyList': historyToolLifeQtyList,
+        'historyToolLifeMinList': historyToolLifeMinList,
+        'hasToolConfirmedQtyList': hasToolConfirmedQtyList,
+        'toolHeaderList': toolHeaderList,
+        'toolStepLists': toolStepLists,
+        'toolItemLists': toolItemLists,
+        'toolLifeQtyLists': toolLifeQtyLists,
+        'toolLifeMinLists': toolLifeMinLists,
     }
     return render(request, 'transaction.html', context)
 
@@ -359,49 +458,162 @@ def lot_traveller(request, orderno, lotno):
     }
     return render(request, 'lot_traveller.html', context)
 
+def ab_graph_mn(request, frt, fdate):
+    onRoutingList = getOnRoutingList()
+    if frt == "FIRST":
+        frt = onRoutingList[0].WorkCenterNo
+    if fdate == "NOW":
+        fdate = datetime.today().strftime('%Y-%m-%d')
+    act_date = datetime.strptime(fdate, '%Y-%m-%d')
+    ndate = (act_date + timedelta(days=(1))).strftime('%Y-%m-%d')
+    is_able_to_edit = ((datetime.today() - act_date <= timedelta(days=(AB_GRAPH_LIMIT_DAY))) and datetime.today() > act_date)
+    is_today = True if act_date.date() == datetime.today().date() else False
+    mcs = getMachineOnRoutingIsActiveList(frt)
+    states, hrs, mins, nhrs, nmins, rhours = [], [], [], [], [], []
+    states_changables = [False] * 24 if is_today else [True] * 24
+    if is_today:
+        for idx, i in enumerate(states_changables):
+            hr_now = int(datetime.today().strftime('%H'))
+            if idx <= hr_now:
+                states_changables[idx] = True
+    for mc in mcs: 
+        state = ['N'] * 24
+        hr = ""
+        min = ""
+        nhr = ""
+        nmin = ""
+        rhour = ""
+        wc = mc.WorkCenterNo
+        st = getABGraphManualData(wc, fdate)
+        if st:
+            state[0] = st.H00
+            state[1] = st.H01
+            state[2] = st.H02
+            state[3] = st.H03
+            state[4] = st.H04
+            state[5] = st.H05
+            state[6] = st.H06
+            state[7] = st.H07
+            state[8] = st.H08
+            state[9] = st.H09
+            state[10] = st.H10
+            state[11] = st.H11
+            state[12] = st.H12
+            state[13] = st.H13
+            state[14] = st.H14
+            state[15] = st.H15
+            state[16] = st.H16
+            state[17] = st.H17
+            state[18] = st.H18
+            state[19] = st.H19
+            state[20] = st.H20
+            state[21] = st.H21
+            state[22] = st.H22
+            state[23] = st.H23
+            hr = st.Hour
+            min = st.Min
+        nst = getABGraphManualData(wc, ndate)
+        if nst:
+            nhr = nst.Hour
+            nmin = nst.Min
+            if hr != "" and min != "" and nhr != "" and nmin != "":
+                xhr = nhr
+                xmin = nmin
+                if int(nmin) < int(min):
+                    xhr = int(xhr) - 1
+                    xmin = int(xmin) + 60
+                rmin = int(xmin) - int(min)
+                rhour = int(xhr) - int(hr)
+                if rmin > 30:
+                    rhour = rhour + 1
+        states.append(state)
+        hrs.append(hr)
+        mins.append(min)
+        nhrs.append(nhr)
+        nmins.append(nmin)
+        rhours.append(rhour)
+    context = {
+        'onRoutingList': onRoutingList,
+        'frt': frt,
+        'fdate': fdate,
+        'is_able_to_edit': is_able_to_edit,
+        'is_today': is_today,
+        'states_changables': states_changables,
+        'mcs': mcs,
+        'states': states,
+        'hrs': hrs,
+        'mins': mins,
+        'ndate': ndate,
+        'nhrs': nhrs,
+        'nmins': nmins,
+        'rhours': rhours,
+    }
+    return render(request, 'ab_graph_mn.html', context)
+
+def tool_store(request):
+    toolHeaderList = getToolHeaderAll()
+    context = {
+        'toolHeaderList': toolHeaderList,
+    }
+    return render(request, 'tool_store.html', context)    
+
 #------------------------------------------------------------------------ MASTER
 
-def wc_master(request):
+def master_wc(request):
     workCenterList = getWorkCenterList()
     context = {
         'workCenterList' : workCenterList,
     }
-    return render(request, 'wc_master.html', context)
+    return render(request, 'master/wc.html', context)
 
-def emp_master(request):
+def master_emp(request):
     operatorList = getOperatorList()
     context = {
         'operatorList' : operatorList,
     }
-    return render(request, 'emp_master.html', context)
+    return render(request, 'master/emp.html', context)
 
-def rej_master(request):
+def master_rej(request):
     rejectReasonList = getRejectReasonList()
     context = {
         'rejectReasonList' : rejectReasonList,
     }
-    return render(request, 'rej_master.html', context)
+    return render(request, 'master/rej.html', context)
 
-def matg_master(request):
+def master_matg(request):
     materialGroupList = getMaterialGroupList()
     context = {
         'materialGroupList' : materialGroupList,
     }
-    return render(request, 'matg_master.html', context)
+    return render(request, 'master/matg.html', context)
 
-def purg_master(request):
+def master_purg(request):
     purchaseGroupList = getPurchaseGroupList()
     context = {
         'purchaseGroupList' : purchaseGroupList,
     }
-    return render(request, 'purg_master.html', context)
+    return render(request, 'master/purg.html', context)
 
-def curr_master(request):
+def master_curr(request):
     currencyList = getCurrencyList()
     context = {
         'currencyList' : currencyList,
     }
-    return render(request, 'curr_master.html', context)
+    return render(request, 'master/curr.html', context)
+
+def master_tool(request):
+    toolMasterList = getToolMasterList()
+    context = {
+        'toolMasterList' : toolMasterList,
+    }
+    return render(request, 'master/tool.html', context)
+
+def master_ctt(request):
+    cycleTimeTargetList = getCycleTimeTargetList()
+    context = {
+        'cycleTimeTargetList' : cycleTimeTargetList,
+    }
+    return render(request, 'master/ctt.html', context)
 
 #--------------------------------------------------------------------- DATA PAGE
 
@@ -470,7 +682,7 @@ def working_order(request):
     context = {
         'workingOrderList': workingOrderList,
     }
-    return render(request, 'working_order.html', context)
+    return render(request, 'monitoring/working_order.html', context)
 
 def working_wc(request):
     overtimehour = getOvertimeHour()
@@ -481,7 +693,7 @@ def working_wc(request):
         'warninghour': warninghour,
         'workingWorkCenterList': workingWorkCenterList,
     }
-    return render(request, 'working_wc.html', context)
+    return render(request, 'monitoring/working_wc.html', context)
 
 def working_emp(request):
     # send_email_overtime()
@@ -493,12 +705,18 @@ def working_emp(request):
         'warninghour': warninghour,
         'workingOperatorList': workingOperatorList,
     }
-    return render(request, 'working_emp.html', context)
+    return render(request, 'monitoring/working_emp.html', context)
 
 def delay_operation(request, fwc):
+    # profitCenterList = getProfitCenterList()
+    # workCenterGroupList = getWorkCenterGroupList()
     workCenterList = getWorkCenterRoutingList()
     if fwc == "FIRST":
         fwc = workCenterList[0].WorkCenterNo
+    # if fwcg == "FIRST":
+    #     fwcg = profitCenterList[0].WorkCenterNo
+    # if fwc == "FIRST":
+    #     fpfc = workCenterList[0].WorkCenterNo
     SAPDelayOperationList = getSAPDelayOperationList(fwc)
     SFRDelayOperationList = getSFRDelayOperationList(fwc)
     SFRDelayWorkActualList = []
@@ -516,20 +734,22 @@ def delay_operation(request, fwc):
     delay_list_len = len(SAPDelayOperationList) + len(SFRDelayOperationList)
     context = {
         'fwc': fwc,
+        # 'profitCenterList': profitCenterList,
+        # 'workCenterGroupList': workCenterGroupList,
         'workCenterList': workCenterList,
         'SAPDelayOperationList': SAPDelayOperationList,
         'SFRDelayOperationList': SFRDelayOperationList,
         'SFRDelayWorkActualList': SFRDelayWorkActualList,
         'delay_list_len': delay_list_len,
     }
-    return render(request, 'delay_operation.html', context)
+    return render(request, 'monitoring/delay_operation.html', context)
 
 def none_working_wc(request):
     workCenterList = getNoneWorkingWorkCenterList()
     context = {
         'workCenterList' : workCenterList,
     }
-    return render(request, 'none_working_wc.html', context)
+    return render(request, 'monitoring/none_working_wc.html', context)
 
 def none_start_order(request):
     noneStartOrderList = getNoneStartOrderList()
@@ -543,14 +763,14 @@ def none_start_order(request):
         'noneStartOrderList': noneStartOrderList,
         'req_dates': req_dates,
     }
-    return render(request, 'none_start_order.html', context)
+    return render(request, 'monitoring/none_start_order.html', context)
 
 def pending_pln_fai(request):
     pendingPLNFAIList = getPendingPLNFAIList()
     context = {
         'pendingPLNFAIList': pendingPLNFAIList,
     }
-    return render(request, 'pending_pln_fai.html', context)
+    return render(request, 'monitoring/pending_pln_fai.html', context)
 
 #------------------------------------------------------------------------ REPORT
 
@@ -566,7 +786,7 @@ def ot_table(request, fmonth):
         'overtimeWorkCenterList': overtimeWorkCenterList,
         'overtimeCounterList': overtimeCounterList,
     }
-    return render(request, 'ot_table.html', context)
+    return render(request, 'report/ot_table.html', context)
 
 def mp_ot_auto_machine(request, fmonth):
     if fmonth == "NOW":
@@ -577,7 +797,7 @@ def mp_ot_auto_machine(request, fmonth):
         'fmonth': fmonth,
         'ReportList': ReportList,
     }
-    return render(request, 'mp_ot_auto_machine.html', context)
+    return render(request, 'report/mp_ot_auto_machine.html', context)
 
 def oper_no_time(request, fmonth):
     if fmonth == "NOW":
@@ -587,7 +807,90 @@ def oper_no_time(request, fmonth):
         'fmonth': fmonth,
         'operationNoTimeList': operationNoTimeList,
     }
-    return render(request, 'oper_no_time.html', context)
+    return render(request, 'report/oper_no_time.html', context)
+
+def emp_work_time(request, fstartdate, fstopdate, emp_type):
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    if datetime.strptime(fstopdate, '%Y-%m-%d') < datetime.strptime(fstartdate, '%Y-%m-%d'):
+        fstartdate = fstopdate
+    fmonth = fstartdate[0:7]
+    empWorkTimeList = getEmpWorkTimeList(fstartdate, fstopdate, emp_type)
+    cmsTimeList = []
+    hrTimeList = []
+    percentList = []
+    gradeList = []
+    opthrTimeList = []
+    optpercentList = []
+    optgradeList = []
+    for rec in empWorkTimeList:
+        cmswt = 0
+        # try: 
+        #     response = requests.get('http://129.1.100.185:8200/api/get_emp_work_time/%s&%s&%s' % (rec.EmpID.strip(), fstartdate, fstopdate))
+        #     data = json.loads(response.text)
+        #     cmswt = data['work_time']
+        # except Exception as e:
+        #     print(f"Can not connect to CMS : {e}")
+        cmsTimeList.append(cmswt)
+
+        wt = 0
+        optwt = 0
+        is_leave = False
+        try:
+            hr = getTotalEmpWorkTimeFromHRFocus(rec.EmpID, fstartdate, fstopdate)
+            wt = hr.TotalTime
+            optwt = hr.OptTime
+        except Exception as e:
+            print(f'Can not connect to HR Focus SQL Server: {e}')
+        percentage = '-'
+        grade = '-'
+        if wt != 0:
+            percent = round((rec.Total / wt) * 100, 2)
+            percentage = str(percent) + '%'
+            if percent >= 81:
+                grade = 'A'
+            elif percent >= 61:
+                grade = 'B'
+            elif percent >= 26:
+                grade = 'C'
+            else:
+                grade = 'D'
+        hrTimeList.append(wt)
+        percentList.append(percentage)
+        gradeList.append(grade)
+        optpercentage = '-'
+        optgrade = '-'
+        if optwt != 0:
+            percent = round((rec.Total / optwt) * 100, 2)
+            optpercentage = str(percent) + '%'
+            if percent >= 81:
+                optgrade = 'A'
+            elif percent >= 61:
+                optgrade = 'B'
+            elif percent >= 26:
+                optgrade = 'C'
+            else:
+                optgrade = 'D'
+        opthrTimeList.append(optwt)
+        optpercentList.append(optpercentage)
+        optgradeList.append(optgrade)
+    context = {
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
+        'emp_type': emp_type,
+        'fmonth': fmonth,
+        'empWorkTimeList': empWorkTimeList,
+        'cmsTimeList' : cmsTimeList,
+        'hrTimeList': hrTimeList,
+        'percentList': percentList,
+        'gradeList': gradeList,
+        'opthrTimeList': opthrTimeList,
+        'optpercentList': optpercentList,
+        'optgradeList': optgradeList,
+    }
+    return render(request, 'report/emp_work_time.html', context)
 
 def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
@@ -614,7 +917,7 @@ def completed_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'process_qtys': process_qtys,
         'accepted_qtys': accepted_qtys,
     }
-    return render(request, 'completed_order.html', context)
+    return render(request, 'report/closed_prod/completed_order.html', context)
 
 def rejected_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
@@ -634,7 +937,7 @@ def rejected_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'fstopdate': fstopdate,
         'rejectedOrderList': rejectedOrderList,
     }
-    return render(request, 'rejected_order.html', context)
+    return render(request, 'report/closed_prod/rejected_order.html', context)
 
 def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
@@ -654,7 +957,7 @@ def canceled_order(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'fstopdate': fstopdate,
         'canceledOrderList': canceledOrderList,
     }
-    return render(request, 'canceled_order.html', context)
+    return render(request, 'report/closed_prod/canceled_order.html', context)
 
 def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
     if fdate == "NOW":
@@ -676,9 +979,9 @@ def work_records(request, ftype, fdate, fmonth, fstartdate, fstopdate):
         'empWorkRecords': empWorkRecords,
         'workCenterWorkRecords': workCenterWorkRecords,
     }
-    return render(request, 'work_records.html', context)
+    return render(request, 'report/work_records.html', context)
 
-def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
+def ab_graph_wcg(request, fwcg, ftype, fmonth, fyear):
     workCenterGroupList = getMachineWorkCenterGroupList()
     if fwcg == "FIRST":
         fwcg = workCenterGroupList[0].WorkCenterGroup
@@ -688,7 +991,7 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
         fyear = datetime.today().strftime('%Y')
     year = fmonth[0:4]
     month = fmonth[5:7]
-    workCenterInGroupList = getWorkCenterInGroupActiveList(fwcg)
+    workCenterInGroupList = getWorkCenterInGroupActiveList(fwcg, fmonth)
     #-- INITIALIZE
     x_size = 0
     y_size = 0
@@ -701,9 +1004,10 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
     working_hour_present = 0
     working_hour_present_percent = 0
     wcg_oper = []
-    wcg_setup = []
+    wcg_manual = []
     wc_oper_list = []
     wc_setup_list = []
+    wc_manual_list = []
     wc_target_list = []
     wc_cap_list = []
     if ftype == "MONTHLY":
@@ -712,12 +1016,29 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
         x_size = 12
     wcg_oper = [0] * x_size
     wcg_setup = [0] * x_size
-    if ftype == "MONTHLY":
-        for rs in getMonthlyWorkCenterOperForABGraph('WCG', fwcg, fmonth):
-            wcg_oper[rs.Fday - 1] = rs.Foper
-        for rs in getMonthlyWorkCenterSetupForABGraph('WCG', fwcg, fmonth):
-            wcg_setup[rs.Fday - 1] = rs.Fsetup
-        y_size = 1.25 * (max(wcg_oper) + max(wcg_setup))
+    wcg_manual = [0] * x_size
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    is_pass = is_previous_month(month, year)
+    if ftype == "MONTHLY" and workCenterInGroupList:
+        is_collected = isCollectedABGraphData('WCG', fwcg, month, year)
+        if not is_collected:
+            for rs in getMonthlyWorkCenterOperForABGraph('WCG', fwcg, fmonth):
+                wcg_oper[rs.Fday - 1] = rs.Foper
+                if is_pass: 
+                    saveABGraphData('WCG',fwcg,'W', rs.Foper, rs.Fday, month, year)
+            for rs in getMonthlyWorkCenterSetupForABGraph('WCG', fwcg, fmonth):
+                wcg_setup[rs.Fday - 1] = rs.Fsetup
+                if is_pass: 
+                    saveABGraphData('WCG',fwcg,'S', rs.Fsetup, rs.Fday, month, year)
+        else:
+            for rs in getABGraphCollectedData('WCG', fwcg, 'W', month, year):
+                wcg_oper[rs.Fday - 1] = rs.Hour
+            for rs in getABGraphCollectedData('WCG', fwcg, 'S', month, year):
+                wcg_setup[rs.Fday - 1] = rs.Hour
+        # No Record For Manual Now
+        for rs in getMonthlyWorkCenterManualForABGraph('WCG', fwcg, fmonth):
+            wcg_manual[rs.Fday - 1] = rs.WorkingHour
+        y_size = 1.25 * (max(wcg_oper) + max(wcg_setup)) # higth of graph 25% more than highest bar
         max_hour_day = 24 * len(workCenterInGroupList)
         max_hour_month = max_hour_day * x_size
         working_hour_month = sum(wcg_oper) + sum(wcg_setup)
@@ -734,12 +1055,28 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
         for wc in workCenterInGroupList:
             temp_oper = [0] * x_size
             temp_setup = [0] * x_size
-            for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, fmonth):
-                temp_oper[rs.Fday - 1] = rs.Foper
-            for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, fmonth):
-                temp_setup[rs.Fday - 1] = rs.Fsetup
+            temp_manual = [0] * x_size
+            is_collected = isCollectedABGraphData('WC', wc.WorkCenterNo, month, year)
+            if not is_collected:
+                for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_oper[rs.Fday - 1] = rs.Foper
+                    if is_pass: 
+                        saveABGraphData('WC',wc.WorkCenterNo,'W', rs.Foper, rs.Fday, month, year)
+                for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_setup[rs.Fday - 1] = rs.Fsetup
+                    if is_pass: 
+                        saveABGraphData('WC',wc.WorkCenterNo,'S', rs.Fsetup, rs.Fday, month, year)
+            else:
+                for rs in getABGraphCollectedData('WC', wc.WorkCenterNo, 'W', month, year):
+                    temp_oper[rs.Fday - 1] = rs.Hour
+                for rs in getABGraphCollectedData('WC', wc.WorkCenterNo, 'S', month, year):
+                    temp_setup[rs.Fday - 1] = rs.Hour   
+            # No Record For Manual Now
+            for rs in getMonthlyWorkCenterManualForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_manual[rs.Fday - 1] = rs.WorkingHour 
             wc_oper_list.append(temp_oper)
             wc_setup_list.append(temp_setup)
+            wc_manual_list.append(temp_manual)
             wc_target_list.append(wc.Target)
             wc_cap_list.append(wc.Capacity)
             max_cap_month = sum(wc_cap_list * x_size)
@@ -761,15 +1098,18 @@ def ab_graph_wcg(request,fwcg, ftype, fmonth, fyear):
         'working_hour_present_percent': working_hour_present_percent,
         'wcg_oper': wcg_oper,
         'wcg_setup': wcg_setup,
+        'wcg_manual': wcg_manual,
         'workCenterInGroupList': workCenterInGroupList,
         'wc_oper_list': wc_oper_list,
         'wc_setup_list': wc_setup_list,
+        'wc_manual_list': wc_manual_list,
         'wc_target_list': wc_target_list,
         'wc_cap_list': wc_cap_list,
+        'isoweekdays' : isoweekdays,
     }
-    return render(request, 'ab_graph_wcg.html', context)
+    return render(request, 'report/graph/ab_graph/ab_graph_wcg.html', context)
 
-def ab_graph_rt(request,frt, ftype, fmonth, fyear):
+def ab_graph_rt(request, frt, ftype, fmonth, fyear):
     onRoutingList = getOnRoutingList()
     if frt == "FIRST":
         frt = onRoutingList[0].WorkCenterNo
@@ -779,7 +1119,7 @@ def ab_graph_rt(request,frt, ftype, fmonth, fyear):
         fyear = datetime.today().strftime('%Y')
     year = fmonth[0:4]
     month = fmonth[5:7]
-    workCenterInGroupList = getWorkCenterOnRoutingActiveList(frt)
+    workCenterInGroupList = getWorkCenterOnRoutingActiveList(frt, fmonth)
     #-- INITIALIZE
     x_size = 0
     y_size = 0
@@ -793,8 +1133,10 @@ def ab_graph_rt(request,frt, ftype, fmonth, fyear):
     working_hour_present_percent = 0
     wcg_oper = []
     wcg_setup = []
+    wcg_manual = []
     wc_oper_list = []
     wc_setup_list = []
+    wc_manual_list = []
     wc_target_list = []
     wc_cap_list = []
     if ftype == "MONTHLY":
@@ -803,11 +1145,28 @@ def ab_graph_rt(request,frt, ftype, fmonth, fyear):
         x_size = 12
     wcg_oper = [0] * x_size
     wcg_setup = [0] * x_size
-    if ftype == "MONTHLY":
-        for rs in getMonthlyWorkCenterOperForABGraph('RT', frt, fmonth):
-            wcg_oper[rs.Fday - 1] = rs.Foper
-        for rs in getMonthlyWorkCenterSetupForABGraph('RT', frt, fmonth):
-            wcg_setup[rs.Fday - 1] = rs.Fsetup
+    wcg_manual = [0] * x_size
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    is_pass = is_previous_month(month, year)
+    if ftype == "MONTHLY" and workCenterInGroupList:
+        is_collected = isCollectedABGraphData('RT', frt, month, year)
+        if not is_collected:
+            for rs in getMonthlyWorkCenterOperForABGraph('RT', frt, fmonth):
+                wcg_oper[rs.Fday - 1] = rs.Foper
+                if is_pass: 
+                    saveABGraphData('RT',frt,'W', rs.Foper, rs.Fday, month, year)
+            for rs in getMonthlyWorkCenterSetupForABGraph('RT', frt, fmonth):
+                wcg_setup[rs.Fday - 1] = rs.Fsetup
+                if is_pass: 
+                 saveABGraphData('RT',frt,'S', rs.Fsetup, rs.Fday, month, year)
+        else:
+            for rs in getABGraphCollectedData('RT', frt, 'W', month, year):
+                wcg_oper[rs.Fday - 1] = rs.Hour
+            for rs in getABGraphCollectedData('RT', frt, 'S', month, year):
+                wcg_setup[rs.Fday - 1] = rs.Hour
+        # No Record For Manual Now
+        for rs in getMonthlyWorkCenterManualForABGraph('RT', frt, fmonth):
+            wcg_manual[rs.Fday - 1] = rs.WorkingHour
         y_size = 1.25 * (max(wcg_oper) + max(wcg_setup))
         max_hour_day = 24 * len(workCenterInGroupList)
         max_hour_month = max_hour_day * x_size
@@ -825,12 +1184,28 @@ def ab_graph_rt(request,frt, ftype, fmonth, fyear):
         for wc in workCenterInGroupList:
             temp_oper = [0] * x_size
             temp_setup = [0] * x_size
-            for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, fmonth):
-                temp_oper[rs.Fday - 1] = rs.Foper
-            for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, fmonth):
-                temp_setup[rs.Fday - 1] = rs.Fsetup
+            temp_manual = [0] * x_size
+            is_collected = isCollectedABGraphData('WC', wc.WorkCenterNo, month, year)
+            if not is_collected:
+                for rs in getMonthlyWorkCenterOperForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_oper[rs.Fday - 1] = rs.Foper
+                    if is_pass: 
+                        saveABGraphData('WC',wc.WorkCenterNo,'W', rs.Foper, rs.Fday, month, year)
+                for rs in getMonthlyWorkCenterSetupForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_setup[rs.Fday - 1] = rs.Fsetup
+                    if is_pass: 
+                        saveABGraphData('WC',wc.WorkCenterNo,'S', rs.Fsetup, rs.Fday, month, year)
+            else:
+                for rs in getABGraphCollectedData('WC', wc.WorkCenterNo, 'W', month, year):
+                    temp_oper[rs.Fday - 1] = rs.Hour
+                for rs in getABGraphCollectedData('WC', wc.WorkCenterNo, 'S', month, year):
+                    temp_setup[rs.Fday - 1] = rs.Hour  
+            # No Record For Manual Now
+            for rs in getMonthlyWorkCenterManualForABGraph('WC', wc.WorkCenterNo, fmonth):
+                    temp_manual[rs.Fday - 1] = rs.WorkingHour
             wc_oper_list.append(temp_oper)
             wc_setup_list.append(temp_setup)
+            wc_manual_list.append(temp_manual)
             wc_target_list.append(wc.Target)
             wc_cap_list.append(wc.Capacity)
             max_cap_month = sum(wc_cap_list * x_size)
@@ -852,13 +1227,407 @@ def ab_graph_rt(request,frt, ftype, fmonth, fyear):
         'working_hour_present_percent': working_hour_present_percent,
         'wcg_oper': wcg_oper,
         'wcg_setup': wcg_setup,
+        'wcg_manual': wcg_manual,
         'workCenterInGroupList': workCenterInGroupList,
         'wc_oper_list': wc_oper_list,
         'wc_setup_list': wc_setup_list,
+        'wc_manual_list': wc_manual_list,
         'wc_target_list': wc_target_list,
         'wc_cap_list': wc_cap_list,
+        'isoweekdays': isoweekdays,
     }
-    return render(request, 'ab_graph_rt.html', context)
+    return render(request, 'report/graph/ab_graph/ab_graph_rt.html', context)
+
+def reject_per_pfc(request, fpfc, fmonth):
+    profitCenterList = getProfitCenterList()
+    if fpfc == "FIRST":
+        fpfc = profitCenterList[0].ProfitCenter
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 1
+    x_size = get_day_count(month, year)
+    rejs, pro_qtys, rej_qtys = [0] * x_size, [0] * x_size, [0] * x_size
+    mper, mpro, mrej = 0, 0, 0
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = None
+        item = getRejectPerDataPFC(fpfc, day, month, year)
+        if item:
+            pro_qtys[x] = item.ProcessQty
+            rej_qtys[x] = item.RejectedQty
+            mpro = mpro + pro_qtys[x] if pro_qtys[x] else mpro
+            mrej = mrej + rej_qtys[x] if rej_qtys[x] else mrej
+            if pro_qtys[x] and pro_qtys[x] > 0:
+                rejs[x] = round(((rej_qtys[x] / pro_qtys[x]) * 100), 2)
+        y_size = rejs[x] if rejs[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    week_titles, week_pros, week_rejs, week_pers = get_week_rej_per_info(isoweekdays, pro_qtys, rej_qtys)
+    # Whole Month
+    if mpro and mpro > 0:
+        mper = round(((mrej / mpro) * 100), 2)
+    context = {
+        'fpfc': fpfc,
+        'fmonth': fmonth,
+        'profitCenterList': profitCenterList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'rejs' : rejs,
+        'pro_qtys': pro_qtys,
+        'rej_qtys': rej_qtys,
+        'isoweekdays': isoweekdays,
+        'mper': mper,
+        'mrej': mrej,
+        'mpro': mpro,
+        'week_titles': week_titles,
+        'week_pros': week_pros,
+        'week_rejs': week_rejs,
+        'week_pers': week_pers,
+    }
+    return render(request, 'report/graph/reject_per/reject_per_pfc.html', context)
+
+def reject_rc_pfc(request, fpfc, fmonth):
+    profitCenterList = getProfitCenterList()
+    if fpfc == "FIRST":
+        fpfc = profitCenterList[0].ProfitCenter
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    recs = getRecordRejectionPFC(fpfc, month, year)
+    context = {
+        'fpfc': fpfc,
+        'fmonth': fmonth,
+        'profitCenterList': profitCenterList,
+        'recs': recs,
+    }
+    return render(request, 'report/graph/reject_per/reject_rc_pfc.html', context)
+
+def reject_per_wcg(request, fwcg, fmonth):
+    workCenterGroupList = getMachineWorkCenterGroupList()
+    if fwcg == "FIRST":
+        fwcg = workCenterGroupList[0].WorkCenterGroup
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 1
+    x_size = get_day_count(month, year)
+    rejs, pro_qtys, rej_qtys = [0] * x_size, [0] * x_size, [0] * x_size
+    mper, mpro, mrej = 0, 0, 0
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = None
+        item = getRejectPerDataWCG(fwcg, day, month, year)
+        if item:
+            pro_qtys[x] = item.ProcessQty
+            rej_qtys[x] = item.RejectedQty
+            mpro = mpro + pro_qtys[x] if pro_qtys[x] else mpro
+            mrej = mrej + rej_qtys[x] if rej_qtys[x] else mrej
+            if pro_qtys[x] and pro_qtys[x] > 0:
+                rejs[x] = round(((rej_qtys[x] / pro_qtys[x]) * 100), 2)
+        y_size = rejs[x] if rejs[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    week_titles, week_pros, week_rejs, week_pers = get_week_rej_per_info(isoweekdays, pro_qtys, rej_qtys)
+    # Whole Month
+    if mpro and mpro > 0:
+        mper = round(((mrej / mpro) * 100), 2)
+    context = {
+        'fwcg': fwcg,
+        'fmonth': fmonth,
+        'workCenterGroupList': workCenterGroupList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'rejs' : rejs,
+        'pro_qtys': pro_qtys,
+        'rej_qtys': rej_qtys,
+        'isoweekdays': isoweekdays,
+        'mper': mper,
+        'mrej': mrej,
+        'mpro': mpro,
+        'week_titles': week_titles,
+        'week_pros': week_pros,
+        'week_rejs': week_rejs,
+        'week_pers': week_pers,
+    }
+    return render(request, 'report/graph/reject_per/reject_per_wcg.html', context)
+
+def reject_per_rt(request, fwc, fmonth):
+    workCenterList = getWorkCenterRoutingList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 1
+    x_size = get_day_count(month, year)
+    rejs, pro_qtys, rej_qtys = [0] * x_size, [0] * x_size, [0] * x_size
+    mper, mpro, mrej = 0, 0, 0
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = getRejectPerDataRT(fwc, day, month, year)
+        if item:
+            pro_qtys[x] = item.ProcessQty
+            rej_qtys[x] = item.RejectedQty
+            mpro = mpro + pro_qtys[x] if pro_qtys[x] else mpro
+            mrej = mrej + rej_qtys[x] if rej_qtys[x] else mrej
+            if pro_qtys[x] and pro_qtys[x] > 0:
+                rejs[x] = round(((rej_qtys[x] / pro_qtys[x]) * 100), 2)
+        y_size = rejs[x] if rejs[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    week_titles, week_pros, week_rejs, week_pers = get_week_rej_per_info(isoweekdays, pro_qtys, rej_qtys)
+    # Whole Month
+    if mpro and mpro > 0:
+        mper = round(((mrej / mpro) * 100), 2)
+    context = {
+        'fwc': fwc,
+        'fmonth': fmonth,
+        'workCenterList': workCenterList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'rejs' : rejs,
+        'pro_qtys': pro_qtys,
+        'rej_qtys': rej_qtys,
+        'isoweekdays': isoweekdays,
+        'mper': mper,
+        'mrej': mrej,
+        'mpro': mpro,
+        'week_titles': week_titles,
+        'week_pros': week_pros,
+        'week_rejs': week_rejs,
+        'week_pers': week_pers,
+    }
+    return render(request, 'report/graph/reject_per/reject_per_rt.html', context)
+
+def efficiency_pfc(request, fpfc, fmonth):
+    profitCenterList = getProfitCenterList()
+    if fpfc == "FIRST":
+        fpfc = profitCenterList[0].ProfitCenter
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 100
+    x_size = get_day_count(month, year)
+    setups, est_setups, act_setups = [0] * x_size, [0] * x_size, [0] * x_size
+    opers, est_opers, act_opers = [0] * x_size, [0] * x_size, [0] * x_size
+    labors, est_labors, act_labors = [0] * x_size, [0] * x_size, [0] * x_size
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = getEfficiencyDataPFC(fpfc, day, month, year)
+        if item:
+            est_setups[x] = item.EstSetup
+            est_opers[x] = item.EstOper
+            est_labors[x] = item.EstLabor
+            act_setups[x] = item.ActSetup
+            act_opers[x] = item.ActOper
+            act_labors[x] = item.ActLabor
+            if act_setups[x] and act_setups[x] > 0:
+                setups[x] = int((est_setups[x] / act_setups[x]) * 100)
+            if act_opers[x] and act_opers[x] > 0:
+                opers[x] = int((est_opers[x] / act_opers[x]) * 100)
+            if act_labors[x] and act_labors[x] > 0:
+                labors[x] = int((est_labors[x] / act_labors[x]) * 100)
+        y_size = opers[x] if opers[x] > y_size else y_size
+        y_size = setups[x] if setups[x] > y_size else y_size
+        y_size = labors[x] if labors[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    context = {
+        'fpfc': fpfc,
+        'fmonth': fmonth,
+        'profitCenterList': profitCenterList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'setups' : setups,
+        'opers': opers,
+        'labors': labors,
+        'isoweekdays': isoweekdays,
+    }
+    return render(request, 'report/graph/efficiency/efficiency_pfc.html', context)
+
+def efficiency_wcg(request, fwcg, fmonth):
+    workCenterGroupList = getMachineWorkCenterGroupList()
+    if fwcg == "FIRST":
+        fwcg = workCenterGroupList[0].WorkCenterGroup
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 100
+    x_size = get_day_count(month, year)
+    setups, est_setups, act_setups = [0] * x_size, [0] * x_size, [0] * x_size
+    opers, est_opers, act_opers = [0] * x_size, [0] * x_size, [0] * x_size
+    labors, est_labors, act_labors = [0] * x_size, [0] * x_size, [0] * x_size
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = getEfficiencyDataWCG(fwcg, day, month, year)
+        if item:
+            est_setups[x] = item.EstSetup
+            est_opers[x] = item.EstOper
+            est_labors[x] = item.EstLabor
+            act_setups[x] = item.ActSetup
+            act_opers[x] = item.ActOper
+            act_labors[x] = item.ActLabor
+            if act_setups[x] and act_setups[x] > 0:
+                setups[x] = int((est_setups[x] / act_setups[x]) * 100)
+            if act_opers[x] and act_opers[x] > 0:
+                opers[x] = int((est_opers[x] / act_opers[x]) * 100)
+            if act_labors[x] and act_labors[x] > 0:
+                labors[x] = int((est_labors[x] / act_labors[x]) * 100)
+        y_size = opers[x] if opers[x] > y_size else y_size
+        y_size = setups[x] if setups[x] > y_size else y_size
+        y_size = labors[x] if labors[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    context = {
+        'fwcg': fwcg,
+        'fmonth': fmonth,
+        'workCenterGroupList': workCenterGroupList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'setups' : setups,
+        'opers': opers,
+        'labors': labors,
+        'isoweekdays': isoweekdays,
+    }
+    return render(request, 'report/graph/efficiency/efficiency_wcg.html', context)
+
+def efficiency_wc(request, fwc, fmonth):
+    workCenterList = getWorkCenterRoutingList()
+    if fwc == "FIRST":
+        fwc = workCenterList[0].WorkCenterNo
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    x_size = 0
+    y_size = 100
+    x_size = get_day_count(month, year)
+    setups, est_setups, act_setups = [0] * x_size, [0] * x_size, [0] * x_size
+    opers, est_opers, act_opers = [0] * x_size, [0] * x_size, [0] * x_size
+    labors, est_labors, act_labors = [0] * x_size, [0] * x_size, [0] * x_size
+    isoweekdays = get_isoweekdays(x_size, month, year)
+    for x in range(x_size):
+        day = x + 1
+        item = getEfficiencyDataWC(fwc, day, month, year)
+        if item:
+            est_setups[x] = item.EstSetup
+            est_opers[x] = item.EstOper
+            est_labors[x] = item.EstLabor
+            act_setups[x] = item.ActSetup
+            act_opers[x] = item.ActOper
+            act_labors[x] = item.ActLabor
+            if act_setups[x] and act_setups[x] > 0:
+                setups[x] = int((est_setups[x] / act_setups[x]) * 100)
+            if act_opers[x] and act_opers[x] > 0:
+                opers[x] = int((est_opers[x] / act_opers[x]) * 100)
+            if act_labors[x] and act_labors[x] > 0:
+                labors[x] = int((est_labors[x] / act_labors[x]) * 100)
+        y_size = opers[x] if opers[x] > y_size else y_size
+        y_size = setups[x] if setups[x] > y_size else y_size
+        y_size = labors[x] if labors[x] > y_size else y_size
+    y_size = int(y_size) * 1.25
+    context = {
+        'fwc': fwc,
+        'fmonth': fmonth,
+        'workCenterList': workCenterList,
+        'x_size': x_size,
+        'y_size' : y_size,
+        'setups' : setups,
+        'opers': opers,
+        'labors': labors,
+        'isoweekdays': isoweekdays,
+    }
+    return render(request, 'report/graph/efficiency/efficiency_wc.html', context)
+
+def cumulative_rejection(request):
+    pfcs = getProfitCenterList()
+    pfc = request.POST.get('pfc', pfcs[0].ProfitCenter)
+    month = request.POST.get('month', datetime.today().strftime('%Y-%m')) if request.POST.get('month') != '' else datetime.today().strftime('%Y-%m')
+    month_no = month[5:7]
+    year = month[0:4]
+    day_count = get_day_count(month_no, year)
+    days = []
+    orders = []
+    rejects = []
+    percentages = []
+    total_order = 0
+    total_reject = 0
+    total_percentage = 0
+    is_sundays = get_isoweekdays(day_count, month_no, year)
+    cums = getCumulativeRejectionList(pfc, int(month_no), int(year))
+    day = 1
+    for cum in cums:
+        # handle case no order finish in that day - previous and between
+        while int(cum.Day) != day:
+            tmp = datetime(int(year), int(month_no), (day)).strftime('%a %d')
+            days.append(tmp)
+            orders.append(0)
+            rejects.append(0)
+            percentages.append(0)
+            day = day + 1
+        tmp = datetime(int(year), int(month_no), (day)).strftime('%a %d')
+        days.append(tmp)
+        orders.append(cum.OrderQty)
+        rejects.append(cum.RejectQty)
+        percentages.append(cum.RejectPercentage)
+        total_order = total_order + cum.OrderQty
+        total_reject = total_reject + cum.RejectQty
+        day = day + 1
+    # handle case no order finish in that day - after
+    while len(orders) < day_count:
+        tmp = datetime(int(year), int(month_no), (day)).strftime('%a %d')
+        days.append(tmp)
+        orders.append(0)
+        rejects.append(0)
+        percentages.append(0)
+        day = day + 1
+    if total_order != 0:
+        total_percentage = round(((total_reject / total_order) * 100), 3)
+    context = {
+        'pfcs': pfcs,
+        'month': month,
+        'pfc': pfc,
+        'day_count' : day_count,
+        'days' : days,
+        'orders' : orders,
+        'rejects' : rejects,
+        'percentages' : percentages,
+        'total_order' : total_order,
+        'total_reject' : total_reject,
+        'total_percentage' : total_percentage,
+        'is_sundays' : is_sundays,
+    }
+    return render(request, 'report/graph/cumulative_rejection.html', context)
+
+def cumulative_rejection_record(request):
+    pfcs = getProfitCenterList()
+    pfc = request.POST.get('pfc', pfcs[0].ProfitCenter)
+    is_rej_only = request.POST.get('is_rej_only', False)
+    is_rej_only = True if is_rej_only == 'Yes' else False
+    month = request.POST.get('month', datetime.today().strftime('%Y-%m')) if request.POST.get('month') != '' else datetime.today().strftime('%Y-%m')
+    month_no = month[5:7]
+    year = month[0:4]
+    recs = getCumulativeRejectionRecordList(pfc, int(month_no), int(year), is_rej_only)
+    context = {
+        'pfcs': pfcs,
+        'month': month,
+        'pfc': pfc,
+        'is_rej_only' : is_rej_only,
+        'recs' : recs,
+    }
+    return render(request, 'report/graph/cumulative_rejection_record.html', context)
 
 def con_operation(request, fwc, fmonth):
     workCenterList = getWorkCenterRoutingList()
@@ -873,7 +1642,36 @@ def con_operation(request, fwc, fmonth):
         'workCenterList': workCenterList,
         'confirmOperationList': confirmOperationList,
     }
-    return render(request, 'con_operation.html', context)
+    return render(request, 'report/con_operation.html', context)
+
+def operating_history(request, fwc, fmc, ftype, fstartdate, fstopdate, fmonth):
+    wc_list = getWorkCenterRoutingList()
+    mc_list = getWorkCenterMachineList()
+    if fwc == "FIRST":
+        fwc = wc_list[0].WorkCenterNo
+    if fmc == "FIRST":
+        fmc = mc_list[0].WorkCenterNo
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    con_list = getOperatingHistoryConfirm(fwc, fmc, ftype, fstartdate, fstopdate, fmonth)
+    opr_list = getOperatingHistoryOperate(fwc, fmc, ftype, fstartdate, fstopdate, fmonth)
+    context = {
+        'wc_list': wc_list,
+        'mc_list': mc_list,
+        'fwc': fwc,
+        'fmc': fmc,
+        'ftype': ftype,
+        'fstopdate': fstopdate,
+        'fstartdate': fstartdate,
+        'fmonth': fmonth,
+        'con_list': con_list,
+        'opr_list': opr_list,
+    }
+    return render(request, 'report/operating_history.html', context)
 
 def over_est_operation(request, fwc, fweek):
     workCenterList = getWorkCenterRoutingList()
@@ -883,55 +1681,83 @@ def over_est_operation(request, fwc, fweek):
         fweek = datetime.today().strftime('%Y-W%W')
     overEstOperationList = getOverEstOperationList(fwc, fweek)
     start_date, end_date = get_date_between_week(fweek)
+    mc_list = []
     est_setup_sum = []
     est_oper_sum = []
+    target_sum = []
     est_labor_sum = []
     actual_setup = []
     actual_oper = []
     actual_labor = []
+    actual_ai = []
     setup_percent = []
     oper_percent = []
+    tar_percent = []
     labor_percent = []
+    ai_percent = []
     yellow_setup = []
     yellow_oper = []
     yellow_labor = []
+    yellow_ai = []
     red_setup = []
     red_oper = []
     red_labor = []
+    red_ai = []
     for op in overEstOperationList:
+        tmps = []
+        mcs = getMachineWorkOnOperation(op.OrderNo, op.OperationNo)
+        for mc in mcs:
+            if mc.WorkCenterNo not in tmps:
+                tmps.append(mc.WorkCenterNo)
+        mc_list.append(','.join(str(e) for e in tmps))
         est_setup = int(op.EstSetupTime * op.ProcessQty)
         est_oper = int(op.EstOperationTime * op.ProcessQty)
         est_labor = int(op.EstLaborTime * op.ProcessQty)
         est_setup_sum.append(est_setup)
         est_oper_sum.append(est_oper)
+        target = 0 if not op.TargetValue else int(op.TargetValue * op.ProcessQty)
+        target_sum.append(target)
         est_labor_sum.append(est_labor)
         act_setup = op.ActualSetup if op.ActualSetup else 0
         act_oper = op.ActualOper if op.ActualOper else 0
         act_labor = op.ActualLabor if op.ActualLabor else 0
+        xIdle = getTotalIdleTime(op.OrderNo, op.OperationNo)
+        idle = int(xIdle.Idle) if xIdle and xIdle.Idle else 0
+        act_ai = int(act_oper) + int(idle)
         actual_setup.append(int(act_setup))
         actual_oper.append(int(act_oper))
         actual_labor.append(int(act_labor))
-        if est_setup > 0:
-            setup_per = int(act_setup / (op.EstSetupTime * op.ProcessQty) * 100)
+        actual_ai.append(act_ai)
+        if act_setup > 0:
+            setup_per = int(((op.EstSetupTime * op.ProcessQty) / act_setup) * 100)
             setup_percent.append(str(setup_per) + "%")
         else:
             setup_percent.append("-")
-        if est_oper > 0:
-            oper_per = int(act_oper / (op.EstOperationTime * op.ProcessQty) * 100)
+        if act_oper > 0:
+            oper_per = int(((op.EstOperationTime * op.ProcessQty) / act_oper) * 100)
             oper_percent.append(str(oper_per) + "%")
+            tar_percent.append(str(int((target / act_oper) * 100)) + "%")
         else:
             oper_percent.append("-")
-        if est_labor > 0:
-            labor_per = int(act_labor / (op.EstLaborTime * op.ProcessQty) * 100)
+            tar_percent.append("-")
+        if act_labor > 0:
+            labor_per = int(((op.EstLaborTime * op.ProcessQty) / act_labor) * 100)
             labor_percent.append(str(labor_per) + "%")
         else:
             labor_percent.append("-")
-        red_setup.append(True if est_setup == 0 and act_setup > 0 or act_setup > est_setup * OVER_EST_RATING else False)
-        red_oper.append(True if est_oper == 0 and act_oper > 0 or act_oper > est_oper * OVER_EST_RATING else False)
-        red_labor.append(True if est_labor == 0 and act_labor > 0 or act_labor > est_labor * OVER_EST_RATING else False)
+        if act_ai > 0:
+            ai_per = int(((op.EstOperationTime * op.ProcessQty) / act_ai) * 100)
+            ai_percent.append(str(ai_per) + "%")
+        else:
+            ai_percent.append("-")
+        red_setup.append(True if (est_setup == 0 and act_setup > 0) or act_setup > est_setup * OVER_EST_RATING else False)
+        red_oper.append(True if (est_oper == 0 and act_oper > 0) or act_oper > est_oper * OVER_EST_RATING else False)
+        red_labor.append(True if (est_labor == 0 and act_labor > 0) or act_labor > est_labor * OVER_EST_RATING else False)
+        red_ai.append(True if (est_oper == 0 and act_ai > 0) or act_ai > est_oper * OVER_EST_RATING else False)
         yellow_setup.append(True if act_setup > est_setup else False)
         yellow_oper.append(True if act_oper > est_oper else False)
         yellow_labor.append(True if act_labor > est_labor else False)
+        yellow_ai.append(True if act_ai > est_oper else False)
     context = {
         'fwc': fwc,
         'fweek': fweek,
@@ -939,37 +1765,114 @@ def over_est_operation(request, fwc, fweek):
         'overEstOperationList': overEstOperationList,
         'start_date': start_date,
         'end_date': end_date,
+        'mc_list': mc_list,
         'est_setup_sum': est_setup_sum,
         'est_oper_sum': est_oper_sum,
+        'target_sum': target_sum,
         'est_labor_sum': est_labor_sum,
         'actual_setup': actual_setup,
         'actual_oper': actual_oper,
         'actual_labor': actual_labor,
+        'actual_ai': actual_ai,
         'setup_percent': setup_percent,
         'oper_percent': oper_percent,
+        'tar_percent': tar_percent,
         'labor_percent': labor_percent,
+        'ai_percent': ai_percent,
         'yellow_setup': yellow_setup,
         'yellow_oper': yellow_oper,
         'yellow_labor': yellow_labor,
+        'yellow_ai': yellow_ai,
         'red_setup': red_setup,
         'red_oper': red_oper,
         'red_labor': red_labor,
+        'red_ai': red_ai,
     }
-    return render(request, 'over_est_operation.html', context)
+    return render(request, 'report/over_est_operation.html', context)
 
-def zpp02(request):
-
+def plan_act_cycle_time(request, ffgcode, fwc, ftype, fstartdate, fstopdate, fmonth):
+    wc_list = getWorkCenterRoutingList()
+    planActualCycleTimeList = []
+    per_setups, per_opers, per_labors, acts, per_tars, per_ais = [], [], [], [], [], []
+    yellow_setup, yellow_oper, yellow_labor, yellow_ai, red_setup, red_oper, red_labor, red_ai = [], [], [], [], [], [], [], []
+    if fwc == "FIRST":
+        fwc = wc_list[0].WorkCenterNo
+    if fstartdate == "NOW":
+        fstartdate = datetime.today().strftime('%Y-%m-%d')
+    if fstopdate == "NOW":
+        fstopdate = datetime.today().strftime('%Y-%m-%d')
+    if fmonth == "NOW":
+        fmonth = datetime.today().strftime('%Y-%m')
+    if ffgcode != "NONE":
+        planActualCycleTimeList = getPlanActualCycleTimeList(ffgcode, fwc, ftype, fstartdate, fstopdate, fmonth)
+        for item in planActualCycleTimeList:
+            per_setup = '-'
+            per_oper = '-'
+            per_labor = '-'
+            per_tar = '-'
+            act = '-'
+            per_ai = '-'
+            item.AI = item.AI if item.AI else item.ActOper
+            if item.Est2Setup > 0:
+                per_setup = str(round((item.ActSetup / item.Est2Setup) * 100, 2)) + '%'
+            if item.Est2Oper > 0:
+                per_oper = str(round((item.ActOper / item.Est2Oper) * 100, 2)) + '%'
+                per_ai = str(round((item.AI / item.Est2Oper) * 100, 2)) + '%'
+            if item.Est2Labor > 0:
+                per_labor = str(round((item.ActLabor / item.Est2Labor) * 100, 2)) + '%'
+            if item.TargetValue:
+                act = int(item.TargetValue * item.ProcessQty)
+                per_tar = str(round((item.ActOper / act) * 100, 2)) + '%'
+            per_setups.append(per_setup)
+            per_opers.append(per_oper)
+            per_labors.append(per_labor)
+            acts.append(act)
+            per_tars.append(per_tar)
+            per_ais.append(per_ai)
+            red_setup.append(True if (item.Est2Setup == 0 and item.ActSetup > 0) or item.ActSetup > float(item.Est2Setup) * OVER_EST_RATING else False)
+            red_oper.append(True if (item.Est2Oper == 0 and item.ActOper > 0) or item.ActOper > float(item.Est2Oper) * OVER_EST_RATING else False)
+            red_labor.append(True if (item.Est2Labor == 0 and item.ActLabor > 0) or item.ActLabor > float(item.Est2Labor) * OVER_EST_RATING else False)
+            red_ai.append(True if (item.Est2Oper == 0 and item.AI > 0) or item.AI > float(item.Est2Oper) * OVER_EST_RATING else False)
+            yellow_setup.append(True if item.ActSetup > item.Est2Setup else False)
+            yellow_oper.append(True if item.ActOper > item.Est2Oper else False)
+            yellow_labor.append(True if item.ActLabor > item.Est2Labor else False)
+            yellow_ai.append(True if item.AI > item.Est2Oper else False)
     context = {
-
+        'ffgcode': ffgcode,
+        'fwc': fwc,
+        'ftype': ftype,
+        'fstartdate': fstartdate,
+        'fstopdate': fstopdate,
+        'fmonth': fmonth,
+        'wc_list': wc_list,
+        'planActualCycleTimeList': planActualCycleTimeList,
+        'per_setups': per_setups,
+        'per_opers': per_opers,
+        'per_labors': per_labors,
+        'acts': acts,
+        'per_tars': per_tars,
+        'per_ais': per_ais,
+        'yellow_setup': yellow_setup,
+        'yellow_oper': yellow_oper,
+        'yellow_labor': yellow_labor,
+        'yellow_ai': yellow_ai,
+        'red_setup': red_setup,
+        'red_oper': red_oper,
+        'red_labor': red_labor,
+        'red_ai': red_ai,
     }
-    return render(request, 'zpp02.html', context)
+    return render(request, 'report/plan_act_cycle_time.html', context)
 
-def zpp04(request):
-
+def order_analysis(request):
+    routings = getWorkCenterRoutingList()
+    profit_centers = getProfitCenterList()
+    token = generate_random_token(6)
     context = {
-
+        'profit_centers': profit_centers,
+        'routings': routings,
+        'token': token,
     }
-    return render(request, 'zpp04.html', context)
+    return render(request, 'report/order_analysis.html', context)
 
 #--------------------------------------------------------------------------- SAP
 
@@ -984,7 +1887,7 @@ def sap_order(request, fdate, fhour):
         'fhour' : fhour,
         'sapOrderList' : sapOrderList,
     }
-    return render(request, 'sap_order.html', context)
+    return render(request, 'sap_log/data_from_sap/sap_order.html', context)
 
 def sap_routing(request, fdate, fhour):
     if fdate == "NOW":
@@ -997,7 +1900,7 @@ def sap_routing(request, fdate, fhour):
         'fhour' : fhour,
         'sapRoutingList' : sapRoutingList,
     }
-    return render(request, 'sap_routing.html', context)
+    return render(request, 'sap_log/data_from_sap/sap_routing.html', context)
 
 def sap_component(request, fdate, fhour):
     if fdate == "NOW":
@@ -1010,7 +1913,7 @@ def sap_component(request, fdate, fhour):
         'fhour' : fhour,
         'sapComponentList' : sapComponentList,
     }
-    return render(request, 'sap_component.html', context)
+    return render(request, 'sap_log/data_from_sap/sap_component.html', context)
 
 def sap_report(request, fdate, fhour):
     if fdate == "NOW":
@@ -1023,7 +1926,7 @@ def sap_report(request, fdate, fhour):
         'fhour' : fhour,
         'sapReportList' : sapReportList,
     }
-    return render(request, 'sap_report.html', context)
+    return render(request, 'sap_log/data_to_sap/sap_report.html', context)
 
 def sap_mod(request, fdate, fhour):
     if fdate == "NOW":
@@ -1036,11 +1939,11 @@ def sap_mod(request, fdate, fhour):
         'fhour' : fhour,
         'sapModifierList' : sapModifierList,
     }
-    return render(request, 'sap_mod.html', context)
+    return render(request, 'sap_log/data_to_sap/sap_mod.html', context)
 
 #------------------------------------------------------------------- ADMIN PANEL
 
-def admin_controller(request):
+def controller(request):
     userList = getUserList()
     empNameList = []
     for user in userList:
@@ -1049,6 +1952,31 @@ def admin_controller(request):
     canMP = getManualReportAllow()
     refreshSecond = getRefreshSecond()
     drawingAppPath = getDrawingAppPath()
+    profitCenterList = getProfitCenterList()
+    # update_estimate()
+    # update_target_cycle_time()
+    # run_collect_ab_data('2023-10') Done
+    # run_collect_ab_data('2023-09') Done 
+    # run_collect_ab_data('2023-08') Done
+    # run_collect_ab_data('2023-07') Done
+    # run_collect_ab_data('2023-06') Done
+    # run_collect_ab_data('2023-05') Done
+    # run_collect_ab_data('2023-04') Done
+    # run_collect_ab_data('2023-03') Done
+    # run_collect_ab_data('2023-02') Done
+    # run_collect_ab_data('2023-01') Done
+    # run_collect_ab_data('2022-12') Done
+    # run_collect_ab_data('2022-11') Done
+    # run_collect_ab_data('2022-10') Done 
+    # run_collect_ab_data('2022-09') Done
+    # run_collect_ab_data('2022-08') Done
+    # run_collect_ab_data('2022-07') Done
+    # run_collect_ab_data('2022-06') Done
+    # run_collect_ab_data('2022-05') Done
+    # run_collect_ab_data('2022-04') Done
+    # run_collect_ab_data('2022-03') Done
+    # run_collect_ab_data('2022-02') Done
+    # run_collect_ab_data('2022-01') Done
     context = {
         'userList': userList,
         'empNameList': empNameList,
@@ -1056,8 +1984,9 @@ def admin_controller(request):
         'canMP': canMP,
         'refreshSecond': refreshSecond,
         'drawingAppPath': drawingAppPath,
+        'profitCenterList': profitCenterList,
     }
-    return render(request, 'admin_controller.html', context)
+    return render(request, 'admin_panel/controller.html', context)
 
 def error_data(request):
     orderNoRoutingList = getSAPOrderNoRoutingList()
@@ -1074,13 +2003,93 @@ def error_data(request):
         'operationRemainQtyList': operationRemainQtyList,
         'lastProcessStopOrderNotStop': lastProcessStopOrderNotStop,
     }
-    return render(request, 'error_data.html', context)
+    return render(request, 'admin_panel/error_data.html', context)
 
 def drawing(request, dir, fg_code):
     drawingAppPath = getDrawingAppPath()
     path = drawingAppPath + str(dir) + '&' + str(fg_code)
     print(path)
     return redirect(path)
+
+def diskpulse(request):
+    hours = [''] * 24
+    mins = [''] * 60
+    context = {
+        'hours' : hours,
+        'mins' : mins,
+        'search_txt': "",
+        'fopr': "ALL",
+        'fdate' : None,
+        'fhour' : None,
+        'list': [],
+        'fpaths': [],
+        'fnames': [],
+    }
+    return render(request, 'diskpulse.html', context)
+
+def diskpulse_search(request):
+    # Created = 0, Deleted = 1, Modified = 2, Renamed = 3, Renamed To = 4
+    hours = [''] * 24
+    mins = [''] * 60
+    exclude_tmp = True 
+    exclude_mod = False
+    ## 
+    search_txt = request.POST['search_txt'].strip()
+    fopr = request.POST['fopr']
+    fdate = request.POST['fdate'] if request.POST['fdate'] != None else None
+    fhour = request.POST['fhour'] if request.POST['fhour'] != None and request.POST['fhour'] != "" else None
+    fmin = request.POST['fmin'] if request.POST['fmin'] != None and request.POST['fmin'] != "" else None
+    list, fpaths, fnames, = [], [], []
+    is_too_heavy = False
+    if search_txt == "" and (not fdate or not fhour or not fmin):
+        is_too_heavy = True
+    if not is_too_heavy:
+        conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS01;''Database=DiskPulse;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
+        cursor = conn.cursor()
+        sql = "SELECT * FROM [changes] WHERE (owner LIKE '%"+str(search_txt)+"%' OR fname LIKE '%"+str(search_txt)+"%' OR dt LIKE '%"+str(search_txt)+"%')"
+        if exclude_tmp:
+            sql += " AND fname NOT LIKE '%.tmp' AND fname NOT LIKE '%~$%'"
+        if exclude_mod:
+            sql += " AND ctype != '2'"
+        if fopr != "ALL":
+            sql += " AND ctype = "+str(fopr)
+        if fdate:
+            date = fdate.replace("-", "/")
+            sql += " AND dt LIKE '"+str(date)+"%'"
+        if fhour:
+            hour = "0" + str(fhour) if int(fhour) < 10 else str(fhour)
+            sql += " AND dt LIKE '% "+str(hour)+":%'"
+        if fmin:
+            min = "0" + str(fmin) if int(fmin) < 10 else str(fmin)
+            sql += " AND dt LIKE '%:"+str(min)+":%'"
+        cursor.execute(sql)
+        list = cursor.fetchall()
+        for item in list:
+            fpath, fname = get_file_info(item.fname)
+            fpaths.append(fpath)
+            fnames.append(fname)
+    context = {
+        'hours' : hours,
+        'mins' : mins,
+        'search_txt': search_txt,
+        'fopr': fopr,
+        'fdate' : fdate,
+        'fhour' : fhour,
+        'fmin' : fmin,
+        'list': list,
+        'fpaths': fpaths,
+        'fnames': fnames,
+    }
+    return render(request, 'diskpulse.html', context)
+
+def get_file_info(path):
+    fpath = path
+    fname = '-'
+    tmps = path.split("\\")
+    if len(tmps) > 1:
+        fpath = path.replace("\\" + tmps[-1],"")
+        fname = tmps[-1]
+    return fpath, fname
 
 ################################################################################
 #################################### REQUEST ###################################
@@ -1198,8 +2207,12 @@ def add_operating_workcenter(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
     workcenter_no = request.GET.get('workcenter_no')
-    #-- WORKCENTER : ADD
-    insertOperatingWorkCenter(order_no, operation_no, workcenter_no)
+    #-- RECHECK QTY
+    operation = getOperation(order_no, operation_no)
+    remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+    if remainQty > 0:
+        #-- WORKCENTER : ADD
+        insertOperatingWorkCenter(order_no, operation_no, workcenter_no)
     data = {
     }
     return JsonResponse(data)
@@ -1213,6 +2226,34 @@ def delete_operating_workcenter(request):
     }
     return JsonResponse(data)
 
+def idle_operating_workcenter(request):
+
+    #-- *** ONLY MACHINE TYPE ***
+    id = request.GET.get('id')
+    code = request.GET.get('code')
+    #-- WORKCENTER : IDLE
+    updateOperatingWorkCenter(id, 'IDLE')
+    updateIdleCodeOperatingWorkCenter(id, code)
+    data = {
+    }
+    return JsonResponse(data)
+
+def stop_idle_operating_workcenter(request):
+    #-- *** ONLY MACHINE TYPE ***
+    id = request.GET.get('id')
+    #-- WORKCENTER : STOP IDLE
+    updateOperatingWorkCenter(id, "COMPLETE")
+    owc = getWorkCenterOperatingByID(id) 
+    #-- SAVE DATA
+    idleTime = int(((owc.StopDateTime - owc.StartDateTime).total_seconds())/60)
+    if int(idleTime) > 0:
+        insertHistoryOperate(owc.OrderNo, owc.OperationNo, "NULL", owc.WorkCenterNo, "IDLE", 0, 0, 0, idleTime, owc.StartDateTime, owc.StopDateTime, owc.IdleCode)
+    #-- GO BACK TO WAITING
+    updateOperatingWorkCenter(id, 'WAITING')
+    data = {
+    }
+    return JsonResponse(data)
+
 def add_operating_operator(request):
     order_no = request.GET.get('order_no')
     operation_no = request.GET.get('operation_no')
@@ -1220,37 +2261,41 @@ def add_operating_operator(request):
     owc_id = request.GET.get('owc_id')
     status = request.GET.get('status')
     refresh = False
-    #-- INSERT EMP AT COMPUTER (IF NOT EXT-WORK)
-    if status != 'EXT-WORK':
-        insertEmpAtComputer(operator_id, getClientIP(request))
-    #-- OPERATOR : WORKING/SETUP/EXT-WORK
-    insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
-    #-- IF OPERATION IS NOT LABOR TYPE
-    if owc_id != "-1":
-        #-- IF MACHINE NOT START YET
-        owc = getWorkCenterOperatingByID(owc_id)
-        if owc.StartDateTime == None:
-            #-- WORKCENTER : WORKING/SETUP
-            updateOperatingWorkCenter(owc_id, status)
-    #-- IF NOT START OPERATION YET
-    if hasNotStartOperation(order_no, operation_no):
-        refresh = True
-        #-- OPERATION : START
-        updateOperationControl(order_no, operation_no, 0, 0, "START")
-        #-- IF NOT START ORDER YET
-        if hasNotStartOrder(order_no):
-            #-- ORDER : START
-            updateOrderControl(order_no, "START")
-    #-- IF JOINING
-    joinList = getJoinList(order_no, operation_no)
-    for join in joinList:
-        if hasNotStartOperation(join.OrderNo, join.OperationNo):
+    #-- RECHECK QTY
+    operation = getOperation(order_no, operation_no)
+    remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
+    if remainQty > 0:
+        #-- INSERT EMP AT COMPUTER (IF NOT EXT-WORK)
+        if status != 'EXT-WORK':
+            insertEmpAtComputer(operator_id, getClientIP(request))
+        #-- OPERATOR : WORKING/SETUP/EXT-WORK
+        insertOperatingOperator(order_no, operation_no, operator_id, owc_id, status)
+        #-- IF OPERATION IS NOT LABOR TYPE
+        if owc_id != "-1":
+            #-- IF MACHINE NOT START YET
+            owc = getWorkCenterOperatingByID(owc_id)
+            if owc.StartDateTime == None:
+                #-- WORKCENTER : WORKING/SETUP
+                updateOperatingWorkCenter(owc_id, status)
+        #-- IF NOT START OPERATION YET
+        if hasNotStartOperation(order_no, operation_no):
+            refresh = True
             #-- OPERATION : START
-            updateOperationControl(join.OrderNo, join.OperationNo, 0, 0, "START")
+            updateOperationControl(order_no, operation_no, 0, 0, "START")
             #-- IF NOT START ORDER YET
-            if hasNotStartOrder(join.OrderNo):
+            if hasNotStartOrder(order_no):
                 #-- ORDER : START
-                updateOrderControl(join.OrderNo, "START")
+                updateOrderControl(order_no, "START")
+        #-- IF JOINING
+        joinList = getJoinList(order_no, operation_no)
+        for join in joinList:
+            if hasNotStartOperation(join.OrderNo, join.OperationNo):
+                #-- OPERATION : START
+                updateOperationControl(join.OrderNo, join.OperationNo, 0, 0, "START")
+                #-- IF NOT START ORDER YET
+                if hasNotStartOrder(join.OrderNo):
+                    #-- ORDER : START
+                    updateOrderControl(join.OrderNo, "START")
     data = {
         'refresh' : refresh,
     }
@@ -1273,7 +2318,7 @@ def start_work_operating_operator(request):
         if int(setuptime > 0):
             insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
         #-- OPERATOR : SETUP TIME LOG
-        insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
+        insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0,0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime, "NULL")
         #-- WORKCENTER : WORKING
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WORKING")
     #-- OPERATOR : WORKING
@@ -1298,13 +2343,15 @@ def stop_setup_operating_operator(request):
     if int(setuptime > 0):
         insertSFR2SAP_Report(oopr.WorkCenterNo,oopr.OrderNo,oopr.OperationNo,0,0,setuptime,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- OPERATOR : SETUP TIME LOG
-    insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
+    insertHistoryOperate(oopr.OrderNo,oopr.OperationNo, oopr.EmpID, oopr.WorkCenterNo, "SETUP", setuptime, 0, 0,0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime, "NULL")
     #-- WORKCENTER : WAITING
     updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "WAITING")
     #-- OPERATOR : EXIT
     deleteOperatingOperator(id)
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(oopr.OrderNo, oopr.OperationNo)
+    #-- DELETE DOUBLE REPORT
+    deleteDoubleRecord(oopr.OrderNo, oopr.OperationNo)
     data = {
         'IsOperating' : IsOperating,
     }
@@ -1337,17 +2384,19 @@ def stop_work_operating_operator(request):
     if status == "EXT-WORK":
         worktimeOperator = 0
     #-- IF EXTERNAL PROCESS DONT SEND DATA TO SAP (COMFIRMATION WILL HAVE ALL THIS INFO)
-    #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TOP SAP
+    #-- IF WORK TIME IS LESS THAN 1 MIN DON'T SEND DATA TO SAP
     if status != "EXT-WORK" and (int(worktimeMachine) > 0 or int(worktimeOperator) > 0):
         insertSFR2SAP_Report(workcenter,oopr.OperatorOrderNo,oopr.OperatorOperationNo,0,0,0,worktimeMachine,worktimeOperator,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
     #-- OPERATOR : OPERATING TIME LOG
-    insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, 0, worktimeMachine, worktimeOperator, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime)
+    insertHistoryOperate(oopr.OperatorOrderNo,oopr.OperatorOperationNo, oopr.EmpID, workcenter, type, 0, worktimeMachine, worktimeOperator,0, oopr.OperatorStartDateTime, oopr.OperatorStopDateTime, "NULL")
     #-- IF OPERATION IS NOT LABOR TYPE & NO OPERATOR WORKING & WORKCENTER IS MANUAL
     if oopr.OperatingWorkCenterID != None and hasOperatorOperating(oopr.OperatingWorkCenterID) == False and oopr.MachineType.strip() == 'Manual':
         #-- WORKCENTER : STOP
         updateOperatingWorkCenter(oopr.OperatingWorkCenterID, "COMPLETE")
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
+    #-- DELETE DOUBLE REPORT
+    deleteDoubleRecord(oopr.OperatorOrderNo, oopr.OperatorOperationNo)
     data = {
         'IsOperating' : IsOperating,
     }
@@ -1365,9 +2414,11 @@ def stop_operating_workcenter(request):
     if int(worktimeMachine) > 0:
         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
     #-- WORKCENTER : OPERATING TIME LOG
-    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING", 0, worktimeMachine, 0, owc.StartDateTime, owc.StopDateTime)
+    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING", 0, worktimeMachine, 0, 0, owc.StartDateTime, owc.StopDateTime, "NULL")
     #-- CHECK REMAINING IS OPERATING
     IsOperating = isOperatingOperation(owc.OrderNo, owc.OperationNo)
+    #-- DELETE DOUBLE REPORT
+    deleteDoubleRecord(owc.OrderNo, owc.OperationNo)
     data = {
         'IsOperating' : IsOperating,
     }
@@ -1400,6 +2451,7 @@ def confirm(request):
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
     scrap_at = request.GET.get('scrap_at')
+    reject_reason.replace("'", "")
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -1414,16 +2466,18 @@ def confirm(request):
     operation = getOperation(orderNo, operationNo)
     remainQty = operation.ProcessQty - (operation.AcceptedQty + operation.RejectedQty)
     if remainQty >= (int(good_qty) + int(reject_qty)):
-        #-- SAP : CONFIRM
         if oopr.WorkCenterNo == None:
             workcenter = getOperation(orderNo, operationNo).WorkCenterNo
-        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
-        #-- CONFIRM : LOG
-        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason, scrap_at)
         #-- UPDATE QTY OF CURRENT OPERATION
         updateOperationControl(orderNo,operationNo, good_qty, reject_qty, "UPDATEQTY")
         #-- UPDATE PROCESS QTY OF NEXT OPERATION
         nextOperation = getNextOperation(orderNo,operationNo)
+        #-- CONFIRM : LOG
+        insertHistoryConfirm(orderNo,operationNo, oopr.EmpID, workcenter, good_qty, reject_qty, reject_reason, scrap_at)
+        #-- SAP : CONFIRM
+        insertSFR2SAP_Report(workcenter,orderNo,operationNo,good_qty,reject_qty,0,0,0,oopr.OperatorStartDateTime,oopr.OperatorStopDateTime,oopr.EmpID)
+        #-- TOOLLIST : CONFIRM
+        runToolConfirm(orderNo, operationNo, workcenter, good_qty, reject_qty)
         if nextOperation != None:
             updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
         #-- NO MORE REMAINING QTY
@@ -1443,7 +2497,7 @@ def confirm(request):
                     if int(worktimeMachine) > 0:
                         insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                     #-- WORKCENTER : OPERATING TIME LOG
-                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
+                    insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0,0, owc.StartDateTime, owc.StopDateTime, "NULL")
             #-- CLEAR ALL CONTROL DATA
             deleteAllOperatingData(orderNo, operationNo)
             #-- STOP OPERATION
@@ -1481,6 +2535,7 @@ def manual_report(request):
     reject_reason = request.GET.get('reject_reason')
     other_reason = request.GET.get('other_reason')
     scrap_at = request.GET.get('scrap_at')
+    reject_reason.replace("'", "")
     if reject_reason == "-1" or reject_qty == 0:
         reject_reason = ""
     elif reject_reason == "OTHER":
@@ -1499,19 +2554,22 @@ def manual_report(request):
             if hasNotStartOrder(order_no):
                 #-- ORDER : START
                 updateOrderControl(order_no, "START")
+        #-- MANUAL REPORT : LOG
+        insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time,0, start_time, stop_time, "NULL")
         # SAP : CONFIRM TIME & QTY
         insertSFR2SAP_Report(workcenter_no,order_no,operation_no,good_qty,reject_qty,setup_time,operate_time,labor_time,start_time,stop_time,emp_id)
-        #-- MANUAL REPORT : LOG
-        insertHistoryOperate(order_no, operation_no, emp_id, workcenter_no, "MANUAL", setup_time, operate_time, labor_time, start_time, stop_time)
+        #-- TOOLLIST : CONFIRM
+        runToolConfirm(order_no, operation_no, workcenter_no, good_qty, reject_qty)
         #-- CLEAR OVERTIME IS FIXED
         fixOvertimeReported(emp_id)
         #-- CONFIRM : LOG
         if int(good_qty) > 0 or int(reject_qty) > 0:
-            insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason, scrap_at)
             #-- UPDATE QTY OF CURRENT OPERATION
             updateOperationControl(order_no, operation_no, good_qty, reject_qty, "UPDATEQTY")
             #-- UPDATE PROCESS QTY OF NEXT OPERATION
             nextOperation = getNextOperation(order_no, operation_no)
+            # -- ADD HISTORY LOG
+            insertHistoryConfirm(order_no, operation_no, emp_id, workcenter_no, good_qty, reject_qty, reject_reason, scrap_at)
             if nextOperation != None:
                 updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, good_qty, 0, "PROCESSQTY")
             #-- NO MORE REMAINING QTY
@@ -1531,7 +2589,7 @@ def manual_report(request):
                         if int(worktimeMachine) > 0:
                             insertSFR2SAP_Report(owc.WorkCenterNo,owc.OrderNo,owc.OperationNo,0,0,0,worktimeMachine,0,owc.StartDateTime,owc.StopDateTime,'9999')
                         #-- WORKCENTER : OPERATING TIME LOG
-                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime)
+                        insertHistoryOperate(owc.OrderNo,owc.OperationNo, "NULL", owc.WorkCenterNo, "WORKING",0,worktimeMachine,0, owc.StartDateTime, owc.StopDateTime, "NULL")
                 #-- CLEAR ALL CONTROL DATA
                 deleteAllOperatingData(order_no, operation_no)
                 #-- STOP OPERATION
@@ -1656,20 +2714,17 @@ def delete_operation(request):
     emp_id = request.GET.get('emp_id')
     password = request.GET.get('password')
     operation = getOperation(order_no, operation_no)
-    nextlink = "0"
+    nextoolink = "0"
     #-- CLEAR DATA MIGHT LEFT (LIKE WAITING WORKCENTER)
     deleteAllOperatingData(order_no, operation_no)
     #-- TRANSFER PROCESS QTY TO NEXT OPERATION
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
-        nextlink = nextOperation.OrderNo + nextOperation.OperationNo
+        nextoolink = nextOperation.OrderNo + nextOperation.OperationNo
         updateOperationControl(nextOperation.OrderNo,nextOperation.OperationNo, operation.ProcessQty, 0, "PROCESSQTY")
     else:
         #-- ORDER : STOP
         updateOrderControl(operation_no, "STOP")
-        #-- PENDING PLN_FAI
-        if operation.WorkCenterNo.strip() == 'PLN_FAI':
-            addPendingPLNFAI(operation.OrderNo, operation.OperationNo, operation.ProcessQty)
     #-- SAP MODIFIER : DELETE OPERATION
     insertSFR2SAP_Modifier_Delete(order_no, operation_no)
     #-- HISTORY : DELETE OPERATION
@@ -1693,7 +2748,7 @@ def delete_operation(request):
     if len(operationList) == 0:
         deleteAllSFRAndSAPOrder(order_no)
     data = {
-        'nextlink' : nextlink,
+        'nextoolink' : nextoolink,
     }
     return JsonResponse(data)
 
@@ -1731,7 +2786,8 @@ def add_operation(request):
     nextOperation = getNextOperation(order_no, operation_no)
     if nextOperation != None:
         updateOperationControl(order_no, operation_no, nextOperation.ProcessQty, 0, "PROCESSQTY")
-        updateOperationControl(order_no,nextOperation.OperationNo, (nextOperation.ProcessQty * -1), 0, "PROCESSQTY")
+        updateOperationControl(order_no, nextOperation.OperationNo, (nextOperation.ProcessQty * -1), 0, "PROCESSQTY")
+        deleteAllOperatingData(order_no, nextOperation.OperationNo)
     data = {
     }
     return JsonResponse(data)
@@ -1764,6 +2820,9 @@ def change_operation(request):
     if control_key == "PP01":
         changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, est_setup_time, est_operate_time, est_labor_time)
     else:
+        est_setup_time = 0
+        est_operate_time = 0
+        est_labor_time = 0
         changeOperationControl(order_no, operation_no, work_center_no, plan_start_date, plan_finish_date, 0, 0, 0)
     #-- SAP : CHANGE OPERATION
     insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time)
@@ -1780,8 +2839,10 @@ def save_note(request):
     order_no = request.GET.get('order_no')
     order_note = request.GET.get('order_note')
     operation_note_list = request.GET.getlist('operation_note_list[]')
+    weight = request.GET.get('weight')
+    size = request.GET.get('size')
     operationList = getOperationList(order_no)
-    updateOrderNote(order_no, order_note)
+    updateOrderNote(order_no, order_note, weight, size)
     for i in range(len(operationList)):
         updateOperationNote(order_no, operationList[i].OperationNo, operation_note_list[i])
     data = {
@@ -1951,6 +3012,91 @@ def validate_new_password(request):
     }
     return JsonResponse(data)
 
+def validate_upload_tool_list(request):
+    order_no = request.GET.get('order_no').strip()
+    operation_no = request.GET.get('operation_no').strip()
+    wc_no = request.GET.get('wc_no').strip()
+    canUse = False
+    invalidText = ''
+    if not isExistOperation(order_no, operation_no):
+        invalidText = f'{order_no}-{operation_no} is not exist.'
+    elif not isExistWorkCentrNo(wc_no):
+        invalidText = 'Work Center is not exist.'
+    elif not isMachine(wc_no):
+        invalidText = 'Work Center is not a Machine No.'
+    elif isExistToolHeader(order_no, operation_no, wc_no):
+        invalidText = f'Tool List of {wc_no} is already exist in {order_no}-{operation_no}'
+    else:
+        canUse = True
+    data = {
+        'canUse': canUse,
+        'invalidText': invalidText,
+    }
+    return JsonResponse(data)
+
+def validate_transfer_tool(request):
+    order_no = request.GET.get('order_no').strip()
+    operation_no = request.GET.get('operation_no').strip()
+    toolh_id = request.GET.get('toolh_id').strip()
+    toolh = getToolHeaderByID(toolh_id)
+    canUse = False
+    invalidText = ''
+    if not isExistOperation(order_no, operation_no):
+        invalidText = f'{order_no}-{operation_no} is not exist.'
+    elif isExistToolHeader(order_no, operation_no, toolh.WorkCenterNo):
+        invalidText = f'Tool List of {toolh.WorkCenterNo} is already exist in {order_no}-{operation_no}'
+    else:
+        prod_1 = getOrder(toolh.OrderNo)
+        prod_2 = getOrder(order_no)
+        if prod_1.FG_MaterialCode != prod_2.FG_MaterialCode:
+            invalidText = f'FG Material Code not match.'
+        else:
+            canUse = True
+    data = {
+        'canUse': canUse,
+        'invalidText': invalidText,
+    }
+    return JsonResponse(data)
+
+def validate_change_tool_wc(request):
+    toolh_id = request.GET.get('toolh_id').strip()
+    wc_no = request.GET.get('wc_no').strip()
+    toolh = getToolHeaderByID(toolh_id)
+    canUse = False
+    invalidText = ''
+    order_no = toolh.OrderNo
+    operation_no = toolh.OperationNo
+    if not isExistWorkCentrNo(wc_no):
+        invalidText = 'Work Center is not exist.'
+    elif not isMachine(wc_no):
+        invalidText = 'Work Center is not a Machine No.'
+    elif isExistToolHeader(order_no, operation_no, wc_no):
+        invalidText = f'Tool List of {wc_no} is already exist in {order_no}-{operation_no}'
+    else:
+        canUse = True
+    data = {
+        'canUse': canUse,
+        'invalidText': invalidText,
+    }
+    return JsonResponse(data)
+
+def validate_add_new_tool(request):
+    toolh_id = request.GET.get('toolh_id').strip()
+    no = request.GET.get('no').strip()
+    toolItemList = getToolItemList(toolh_id)
+    canUse = True
+    invalidText = ''
+    for tooli in toolItemList:
+        if tooli.No == float(no):
+            canUse = False
+            invalidText = f'No {no} already has tool'
+            break
+    data = {
+        'canUse': canUse,
+        'invalidText': invalidText,
+    }
+    return JsonResponse(data)
+
 #------------------------------------------------------------------- ADMIN PANEL
 def add_new_user(request):
     user_id = request.GET.get('user_id')
@@ -1991,7 +3137,9 @@ def add_wc(request):
     on_rt = request.GET.get('on_rt').strip()
     target = request.GET.get('target').strip()
     capacity = request.GET.get('capacity').strip()
-    insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity)
+    pfc = request.GET.get('pfc').strip()
+    active_date = datetime.today().strftime('%Y-%m') + "-01"
+    insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity, pfc, active_date, DEFAULT_INACTIVE_DATE)
     data = {
     }
     return JsonResponse(data)
@@ -2120,14 +3268,286 @@ def clear_pln_fai(request):
     }
     return JsonResponse(data)
 
+def remark_pln_fai(request):
+    order_no = request.GET.get('order_no')
+    remark = request.GET.get('remark')
+    remarkPLNFAI(order_no, remark)
+    data = {
+    }
+    return JsonResponse(data)
+
+def save_abgraph_mn(request):
+    date = request.GET.get('date')
+    mc_no = request.GET.get('mc_no')
+    hr = request.GET.get('hr')
+    min = request.GET.get('min')
+    states = request.GET.getlist('states[]')
+    saveABGraphMunalData(mc_no, date, states, hr, min)
+    data = {
+    }
+    return JsonResponse(data)
+
+def get_wcs_of_profit_center(request):
+    profit_center = request.GET.get('profit_center')
+    workCenterList = getWorkCenterListInProfitCenter(profit_center)
+    wcs = []
+    for workCenter in workCenterList:
+        wcs.append(workCenter.WorkCenterNo)
+    data = {
+        'wcs': wcs,
+    }
+    return JsonResponse(data)
+
+def generate_order_analysis(request):
+    token = request.GET.get('token')
+    fg_matcode = request.GET.get('fg_matcode')
+    start_date = request.GET.get('start_date') if request.GET.get('start_date') != '' else None
+    stop_date = request.GET.get('stop_date') if request.GET.get('stop_date') != '' else None
+    type_excel_data = request.GET.get('type_excel_data')
+    include_other_operation = True if request.GET.get('include_other_operation') == 'true' else False
+    is_consider_all = True if request.GET.get('is_consider_all') == 'true' else False
+    consider_operations = request.GET.getlist('consider_operations[]')
+    consider_operations_sql = get_list_for_sql(consider_operations)
+    cursor = get_connection().cursor()
+    sql = f"""
+    SELECT
+        FG_MaterialCode, TB1.OrderNo, TB1.OperationNo, WorkCenterNo, WorkCenterType, CAST(ProcessStart AS DATE) AS ProcessStart, CAST(ProcessStop AS DATE) AS ProcessStop, 
+        OrderQty, ProcessQty, AcceptedQty, RejectedQty, TotalRejectedQty,
+        CASE WHEN TB1.OperationNo <> LastOperationNo THEN NULL ELSE TotalRejectedQty END AS CummulateRejectQty,
+        ROUND(COALESCE(((RejectedQty / NULLIF(OrderQty, 0)) * 100), 0), 2) AS RejectByOrderPercentage,
+        ROUND(COALESCE(((RejectedQty / NULLIF(ProcessQty, 0)) * 100), 0), 2) AS RejectByProcessPercentage,
+        CASE WHEN TB1.OperationNo <> LastOperationNo THEN NULL ELSE ROUND(COALESCE(((TotalRejectedQty / NULLIF(OrderQty, 0)) * 100), 0), 2) END AS CummulateRejectPercentage,
+        EstSetupPerUnit, EstSetupTotal, 
+        COALESCE(ActSetupTotal, 0) AS ActSetupTotal,
+        ROUND(COALESCE(((EstSetupTotal / NULLIF(ActSetupTotal, 0)) * 100), 0), 2) AS SetupPercentage,
+        EstOperPerUnit, EstOperTotal, MainProcess, TargetPerUnit, TargetTotal, COALESCE(ActOperTotal, 0) AS ActOperTotal, 
+        ROUND(COALESCE(((EstOperTotal / NULLIF(ActOperTotal, 0)) * 100), 0), 2) AS OperByEstPercentage,
+        ROUND(COALESCE(((TargetTotal / NULLIF(ActOperTotal, 0)) * 100), 0), 2) AS OperByTarPercentage,
+        COALESCE(IdleTotal, 0) AS IdleTotal, COALESCE((IdleTotal + ActOperTotal), 0) AS ActIdleOperTotal,
+        ROUND(COALESCE(((EstOperTotal / NULLIF((IdleTotal + ActOperTotal), 0)) * 100), 0), 2) AS IdleOperPercentage,
+        EstLaborPerUnit, EstLaborTotal, COALESCE(ActLaborTotal, 0) AS ActLaborTotal,
+        ROUND(COALESCE(((EstLaborTotal / NULLIF(ActLaborTotal, 0)) * 100), 0), 2) AS LaborPercentage
+        FROM
+        (
+        SELECT OC.FG_MaterialCode, OPC.OrderNo, OPC.OperationNo, OPC.WorkCenterNo, WC.WorkCenterType, OPC.ProcessStart, OPC.ProcessStop, OC.ProductionOrderQuatity AS OrderQty, OPC.ProcessQty, OPC.AcceptedQty, OPC.RejectedQty,
+        OPC.EstSetupTime AS EstSetupPerUnit, (OPC.EstSetupTime * OPC.ProcessQty) AS EstSetupTotal, OPC.EstOperationTime AS EstOperPerUnit, (OPC.EstOperationTime * OPC.ProcessQty) AS EstOperTotal,
+        OPC.EstLaborTime AS EstLaborPerUnit, (OPC.EstLaborTime * OPC.ProcessQty) AS EstLaborTotal, COALESCE(WC.MainProcess, '') AS MainProcess, COALESCE(CTT.TargetValue, 0) AS TargetPerUnit, (COALESCE(CTT.TargetValue, 0) * OPC.ProcessQty) AS TargetTotal
+        FROM OperationControl AS OPC
+        INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
+        INNER JOIN WorkCenter AS WC ON OPC.WorkCenterNo = WC.WorkCenterNo
+        LEFT JOIN CycleTimeTarget AS CTT ON WC.MainProcess = CTT.MainProcess AND OC.FG_MaterialCode = CTT.FG_MaterialCode
+        WHERE OC.FG_MaterialCode LIKE '{fg_matcode}%'"""
+    if not include_other_operation and not is_consider_all:
+        sql += f" AND OPC.WorkCenterNo IN {consider_operations_sql}"
+    if start_date and stop_date:
+        sql += f" AND OPC.OrderNo IN (SELECT OrderNo FROM OperationControl WHERE ProcessStop BETWEEN '{start_date}' AND '{stop_date}'"
+        if not is_consider_all:
+            sql += f" AND WorkCenterNo IN {consider_operations_sql}"
+        sql += ")"
+    elif start_date:
+        sql += f" AND OPC.OrderNo IN (SELECT OrderNo FROM OperationControl WHERE ProcessStop >= '{start_date}'"
+        if not is_consider_all:
+            sql += f" AND WorkCenterNo IN {consider_operations_sql}"
+        sql += ")"
+    elif stop_date:
+        sql += f" AND OPC.OrderNo IN (SELECT OrderNo FROM OperationControl WHERE ProcessStop <= '{stop_date}'"
+        if not is_consider_all:
+            sql += f" AND WorkCenterNo IN {consider_operations_sql}"
+        sql += ")"
+    sql += """
+        ) AS TB1
+        INNER JOIN (SELECT OrderNo, MAX(OperationNo) As LastOperationNo, SUM(RejectedQty) AS TotalRejectedQty FROM OperationControl GROUP BY OrderNo) AS TB3 ON TB1.OrderNo = TB3.OrderNo
+        LEFT JOIN (
+        SELECT OrderNo, OperationNo, COALESCE(SUM(Setup), 0) AS ActSetupTotal, COALESCE(SUM(Oper), 0) As ActOperTotal, COALESCE(SUM(Labor), 0) AS ActLaborTotal, COALESCE(SUM(Idle), 0) AS IdleTotal
+        FROM HistoryOperate
+        GROUP BY OrderNo, OperationNo
+        ) AS TB2 ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo
+        ORDER BY FG_MaterialCode, TB1.OrderNo ASC, TB1.OperationNo ASC
+    """
+    print(sql)
+    cursor.execute(sql)
+    orders = cursor.fetchall()
+    file_name = f'order_analysis_{token}.xlsx'
+    file_path = f'media/order_analysis/{file_name}'
+    try:
+        dir_path = file_path
+        shutil.rmtree(dir_path)
+    except:
+        error_msg = 'cant find path'
+    source_file = settings.MEDIA_ROOT + f'/order_analysis_template.xlsx'
+    destination_file = settings.MEDIA_ROOT + '/order_analysis/' + file_name
+    shutil.copy(source_file, destination_file)
+    wb = load_workbook(file_path)
+    # Detail
+    ws = wb['Detail']
+    ws['B3'] = datetime.today()
+    ws['B4'] = getClientIP(request)
+    ws['B5'] = fg_matcode
+    ws['B6'] = start_date if start_date else ''
+    ws['B7'] = stop_date if stop_date else ''
+    ws['B8'] = 'Yes' if include_other_operation else 'No'
+    if is_consider_all:
+        ws['B9'] = 'All'
+    else:
+        row = 9
+        for consider_operation in consider_operations:
+            ws['B' + str(row)] = consider_operation
+            row = row + 1
+    # Table
+    ws = wb['Table']
+    row = 4
+    columns = [c for c in string.ascii_uppercase]
+    columns += [a + b for a in string.ascii_uppercase for b in string.ascii_uppercase]
+    for order in orders:
+        values = [order.FG_MaterialCode, order.OrderNo, order.OperationNo, order.WorkCenterNo, order.WorkCenterType, order.ProcessStart,
+          order.ProcessStop, order.OrderQty, order.ProcessQty, order.AcceptedQty, order.RejectedQty, order.CummulateRejectQty, 
+          order.RejectByOrderPercentage, order.RejectByProcessPercentage, order.CummulateRejectPercentage, order.EstSetupPerUnit,
+          order.EstSetupTotal, order.ActSetupTotal, order.SetupPercentage, order.EstOperPerUnit, order.EstOperTotal, order.MainProcess,
+          order.TargetPerUnit, order.TargetTotal, order.ActOperTotal, order.OperByEstPercentage, order.OperByTarPercentage, order.IdleTotal,
+          order.ActIdleOperTotal, order.IdleOperPercentage, order.EstLaborPerUnit, order.EstLaborTotal, order.ActLaborTotal, order.LaborPercentage]
+        for col, value in zip(columns, values):
+            ws[col + str(row)] = value
+        row = row + 1
+
+    if type_excel_data == 'Rej':
+        columns_to_hide = ['E','F','G', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH']
+
+        for column_letter in columns_to_hide:
+            ws.column_dimensions[column_letter].hidden = True
+
+    wb.save(file_path)
+    data = {
+        'new_token': generate_random_token(6),
+        'file_path': '/' + file_path        
+    }
+    return JsonResponse(data)
+
+#--------------------------------------------------------------------------- TOOL LIST
+
+def upload_tool_list_save(request): 
+    order_no = request.POST['order_no'].strip()
+    operation_no = request.POST['operation_no'].strip()
+    wc_no = request.POST['wc_no'].strip()
+    file = request.FILES['file']
+    sheets = request.POST.getlist('sheets')
+    # upload file
+    file_path = 'tool_list/' + file.name
+    # remove file
+    try:
+        path = 'media/' + file_path
+        os.remove(path)
+    except Exception:
+        print('Error : File Not Found')
+    # save file
+    fs = FileSystemStorage()
+    fs.save(file_path, file)
+    time.sleep(3)
+    fg_matcode = getOrder(order_no).FG_MaterialCode
+    fg_drawing = getOrder(order_no).FG_Drawing
+    # run upload data to db
+    if run_upload_tool_list(True, fg_matcode, fg_drawing, order_no, operation_no, wc_no, file, sheets):
+        run_upload_tool_list(False, fg_matcode, fg_drawing, order_no, operation_no, wc_no, file, sheets)
+    return redirect('/tool_store/')
+
+def transfer_tool(request):
+    order_no = request.GET['order_no'].strip()
+    operation_no = request.GET['operation_no'].strip()
+    toolh_id = request.GET.get('toolh_id')
+    transferToolHeader(toolh_id, order_no, operation_no)
+    data = {
+    }
+    return JsonResponse(data)
+
+def return_tool_all(request):
+    toolh_id = request.GET.get('toolh_id')
+    toolh = getToolHeaderByID(toolh_id)
+    toolItemList = getToolItemList(toolh_id)
+    for tooli in toolItemList:
+        if tooli.ConfirmedQty > 0:
+            insertHistoryTool(tooli.ID, tooli.No, tooli.CTCode, tooli.ToolNo, tooli.ConfirmedQty, tooli.ToolLifeQty, tooli.ToolLifeMin, tooli.Remark, 'Return', toolh.FG_MaterialCode, toolh.OrderNo, toolh.OperationNo, toolh.WorkCenterNo)
+    deleteTool(toolh_id)
+    data = {
+    }
+    return JsonResponse(data)
+
+def return_tool(request):
+    tooli_id = request.GET.get('tooli_id')
+    tooli = getToolItem(tooli_id)
+    toolh = getToolHeaderByID(tooli.ToolHeaderID)
+    if tooli.ConfirmedQty > 0:
+            insertHistoryTool(tooli.ID, tooli.No, tooli.CTCode, tooli.ToolNo, tooli.ConfirmedQty, tooli.ToolLifeQty, tooli.ToolLifeMin, tooli.Remark, 'Return', toolh.FG_MaterialCode, toolh.OrderNo, toolh.OperationNo, toolh.WorkCenterNo)
+    deleteToolItem(tooli_id)
+    if len(getToolItemList(tooli.ToolHeaderID)) == 0:
+        deleteTool(tooli.ToolHeaderID)
+    data = {
+    }
+    return JsonResponse(data)
+
+def change_tool_wc(request):
+    toolh_id = request.GET.get('toolh_id').strip()
+    wc_no = request.GET.get('wc_no').strip()
+    changeToolHeaderWorkCenter(toolh_id, wc_no)
+    data = {
+    }
+    return JsonResponse(data)
+
+def change_tool(request):
+    tooli_id = request.GET.get('tooli_id')
+    change_type = request.GET.get('change_type')
+    reason = request.GET.get('reason').strip()
+    ct_code = request.GET.get('ct_code').strip()
+    tool_no = request.GET.get('tool_no').strip()
+    tool_life_qty = request.GET.get('tool_life_qty').strip()
+    tool_life_min = request.GET.get('tool_life_min').strip()
+    remark = request.GET.get('remark').strip()
+    tooli = getToolItem(tooli_id)
+    toolh = getToolHeaderByID(tooli.ToolHeaderID)
+    if change_type == 'Same':
+        InsertToolItem(tooli.ToolHeaderID, tooli.No, tooli.CTCode, tooli.ToolNo, tooli.ToolLifeQty, tooli.ToolLifeMin, tooli.Remark, 0)
+    elif change_type == 'Diff':
+        InsertToolItem(tooli.ToolHeaderID, tooli.No, ct_code, tool_no, tool_life_qty, tool_life_min, remark, 0)
+    if tooli.ConfirmedQty > 0:
+        insertHistoryTool(tooli.ID, tooli.No, tooli.CTCode, tooli.ToolNo, tooli.ConfirmedQty, tooli.ToolLifeQty, tooli.ToolLifeMin, tooli.Remark, reason, toolh.FG_MaterialCode, toolh.OrderNo, toolh.OperationNo, toolh.WorkCenterNo)
+    deleteToolItem(tooli_id)
+    data = {
+    }
+    return JsonResponse(data)
+
+def runToolConfirm(order_no, operation_no, wc_no, accepted_qty, rejected_qty):
+    confirmed_qty = int(accepted_qty) + int(rejected_qty)
+    if confirmed_qty == 0:
+        return
+    if not isExistToolHeader(order_no, operation_no, wc_no):
+        return
+    toolh = getToolHeaderByOrder(order_no, operation_no, wc_no)
+    toolItemList = getToolItemList(toolh.ID)
+    for tooli in toolItemList:
+        updateToolItemConfirm(tooli.ID, confirmed_qty)
+    return
+
+def add_new_tool(request):
+    toolh_id = request.GET.get('toolh_id')
+    no = request.GET.get('no').strip()
+    ct_code = request.GET.get('ct_code').strip()
+    tool_no = request.GET.get('tool_no').strip()
+    tool_life_qty = request.GET.get('tool_life_qty').strip()
+    tool_life_min = request.GET.get('tool_life_min').strip()
+    remark = request.GET.get('remark').strip()
+    InsertToolItem(toolh_id, no, ct_code, tool_no, tool_life_qty, tool_life_min, remark, 0)
+    data = {
+    }
+    return JsonResponse(data)
+
 ################################################################################
 ################################### DATABASE ###################################
 ################################################################################
 
 def get_connection():
-    # conn = pyodbc.connect('Driver={SQL Server};''Server=SVSP-SQL;''Database=SFR;''UID=CCSGROUPS\sqladmin;''PWD=$ql@2019;''Trusted_Connection=yes;')
-    # conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
     conn = pyodbc.connect('Driver={SQL Server};''Server=SVCCS-SFR\SQLEXPRESS01;''Database=SFR;''UID=sa;''PWD=$fr@2021;''Trusted_Connection=yes;')
+    return conn
+
+def get_connection_hr_focus():
+    conn = pyodbc.connect('Driver={SQL Server};''Server=HR-FOCUS\SQLEXPRESS;''Database=HR_CCS;''UID=sa;''PWD=@MISccs55;''Trusted_Connection=yes;')
     return conn
 
 #-------------------------------------------------------------------------- LIST
@@ -2205,9 +3625,21 @@ def getWorkCenterGroupList():
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getWorkCenterListInProfitCenter(profit_center):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM [WorkCenter] WHERE ProfitCenter = '{profit_center}'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getOnRoutingList():
     cursor = get_connection().cursor()
     sql = "SELECT WC1.WorkCenterNo FROM WorkCenter AS WC1 INNER JOIN WorkCenter AS WC2 ON WC1.WorkCenterNo = WC2.OnRouting GROUP BY WC1.WorkCenterNo"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getProfitCenterList():
+    cursor = get_connection().cursor()
+    sql = "SELECT ProfitCenter FROM WorkCenter WHERE IsActive = 1 GROUP BY ProfitCenter"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2220,9 +3652,9 @@ def getMachineWorkCenterGroupList():
 def getOperatorList():
     cursor = get_connection().cursor()
     sql = """
-            SELECT EMP.EmpID, EmpName, Section, CostCenter, IsActive, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
+            SELECT EMP.EmpID, EmpName, Section, CostCenter, EmploymentType, Position, IsActive, ProfitCenter, JobFunction, MAX(StartDateTime) AS LastStartWorkingTime FROM Employee AS EMP
             LEFT JOIN HistoryOperate AS HO ON EMP.EmpID = HO.EmpID
-            GROUP BY EMP.EmpId, EmpName, Section, CostCenter, IsActive
+            GROUP BY EMP.EmpId, EmpName, Section, CostCenter, EmploymentType, Position, IsActive, ProfitCenter, JobFunction
         """
     cursor.execute(sql)
     return cursor.fetchall()
@@ -2230,6 +3662,14 @@ def getOperatorList():
 def getBomList(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [SAP_Component] WHERE ProductionOrderNo = '" + order_no + "' ORDER BY DateGetFromSAP"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getIdleTypeList():
+    cursor = get_connection().cursor()
+    sql = """
+            SELECT * FROM IdleType
+        """
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2300,6 +3740,7 @@ def getWorkingWorkCenterList():
     sql = "SELECT OWC.WorkCenterNo AS WCN, OC.Note AS OperationNote, * FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
     sql += " INNER JOIN [OperationControl] as OC ON OC.OrderNo = OWC.OrderNo AND OC.OperationNo = OWC.OperationNo"
     sql += " INNER JOIN [OrderControl] as ORDC ON OWC.OrderNo = ORDC.OrderNo"
+    sql += " LEFT JOIN IdleType AS IT ON IT.Code = OWC.IdleCode"
     sql += " WHERE Status <> 'COMPLETE' ORDER BY OWC.OperatingWorkCenterID ASC"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -2336,8 +3777,9 @@ def getOperatingWorkCenterList(order_no, operation_no):
 
 def getOperatingWorkCenterListForTable(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT OWC.OperatingWorkCenterID, OWC.WorkCenterNo, WC.WorkCenterName, OWC.StartDateTime, OWC.StopDateTime, OWC.Status, WC.MachineType, *"
+    sql = "SELECT OWC.OperatingWorkCenterID, OWC.WorkCenterNo, WC.WorkCenterName, OWC.StartDateTime, OWC.StopDateTime, OWC.Status, WC.MachineType, IT.Description, *"
     sql += " FROM [OperatingWorkCenter] as OWC INNER JOIN [WorkCenter] as WC ON OWC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN IdleType AS IT ON IT.Code = OWC.IdleCode"
     sql += " WHERE OrderNo = '" + order_no + "' AND OperationNo = '" + operation_no + "' ORDER BY OWC.OperatingWorkCenterID DESC"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -2393,6 +3835,7 @@ def getHistoryOperateList(order_no, operation_no):
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [HistoryOperate] AS HO"
     sql += " INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN IdleType AS IT ON IT.Code = HO.IdleCode"
     sql += " LEFT JOIN SFR2SAP_Report AS SAP"
     sql += " ON HO.OrderNo = SAP.ProductionOrderNo AND HO.OperationNo = SAP.OperationNumber AND HO.Type = 'MANUAL'"
     sql += " AND Ho.Setup = SAP.SetupTime AND HO.Oper = SAP.OperTime AND HO.Labor = SAP.LaborTime AND HO.EmpID = SAP.EmployeeID"
@@ -2419,11 +3862,21 @@ def getHistoryJoinList(order_no, operation_no):
     cursor.execute(sql)
     return cursor.fetchall()
 
+def getHistoryToolList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM HistoryTool WHERE OrderNo = '{order_no}' AND OperationNo = '{operation_no}' ORDER BY No ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
 def getWorkCenterHistoryTransactionList(work_center_no, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [HistoryOperate] WHERE WorkCenterNo = '"+work_center_no+"' AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql = f"""
+            SELECT HO.*, IT.Description FROM [HistoryOperate] AS HO
+            LEFT JOIN IdleType AS IT ON HO.IdleCode = IT.Code
+            WHERE WorkCenterNo = '{work_center_no}' AND month(StartDateTime) = '{month}' AND year(StartDateTime) = '{year}'
+        """
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2491,19 +3944,56 @@ def getOperationNoTimeList(fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
     cursor = get_connection().cursor()
-    sql = """
-            SELECT * FROM OperationControl AS OC INNER JOIN WorkCenter AS WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE
-            CONCAT(OrderNo, OperationNo) NOT IN
-            (SELECT CONCAT(OrderNo, OperationNo) AS orderoprno FROM
-            (SELECT OrderNo, OperationNo, SUM(Oper) AS Oper, SUM(Labor) AS Labor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB
-            WHERE Oper + Labor != 0) AND OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)
-            AND ProcessStop IS NOT NULL
-            AND OC.WorkCenterNo != 'MT_AS' AND OC.WorkCenterNo != 'MT' AND OC.WorkCenterNo != 'PK' AND OC.WorkCenterNo != 'PK_AS'
-            AND OC.WorkCenterNo != 'MT_CNF'  AND OC.WorkCenterNo != 'MT-MD' AND OC.WorkCenterNo != 'JP_AS' AND OC.WorkCenterNo != 'HT'
-            AND IsExternalProcess = 0
+    sql = f"""
+            SELECT * 
+            FROM OperationControl AS OC
+            INNER JOIN WorkCenter AS WC ON OC.WorkCenterNo = WC.WorkCenterNo
+            WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) /* Cancel Order */
+            AND CONCAT(OrderNo, OperationNo) NOT IN (SELECT CONCAT(JoinToOrderNo, JoinToOperationNo) FROM HistoryJoin) /* Was Join To */
+            AND CONCAT(OrderNo, OperationNo) NOT IN (SELECT CONCAT(JoinByOrderNo, JoinByOperationNo) FROM HistoryJoin) /* Was Join By */
+            AND CONCAT(OrderNo, OperationNo) NOT IN (SELECT CONCAT(OrderNo, OperationNo) FROM HistoryOperate WHERE Oper + Labor != 0) /* Has Time Report */
+            AND ProcessStop IS NOT NULL /* Only Stop Process */
+            AND IsExternalProcess = 0 /* Exclude External Process */
+            AND OC.WorkCenterNo NOT IN ('MT_AS', 'MT', 'PK', 'PK_AS', 'MT_CNF', 'MT-MD', 'JP_AS', 'HT', 'P-PE') /* Exclude Some Workcenter */
+            AND Note NOT LIKE '%Combine%' AND Note <> 'PP' /* Exclude Some Note */
+            AND month(ProcessStop) = '{month}' AND year(ProcessStop) = '{year}'
+            ORDER BY ProcessStop DESC
           """
-    sql += "AND month(ProcessStop) = '"+month+"' AND year(ProcessStop) = '"+year+"' "
-    sql += "ORDER BY ProcessStop DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getEmpWorkTimeList(fstartdate, fstopdate, emp_type):
+    fstopdate = datetime.strptime(fstopdate, '%Y-%m-%d') + timedelta(days=1)
+    fstopdate = fstopdate.strftime('%Y-%m-%d')
+    cursor = get_connection().cursor()
+    emp_type_sql = ''
+    if emp_type != 'All':
+        emp_type_sql = f"AND EmploymentType = '{emp_type}' "
+    sql = f"""
+            SELECT Section, CostCenter, EMP.EmpID, EmpName, EmploymentType, Position, ProfitCenter, JobFunction, ROUND(SUM(Setup), 0) AS Setup, ROUND(SUM(Labor), 0) AS Labor, ROUND(SUM(Setup), 0) + ROUND(SUM(Labor), 0) AS Total
+            FROM HistoryOperate AS HO
+            INNER JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID
+            WHERE (Labor <> 0 OR Setup <> 0) 
+            AND DATEADD(s, DATEDIFF(s, StartDateTime, StopDateTime)/2, StartDateTime) >= '{fstartdate} 07:00:000' 
+            AND DATEADD(s, DATEDIFF(s, StartDateTime, StopDateTime)/2, StartDateTime) <= '{fstopdate} 07:00:000'
+            {emp_type_sql}
+            GROUP BY Section, CostCenter, EMP.EmpID, EmpName, EmploymentType, Position, ProfitCenter, JobFunction
+          """
+    # sql = f"""
+    #         SELECT EMP.*, TB1.Setup, TB1.Labor, TB1.Total 
+    #         FROM Employee AS EMP
+    #         LEFT JOIN
+    #         (
+    #         SELECT EmpID, ROUND(SUM(Setup), 0) AS Setup, ROUND(SUM(Labor), 0) AS Labor, ROUND(SUM(Setup), 0) + ROUND(SUM(Labor), 0) AS Total 
+    #         FROM HistoryOperate
+    #         WHERE (Labor <> 0 OR Setup <> 0) 
+    #         AND DATEADD(s, DATEDIFF(s, StartDateTime, StopDateTime)/2, StartDateTime) >= '{fstartdate} 07:00:000'
+    #         AND DATEADD(s, DATEDIFF(s, StartDateTime, StopDateTime)/2, StartDateTime) <= '{fstopdate} 07:00:000'
+    #         {emp_type_sql}
+    #         GROUP BY EmpID
+    #         ) AS TB1 ON EMP.EmpID = TB1.EmpID
+    #         WHERE IsActive = 1
+    #     """
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2552,15 +4042,29 @@ def getWorkCenterInGroupList(work_center_group):
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterInGroupActiveList(work_center_group):
+def getWorkCenterInGroupActiveList(work_center_group, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    fdate = year + '-' + month + '-15'
     cursor = get_connection().cursor()
     sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND WorkCenterGroup = '"+work_center_group+"' AND IsActive = 1"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     cursor.execute(sql)
     return cursor.fetchall()
 
-def getWorkCenterOnRoutingActiveList(on_rt):
+def getWorkCenterOnRoutingActiveList(on_rt, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    fdate = year + '-' + month + '-15'
     cursor = get_connection().cursor()
     sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND OnRouting = '"+on_rt+"' AND IsActive = 1"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getMachineOnRoutingIsActiveList(frt):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM WorkCenter WHERE IsRouting = 0 AND OnRouting = '"+str(frt)+"' AND IsActive = 1"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2670,7 +4174,7 @@ def getSAPDelayOperationList(fwc):
             INNER JOIN SAP_Order AS SO ON SO.ProductionOrderNo = RT.ProductionOrderNo
         """
     if fwc != 'ALL':
-        sql += " WHERE RT.WorkCenter = '"+fwc+"'"
+        sql += f" WHERE RT.WorkCenter = '{fwc}'"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2684,13 +4188,14 @@ def getSFRDelayOperationList(fwc):
             WHERE OPC.OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder) AND (ProcessQty - (AcceptedQty + RejectedQty) > 0)
           """
     if fwc != 'ALL':
-        sql += " AND WorkCenterNo = '"+fwc+"'"
+        sql += f" AND OPC.WorkCenterNo = '{fwc}'"
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
+    fdate = year + '-' + month + '-15'
     cursor = get_connection().cursor()
     sql = "SELECT day(CONVERT(DATE, Fdate)) AS Fday, CAST(ROUND(SUM(Foper)/60, 0) AS Int) AS Foper FROM"
     sql += " ("
@@ -2699,6 +4204,7 @@ def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND month(StartDateTime) != month(StopDateTime)"
     sql += " AND month(StopDateTime) = '"+month+"' AND year(StopDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2711,6 +4217,7 @@ def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2723,6 +4230,7 @@ def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime) AND month(StartDateTime) = month(StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2735,6 +4243,7 @@ def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Oper != 0 AND CONVERT(DATE, StartDateTime) = CONVERT(DATE, StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2749,12 +4258,14 @@ def getMonthlyWorkCenterOperForABGraph(fwctype, fkey, fmonth):
 def getMonthlyWorkCenterSetupForABGraph(fwctype, fkey, fmonth):
     year = fmonth[0:4]
     month = fmonth[5:7]
+    fdate = year + '-' + month + '-15'
     cursor = get_connection().cursor()
     sql = "SELECT day(CONVERT(DATE, Fdate)) AS Fday, CAST(ROUND(SUM(Fsetup)/60, 0) AS Int) AS Fsetup FROM"
     sql += " ((SELECT StopDateTime As Fdate, (Setup - ((DATEDIFF(MINUTE, StartDateTime, CONVERT(DATE, StopDateTime))/Setup) * Setup)) AS Fsetup"
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Setup != 0 AND month(StartDateTime) != month(StopDateTime)"
     sql += " AND month(StopDateTime) = '"+month+"' AND year(StopDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2766,6 +4277,7 @@ def getMonthlyWorkCenterSetupForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Setup != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2777,6 +4289,7 @@ def getMonthlyWorkCenterSetupForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Setup != 0 AND CONVERT(DATE, StartDateTime) != CONVERT(DATE, StopDateTime) AND month(StartDateTime) = month(StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2788,6 +4301,7 @@ def getMonthlyWorkCenterSetupForABGraph(fwctype, fkey, fmonth):
     sql += " FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo"
     sql += " WHERE Setup != 0 AND CONVERT(DATE, StartDateTime) = CONVERT(DATE, StopDateTime)"
     sql += " AND month(StartDateTime) = '"+month+"' AND year(StartDateTime) = '"+year+"'"
+    sql += " AND '"+str(fdate)+"' BETWEEN ActiveDate AND InActiveDate"
     if fwctype == "WC":
         sql += " AND HO.WorkCenterNo = '"+fkey+"'"
     elif fwctype == "WCG":
@@ -2796,6 +4310,24 @@ def getMonthlyWorkCenterSetupForABGraph(fwctype, fkey, fmonth):
         sql += " AND OnRouting = '"+fkey+"' AND WorkCenterType = 'Machine' AND IsActive = 1"
     sql += ")) AS TB"
     sql += " GROUP BY day(CONVERT(DATE, Fdate))"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getMonthlyWorkCenterManualForABGraph(fwctype, fkey, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT DAY(Date) Fday, SUM(WorkingHour) AS WorkingHour"
+    sql += " FROM ABGraphManualData AS AB"
+    sql += " INNER JOIN WorkCenter AS WC ON AB.WorkCenterNo = WC.WorkCenterNo"
+    sql += " WHERE MONTH(Date) = '"+str(month)+"' AND YEAR(Date) = '"+str(year)+"'"
+    if fwctype == "WC":
+        sql += " AND AB.WorkCenterNo = '"+str(fkey)+"'"
+    elif fwctype == "WCG":
+        sql += " AND WC.WorkCenterGroup = '"+str(fkey)+"'"
+    elif fwctype == "RT":
+        sql += " AND WC.OnRouting = '"+str(fkey)+"'"
+    sql += " GROUP BY Date"
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2845,27 +4377,341 @@ def getOverEstOperationList(fwc, fweek):
     start_date = str(start_date)[0:10]
     end_date = str(end_date)[0:10]
     cursor = get_connection().cursor()
-    sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing, CONVERT(int, TB3.ProductionOrderQuatity) AS OrderQty FROM"
+    sql = "SELECT TB1.*, TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, TB3.FG_MaterialCode, TB3.FG_Drawing, CONVERT(int, TB3.ProductionOrderQuatity) AS OrderQty, CT.TargetValue FROM"
     sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
-    sql += " AND (ProcessStop BETWEEN '"+str(start_date)+"' AND '"+str(end_date)+"')"
+    sql += f" AND (ProcessStop BETWEEN '{start_date}' AND '{end_date}')"
     if fwc != 'ALL':
         sql += " AND WorkCenterNo = '"+fwc+"'"
     sql += ") AS TB1 LEFT JOIN"
     sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
     sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo"
-    # print(sql)
+    sql += " INNER JOIN WorkCenter AS WC ON TB1.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN CycleTimeTarget AS CT ON WC.MainProcess = CT.MainProcess AND TB3.FG_MaterialCode = CT.FG_MaterialCode"
     cursor.execute(sql)
+    # print(sql)
     return cursor.fetchall()
 
 def getEmpAtComputerList(ip_address):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM EmpAtComputer WHERE IPAddress = '"+ ip_address +"' ORDER BY DateTimeStamp DESC"
+    sql = f"""SELECT * FROM EmpAtComputer AS EAC INNER JOIN Employee AS EMP ON EAC.EmpID = EMP.EmpID WHERE IPAddress = '{ip_address}' ORDER BY DateTimeStamp DESC"""
     cursor.execute(sql)
     return cursor.fetchall()
 
 def getPendingPLNFAIList():
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM PendingPLNFAI"
+    sql = "SELECT * FROM PendingPLNFAI AS PPF LEFT JOIN OrderControl AS OC ON PPF.OrderNo = OC.OrderNo"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOrderListBySaleNo(so_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM SAP_Order WHERE SalesOrderNo = '" + str(so_no) + "'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOperatingHistoryConfirm(fwc, fmc, ftype, fstartdate, fstopdate, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT HC.WorkCenterNo AS Machine, OPC.WorkCenterNo AS WorkCenter, HC.AcceptedQty AS Yeild, HC.RejectedQty AS Scrap, OPC.AcceptedQty AS AcceptedAll, OPC.RejectedQty AS RejectedAll, * FROM HistoryConfirm AS HC"
+    sql += " INNER JOIN OperationControl AS OPC ON HC.OrderNo = OPC.OrderNo AND HC.OperationNo = OPC.OperationNo"
+    sql += " INNER JOIN OrderControl AS OC ON HC.OrderNo = OC.OrderNo"
+    sql += " INNER JOIN Employee AS EMP ON HC.EmpID = EMP.EmpID"
+    sql += " WHERE"
+    if ftype == "MONTHLY":
+        sql += " month(HC.ConfirmDateTime) = '"+str(month)+"' AND year(HC.ConfirmDateTime) = '"+str(year)+"'"
+    else:
+        if ftype == "DAILY":
+            fstopdate = fstartdate
+        sql += " HC.ConfirmDateTime >= '" + fstartdate + " 00:00:00' AND HC.ConfirmDateTime <= '" + fstopdate + " 23:59:59'"
+    if fwc != 'ALL':
+        sql += " AND OPC.WorkCenterNo = '"+str(fwc)+"'"
+    if fmc != 'ALL':
+        sql += " AND HC.WorkCenterNo = '"+str(fmc)+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getOperatingHistoryOperate(fwc, fmc, ftype, fstartdate, fstopdate, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT HO.WorkCenterNo AS Machine, OPC.WorkCenterNo AS WorkCenter, * FROM HistoryOperate AS HO"
+    sql += " INNER JOIN OperationControl AS OPC ON HO.OrderNo = OPC.OrderNo AND HO.OperationNo = OPC.OperationNo"
+    sql += " INNER JOIN OrderControl AS OC ON HO.OrderNo = OC.OrderNo"
+    sql += " LEFT JOIN Employee AS EMP ON HO.EmpID = EMP.EmpID"
+    sql += " LEFT JOIN IdleType AS IT ON HO.IdleCode = IT.Code"
+    sql += " WHERE HO.Setup + HO.Oper + HO.Labor + HO.Idle > 0 AND"
+    if ftype == "MONTHLY":
+        sql += " month(HO.StartDateTime) = '"+str(month)+"' AND year(HO.StartDateTime) = '"+str(year)+"'"
+    else:
+        if ftype == "DAILY":
+            fstopdate = fstartdate
+        sql += " HO.StartDateTime >= '" + fstartdate + " 00:00:00' AND HO.StartDateTime <= '" + fstopdate + " 23:59:59'"
+    if fwc != 'ALL':
+        sql += " AND OPC.WorkCenterNo = '"+str(fwc)+"'"
+    if fmc != 'ALL':
+        sql += " AND HO.WorkCenterNo = '"+str(fmc)+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getABGraphCollectedData(type, wc, opr, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT *, day(CONVERT(DATE, Date)) AS Fday FROM ABGraphData WHERE Type = '"+str(type)+"' AND WorkCenterNo = '"+str(wc)+"'"
+    sql += " AND Operation = '"+str(opr)+"' AND month(Date) = '"+str(month)+"' AND year(Date) = '"+str(year)+"' ORDER BY Date ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getMachineWorkOnOperation(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM HistoryOperate AS HO INNER JOIN WorkCenter AS WC ON HO.WorkCenterNo = WC.WorkCenterNo WHERE IsRouting = 0 AND OrderNo = '"+str(order_no)+"' AND OperationNo = '"+str(operation_no)+"'"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getRecordRejectionPFC(pfc, month, year):
+    cursor = get_connection().cursor()
+    sql = f"""
+        SELECT HC.*, WC.*, OC.*, OPC.ProcessQty FROM HistoryConfirm AS HC 
+        INNER JOIN (SELECT * FROM WorkCenter WHERE ProfitCenter = '{pfc}') AS WC ON HC.WorkCenterNo = WC.WorkCenterNo
+        INNER JOIN OrderControl AS OC ON HC.OrderNo = OC.OrderNo 
+        INNER JOIN OperationControl AS OPC ON HC.OrderNo = OPC.OrderNo AND HC.OperationNo = OPC.OperationNo
+        WHERE HC.RejectReason != 'MATERIAL QUANTITY ADJUSTMENT' AND HC.RejectedQty > 0 AND MONTH(ConfirmDateTime) = '{month}' AND YEAR(ConfirmDatetime) = '{year}'
+        """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getToolMasterList():
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [ToolMaster]"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getToolHeaderListByOrder(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM ToolHeader WHERE OrderNo = '{order_no}' AND OperationNo = '{operation_no}' ORDER BY DateTimeStamp"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getToolStepList(id):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM ToolStep WHERE ToolHeaderID = {id} ORDER BY StepOrder"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getToolItemList(id):
+    cursor = get_connection().cursor()
+    sql = f"SELECT TI.CTCode AS CTCode1, * FROM ToolItem AS TI LEFT JOIN ToolMaster AS TM ON TI.CTCode = TM.CTCode WHERE ToolHeaderID = {id} ORDER BY No ASC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getToolHeaderAll():
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM ToolHeader ORDER BY DateTimeStamp DESC"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getPlanActualCycleTimeList(ffgcode, fwc, ftype, fstartdate, fstopdate, fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    cursor = get_connection().cursor()
+    sql = "SELECT TB.ProcessStart, TB.ProcessStop, HO.OrderNo, HO.OperationNo, TB.FG_MaterialCode, TB.FG_Drawing, TB.WorkCenterNo, TB.TargetValue, TB.ProcessQty, TB.AcceptedQty, TB.RejectedQty,"
+    sql += "TB.EstSetupTime AS EstSetup, TB.EstOperationTime AS EstOper, TB.EstLaborTime AS EstLabor," 
+    sql += "(TB.EstSetupTime * TB.ProcessQty) AS Est2Setup, (TB.EstOperationTime * TB.ProcessQty) AS Est2Oper, (TB.EstLaborTime * TB.ProcessQty) AS Est2Labor,"
+    sql += "SUM(HO.Setup) AS ActSetup, SUM(Ho.Oper) AS ActOper, SUM(HO.Labor) AS ActLabor, SUM(HO.Idle) AS Idle, (SUM(Ho.Oper) + SUM(HO.Idle)) AS AI"
+    sql += " FROM HistoryOperate AS HO INNER JOIN"
+    sql += " (SELECT OC.FG_MaterialCode, OC.FG_Drawing, OPC.* , CT.TargetValue FROM OrderControl AS OC"
+    sql += " INNER JOIN OperationControl AS OPC ON OC.OrderNo = OPC.OrderNo"
+    sql += " INNER JOIN WorkCenter AS WC ON OPC.WorkCenterNo = WC.WorkCenterNo"
+    sql += " LEFT JOIN CycleTimeTarget AS CT ON WC.MainProcess = CT.MainProcess AND OC.FG_MaterialCode = CT.FG_MaterialCode"
+    sql += f" WHERE OPC.ProcessStop IS NOT NULL AND OC.FG_MaterialCode LIKE '{ffgcode}' AND OPC.WorkCenterNo = '{fwc}'"
+    if ftype == 'DAILY':
+        fstopdate = fstartdate
+        sql += f" AND OPC.ProcessStart >= '{fstartdate} 00:00:00' AND OPC.ProcessStart <= '{fstopdate} 23:59:59'"
+    elif ftype == 'RANGE':
+        sql += f" AND OPC.ProcessStart >= '{fstartdate} 00:00:00' AND OPC.ProcessStart <= '{fstopdate} 23:59:59'"
+    elif ftype == 'MONTHLY':
+        sql += f" AND month(OPC.ProcessStart) = '{month}' AND year(OPC.ProcessStart) = '{year}'"
+    sql += ") AS TB ON HO.OrderNo = TB.OrderNo AND HO.OperationNo = TB.OperationNo"
+    sql += " GROUP BY TB.ProcessStart, TB.ProcessStop, HO.OrderNo, HO.OperationNo, TB.FG_MaterialCode, TB.FG_Drawing, TB.WorkCenterNo, TB.TargetValue,"
+    sql += " TB.EstSetupTime, TB.EstOperationTime, TB.EstLaborTime, TB.ProcessQty, TB.ProcessQty, TB.AcceptedQty, TB.RejectedQty"
+    # print(sql)
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getIdleList(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = f"""SELECT OrderNo, OperationNo, IdleCode, Description, SUM(Idle) AS Idle
+            FROM HistoryOperate AS HO 
+            INNER JOIN IdleType AS IT ON HO.IdleCode = IT.Code 
+            WHERE Idle > 0 AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'
+            GROUP BY OrderNo, OperationNo, IdleCode, Description"""
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getCycleTimeTargetList():
+    cursor = get_connection().cursor()
+    sql = """
+      SELECT
+            C1.FG_MaterialCode,
+            C2.TargetValue AS 'MCA3Axis',
+            C3.TargetValue AS 'HMC',
+            C4.TargetValue AS 'TMA',
+            C5.TargetValue AS 'MCA5Axis',
+            C6.TargetValue AS 'CLA',
+            C7.TargetValue AS 'BTA',
+            C8.TargetValue AS 'OG',
+            C9.TargetValue AS 'EDA',
+            C10.TargetValue AS 'WCA',
+            C11.TargetValue AS 'CLN_AS',
+            C12.TargetValue AS 'TBL_AS',
+            C13.TargetValue AS 'IQC_AS',
+            C14.TargetValue AS 'FPI',
+            C15.TargetValue AS 'MPI',
+            C16.TargetValue AS 'STC',
+            C17.TargetValue AS 'STD',
+            C18.TargetValue AS 'STM',
+            C19.TargetValue AS 'STH',
+            C20.TargetValue AS 'IDHEN_OEM',
+            C21.TargetValue AS 'MSM_OEM',
+            C22.TargetValue AS 'VIB_OEM',
+            C23.TargetValue AS 'STR_OEM',
+            C24.TargetValue AS 'STR_VIB',
+            C25.TargetValue AS 'ASSY_OEM',
+            C26.TargetValue AS 'PNT_OEM',
+            C27.TargetValue AS 'INK_OEM',
+            C28.TargetValue AS 'STP',
+            C29.TargetValue AS 'LS_AS',
+            C30.TargetValue AS 'FQC_AS',
+            C31.TargetValue AS 'PK_AS',
+            C32.TargetValue AS 'IG'
+        FROM
+            CycleTimeTarget AS C1
+            LEFT JOIN CycleTimeTarget AS C2 ON C1.FG_MaterialCode = C2.FG_MaterialCode AND C2.MainProcess = 'MCA 3 Axis'
+            LEFT JOIN CycleTimeTarget AS C3 ON C1.FG_MaterialCode = C3.FG_MaterialCode AND C3.MainProcess = 'HMC'
+            LEFT JOIN CycleTimeTarget AS C4 ON C1.FG_MaterialCode = C4.FG_MaterialCode AND C4.MainProcess = 'TMA'
+            LEFT JOIN CycleTimeTarget AS C5 ON C1.FG_MaterialCode = C5.FG_MaterialCode AND C5.MainProcess = '5 Axis'
+            LEFT JOIN CycleTimeTarget AS C6 ON C1.FG_MaterialCode = C6.FG_MaterialCode AND C6.MainProcess = 'CLA'
+            LEFT JOIN CycleTimeTarget AS C7 ON C1.FG_MaterialCode = C7.FG_MaterialCode AND C7.MainProcess = 'BTA'
+            LEFT JOIN CycleTimeTarget AS C8 ON C1.FG_MaterialCode = C8.FG_MaterialCode AND C8.MainProcess = 'OG'
+            LEFT JOIN CycleTimeTarget AS C9 ON C1.FG_MaterialCode = C9.FG_MaterialCode AND C9.MainProcess = 'EDA'
+            LEFT JOIN CycleTimeTarget AS C10 ON C1.FG_MaterialCode = C10.FG_MaterialCode AND C10.MainProcess = 'WCA'
+            LEFT JOIN CycleTimeTarget AS C11 ON C1.FG_MaterialCode = C11.FG_MaterialCode AND C11.MainProcess = 'CLN_AS'
+            LEFT JOIN CycleTimeTarget AS C12 ON C1.FG_MaterialCode = C12.FG_MaterialCode AND C12.MainProcess = 'TBL_AS'
+            LEFT JOIN CycleTimeTarget AS C13 ON C1.FG_MaterialCode = C13.FG_MaterialCode AND C13.MainProcess = 'IQC_AS'
+            LEFT JOIN CycleTimeTarget AS C14 ON C1.FG_MaterialCode = C14.FG_MaterialCode AND C14.MainProcess = 'FPI'
+            LEFT JOIN CycleTimeTarget AS C15 ON C1.FG_MaterialCode = C15.FG_MaterialCode AND C15.MainProcess = 'MPI'
+            LEFT JOIN CycleTimeTarget AS C16 ON C1.FG_MaterialCode = C16.FG_MaterialCode AND C16.MainProcess = 'STC'
+            LEFT JOIN CycleTimeTarget AS C17 ON C1.FG_MaterialCode = C17.FG_MaterialCode AND C17.MainProcess = 'STD'
+            LEFT JOIN CycleTimeTarget AS C18 ON C1.FG_MaterialCode = C18.FG_MaterialCode AND C18.MainProcess = 'STM'
+            LEFT JOIN CycleTimeTarget AS C19 ON C1.FG_MaterialCode = C19.FG_MaterialCode AND C19.MainProcess = 'STH'
+            LEFT JOIN CycleTimeTarget AS C20 ON C1.FG_MaterialCode = C20.FG_MaterialCode AND C20.MainProcess = 'IDHEN_OEM'
+            LEFT JOIN CycleTimeTarget AS C21 ON C1.FG_MaterialCode = C21.FG_MaterialCode AND C21.MainProcess = 'MSM_OEM'
+            LEFT JOIN CycleTimeTarget AS C22 ON C1.FG_MaterialCode = C22.FG_MaterialCode AND C22.MainProcess = 'VIB_OEM'
+            LEFT JOIN CycleTimeTarget AS C23 ON C1.FG_MaterialCode = C23.FG_MaterialCode AND C23.MainProcess = 'STR_OEM'
+            LEFT JOIN CycleTimeTarget AS C24 ON C1.FG_MaterialCode = C24.FG_MaterialCode AND C24.MainProcess = 'STR_VIB'
+            LEFT JOIN CycleTimeTarget AS C25 ON C1.FG_MaterialCode = C25.FG_MaterialCode AND C25.MainProcess = 'ASSY_OEM'
+            LEFT JOIN CycleTimeTarget AS C26 ON C1.FG_MaterialCode = C26.FG_MaterialCode AND C26.MainProcess = 'PNT_OEM'
+            LEFT JOIN CycleTimeTarget AS C27 ON C1.FG_MaterialCode = C27.FG_MaterialCode AND C27.MainProcess = 'INK_OEM'
+            LEFT JOIN CycleTimeTarget AS C28 ON C1.FG_MaterialCode = C28.FG_MaterialCode AND C28.MainProcess = 'STP'
+            LEFT JOIN CycleTimeTarget AS C29 ON C1.FG_MaterialCode = C29.FG_MaterialCode AND C29.MainProcess = 'LS_AS'
+            LEFT JOIN CycleTimeTarget AS C30 ON C1.FG_MaterialCode = C30.FG_MaterialCode AND C30.MainProcess = 'FQC_AS'
+            LEFT JOIN CycleTimeTarget AS C31 ON C1.FG_MaterialCode = C31.FG_MaterialCode AND C31.MainProcess = 'PK_AS'
+            LEFT JOIN CycleTimeTarget AS C32 ON C1.FG_MaterialCode = C32.FG_MaterialCode AND C32.MainProcess = 'IG'
+        GROUP BY
+            C1.FG_MaterialCode,
+            C2.TargetValue,
+            C3.TargetValue,
+            C4.TargetValue,
+            C5.TargetValue,
+            C6.TargetValue,
+            C7.TargetValue,
+            C8.TargetValue,
+            C9.TargetValue,
+            C10.TargetValue,
+            C11.TargetValue,
+            C12.TargetValue,
+            C13.TargetValue,
+            C14.TargetValue,
+            C15.TargetValue,
+            C16.TargetValue,
+            C17.TargetValue,
+            C18.TargetValue,
+            C19.TargetValue,
+            C20.TargetValue,
+            C21.TargetValue,
+            C22.TargetValue,
+            C23.TargetValue,
+            C24.TargetValue,
+            C25.TargetValue,
+            C26.TargetValue,
+            C27.TargetValue,
+            C28.TargetValue,
+            C29.TargetValue,
+            C30.TargetValue,
+            C31.TargetValue,
+            C32.TargetValue
+        ORDER BY
+            C1.FG_MaterialCode
+    """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getCumulativeRejectionList(profitcenter, month_no, year):
+    # Get WorkCenter of MT_AS to Improve Performance
+    cursor = get_connection().cursor()
+    sql = "SELECT WorkCenterNo FROM WorkCenter WHERE OnRouting = 'MT_AS'"
+    cursor.execute(sql)
+    tmps = cursor.fetchall()
+    wcs = "(" + ", ".join(["'" + tmp.WorkCenterNo + "'" for tmp in tmps]) + ")" if len(tmps) > 0 else "('')"
+    # Main
+    cursor = get_connection().cursor()
+    sql = f"""
+        SELECT DAY(OrderStop) AS Day, ProfitCenter, SUM(OrderQty) AS OrderQty, SUM(RejectQty) AS RejectQty, ROUND(((SUM(RejectQty) / SUM(OrderQty)) * 100), 3) AS RejectPercentage FROM
+        (
+        SELECT OPC.OrderNo, MAX(WC.ProfitCenter) AS ProfitCenter, OC.ProcessStop AS OrderStop, OC.ProductionOrderQuatity AS OrderQty
+        FROM OperationControl AS OPC
+        INNER JOIN WorkCenter AS WC ON OPC.WorkCenterNo = WC.WorkCenterNo
+        INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
+        WHERE YEAR(OC.ProcessStop) = '{year}' AND MONTH(OC.ProcessStop) = '{month_no}' AND OPC.OrderNo NOT IN (SELECT OrderNo From CanceledOrder) 
+        GROUP BY OPC.OrderNo, OC.ProcessStop, OC.ProductionOrderQuatity
+        ) AS TB1
+        INNER JOIN
+        (
+        SELECT OrderNo, CAST(SUM(RejectedQty) AS INT) AS RejectQty FROM HistoryConfirm WHERE WorkCenterNo NOT IN {wcs} GROUP BY OrderNo
+        ) AS TB2
+        ON TB1.OrderNo = TB2.OrderNo
+        WHERE ProfitCenter = '{profitcenter}'
+        GROUP BY ProfitCenter, DAY(OrderStop)
+    """
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def getCumulativeRejectionRecordList(profitcenter, month_no, year, is_rej_only):
+    # Get WorkCenter of MT_AS to Improve Performance
+    cursor = get_connection().cursor()
+    sql = "SELECT WorkCenterNo FROM WorkCenter WHERE OnRouting = 'MT_AS'"
+    cursor.execute(sql)
+    tmps = cursor.fetchall()
+    wcs = "(" + ", ".join(["'" + tmp.WorkCenterNo + "'" for tmp in tmps]) + ")" if len(tmps) > 0 else "('')"
+    # Main
+    cursor = get_connection().cursor()
+    rej_only_sql = 'AND RejectQty > 0' if is_rej_only else ''
+    sql = f"""
+        SELECT OrderStop, TB1.OrderNo, OrderQty, RejectQty, FG_MaterialCode, FG_Drawing, DrawingNo FROM
+        (
+        SELECT OPC.OrderNo, MAX(WC.ProfitCenter) AS ProfitCenter, OC.ProcessStop AS OrderStop, OC.ProductionOrderQuatity AS OrderQty, OC.FG_MaterialCode, OC.FG_Drawing, OC.DrawingNo
+        FROM OperationControl AS OPC
+        INNER JOIN WorkCenter AS WC ON OPC.WorkCenterNo = WC.WorkCenterNo
+        INNER JOIN OrderControl AS OC ON OPC.OrderNo = OC.OrderNo
+        WHERE YEAR(OC.ProcessStop) = '{year}' AND MONTH(OC.ProcessStop) = '{month_no}' AND OPC.OrderNo NOT IN (SELECT OrderNo From CanceledOrder) 
+        GROUP BY OPC.OrderNo, OC.ProcessStop, OC.ProductionOrderQuatity, OC.FG_MaterialCode, OC.FG_Drawing, OC.DrawingNo
+        ) AS TB1
+        INNER JOIN
+        (
+        SELECT OrderNo, CAST(SUM(RejectedQty) AS INT) AS RejectQty FROM HistoryConfirm WHERE WorkCenterNo NOT IN {wcs} GROUP BY OrderNo
+        ) AS TB2
+        ON TB1.OrderNo = TB2.OrderNo
+        WHERE ProfitCenter = '{profitcenter}' {rej_only_sql}
+    """
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -2911,7 +4757,7 @@ def getWorkCenter(workcenter_no):
 
 def getOperator(operator_id):
     cursor = get_connection().cursor()
-    sql = "SELECT * FROM [Employee] WHERE EmpID = " + str(operator_id)
+    sql = "SELECT * FROM [Employee] WHERE EmpID = '" + str(operator_id) +"'"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -2987,7 +4833,7 @@ def getManualReportAllow():
     cursor = get_connection().cursor()
     sql = "SELECT * FROM [AdminConfig] WHERE KeyText = 'MANUAL_REPORT_ALLOWDANCE'"
     cursor.execute(sql)
-    return (cursor.fetchone().Value)
+    return cursor.fetchone().Value.strip() == 'True'
 
 def getRefreshSecond():
     cursor = get_connection().cursor()
@@ -3023,13 +4869,131 @@ def getFirstConfirmTime(order_no, operation_no):
 
 def getActualTime(order_no, operation_no):
     cursor = get_connection().cursor()
-    sql = "SELECT SUM(Setup) AS Setup , SUM(Oper) AS Oper, SUM(Labor) AS Labor  FROM HistoryOperate WHERE OrderNo = '" + str(order_no) + "' AND OperationNo = '" + str(operation_no) + "' GROUP BY OrderNo"
+    sql = "SELECT SUM(Setup) AS Setup , SUM(Oper) AS Oper, SUM(Labor) AS Labor, SUM(COALESCE(Idle, 0)) AS Idle FROM HistoryOperate WHERE OrderNo = '" + str(order_no) + "' AND OperationNo = '" + str(operation_no) + "' GROUP BY OrderNo"
     cursor.execute(sql)
     return cursor.fetchone()
 
 def getCanceledOrderInfo(order_no):
     cursor = get_connection().cursor()
     sql = "SELECT *, CO.EmpID as Requester FROM CanceledOrder AS CO LEFT JOIN Employee AS EM ON CO.EmpID = EM.EmpID WHERE OrderNo = '"+order_no+"'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getABGraphManualData(wc, fdate):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM ABGraphManualData WHERE WorkCenterNo = '"+str(wc)+"' AND Date = '"+str(fdate)+"'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getEfficiencyDataPFC(fpfc, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(ActualSetup) AS ActSetup, SUM(ActualOper) AS ActOper, SUM(ActualLabor) AS ActLabor, SUM(EstSetup) AS EstSetup, SUM(EstOper) AS EstOper, SUM(EstLabor) AS EstLabor FROM"
+    sql += " (SELECT TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, (EstSetupTime * ProcessQty) AS EstSetup, (EstOperationTime * ProcessQty) AS EstOper, (EstLaborTime * ProcessQty) AS EstLabor FROM"
+    sql += " (SELECT OC.* FROM OperationControl AS OC INNER JOIN WorkCenter AS WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
+    sql += " AND day(ProcessStop) = '"+str(day)+"' AND month(ProcessStop) = '"+str(month)+"' AND year(ProcessStop) = '"+str(year)+"' AND ProfitCenter = '"+str(fpfc)+"') AS TB1 LEFT JOIN"
+    sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
+    sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo) AS TB4"
+    cursor.execute(sql)
+    # print(sql)
+    return cursor.fetchone()
+
+def getEfficiencyDataWCG(fwcg, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(ActualSetup) AS ActSetup, SUM(ActualOper) AS ActOper, SUM(ActualLabor) AS ActLabor, SUM(EstSetup) AS EstSetup, SUM(EstOper) AS EstOper, SUM(EstLabor) AS EstLabor FROM"
+    sql += " (SELECT TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, (EstSetupTime * ProcessQty) AS EstSetup, (EstOperationTime * ProcessQty) AS EstOper, (EstLaborTime * ProcessQty) AS EstLabor FROM"
+    sql += " (SELECT OC.* FROM OperationControl AS OC INNER JOIN WorkCenter AS WC ON OC.WorkCenterNo = WC.WorkCenterNo WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
+    sql += " AND day(ProcessStop) = '"+str(day)+"' AND month(ProcessStop) = '"+str(month)+"' AND year(ProcessStop) = '"+str(year)+"' AND WorkCenterGroup = '"+str(fwcg)+"') AS TB1 LEFT JOIN"
+    sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
+    sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo) AS TB4"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getEfficiencyDataWC(fwc, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(ActualSetup) AS ActSetup, SUM(ActualOper) AS ActOper, SUM(ActualLabor) AS ActLabor, SUM(EstSetup) AS EstSetup, SUM(EstOper) AS EstOper, SUM(EstLabor) AS EstLabor FROM"
+    sql += " (SELECT TB2.ActualSetup, TB2.ActualOper, TB2.ActualLabor, (EstSetupTime * ProcessQty) AS EstSetup, (EstOperationTime * ProcessQty) AS EstOper, (EstLaborTime * ProcessQty) AS EstLabor FROM"
+    sql += " (SELECT * FROM OperationControl WHERE OrderNo NOT IN (SELECT OrderNo FROM CanceledOrder)"
+    sql += " AND day(ProcessStop) = '"+str(day)+"' AND month(ProcessStop) = '"+str(month)+"' AND year(ProcessStop) = '"+str(year)+"' AND WorkCenterNo = '"+str(fwc)+"') AS TB1 LEFT JOIN"
+    sql += " (SELECT OrderNo, OperationNo, SUM(Setup) AS ActualSetup , SUM(Oper) AS ActualOper, SUM(Labor) AS ActualLabor FROM HistoryOperate GROUP BY OrderNo, OperationNo) AS TB2"
+    sql += " ON TB1.OrderNo = TB2.OrderNo AND TB1.OperationNo = TB2.OperationNo INNER JOIN OrderControl AS TB3 ON TB1.OrderNo = TB3.OrderNo) AS TB4"
+    cursor.execute(sql)
+    # print(sql)
+    return cursor.fetchone()
+
+def getRejectPerDataPFC(fpfc, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(HC.AcceptedQty) + SUM(HC.RejectedQty) AS ProcessQty, SUM(HC.RejectedQty) AS RejectedQty"
+    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.OperationNo = OC.OperationNo"
+    sql += " INNER JOIN WorkCenter AS WC ON WC.WorkCenterNo = OC.WorkCenterNo"
+    sql += " WHERE HC.RejectReason != 'MATERIAL QUANTITY ADJUSTMENT' AND WC.ProfitCenter = '"+str(fpfc)+"' AND day(ConfirmDateTime) = '"+str(day)+"' AND month(ConfirmDateTime) = '"+str(month)+"' AND year(ConfirmDateTime) = '"+str(year)+"'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getRejectPerDataWCG(fwcg, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(HC.AcceptedQty) + SUM(HC.RejectedQty) AS ProcessQty, SUM(HC.RejectedQty) AS RejectedQty"
+    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.OperationNo = OC.OperationNo"
+    sql += " INNER JOIN WorkCenter AS WC ON WC.WorkCenterNo = OC.WorkCenterNo"
+    sql += " WHERE HC.RejectReason != 'MATERIAL QUANTITY ADJUSTMENT' AND WC.WorkCenterGroup = '"+str(fwcg)+"' AND day(ConfirmDateTime) = '"+str(day)+"' AND month(ConfirmDateTime) = '"+str(month)+"' AND year(ConfirmDateTime) = '"+str(year)+"'"
+
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getRejectPerDataRT(fwc, day, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT SUM(HC.AcceptedQty) + SUM(HC.RejectedQty) AS ProcessQty, SUM(HC.RejectedQty) AS RejectedQty"
+    sql += " FROM HistoryConfirm AS HC INNER JOIN OperationControl AS OC ON HC.OrderNo = OC.OrderNo AND HC.OperationNo = OC.OperationNo"
+    sql += " WHERE HC.RejectReason != 'MATERIAL QUANTITY ADJUSTMENT' AND OC.WorkCenterNo = '"+str(fwc)+"' AND day(ConfirmDateTime) = '"+str(day)+"' AND month(ConfirmDateTime) = '"+str(month)+"' AND year(ConfirmDateTime) = '"+str(year)+"'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getToolHeaderByOrder(order_no, operation_no, wc_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM [ToolHeader] WHERE WorkCenterNo = '{wc_no}' AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getToolHeaderByID(toolh_id):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM ToolHeader WHERE ID = '{toolh_id}'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getToolItem(tooli_id):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM ToolItem WHERE ID = '{tooli_id}'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getTotalIdleTime(order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT SUM(Idle) AS Idle FROM HistoryOperate AS HO WHERE Idle > 0 AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getTotalEmpWorkTimeFromHRFocus(emp_id, start_date, stop_date):
+    cursor = get_connection_hr_focus().cursor()
+    sql = f"""
+            SELECT TotalTime, TotalTime - (TotalTime % 60) As OptTime FROM
+            (
+            SELECT 
+            COALESCE(SUM(
+            (COALESCE(datediff(minute, Ch1, Ch2), 0) 
+            + CASE WHEN COALESCE(datediff(minute, Ch3, Ch4), 0) >= 300 THEN datediff(minute, Ch3, Ch4) - 60 ELSE COALESCE(datediff(minute, Ch3, Ch4), 0) END
+            + COALESCE(datediff(minute, Ch5, Ch6), 0) 
+            + COALESCE(datediff(minute, Ch7, Ch8), 0) 
+            + COALESCE(datediff(minute, Ch9, Ch10), 0)
+            )
+            ),0) As TotalTime
+            FROM tbTRTimeTransaction WHERE EmpID = '{emp_id}' AND WorkDate BETWEEN '{start_date}' AND '{stop_date}' AND WtCode <> '8THNOT'
+            ) AS TB1
+        """
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+def getLastCanceledOrder():
+    cursor = get_connection().cursor()
+    sql = f"SELECT TOP(1) * FROM CanceledOrder ORDER BY DateTimeStamp DESC"
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -3175,6 +5139,36 @@ def isExistWorkCentrNo(wc_no):
     cursor.execute(sql)
     return (len(cursor.fetchall()) > 0)
 
+def isCollectedABGraphData(type, wc, month, year):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [ABGraphData] WHERE Type = '"+str(type)+"' AND WorkCenterNo = '"+str(wc)+"' AND month(Date) = '"+str(month)+"' AND year(Date) = '"+str(year)+"'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isMachine(wc_no):
+    cursor = get_connection().cursor()
+    sql = "SELECT * FROM [WorkCenter] WHERE WorkCenterNo = '" + wc_no + "' AND WorkCenterType = 'Machine' AND IsRouting = 0"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isExistToolMaster(ct_code):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM [ToolMaster] WHERE CTCode = '{ct_code}'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isExistToolHeader(order_no, operation_no, wc_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM [ToolHeader] WHERE WorkCenterNo = '{wc_no}' AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
+def isExistHistoryTool(tooli_id, order_no, operation_no):
+    cursor = get_connection().cursor()
+    sql = f"SELECT * FROM [HistoryTool] WHERE ToolItemID = {tooli_id} AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+    cursor.execute(sql)
+    return (len(cursor.fetchall()) > 0)
+
 #--------------------------------------------------------------------------- SET
 
 def setDataFromSAP(order_no):
@@ -3243,12 +5237,17 @@ def setOperationControlFromSAP(order_no):
         date_get_from_sap = str(date_get_from_sap[0:19])
         #--
         if operationNo not in inserted_operation_no_list:
+            #-- Special Case ST_CLLI to ST_CL LI
+            wc = operations[i].WorkCenter
+            if wc == 'ST_CLLI':
+                wc = 'ST_CL LI'
+            #--
             inserted_operation_no_list.append(operationNo)
             sql = "INSERT INTO [OperationControl] ([OrderNo],[OperationNo],[WorkCenterNo],[ProcessQty],[AcceptedQty],[RejectedQty],[PlanStartDate],[PlanFinishDate],[EstSetupTime],[EstOperationTime],[EstLaborTime],[DateGetFromSAP])"
             if i == 0:
-                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',"+str(order.ProductionOrderQuatity)+",0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+wc+"',"+str(order.ProductionOrderQuatity)+",0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
             else:
-                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+operations[i].WorkCenter+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
+                sql += " VALUES ('"+order_no+"','"+operationNo+"','"+wc+"',0,0,0,CONVERT(DATETIME, '"+str(operations[i].PlanStartDate)+"', 104),CONVERT(DATETIME, '"+str(operations[i].PlanFinishDate)+"', 104),"+str(operations[i].EstimateSetTime)+","+str(operations[i].EstimateOperationTime)+","+str(operations[i].EstimateLaborTime)+",'"+date_get_from_sap+"')"
             cursor.execute(sql)
 
         conn.commit()
@@ -3359,11 +5358,11 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     mode = ""
     sql = ""
     if control_key == "PP01":
-        if int(est_setup_time) == 0:
+        if int(float(est_setup_time)) == 0:
             est_setup_time = 'NULL'
-        if int(est_operate_time) == 0:
+        if int(float(est_operate_time)) == 0:
             est_operate_time = 'NULL'
-        if int(est_labor_time) == 0:
+        if int(float(est_labor_time)) == 0:
             est_labor_time = 'NULL'
         mode = "11"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
@@ -3400,16 +5399,17 @@ def insertSFR2SAP_Modifier_Add(order_no, operation_no, control_key, work_center_
     return
 
 def insertSFR2SAP_Modifier_Change(order_no, operation_no, control_key, work_center_no, pdt, cost_element, price_unit, price, currency, mat_group, purchasing_group, purchasing_org, est_setup_time, est_operate_time, est_labor_time):
+    purchasing_group = purchasing_group.strip()
     conn = get_connection()
     cursor = conn.cursor()
     mode = ""
     sql = ""
     if control_key == "PP01":
-        if int(est_setup_time) == 0:
+        if int(float(est_setup_time)) == 0:
             est_setup_time = 'NULL'
-        if int(est_operate_time) == 0:
+        if int(float(est_operate_time)) == 0:
             est_operate_time = 'NULL'
-        if int(est_labor_time) == 0:
+        if int(float(est_labor_time)) == 0:
             est_labor_time = 'NULL'
         mode = "21"
         sql = "INSERT INTO [SFR2SAP_Modifier]"
@@ -3454,13 +5454,13 @@ def insertOperationControl(order_no, operation_no, work_center_no, plan_start_da
     conn.commit()
     return
 
-def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, setup, oper, labor, start_date_time, stop_date_time):
+def insertHistoryOperate(order_no, operation_no, operator_id, workcenter_no, type, setup, oper, labor, idle, start_date_time, stop_date_time, code):
     startDateTime = start_date_time.strftime("%Y-%m-%d %H:%M:%S")
     stopDateTime = stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [HistoryOperate] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[Setup],[Oper],[Labor],[StartDateTime],[StopDateTime])"
-    sql += " VALUES ('" + order_no + "','" + operation_no + "'," + str(operator_id) + ",'" + workcenter_no + "','" + type + "'," + str(setup) + "," + str(oper) + "," + str(labor) + ",'" + startDateTime + "','" + stopDateTime + "')"
+    sql = "INSERT INTO [HistoryOperate] ([OrderNo],[OperationNo],[EmpID],[WorkCenterNo],[Type],[Setup],[Oper],[Labor],[Idle],[StartDateTime],[StopDateTime],[IdleCode])"
+    sql += " VALUES ('"+order_no+"','"+operation_no+"',"+str(operator_id)+",'"+workcenter_no+"','"+type+"',"+str(setup)+","+str(oper)+","+str(labor)+","+str(idle)+",'"+startDateTime+"','"+stopDateTime+"',"+str(code)+")"
     cursor.execute(sql)
     conn.commit()
     return
@@ -3542,7 +5542,7 @@ def insertEmpAtComputer(emp_id, ip_address):
     conn.commit()
     return
 
-def insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity):
+def insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity, pfc, active_date, inactive_date):
     is_rt = 0 if type == 'auto_mc' or type == 'manual_mc' else 1
     wc_type = 'Labor' if type == 'labor_rt' or type == 'ext_rt' else 'Machine'
     is_ext = 1 if type == 'ext_rt' else 0
@@ -3558,9 +5558,8 @@ def insertWorkCenter(type, wc_no, wc_name, wcg, on_rt, target, capacity):
     on_rt = "NULL" if on_rt == "" else "'"+str(on_rt)+"'"
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO [dbo].[WorkCenter]([WorkCenterNo],[WorkCenterName],[WorkCenterGroup],[IsRouting],[WorkCenterType],[IsExternalProcess],[MachineType],[HourlyRate],[IsActive],[Noted],[Target],[Capacity],[OnRouting]) VALUES "
-    sql += "('"+str(wc_no)+"','"+str(wc_name)+"','"+str(wcg)+"',"+str(is_rt)+",'"+str(wc_type)+"',"+str(is_ext)+","+str(mc_type)+","+str(hour_rate)+",1,NULL,"+str(target)+","+str(capacity)+","+str(on_rt)+")"
-    print(sql)
+    sql = "INSERT INTO [dbo].[WorkCenter]([WorkCenterNo],[WorkCenterName],[WorkCenterGroup],[IsRouting],[WorkCenterType],[IsExternalProcess],[MachineType],[HourlyRate],[IsActive],[Noted],[Target],[Capacity],[OnRouting],[ProfitCenter]) VALUES "
+    sql += "('"+str(wc_no)+"','"+str(wc_name)+"','"+str(wcg)+"',"+str(is_rt)+",'"+str(wc_type)+"',"+str(is_ext)+","+str(mc_type)+","+str(hour_rate)+",1,NULL,"+str(target)+","+str(capacity)+","+str(on_rt)+",'"+str(pfc)+"')"
     cursor.execute(sql)
     conn.commit()
     return
@@ -3574,6 +5573,107 @@ def addPendingPLNFAI(order_no, operation_no, qty):
     conn.commit()
     return
 
+def saveABGraphData(type, wc, opr, hr, day, month, year):
+    date = frontZero(str(day), 2)
+    fdate = year + '-' + month + '-' + date
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ABGraphData] ([Type],[WorkCenterNo],[Operation],[Hour],[Date],[DateTimeStamp]) VALUES"
+    sql += " ('"+str(type)+"','"+str(wc)+"','"+str(opr)+"',"+str(hr)+",'"+str(fdate)+"',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def saveABGraphMunalData(mc, date, states,hr,min):
+    deleteABGraphManualData(mc, date)
+    working_hr = 0
+    day_hr = 0
+    night_hr = 0
+    stop_hr = 0
+    empty_hr = 0
+    if not hr:
+        hr = 0
+    if not min:
+        min = 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ABGraphManualData] ([WorkCenterNo],[Date],[DateTimeStamp],[H00],[H01],[H02],[H03],[H04],[H05],[H06],[H07],[H08],[H09],[H10],[H11],[H12],[H13],[H14],[H15],[H16],[H17],[H18],[H19],[H20],[H21],[H22],[H23],[WorkingHour],[DayHour],[NightHour],[StopHour],[EmptyHour],[Hour],[Min]) VALUES"
+    sql += " ('"+str(mc)+"','"+str(date)+"',CURRENT_TIMESTAMP"
+    for st in states:
+        sql += ",'"+str(st)+"'"
+        if st == 'A':
+            day_hr = day_hr + 1
+            working_hr = working_hr + 1
+        elif st == 'B':
+            night_hr = night_hr + 1
+            working_hr = working_hr + 1
+        elif st == 'S':
+            stop_hr = stop_hr + 1
+        elif st == 'N':
+            empty_hr = empty_hr + 1
+    sql += ","+str(working_hr)+","+str(day_hr)+","+str(night_hr)+","+str(stop_hr)+","+str(empty_hr)+","+str(hr)+","+str(min)+")"
+    # print(sql)
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def getInsertToolHeader(drawing_no, drawing_rev, part_name, programmer, tool_list_no, tool_list_rev, customer, file_location, fg_matcode, fg_drawing, order_no, operation_no, wc_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ToolHeader] ([DrawingNo],[DrawingRev],[PartName],[Programmer],[ToolListNo],[ToolListRev],[Customer],[FileLocation],[FG_MaterialCode],[FG_Drawing],[OrderNo],[OperationNo],[WorkCenterNo],[DateTimeStamp]) VALUES"
+    sql += f" ('{drawing_no}','{drawing_rev}','{part_name}','{programmer}','{tool_list_no}','{tool_list_rev}','{customer}','{file_location}','{fg_matcode}','{fg_drawing}','{order_no}','{operation_no}','{wc_no}',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    sql = "SELECT SCOPE_IDENTITY()"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        return None
+    return result[0][0]
+
+def InsertToolStep(tool_header_id, step_order, step_name, operation, remark):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ToolStep] ([ToolHeaderID],[StepOrder],[StepName],[Operation],[Remark],[DateTimeStamp]) VALUES"
+    sql += f" ({tool_header_id},{step_order},'{step_name}','{operation}','{remark}',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def InsertToolItem(tool_header_id, no, ct_code, tool_no, tool_life_qty, tool_life_min, remark, confirmed_qty):
+    tool_life_qty = tool_life_qty if tool_life_qty else 0
+    tool_life_min = tool_life_min if tool_life_min else 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ToolItem] ([ToolHeaderID],[No],[CTCode],[ToolNo],[ToolLifeQty],[ToolLifeMin],[Remark],[ConfirmedQty],[DateTimeStamp]) VALUES"
+    sql += f" ({tool_header_id},{no},'{ct_code}','{tool_no}',{tool_life_qty},{tool_life_min},'{remark}',{confirmed_qty},CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+
+def InsertToolMaster(ct_code, type, material, dia, flute, ma_code, proj_len, flute_len):
+    type = type if type else ''
+    material = material if material else ''
+    dia = dia if dia else 0
+    flute = flute if flute else 0
+    ma_code = ma_code if ma_code else ''
+    proj_len = proj_len if proj_len else 0
+    flute_len = flute_len if flute_len else 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[ToolMaster] ([CTCode],[Type],[Material],[Dia],[Flute],[MACode],[ProjLen],[FluteLen],[DateTimeStamp]) VALUES"
+    sql += f" ('{ct_code}','{type}','{material}',{dia},{flute},'{ma_code}',{proj_len},{flute_len},CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+
+def insertHistoryTool(tooli_id, no, ct_code, tool_no, confirmed_qty, tool_life_qty, tool_life_min, remark, inactive_reason, fg_matcode, order_no, operation_no, wc_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "INSERT INTO [dbo].[HistoryTool] ([ToolItemID],[No],[CTCode],[ToolNo],[ConfirmedQty],[ToolLifeQty],[ToolLifeMin],[Remark],[InActiveReason],[FG_MaterialCode],[OrderNo],[OperationNo],[WorkCenterNo],[DateTimeStamp])"
+    sql += f" VALUES ({tooli_id},{no},'{ct_code}','{tool_no}',{confirmed_qty},{tool_life_qty},{tool_life_min},'{remark}','{inactive_reason}','{fg_matcode}','{order_no}','{operation_no}','{wc_no}',CURRENT_TIMESTAMP)"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 #------------------------------------------------------------------------ UPDATE
 
 def updateOperatingWorkCenter(id, status):
@@ -3581,11 +5681,13 @@ def updateOperatingWorkCenter(id, status):
     cursor = conn.cursor()
     sql = ""
     if status == "WAITING":
-        sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING' WHERE OperatingWorkCenterID = " + str(id)
+        sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = NULL, [StopDateTime] = NULL, [Status] = 'WAITING', IdleCode = NULL WHERE OperatingWorkCenterID = " + str(id)
     if status == "WORKING":
         sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'WORKING' WHERE OperatingWorkCenterID = " + str(id)
     if status == "SETUP":
         sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'SETUP' WHERE OperatingWorkCenterID = " + str(id)
+    if status == "IDLE":
+        sql = "UPDATE [OperatingWorkCenter] SET [StartDateTime] = CURRENT_TIMESTAMP, [StopDateTime] = NULL, [Status] = 'IDLE' WHERE OperatingWorkCenterID = " + str(id)
     if status == "COMPLETE":
         sql = "UPDATE [OperatingWorkCenter] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETE' WHERE OperatingWorkCenterID = " + str(id)
     cursor.execute(sql)
@@ -3606,6 +5708,15 @@ def updateOperatingOperator(id, status):
         sql = "UPDATE [OperatingOperator] SET [StopDateTime] = CURRENT_TIMESTAMP, [Status] = 'COMPLETE' WHERE OperatingOperatorID = " + str(id)
     cursor.execute(sql)
     conn.commit()
+    return
+
+def updateIdleCodeOperatingWorkCenter(id, code):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [OperatingWorkCenter] SET IdleCode = '"+str(code)+"' WHERE OperatingWorkCenterID = " + str(id)
+    cursor.execute(sql)
+    conn.commit()
+    return
 
 def updateOrderControl(order_no, status):
     conn = get_connection()
@@ -3706,10 +5817,10 @@ def decreaseQty(order_no, operation_no, amount):
     conn.commit()
     return
 
-def updateOrderNote(order_no, note):
+def updateOrderNote(order_no, note, weight, size):
     conn = get_connection()
     cursor = conn.cursor()
-    sql = "UPDATE [OrderControl] SET [Note] = '"+note+"' WHERE OrderNo = '"+order_no+"'"
+    sql = "UPDATE [OrderControl] SET [Note] = '"+note+"',[Weight] = '"+str(weight)+"',[Size] = '"+str(size)+"' WHERE OrderNo = '"+order_no+"'"
     cursor.execute(sql)
     conn.commit()
     return
@@ -3770,6 +5881,45 @@ def fixOvertimeReported(emp_id):
     conn.commit()
     return
 
+def remarkPLNFAI(order_no, remark):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE [PendingPLNFAI] SET Remark = '"+remark+"' WHERE OrderNo = '"+order_no+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def increaseHistoyToolConfirm(tooli_id, order_no, operation_no, confirmed_qty):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"UPDATE HistoryTool SET ConfirmedQty = ConfirmedQty + {confirmed_qty} WHERE ToolItemID = {tooli_id} AND OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def transferToolHeader(toolh_id, order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"UPDATE ToolHeader SET OrderNo = '{order_no}', OperationNo = '{operation_no}' WHERE ID = {toolh_id}"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def updateToolItemConfirm(tooli_id, confirmed_qty):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"UPDATE ToolItem SET ConfirmedQty = ConfirmedQty + {confirmed_qty} WHERE ID = {tooli_id}"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def changeToolHeaderWorkCenter(toolh_id, wc_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"UPDATE ToolHeader SET WorkCenterNo = '{wc_no}' WHERE ID = {toolh_id}"
+    cursor.execute(sql)
+    conn.commit()
+    return
 #------------------------------------------------------------------------ DELETE
 
 def deleteOperatingWorkCenter(id):
@@ -3865,6 +6015,58 @@ def clearPLNFAI(order_no):
     conn.commit()
     return
 
+def deleteABGraphManualData(mc, date):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = "DELETE FROM [ABGraphManualData] WHERE WorkCenterNo = '"+str(mc)+"' and Date = '"+str(date)+"'"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteTool(toolh_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"DELETE FROM [ToolItem] WHERE ToolHeaderID = {toolh_id}"
+    cursor.execute(sql)
+    conn.commit()
+    sql = f"DELETE FROM [ToolStep] WHERE ToolHeaderID = {toolh_id}"
+    cursor.execute(sql)
+    conn.commit()
+    sql = f"DELETE FROM [ToolHeader] WHERE ID = {toolh_id}"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteToolItem(tooli_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"DELETE FROM [ToolItem] WHERE ID = {tooli_id}"
+    cursor.execute(sql)
+    conn.commit()
+    return
+
+def deleteDoubleRecord(order_no, operation_no):
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = f"""
+            WITH CTE AS 
+            ( SELECT *, ROW_NUMBER() OVER (PARTITION BY OrderNo, OperationNo, EmpID, WorkCenterNo, StartDateTime 
+            ORDER BY StartDateTime) AS RowNum 
+            FROM HistoryOperate WHERE OrderNo = '{order_no}' AND OperationNo = '{operation_no}' AND Type <> 'MANUAL' 
+            ) 
+            DELETE FROM CTE WHERE RowNum > 1;
+
+            WITH CTE AS 
+            ( SELECT *, ROW_NUMBER() OVER (PARTITION BY ProductionOrderNo, OperationNumber, EmployeeID, WorkCenter, StartDate, StartTime
+            ORDER BY StartDate, StartTime) AS RowNum 
+            FROM SFR2SAP_Report WHERE ProductionOrderNo = '{order_no}' AND OperationNumber = '{operation_no}' AND Yiled = 0 AND Scrap = 0
+            ) 
+            DELETE FROM CTE WHERE RowNum > 1;
+        """
+    cursor.execute(sql)
+    conn.commit()
+    return
+
 ################################################################################
 ################################################################################
 ################################################################################
@@ -3883,6 +6085,26 @@ def printString(str):
     print("################################################################################")
     return
 
+def get_list_for_sql(list):
+    if not list:
+        return '()'
+    else:
+        str = '('
+        for idx, item in enumerate(list):
+            if idx == 0:
+                str += '\'' + item + '\''
+            else:
+                str += ',\'' + item + '\''
+        str += ')'
+    return str
+
+def generate_random_token(length):
+    # Define the characters used for the token
+    characters = string.ascii_letters + string.digits
+    # Generate the random token
+    token = ''.join(secrets.choice(characters) for _ in range(length))
+    return token
+
 def frontZero(str, length):
     result = str
     for i in range(length - len(str)):
@@ -3898,6 +6120,138 @@ def get_day_count(month, year):
         return 31
     return 30
 
+def get_isoweekdays(size, month, year):
+    isoweekdays = [False] * size
+    for i in range(size):
+        day = frontZero(str(i + 1), 2)
+        month = frontZero(month, 2)
+        tmp = str(day) + '-' + str(month) + '-' + year
+        date = datetime.strptime(tmp, '%d-%m-%Y')
+        if date.isoweekday() == 7: # Sunday
+            isoweekdays[i] = True
+    return isoweekdays
+
+def get_week_rej_per_info(isoweekdays, pro_qtys, rej_qtys):
+    week_titles = []
+    week_pros = []
+    week_rejs = []
+    week_pers = []
+    week_pro = 0
+    week_rej = 0
+    week_per = 0
+    start_idx = 0
+    for idx, is_week in enumerate(isoweekdays):
+        week_pro = week_pro + (pro_qtys[idx] if pro_qtys[idx] else 0)
+        week_rej = week_rej + (rej_qtys[idx] if rej_qtys[idx] else 0)
+        if not is_week:
+            week_titles.append(None)
+            week_pros.append(0)
+            week_rejs.append(0)
+            week_pers.append(0)
+        if is_week:
+            print(week_rej)
+            if week_pro > 0:
+                week_per = round(((week_rej / week_pro) * 100), 2)
+            if(start_idx != idx): 
+                week_titles.append(str(start_idx + 1) + " - " + str(idx + 1))
+            else:
+                week_titles.append(str(idx + 1))
+            week_pros.append(week_pro)
+            week_rejs.append(week_rej)
+            week_pers.append(week_per)
+            week_pro = 0
+            week_rej = 0
+            week_per = 0
+            start_idx = idx + 1
+    return week_titles, week_pros, week_rejs, week_pers
+
+def get_date_between_week(fweek):
+    year = int(fweek[0:4])
+    week = int(fweek[6:len(fweek)])
+    start_date = datetime(year, 1, 1)
+    while start_date.weekday() != 0:
+        start_date = start_date + relativedelta(days=+1)
+    start_date = start_date + relativedelta(weeks=+week) + relativedelta(days=-7)
+    end_date = start_date + relativedelta(days=+6)
+    return start_date, end_date
+
+def is_previous_month(month, year):
+    # Convert the month and year strings to integers with base 10
+    month = int(month)
+    year = int(year)
+    
+    # Get the current month and year
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    
+    # Calculate the previous month and year from the current month and year
+    previous_month, previous_year = (current_month - 1, current_year) if current_month > 1 else (12, current_year - 1)
+    
+    # Compare the input month and year with the previous month and year, and all months and years before that
+    while year < current_year or (year == current_year and month < current_month):
+        if (month, year) == (previous_month, previous_year):
+            return True
+        previous_month, previous_year = (previous_month - 1, previous_year) if previous_month > 1 else (12, previous_year - 1)
+        if previous_month == 12:
+            year -= 1
+    return False
+
+def run_collect_ab_data(fmonth):
+    year = fmonth[0:4]
+    month = fmonth[5:7]
+    # WorkCenterGroup
+    wcgs = getMachineWorkCenterGroupList()
+    for wcg in wcgs:
+        fwcg = wcg.WorkCenterGroup
+        wcs = getWorkCenterInGroupActiveList(fwcg, fmonth)
+        is_collected = isCollectedABGraphData('WCG', fwcg, month, year)
+        if not is_collected:
+            print('Collecting AB Graph Data of WorkCenterGroup ', fwcg, ' on ', fmonth)
+            #-- Work
+            for rs in getMonthlyWorkCenterOperForABGraph('WCG', fwcg, fmonth):
+                saveABGraphData('WCG',fwcg,'W', rs.Foper, rs.Fday, month, year)
+            #-- Setup
+            for rs in getMonthlyWorkCenterSetupForABGraph('WCG', fwcg, fmonth):
+                saveABGraphData('WCG',fwcg,'S', rs.Fsetup, rs.Fday, month, year)
+        # Machine
+        for wc in wcs:
+            fwc = wc.WorkCenterNo
+            is_collected = isCollectedABGraphData('WC', fwc, month, year)
+            if not is_collected:
+                print('Collecting AB Graph Data of Machine ', fwc, ' on ', fmonth)
+                #-- Work
+                for rs in getMonthlyWorkCenterOperForABGraph('WC', fwc, fmonth):
+                    saveABGraphData('WC',fwc,'W', rs.Foper, rs.Fday, month, year)
+                #-- Setup
+                for rs in getMonthlyWorkCenterSetupForABGraph('WC', fwc, fmonth):
+                    saveABGraphData('WC',fwc,'S', rs.Fsetup, rs.Fday, month, year)
+    # Routing
+    rts = getOnRoutingList()
+    for rt in rts:
+        frt = rt.WorkCenterNo
+        wcs = getWorkCenterOnRoutingActiveList(frt, fmonth)
+        is_collected = isCollectedABGraphData('RT', frt, month, year)
+        if not is_collected:
+            print('Collecting AB Graph Data of Routing ', frt, ' on ', fmonth)
+            #-- Work
+            for rs in getMonthlyWorkCenterOperForABGraph('RT', frt, fmonth):
+                saveABGraphData('RT',frt,'W', rs.Foper, rs.Fday, month, year)
+            #-- Setup
+            for rs in getMonthlyWorkCenterSetupForABGraph('RT', frt, fmonth):
+                saveABGraphData('RT',frt,'S', rs.Fsetup, rs.Fday, month, year)
+        for wc in wcs:
+            fwc = wc.WorkCenterNo
+            is_collected = isCollectedABGraphData('WC', fwc, month, year)
+            print('Collecting AB Graph Data of Machine ', fwc, ' on ', fmonth)
+            if not is_collected:
+                #-- Work
+                for rs in getMonthlyWorkCenterOperForABGraph('WC', fwc, fmonth):
+                    saveABGraphData('WC',fwc,'W', rs.Foper, rs.Fday, month, year)
+                #-- Setup
+                for rs in getMonthlyWorkCenterSetupForABGraph('WC', fwc, fmonth):
+                    saveABGraphData('WC',fwc,'S', rs.Fsetup, rs.Fday, month, year)
+    return
+
 def update_employee_master():
     wb = load_workbook(filename = 'media/Employee.xlsx')
     ws = wb.active
@@ -3912,71 +6266,339 @@ def update_employee_master():
     for i in range(ws.max_row + 1):
         if i < skip_count:
             continue
-        emp_id = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
-        emp_name = "" if ws['C' + str(i)].value == None else ws['C' + str(i)].value
-        last_name = "" if ws['D' + str(i)].value == None else ws['D' + str(i)].value
-        if last_name != "" and last_name != "-":
-            emp_name = emp_name + " " + last_name
-        section = "" if ws['E' + str(i)].value == None else ws['E' + str(i)].value
-        costcenter = "" if ws['F' + str(i)].value == None else ws['F' + str(i)].value
-        is_active = 1 if ws['H' + str(i)].value == 1 or ws['H' + str(i)].value == '1' else 0
+        emp_id = "" if ws['A' + str(i)].value == None else int(str(ws['A' + str(i)].value).strip())
+        emp_name = "" if ws['B' + str(i)].value == None else ws['B' + str(i)].value
+        employment_type = "" if ws['J' + str(i)].value == None else ws['J' + str(i)].value
+        profitcenter = "" if ws['K' + str(i)].value == None else ws['K' + str(i)].value
+        section = "" if ws['L' + str(i)].value == None else ws['L' + str(i)].value
+        section = section.replace('S-','')
+        costcenter = "" if ws['M' + str(i)].value == None else ws['M' + str(i)].value
+        position = "" if ws['N' + str(i)].value == None else ws['N' + str(i)].value
+        jobfunc = "" if ws['O' + str(i)].value == None else ws['O' + str(i)].value
+        jobfunc = jobfunc[0:50]
+        is_active = 1 if ws['P' + str(i)].value == 1 or ws['P' + str(i)].value == '1' or ws['P' + str(i)].value == 'Active' else 0
         is_active_txt = 'Active' if is_active == 1 else 'In-Active'
-        if emp_id != None:
+        if emp_id and emp_id != "":
             isExist = isExistOperator(str(emp_id))
             if isExist:
                 emp = getEmpIDByUserID(emp_id)
-                if emp.EmpName != emp_name or emp.Section != section or emp.CostCenter != costcenter or is_active != emp.IsActive:
+                if emp.EmpName != emp_name or emp.Section != section or int(emp.CostCenter) != costcenter or emp.IsActive != is_active or emp.EmploymentType != employment_type or position != emp.Position or emp.ProfitCenter != profitcenter or emp.JobFunction != jobfunc:
                     conn = get_connection()
                     cursor = conn.cursor()
-                    sql = "UPDATE Employee SET EmpName = '"+emp_name+"', Section = '"+section+"', CostCenter = '"+costcenter+"', IsActive = "+str(is_active)+" WHERE EmpID = '"+str(emp_id)+"'"
+                    sql = f"""UPDATE Employee SET EmpName = '{emp_name}', Section = '{section}', CostCenter = '{costcenter}', IsActive = {str(is_active)}, EmploymentType = '{employment_type}', Position = '{position}', ProfitCenter = '{profitcenter}', JobFunction = '{jobfunc}' WHERE EmpID = '{str(emp_id)}'"""
                     cursor.execute(sql)
                     conn.commit()
                     update_emp_count = update_emp_count + 1
-                    print('# Update -->', emp_id, '|', emp_name, '|', section, '|', costcenter, '|', is_active_txt)
+                    print(f'# UPDATE : {emp_id}')
+                    if(emp.EmpName != emp_name):
+                        print(f'--- Name : {emp.EmpName} => {emp_name}')
+                    if(emp.Section != section):
+                        print(f'--- Section : {emp.Section} => {section}')
+                    if(int(emp.CostCenter) != costcenter):
+                        print(f'--- Cost Center : {emp.CostCenter} => {costcenter}')
+                    if(emp.ProfitCenter != profitcenter):
+                        print(f'--- Profit Center : {emp.ProfitCenter} => {profitcenter}')
+                    if(emp.EmploymentType != employment_type):
+                        print(f'--- Employement Type : {emp.EmploymentType} => {employment_type}')
+                    if(emp.Position != position):
+                        print(f'--- Position : {emp.Position} => {position}')
+                    if(emp.JobFunction != jobfunc):
+                        print(f'--- Job Function : {emp.JobFunction} => {jobfunc}')
+                    if(emp.IsActive != is_active):
+                        is_active_tmp = 'Active' if emp.IsActive else 'In-Active'
+                        print(f'--- Is Active : {is_active_tmp} => {is_active_txt}')
             if not isExist:
                 conn = get_connection()
                 cursor = conn.cursor()
-                sql = "INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive) VALUES ('"+str(emp_id)+"','"+emp_name+"','"+section+"','"+costcenter+"',"+str(is_active)+")"
+                sql = f"""INSERT INTO Employee (EmpID,EmpName,Section,CostCenter,IsActive,EmploymentType,Position,ProfitCenter,JobFunction) VALUES ('{str(emp_id)}','{emp_name}','{section}','{costcenter}',{str(is_active)},'{employment_type}','{position}','{profitcenter}','{jobfunc}')"""
                 cursor.execute(sql)
                 conn.commit()
                 new_emp_count = new_emp_count + 1
-                print('# New -->', emp_id, '|', emp_name, '|', section, '|', costcenter, '|', is_active_txt)
+                print(f'# NEW : {emp_id}')
+                print(f'--- Name : {emp_name}')
+                print(f'--- Section : {section}')
+                print(f'--- Cost Center : {costcenter}')
+                print(f'--- Profit Center : {profitcenter}')
+                print(f'--- Employement Type : {employment_type}')
+                print(f'--- Position : {position}')
+                print(f'--- Job Function : {jobfunc}')
+                print(f'--- Is Active : {is_active}')
         else:
             error_emp_count = error_emp_count + 1
         row_count = row_count + 1
     print("#########################################")
-    print("All Row :", str(row_count))
-    print("New Employee :", str(new_emp_count))
-    print("Update Employee :", str(update_emp_count))
-    print("Error Row :", str(error_emp_count))
+    print("Data Records :", str(row_count))
+    print("New Records :", str(new_emp_count))
+    print("Update Records :", str(update_emp_count))
+    print("Error Records :", str(error_emp_count))
     print("#########################################")
     return
 
-def update_on_rt():
-    wb = load_workbook(filename = 'media/OnRouting.xlsx')
+def update_estimate():
+    wb = load_workbook(filename = 'media/RTUP.xlsx')
     ws = wb.active
-    skip_count = 2
+    skip_count = 2 + 69990
     for i in range(ws.max_row + 1):
         if i < skip_count:
             continue
-        wc_no = "" if ws['A' + str(i)].value == None else ws['A' + str(i)].value
-        on_rt = "" if ws['B' + str(i)].value == None else ws['B' + str(i)].value
-        if wc_no and on_rt:
-            wc = getWorkCenter(wc_no)
-            if wc:
-                conn = get_connection()
-                cursor = conn.cursor()
-                sql = "UPDATE WorkCenter SET OnRouting = '"+on_rt+"' WHERE WorkCenterNo = '"+wc_no+"'"
-                cursor.execute(sql)
-                conn.commit()
+        order_no = ws['A' + str(i)].value
+        operation_no = ws['B' + str(i)].value
+        setup = ws['C' + str(i)].value
+        oper = ws['D' + str(i)].value
+        labor = ws['E' + str(i)].value
+        operation_no = str(operation_no)
+        while len(operation_no) < 4:
+            operation_no = '0' + operation_no
+        print(i, order_no, operation_no)
+        if not order_no or not operation_no:
+            continue
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = f"UPDATE OperationControl SET EstSetupTime = {setup}, EstOperationTime = {oper}, EstLaborTime = {labor} WHERE OrderNo = '{order_no}' AND OperationNo = '{operation_no}'"
+        cursor.execute(sql)
+        conn.commit()
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = f"UPDATE SAP_Routing SET EstimateSetTime = {setup}, EstimateOperationTime = {oper}, EstimateLaborTime = {labor} WHERE ProductionOrderNo = '{order_no}' AND OperationNumber = '{operation_no}'"
+        cursor.execute(sql)
+        conn.commit()
     return
 
-def get_date_between_week(fweek):
-    year = int(fweek[0:4])
-    week = int(fweek[6:len(fweek)])
-    start_date = datetime(year, 1, 1)
-    while start_date.weekday() != 0:
-        start_date = start_date + relativedelta(days=+1)
-    start_date = start_date + relativedelta(weeks=+week) + relativedelta(days=-7)
-    end_date = start_date + relativedelta(days=+6)
-    return start_date, end_date
+def update_target_cycle_time():
+    wb = load_workbook(filename = 'media/target_cycle_time.xlsx')
+    ws = wb.active
+    skip_count = 3
+    stop_count = 999
+    for i in range(ws.max_row + 1):
+        if i < skip_count:
+            continue
+        if i > stop_count:
+            break
+        fg_materialcode = ws['E' + str(i)].value
+        mca_3_axis = round(ws['G' + str(i)].value) if ws['G' + str(i)].value else None
+        hmc = round(ws['H' + str(i)].value) if ws['H' + str(i)].value else None
+        tma = round(ws['I' + str(i)].value) if ws['I' + str(i)].value else None
+        mca_5_axis = round(ws['J' + str(i)].value) if ws['J' + str(i)].value else None
+        cla = round(ws['K' + str(i)].value) if ws['K' + str(i)].value else None
+        bta = round(ws['L' + str(i)].value) if ws['L' + str(i)].value else None
+        ig = round(ws['M' + str(i)].value) if ws['M' + str(i)].value else None
+        og = round(ws['N' + str(i)].value) if ws['N' + str(i)].value else None
+        eda = round(ws['O' + str(i)].value) if ws['O' + str(i)].value else None
+        wca = round(ws['P' + str(i)].value) if ws['P' + str(i)].value else None
+        cln_as = round(ws['Q' + str(i)].value) if ws['Q' + str(i)].value else None
+        tbl_as = round(ws['R' + str(i)].value) if ws['R' + str(i)].value else None
+        iqc_as = round(ws['S' + str(i)].value) if ws['S' + str(i)].value else None
+        fpi = round(ws['T' + str(i)].value) if ws['T' + str(i)].value else None
+        mpi = round(ws['U' + str(i)].value) if ws['U' + str(i)].value else None
+        stc = round(ws['V' + str(i)].value) if ws['V' + str(i)].value else None
+        std = round(ws['W' + str(i)].value) if ws['W' + str(i)].value else None
+        stm = round(ws['X' + str(i)].value) if ws['X' + str(i)].value else None
+        sth = round(ws['Y' + str(i)].value) if ws['Y' + str(i)].value else None
+        idhen_oem = round(ws['Z' + str(i)].value) if ws['Z' + str(i)].value else None
+        msm_oem = round(ws['AA' + str(i)].value) if ws['AA' + str(i)].value else None
+        vib_oem = round(ws['AB' + str(i)].value) if ws['AB' + str(i)].value else None
+        str_oem = round(ws['AC' + str(i)].value) if ws['AC' + str(i)].value else None
+        str_vib = round(ws['AD' + str(i)].value) if ws['AD' + str(i)].value else None
+        assy_oem = round(ws['AE' + str(i)].value) if ws['AE' + str(i)].value else None
+        pnt_oem = round(ws['AF' + str(i)].value) if ws['AF' + str(i)].value else None
+        ink_oem = round(ws['AG' + str(i)].value) if ws['AG' + str(i)].value else None
+        stp = round(ws['AH' + str(i)].value) if ws['AH' + str(i)].value else None
+        ls_as = round(ws['AI' + str(i)].value) if ws['AI' + str(i)].value else None
+        fqc_as = round(ws['AJ' + str(i)].value) if ws['AJ' + str(i)].value else None
+        pk_as = round(ws['AK' + str(i)].value) if ws['AK' + str(i)].value else None
+        
+        keys = ['MCA 3 Axis','HMC','TMA','5 Axis','CLA','BTA','IG','OG','EDA','WCA','CLN_AS','TBL_AS',
+                'IQC_AS','FPI','MPI','STC','STD','STM','STH','IDHEN_OEM','MSM_OEM','VIB_OEM','STR_OEM',
+                'STR_VIB','ASSY_OEM','PNT_OEM','INK_OEM','STP','LS_AS','FQC_AS','PK_AS']
+        values = [mca_3_axis, hmc, tma, mca_5_axis, cla, bta, ig, og, eda, wca, cln_as, tbl_as,
+                  iqc_as, fpi, mpi, stc, std, stm, sth, idhen_oem, msm_oem, vib_oem, str_oem,
+                  str_vib, assy_oem, pnt_oem, ink_oem, stp, ls_as, fqc_as, pk_as]
+        
+        for idx, key in enumerate(keys):
+            value = values[idx]
+            cmd = 'Skip :'
+            cursor = get_connection().cursor()
+            sql = f"SELECT * FROM [CycleTimeTarget] WHERE fg_materialcode = '{fg_materialcode}' AND MainProcess = '{key}'"
+            cursor.execute(sql)
+            if (len(cursor.fetchall()) > 0):
+                if value: # update
+                    cmd = 'Update :'
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    sql = f"UPDATE CycleTimeTarget SET TargetValue = {value} WHERE fg_materialcode = '{fg_materialcode}' AND MainProcess = '{key}'"
+                    cursor.execute(sql)
+                    conn.commit()
+                else: # delete
+                    cmd = 'Delete :'
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    sql = f"DELETE FROM CycleTimeTarget WHERE fg_materialcode = '{fg_materialcode}' AND MainProcess = '{key}'"
+                    cursor.execute(sql)
+                    conn.commit()
+            elif value: # insert
+                cmd = 'Insert :'
+                conn = get_connection()
+                cursor = conn.cursor()
+                sql = f"INSERT INTO [dbo].[CycleTimeTarget] ([FG_MaterialCode],[MainProcess],[TargetValue]) VALUES ('{fg_materialcode}','{key}',{value})"
+                cursor.execute(sql)
+                conn.commit()
+            if cmd != 'Skip :':
+                print(i, cmd, fg_materialcode, key, value)
+    return    
+
+def run_upload_tool_list(is_validating, fg_matcode, fg_drawing, order_no, operation_no, wc_no, file, sheets):
+    wb = load_workbook(filename = f'media/tool_list/{file}')
+    sh = wb.worksheets
+    print("#########################################")
+    print(f"Start : Upload Tool List , Is Validating : {is_validating}")
+    print("#########################################")
+    tool_header_id = None
+    step_order = 0
+    confirmed_qty = 0
+    ##### FILE TYPE 1 -> MCA ?
+    is_type_1 = run_upload_tool_file_type_1(is_validating, fg_matcode, fg_drawing, order_no, operation_no, wc_no, sheets, sh, tool_header_id, step_order, confirmed_qty)
+    if is_type_1:
+        return True
+    ##### FILE TYPE 2 -> BTA & CLA
+    is_type_2 = run_upload_tool_file_type_2(is_validating, fg_matcode, fg_drawing, order_no, operation_no, wc_no, sheets, sh, tool_header_id, confirmed_qty)
+    if is_type_2:
+        return True
+    print("#########################################")
+    print("Stop : Upload Tool Life")
+    print("#########################################")
+    return False
+
+def run_upload_tool_file_type_1(is_validating, fg_matcode, fg_drawing, order_no, operation_no, wc_no, sheets, sh, tool_header_id, step_order, confirmed_qty):
+    try:
+    # if True:
+        print("-------------- Header --------------")
+        for idx, ws in enumerate(sh):
+            drawing_no = ws['C4'].value[1:] 
+            drawing_rev = ws['C5'].value[1:]  
+            part_name = ws['C6'].value[1:] 
+            programmer = ws['C7'].value[1:]  
+            tool_list_no = ws['I4'].value[1:]  
+            tool_list_rev = ws['I5'].value[1:]  
+            customer = ws['I6'].value[1:] 
+            file_location = ws['C9'].value
+            if not is_validating:
+                tool_header_id = getInsertToolHeader(drawing_no, drawing_rev, part_name, programmer, tool_list_no, tool_list_rev, customer, file_location, fg_matcode, fg_drawing, order_no, operation_no, wc_no) 
+            print(drawing_no, drawing_rev, part_name, programmer, tool_list_no, tool_list_rev, customer, file_location, order_no, operation_no)
+            break
+        print("-------------- Step --------------")
+        for idx, ws in enumerate(sh):
+            if str(idx) not in sheets:
+                continue
+            skip_count = 13
+            old_operation = ''
+            old_remark = ''
+            for i in range(ws.max_row + 1):
+                if i < skip_count:
+                    continue
+                step_name = ws['A' + str(i)].value
+                operation = ws['E' + str(i)].value if ws['E' + str(i)].value else old_operation
+                remark = ws['I' + str(i)].value if ws['I' + str(i)].value else old_remark
+                if not step_name: # case of no step
+                    break
+                old_operation = operation
+                old_remark = remark
+                if not is_validating:
+                    InsertToolStep(tool_header_id, step_order, step_name, operation, remark)
+                    step_order += 1
+                print(step_name, operation, remark)
+        print("--------------- Item ---------------")
+        used_no = []
+        for idx, ws in enumerate(sh):
+            if str(idx) not in sheets:
+                continue
+            skip_count = 19
+            for i in range(ws.max_row + 1):
+                if i < skip_count:
+                    continue
+                no = ws['A' + str(i)].value
+                tool_no = ''
+                type = ws['B' + str(i)].value
+                type.replace("'", "")
+                ct_code = ws['C' + str(i)].value
+                if ct_code and '/' in ct_code:
+                    ct_code = ct_code.split('/')[0]
+                material = ws['D' + str(i)].value
+                dia = ws['E' + str(i)].value 
+                flute = ws['F' + str(i)].value 
+                ma_code = ws['G' + str(i)].value 
+                proj_len = ws['H' + str(i)].value 
+                flute_len = ws['I' + str(i)].value 
+                tool_life_qty = ws['J' + str(i)].value 
+                tool_life_min = ws['K' + str(i)].value
+                remark = ws['L' + str(i)].value if ws['L' + str(i)].value else ''
+                if not no: # case of no item
+                    break
+                if no in used_no: # skip same number
+                    continue
+                used_no.append(no)
+                if not is_validating:
+                    if not isExistToolMaster(ct_code):
+                        InsertToolMaster(ct_code, type, material, dia, flute, ma_code, proj_len, flute_len)
+                    InsertToolItem(tool_header_id, no, ct_code, tool_no, tool_life_qty, tool_life_min, remark, confirmed_qty)
+                print(no, ct_code, type, material, dia, flute, ma_code, proj_len, flute_len, tool_life_qty, tool_life_min, remark)
+    except Exception:
+        print('Its not file type #1')
+        return False
+    return True
+
+def run_upload_tool_file_type_2(is_validating, fg_matcode, fg_drawing, order_no, operation_no, wc_no, sheets, sh, tool_header_id, confirmed_qty):
+    try:
+    # if True:
+        print("-------------- Header --------------")
+        for idx, ws in enumerate(sh):
+            drawing_no = ws['C4'].value
+            drawing_rev = ''
+            part_name = ''
+            programmer = '' 
+            tool_list_no = ws['C2'].value
+            tool_list_rev = ''
+            customer = ''
+            file_location = ''
+            if not is_validating:
+                tool_header_id = getInsertToolHeader(drawing_no, drawing_rev, part_name, programmer, tool_list_no, tool_list_rev, customer, file_location, fg_matcode, fg_drawing, order_no, operation_no, wc_no) 
+            print(drawing_no, drawing_rev, part_name, programmer, tool_list_no, tool_list_rev, customer, file_location, order_no, operation_no)
+            break
+        print("--------------- Item ---------------")
+        used_no = []
+        for idx, ws in enumerate(sh):
+            if str(idx) not in sheets:
+                continue
+            skip_count = 9
+            for i in range(ws.max_row + 1):
+                if i < skip_count:
+                    continue
+                no = ws['A' + str(i)].value
+                tool_no = ws['B' + str(i)].value
+                type = ws['D' + str(i)].value # mat_desc
+                type = type.replace("'", "")
+                ct_code = ws['C' + str(i)].value
+                if ct_code and '/' in ct_code:
+                    ct_code = ct_code.split('/')[0]
+                material = ''
+                dia = 0 
+                flute = 0
+                ma_code = ''
+                proj_len = 0
+                flute_len = 0
+                tool_life_qty = ws['E' + str(i)].value 
+                tool_life_min = ws['F' + str(i)].value if ws['F' + str(i)].value != '-' else 0
+                remark = ws['L' + str(i)].value if ws['L' + str(i)].value else ''
+                if not no: # case of no item
+                    break
+                if no in used_no: # skip same number
+                    continue
+                used_no.append(no)
+                if not is_validating:
+                    if not isExistToolMaster(ct_code):
+                        InsertToolMaster(ct_code, type, material, dia, flute, ma_code, proj_len, flute_len)
+                    InsertToolItem(tool_header_id, no, ct_code, tool_no, tool_life_qty, tool_life_min, remark, confirmed_qty)
+                print(no, ct_code, type, material, dia, flute, ma_code, proj_len, flute_len, tool_life_qty, tool_life_min, remark)
+    except Exception:
+        print('Its not file type #2 :')
+        return False
+    return True

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Employee Working Time | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Employee Working Time ({{empWorkTimeList|length}})</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <input type="date" class="form-control form-control-sm" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
+            <span id="range-to">&nbsp;-&nbsp;</span>
+            <input type="date" class="form-control form-control-sm" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
+            <small>&nbsp;&nbsp;Employement&nbsp;Type&nbsp;&nbsp;</small>
+            <select class="form-control form-control-sm" id="emp_type">
+              <option value="All" {% if emp_type == 'All' %}style="color:blue" selected{% endif %}>All</option>
+              <option value="Direct" {% if emp_type == 'Direct' %}style="color:blue" selected{% endif %}>Direct</option>
+              <option value="In-Direct (Production)" {% if emp_type == 'In-Direct (Production)' %}style="color:blue" selected{% endif %}>In-Direct (Production)</option>
+              <option value="In-Direct (Support)" {% if emp_type == 'In-Direct (Support)' %}style="color:blue" selected{% endif %}>In-Direct (Support)</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <small>
+                          * <b>Work Time Consideration :</b> SFR booking time consider from 7:00 of start date to 7:00 of stop date + 1 day. / เวลาที่บันทึกใน SFR คิดตั้งแต่ 7 โมงของวันที่เริ่มจนถึง 7 โมงของวันถัดไป
+                          <br>** <b>Grade Calculation :</b> A >= 81, B >= 61, C >= 26 D < 26
+                          <br>*** <b>HR Focus Time :</b> Tim from HR Focus is calculate by scan in and scan out not the actual worktime / เวลาของ HR Focus คำนวนจากการสแกนหน้าเข้าและออก ไม่ใช่เวลาทำงานจริง 
+                      </small>
+                      <table class="table table-sm table-outline small" id="data_table" style="width: 100%">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>ProfitCenter</th>
+                            <th>Section</th>
+                            <th>EmpID</th>
+                            <th>EmpName</th>
+                            <th>EmploymentType</th>
+                            <th>Position</th>
+                            <th>Function</th>
+                            <th>Setup</th>
+                            <th>Labor</th>
+                            <th>Total</th>
+                            <!-- <th>CMS Time</th> -->
+                            <th>HR Focus</th>
+                            <th>Total / HR Focus</th>
+                            <th>Grade</th>
+                            <th class="bg-warning text-dark">Opt. HR Focus</th>
+                            <th class="bg-warning text-dark">Total / Opt. HR Focus</th>
+                            <th class="bg-warning text-dark">Opt. Grade</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for rec in empWorkTimeList %}
+                          <tr>
+                            <td>{{rec.ProfitCenter}}</td>
+                            <td>{{rec.Section}}</td>
+                            <td data-order="{{rec.EmpID}}"><a href="/emp/{{rec.EmpID}}&{{fmonth}}" target="_blank">{{rec.EmpID}}</a></td>
+                            <td>{{rec.EmpName}}</td>
+                            <td>{{rec.EmploymentType|default_if_none:""}}</td>
+                            <td>{{rec.Position|default_if_none:""}}</td>
+                            <td>{{rec.JobFunction|default_if_none:""}}</td>
+                            <td>{{rec.Setup|floatformat}}</td>
+                            <td>{{rec.Labor|floatformat}}</td>
+                            <td>{{rec.Total|floatformat}}</td>
+                            <!-- <td>{{cmsTimeList|index:forloop.counter0}}</td> -->
+                            <td>{{hrTimeList|index:forloop.counter0}}</td>
+                            <td>{{percentList|index:forloop.counter0}}</td>
+                            <td>
+                              {% with grade=gradeList|index:forloop.counter0 %}
+                              {% if grade == 'A' %}<b class="text-success">{{grade}}</b>
+                              {% elif grade == 'B' %}<b class="text-info">{{grade}}</b>
+                              {% elif grade == 'C' %}<b class="text-warning">{{grade}}</b>
+                              {% elif grade == 'D' %}<b class="text-danger">{{grade}}</b>
+                              {% else %}<b class="text-muted">{{grade}}</b>{% endif %}
+                              {% endwith %}
+                            </td>
+                            <td>{{opthrTimeList|index:forloop.counter0}}</td>
+                            <td>{{optpercentList|index:forloop.counter0}}</td>
+                            <td>
+                              {% with optgrade=optgradeList|index:forloop.counter0 %}
+                              {% if optgrade == 'A' %}<b class="text-success">{{optgrade}}</b>
+                              {% elif optgrade == 'B' %}<b class="text-info">{{optgrade}}</b>
+                              {% elif optgrade == 'C' %}<b class="text-warning">{{optgrade}}</b>
+                              {% elif optgrade == 'D' %}<b class="text-danger">{{optgrade}}</b>
+                              {% else %}<b class="text-muted">{{optgrade}}</b>{% endif %}
+                              {% endwith %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script src="{% static "customize/datatable/dataTables.buttons.min.js" %}"></script>
+    <script src="{% static "customize/datatable/jszip.min.js" %}"></script>
+    <script src="{% static "customize/datatable/pdfmake.min.js" %}"></script>
+    <script src="{% static "customize/datatable/vfs_fonts.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.html5.min.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.print.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      $(document).ready(function() {
+        $('#data_table').DataTable( {
+            "order": [[ 0, "asc" ],[ 1, "asc" ],[ 2, "asc" ]],
+            'iDisplayLength': 100,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            initComplete: function () {
+              $('.dt-button').addClass("btn btn-outline-success mb-4");
+            }
+        });
+      });
+
+      $('#fstartdate').change(function() {
+        filter();
+      });
+
+      $('#fstopdate').change(function() {
+        filter();
+      });
+
+      $('#emp_type').change(function() {
+        filter();
+      });
+
+      function filter(){
+        var fstartdate = $("#fstartdate").val();
+        var fstopdate = $("#fstopdate").val();
+        var emp_type = $("#emp_type").val();
+        window.location.href = "/report/emp_work_time/" + fstartdate + "&" + fstopdate + "&" + emp_type;
+      }
+
+    </script>
+  </body>
+</html>

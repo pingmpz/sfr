@@ -1,4 +1,4 @@
-<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
+<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable small" id="sidebar">
   <div class="c-sidebar-brand d-md-down-none">
     <h4 class="c-sidebar-brand-full fade-in">
       <span class="text-danger">ꜱʜᴏᴘꜰʟᴏᴏʀ</span> <span class="text-white">ʀᴇᴘᴏʀᴛɪɴɢ</span>
@@ -17,6 +17,16 @@
       </a>
     </li>
     <li class="c-sidebar-nav-item">
+      <a class="c-sidebar-nav-link" href="/ab_graph_mn/FIRST&NOW">
+        <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-graph"></i>AB Graph (Manual)
+      </a>
+    </li>
+    <li class="c-sidebar-nav-item">
+      <a class="c-sidebar-nav-link" href="/tool_store/">
+        <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-highlighter"></i>Tool Store
+      </a>
+    </li>
+    <li class="c-sidebar-nav-item">
       <a class="c-sidebar-nav-link" href="../media/SFR Manual.pdf" target="_blank">
         <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-book"></i> SFR Manual
       </a>
@@ -26,13 +36,13 @@
         <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-monitor"></i> Monitoring
       </a>
       <ul class="c-sidebar-nav-dropdown-items">
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/working_order/">Working Production Order</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/working_wc/">Working Work Center</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/working_emp/">Working Operator</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/delay_operation/FIRST">Delay</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/none_working_wc/">None-Working Work Center</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/none_start_order/">None-Start Production Order</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/pending_pln_fai/">Pending PLN_FAI</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/working_order/">Working Production Order</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/working_wc/">Working Work Center</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/working_emp/">Working Operator</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/delay_operation/FIRST">Delay</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/none_working_wc/">None-Working Work Center</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/none_start_order/">None-Start Production Order</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/monitoring/pending_pln_fai/">Pending PLN_FAI</a></li>
       </ul>
     </li>
     <li class="c-sidebar-nav-dropdown">
@@ -40,27 +50,62 @@
         <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-bar-chart"></i> Report
       </a>
       <ul class="c-sidebar-nav-dropdown-items">
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/ot_table/NOW">Overtime Table</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/mp_ot_auto_machine/NOW">Manual Report (Overtime - Auto Machine)</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/oper_no_time/NOW">Operation No Time Record</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/ot_table/NOW">Overtime Table</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/mp_ot_auto_machine/NOW">Manual Report (Overtime - Auto Machine)</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/oper_no_time/NOW">Operation No Time Record</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/emp_work_time/NOW&NOW&All">Employee Working Time</a></li>
         <li class="c-sidebar-nav-dropdown">
           <a class="c-sidebar-nav-dropdown-toggle" href="#">Closed Production Order</a>
           <ul class="c-sidebar-nav-dropdown-items">
-            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/completed_order/DAILY&NOW&NOW&NOW&NOW"><span class="text-success">Completed</span>&nbsp;Production Order</a></li>
-            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/rejected_order/DAILY&NOW&NOW&NOW&NOW"><span class="text-dark">Rejected</span>&nbsp;Production Order</a></li>
-            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/canceled_order/DAILY&NOW&NOW&NOW&NOW"><span class="text-danger">Canceled</span>&nbsp;Production Order</a></li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/closed_prod/completed_order/DAILY&NOW&NOW&NOW&NOW">●&nbsp;&nbsp;<span class="text-success">Completed</span>&nbsp;Production Order</a></li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/closed_prod/rejected_order/DAILY&NOW&NOW&NOW&NOW">●&nbsp;&nbsp;<span class="text-dark">Rejected</span>&nbsp;Production Order</a></li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/closed_prod/canceled_order/DAILY&NOW&NOW&NOW&NOW">●&nbsp;&nbsp;<span class="text-danger">Canceled</span>&nbsp;Production Order</a></li>
           </ul>
         </li>
         <li class="c-sidebar-nav-dropdown">
-          <a class="c-sidebar-nav-dropdown-toggle" href="#">AB Graph</a>
+          <a class="c-sidebar-nav-dropdown-toggle" href="#">Graph</a>
           <ul class="c-sidebar-nav-dropdown-items">
-            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/ab_graph_wcg/WD&MONTHLY&NOW&NOW">By WorkCenterGroup</a></li>
-            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/ab_graph_rt/FIRST&MONTHLY&NOW&NOW">By Routing</a></li>
+            <li class="c-sidebar-nav-dropdown">
+              <a class="c-sidebar-nav-dropdown-toggle" href="#">●&nbsp;&nbsp;AB Graph</a>
+              <ul class="c-sidebar-nav-dropdown-items">
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/ab_graph/ab_graph_wcg/WD&MONTHLY&NOW&NOW">-&nbsp;&nbsp;By WorkCenterGroup</a></li>
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/ab_graph/ab_graph_rt/FIRST&MONTHLY&NOW&NOW">-&nbsp;&nbsp;By Routing</a></li>
+              </ul>
+            </li>
+            <li class="c-sidebar-nav-dropdown">
+              <a class="c-sidebar-nav-dropdown-toggle" href="#">●&nbsp;&nbsp;Reject (%)</a>
+              <ul class="c-sidebar-nav-dropdown-items">
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/reject_per/reject_per_pfc/FIRST&NOW">-&nbsp;&nbsp;By ProfitCenter</a></li>
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/reject_per/reject_per_wcg/FIRST&NOW">-&nbsp;&nbsp;By WorkCenterGroup</a></li>
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/reject_per/reject_per_rt/FIRST&NOW">-&nbsp;&nbsp;By Routing</a></li>
+              </ul>
+            </li>
+            <li class="c-sidebar-nav-dropdown">
+              <a class="c-sidebar-nav-dropdown-toggle" href="#">●&nbsp;&nbsp;Efficiency</a>
+              <ul class="c-sidebar-nav-dropdown-items">
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/efficiency/efficiency_pfc/FIRST&NOW">-&nbsp;&nbsp;By ProfitCenter</a></li>
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/efficiency/efficiency_wcg/FIRST&NOW">-&nbsp;&nbsp;By WorkCenterGroup</a></li>
+                <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/efficiency/efficiency_wc/FIRST&NOW">-&nbsp;&nbsp;By WorkCenter</a></li>
+              </ul>
+            </li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/graph/cumulative_rejection/">Cumulative Rejection</a></li>
+            
           </ul>
         </li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/work_records/DAILY&NOW&NOW&NOW&NOW">Work Records</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/con_operation/FIRST&NOW">Confirm Operation</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/over_est_operation/FIRST&NOW">Over Est. Time Operation</a></li>
+        <!-- <li class="c-sidebar-nav-dropdown">
+          <a class="c-sidebar-nav-dropdown-toggle" href="#"><s>Tool</s></a>
+          <ul class="c-sidebar-nav-dropdown-items">
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/tool/#">●&nbsp;&nbsp;Tool Life Report # 1</a></li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/tool/#">●&nbsp;&nbsp;Tool Life Report # 2</a></li>
+            <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/tool/#">●&nbsp;&nbsp;Tool Life Report # 3</a></li>
+          </ul>
+        </li> -->
+        <!-- <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/work_records/DAILY&NOW&NOW&NOW&NOW">Work Records</a></li> -->
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/con_operation/FIRST&NOW">Confirm Operation</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/operating_history/FIRST&FIRST&DAILY&NOW&NOW&NOW">Operating History</a></li>
+        <!-- <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/over_est_operation/FIRST&NOW">Over Est. Time Operation</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/plan_act_cycle_time/NONE&FIRST&DAILY&NOW&NOW&NOW">Plan/Actual Cycle Time</a></li> -->
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/report/order_analysis/">Order Analysis</a></li>
       </ul>
     </li>
     <li class="c-sidebar-nav-dropdown">
@@ -71,17 +116,20 @@
         <li class="c-sidebar-nav-dropdown">
           <a class="c-sidebar-nav-dropdown-toggle" href="#"><i class="c-icon c-icon-sm cil-data-transfer-down text-info"></i>&nbsp;Data from SAP</a>
           <ul class="c-sidebar-nav-dropdown-items">
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_order/NOW&NOW">Order</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_routing/NOW&NOW">Routing</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_component/NOW&NOW">Component</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="#"><s>SaleOrder</s></a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_log/data_from_sap/sap_order/NOW&NOW">Order</a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_log/data_from_sap/sap_routing/NOW&NOW">Routing</a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_log/data_from_sap/sap_component/NOW&NOW">Component</a></li>
+            <!-- <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="#"><s>SaleOrder</s></a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="#"><s>SaleItem</s></a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="#"><s>SaleComponent</s></a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="#"><s>SaleReject</s></a></li> -->
           </ul>
         </li>
         <li class="c-sidebar-nav-dropdown">
           <a class="c-sidebar-nav-dropdown-toggle" href="#"><i class="c-icon c-icon-sm cil-data-transfer-up text-info"></i>&nbsp;Data to SAP</a>
           <ul class="c-sidebar-nav-dropdown-items">
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_report/NOW&NOW">Report</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_mod/NOW&NOW">Modifier</a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_log/data_to_sap/sap_report/NOW&NOW">Report</a></li>
+            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/sap_log/data_to_sap/sap_mod/NOW&NOW">Modifier</a></li>
           </ul>
         </li>
       </ul>
@@ -91,16 +139,14 @@
         <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-layers"></i> Master
       </a>
       <ul class="c-sidebar-nav-dropdown-items">
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/wc_master/">Work Center</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/emp_master/">Employee</a></li>
-        <li class="c-sidebar-nav-dropdown"><a class="c-sidebar-nav-dropdown-toggle" href="#">ETC</a>
-          <ul class="c-sidebar-nav-dropdown-items">
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/rej_master/">Rejected Reason</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/matg_master/">Material Group</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/purg_master/">Purchase Group</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/curr_master/">Currency</a></li>
-          </ul>
-        </li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/master/wc/">Work Center</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/master/emp/">Employee</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/rej/">Rejected Reason</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/matg/">Material Group</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/purg/">Purchase Group</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/curr/">Currency</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/tool/">Tool</a></li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/master/ctt/">Cycle Time Target</a></li>
       </ul>
     </li>
     <li class="c-sidebar-nav-dropdown">
@@ -108,8 +154,8 @@
         <i class="c-sidebar-nav-icon c-icon c-icon-lg cil-equalizer"></i> Admin Panel
       </a>
       <ul class="c-sidebar-nav-dropdown-items">
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/admin_controller/">Controller</a></li>
-        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/error_data/">Error Data</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/admin_panel/controller/">Controller</a></li>
+        <li class="c-sidebar-nav-item "><a class="c-sidebar-nav-link" href="/admin_panel/error_data/">Error Data</a></li>
       </ul>
     </li>
     <!-- <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/blank/"><i class="c-sidebar-nav-icon c-icon c-icon-lg cil-border-clear"></i> Blank</a></li> -->

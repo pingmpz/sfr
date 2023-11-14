@@ -1,0 +1,358 @@
+#########################################
+SFR Employee Update Result
+#########################################
+# UPDATE : 31209
+--- Position : OPERATOR MM => Operator MM
+--- Is Active : True => In-Active
+# UPDATE : 31333
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 31753
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+--- Position : DOCUMENT OFFICER => 
+# UPDATE : 32224
+--- Position : SR. ENGINEER => Section Chief
+--- Is Active : True => In-Active
+# UPDATE : 2725
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 2760
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 2981
+--- Is Active : True => In-Active
+# UPDATE : 3205
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 3332
+--- Position : OPERATOR QC => Operator QC
+--- Is Active : True => In-Active
+# UPDATE : 3252
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 90003486
+--- Section : OIG => CP
+--- Cost Center : 351600 => 440000
+--- Profit Center : Job shop => PACKAGING PRODUCTS
+--- Employement Type : Direct => In-Direct (Production)
+--- Position : OPERATOR M => Operator M
+# UPDATE : 3607
+--- Section : CB => FGST
+--- Cost Center : 322000 => 354500
+--- Profit Center : Service Center => Job shop
+# UPDATE : 3151
+--- Position : OPERATOR MM => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 30068
+--- Section : CB => FGST
+--- Cost Center : 322000 => 354500
+--- Profit Center : Service Center => Job shop
+# UPDATE : 4201
+--- Is Active : True => In-Active
+# UPDATE : 4237
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 4324
+--- Is Active : True => In-Active
+# UPDATE : 4332
+--- Section : CB => FGST
+--- Cost Center : 322000 => 354500
+--- Profit Center : Service Center => Job shop
+# UPDATE : 90004505
+--- Is Active : True => In-Active
+# UPDATE : 90004588
+--- Is Active : True => In-Active
+# UPDATE : 90004605
+--- Section : OIG => CP
+--- Cost Center : 351600 => 440000
+--- Profit Center : Job shop => PACKAGING PRODUCTS
+# UPDATE : 4836
+--- Position : OPERATOR QC => Operator QC
+--- Is Active : True => In-Active
+# UPDATE : 5026
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 5204
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 5323
+--- Is Active : True => In-Active
+# UPDATE : 5534
+--- Position : DOCUMENT OFFICER => Document Officer
+--- Is Active : True => In-Active
+# UPDATE : 5622
+--- Is Active : True => In-Active
+# UPDATE : 31894
+--- Position : OPERATOR MM => Operator M
+--- Is Active : True => In-Active
+# UPDATE : 30360
+--- Position : SECTION CHIEF => Section Chief
+--- Is Active : True => In-Active
+# UPDATE : 5694
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 5824
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 5884
+--- Job Function : Quality Control Inspector S-FQC_AS => Cleaning & Deburring Operator CLN_AS
+# UPDATE : 5942
+--- Is Active : True => In-Active
+# UPDATE : 5956
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6010
+--- Position : OPERATOR M => Operator M
+--- Is Active : True => In-Active
+# UPDATE : 6017
+--- Position :  => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6021
+--- Is Active : True => In-Active
+# UPDATE : 6054
+--- Position : CNC OPERATOR => CNC Operator
+--- Is Active : True => In-Active
+# UPDATE : 6065
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6067
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6179
+--- Position : PROJECT ENGINEER => Project Engineer
+--- Is Active : True => In-Active
+# UPDATE : 6178
+--- Position :  => Operator MM
+# UPDATE : 6262
+--- Position : CNC OPERATOR => CNC Operator
+--- Is Active : True => In-Active
+# UPDATE : 6268
+--- Is Active : True => In-Active
+# UPDATE : 6298
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6325
+--- Position : PC OFFICER => PC Officer
+--- Is Active : True => In-Active
+# UPDATE : 6334
+--- Position :  => Operator MM
+# UPDATE : 6345
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6349
+--- Position : PC OFFICER => PC Officer
+--- Is Active : True => In-Active
+# UPDATE : 6371
+--- Position :  => Operator QC
+--- Is Active : True => In-Active
+# UPDATE : 6383
+--- Is Active : True => In-Active
+# UPDATE : 6391
+--- Position : CNC OPERATOR => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6403
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6408
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6443
+--- Position : OPERATOR MM => Operator MM
+--- Is Active : True => In-Active
+# UPDATE : 6418
+--- Position :  => Operator QC
+# UPDATE : 6444
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6454
+--- Is Active : True => In-Active
+# UPDATE : 6492
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6496
+--- Is Active : True => In-Active
+# UPDATE : 6509
+--- Section : CB => FGST
+--- Cost Center : 322000 => 354500
+--- Profit Center : Service Center => Job shop
+# UPDATE : 6515
+--- Is Active : True => In-Active
+# UPDATE : 90006536
+--- Is Active : True => In-Active
+# UPDATE : 6548
+--- Position : OPERATOR MM => Operator MM
+--- Is Active : True => In-Active
+# UPDATE : 6578
+--- Position :  => Operator M
+# UPDATE : 6592
+--- Is Active : True => In-Active
+# UPDATE : 6648
+--- Position :  => CNC Operator
+# UPDATE : 6670
+--- Position : OPERATOR MM => Operator MM
+--- Is Active : True => In-Active
+# UPDATE : 6719
+--- Position :  => Operator MM
+# UPDATE : 6732
+--- Is Active : True => In-Active
+# UPDATE : 6763
+--- Position :  => CNC Operator
+# UPDATE : 6783
+--- Position : CNC OPERATOR => CNC Operator
+--- Is Active : True => In-Active
+# UPDATE : 90006801
+--- Is Active : True => In-Active
+# UPDATE : 90006802
+--- Is Active : True => In-Active
+# UPDATE : 6857
+--- Position : TECH CNC MC => Tech CNC MC
+--- Is Active : True => In-Active
+# UPDATE : 6884
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 6890
+--- Position :  => Store Operator
+# UPDATE : 6905
+--- Is Active : True => In-Active
+# UPDATE : 6908
+--- Position :  => Operator QC
+--- Is Active : True => In-Active
+# UPDATE : 6922
+--- Position :  => Operator MM
+# UPDATE : 6923
+--- Position :  => Operator MM
+# UPDATE : 6943
+--- Position :  => Operator MM
+# UPDATE : 6948
+--- Position :  => Tech CNC MC
+# UPDATE : 90006957
+--- Is Active : True => In-Active
+# UPDATE : 90006962
+--- Is Active : True => In-Active
+# UPDATE : 6998
+--- Is Active : True => In-Active
+# UPDATE : 7002
+--- Position :  => Operator MM
+# UPDATE : 7007
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 7008
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 7012
+--- Position : OPERATOR MM => Operator MM
+# UPDATE : 7017
+--- Position : OPERATOR MM => Operator MM
+# UPDATE : 90007031
+--- Position :  => Operator M
+# UPDATE : 7033
+--- Section : FQC_AS => FGST_ASM
+--- Cost Center : 364400 => 364500
+# UPDATE : 7045
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 7048
+--- Position :  => Operator QC
+# UPDATE : 7086
+--- Position : PROJECT ENGINEER =>
+# UPDATE : 90007091
+--- Is Active : True => In-Active
+# UPDATE : 7093
+--- Is Active : True => In-Active
+# UPDATE : 7094
+--- Section : PMA => FGST_ASM
+--- Cost Center : 364000 => 364500
+# UPDATE : 7113
+--- Is Active : True => In-Active
+# UPDATE : 7118
+--- Is Active : True => In-Active
+# UPDATE : 7119
+--- Is Active : True => In-Active
+# UPDATE : 7125
+--- Is Active : True => In-Active
+# UPDATE : 7140
+--- Is Active : True => In-Active
+# UPDATE : 7142
+--- Is Active : True => In-Active
+# UPDATE : 7146
+--- Is Active : True => In-Active
+# UPDATE : 7147
+--- Is Active : True => In-Active
+# UPDATE : 7151
+--- Is Active : True => In-Active
+# UPDATE : 7153
+--- Is Active : True => In-Active
+# UPDATE : 7154
+--- Is Active : True => In-Active
+# UPDATE : 7155
+--- Is Active : True => In-Active
+# NEW : 7160
+--- Name : PATCHARACHAI INTHANAI
+--- Section : FGST_ASM
+--- Cost Center : 364500
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Store Operator
+--- Job Function :
+--- Is Active : 1
+# NEW : 7161
+--- Name : CHINNAWAT HUAISAI
+--- Section : FGST_ASM
+--- Cost Center : 364500
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Store Operator
+--- Job Function :
+--- Is Active : 1
+# NEW : 7162
+--- Name : MANIRAT NOWARIT
+--- Section : FQC_AS
+--- Cost Center : 364400
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Operator QC
+--- Job Function :
+--- Is Active : 1
+# NEW : 7163
+--- Name : KANYAPHAT CHAITAMAT
+--- Section : FQC_AS
+--- Cost Center : 364400
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Operator QC
+--- Job Function :
+--- Is Active : 1
+# NEW : 7164
+--- Name : PAWEENA YAP
+--- Section : FQC_AS
+--- Cost Center : 364400
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Operator QC
+--- Job Function :
+--- Is Active : 1
+# NEW : 7165
+--- Name : WADSANA PHUKUET
+--- Section : FQC_AS
+--- Cost Center : 364400
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Operator QC
+--- Job Function :
+--- Is Active : 1
+# NEW : 7166
+--- Name : WARAWUT PHIMSON
+--- Section : FQC_AS
+--- Cost Center : 364400
+--- Profit Center : ASM
+--- Employement Type : In-Direct (Production)
+--- Position : Operator QC
+--- Job Function :
+--- Is Active : 1
+#########################################
+Data Records : 1560
+New Records : 7
+Update Records : 111
+Error Records : 0
+#########################################

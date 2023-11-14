@@ -1,0 +1,151 @@
+#########################################
+SFR Employee Update Result
+#########################################
+# UPDATE : 30322
+--- Section : ASY => HT
+--- Cost Center : 341100 => 362100
+--- Employement Type : Direct => In-Direct (Production)
+--- Position : OPERATOR MM => Operator MM
+# UPDATE : 31015
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : MACHINE SETTER => Machine Setter
+# UPDATE : 31213
+--- Section : PJ => PE
+--- Cost Center : 367100 => 340001
+--- Employement Type : In-Direct (Production) => In-Direct (Support)
+--- Position : Section Chief => Project Engineer
+# UPDATE : 31712
+--- Section : PJ => CL
+--- Cost Center : 367100 => 343100
+--- Position : TECH CNC MC => Tech CNC MC
+# UPDATE : 31834
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : SHIFT LEADER => Shift Leader
+# UPDATE : 31844
+--- Section : PJ => CL
+--- Cost Center : 367100 => 343100
+--- Position : MACHINE SETTER => Machine Setter
+# UPDATE : 31873
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : TECH CNC MC => Tech CNC MC
+# UPDATE : 32000
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : CNC PROGRAMMER => CNC Programmer
+# UPDATE : 22297
+--- Cost Center : 368000 => 368000
+--- Position : ASSISTANT MANAGER => Manager
+# UPDATE : 2902
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : SHIFT LEADER => Shift Leader
+# UPDATE : 90003813
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Position : CNC Operator => Operator M
+# UPDATE : 4084
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : TECH CNC MC => Tech CNC MC
+# UPDATE : 4155
+--- Section : PJ => QA
+--- Cost Center : 367100 => 354100
+--- Position : OPERATOR QC => Operator QC
+# UPDATE : 31795
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+# UPDATE : 90004587
+--- Section : TP => OIG
+--- Cost Center : 359300 => 351600
+--- Employement Type : In-Direct (Production) => Direct
+# UPDATE : 90004614
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Position : OPERATOR M => Operator M
+# UPDATE : 4909
+--- Section : PJ => CL
+--- Cost Center : 367100 => 343100
+--- Position : TECH CNC MC => Tech CNC MC
+# UPDATE : 5032
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : CNC OPERATOR => Tech CNC MC
+# UPDATE : 5106
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : TECH CNC MC => Tech CNC MC
+# UPDATE : 90005127
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Employement Type : In-Direct (Production) => Direct
+--- Position : OPERATOR MM => Operator M
+# UPDATE : 5324
+--- Section : PJ => CL
+--- Cost Center : 367100 => 343100
+--- Position : CNC OPERATOR => Tech CNC MC
+# UPDATE : 90005478
+--- Section : STDH => EHS
+--- Cost Center : 368000 => 395000
+--- Profit Center : ASM => Service Center
+--- Employement Type : Direct => In-Direct (Support)
+# UPDATE : 90005648
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Position : OPERATOR M => Operator M
+# UPDATE : 5756
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Position : CNC OPERATOR => Operator M
+# UPDATE : 5821
+--- Section : PJ => CL
+--- Cost Center : 367100 => 343100
+--- Position : CNC OPERATOR => Operator QC
+# UPDATE : 5823
+--- Section : PJ => MC
+--- Cost Center : 367100 => 348100
+--- Position : CNC PROGRAMMER => CNC Programmer
+# UPDATE : 5893
+--- Cost Center : 364800 => 364800
+--- Position :  => CNC Operator
+# UPDATE : 5944
+--- Cost Center : 364600 => 364600
+--- Employement Type : Direct => In-Direct (Production)
+--- Position : STORE OPERATOR => Store Operator
+# UPDATE : 6038
+--- Section : PJ => PE
+--- Cost Center : 367100 => 340001
+--- Employement Type : In-Direct (Production) => In-Direct (Support)
+--- Position : CNC ENGINEER => Project Engineer
+# UPDATE : 6174
+--- Section : PJ => QA
+--- Cost Center : 367100 => 354100
+--- Employement Type : In-Direct (Production) => In-Direct (Support)
+--- Position : OPERATOR M => PC Officer
+# UPDATE : 90006457
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+--- Position : OPERATOR MM => Operator M
+# UPDATE : 6889
+--- Cost Center : 369100 => 369100
+--- Employement Type : Direct => In-Direct (Production)
+--- Position : OPERATOR MM => Document Officer
+# UPDATE : 90006987
+--- Section : CB => SP
+--- Cost Center : 322000 => 357700
+--- Profit Center : Service Center => C.C.S. ENGINEERING
+--- Position : Store Operator => Operator M
+# UPDATE : 90007057
+--- Cost Center : 368000 => 368000
+--- Position : OPERATOR MM =>
+# UPDATE : 42120
+--- Section : PJ => HT
+--- Cost Center : 367100 => 362100
+#########################################
+Data Records : 1552
+New Records : 0
+Update Records : 35
+Error Records : 0
+#########################################

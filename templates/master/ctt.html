@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+{% load static %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Cycle Time Target Master | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Cycle Time Target ({{cycleTimeTargetList|length}})</li>
+            <!-- Breadcrumb Menu-->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <table class="table table-sm table-outline table-responsive small" id="master_table">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>FG_MaterialCode</th>
+
+                            <th>MCA 3 Axis</th>
+                            <th>HMC</th>
+                            <th>TMA</th>
+                            <th>5 Axis</th>
+                            <th>CLA</th>
+                            <th>BTA</th>
+                            <th>IG</th>
+                            <th>OG</th>
+                            <th>EDA</th>
+                            <th>WCA</th>
+                            <th>CLN_AS</th>
+                            <th>TBL_AS</th>
+                            <th>IQC_AS</th>
+                            <th>FPI</th>
+                            <th>MPI</th>
+                            <th>STC</th>
+                            <th>STD</th>
+                            <th>STM</th>
+                            <th>STH</th>
+                            <th>IDHEN_OEM</th>
+                            <th>MSM_OEM</th>
+                            <th>VIB_OEM</th>
+                            <th>STR_OEM</th>
+                            <th>STR_VIB</th>
+                            <th>ASSY_OEM</th>
+                            <th>PNT_OEM</th>
+                            <th>INK_OEM</th>
+                            <th>STP</th>
+                            <th>LS_AS</th>
+                            <th>FQC_AS</th>
+                            <th>PK_AS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in cycleTimeTargetList %}
+                          <tr>
+                            <td>{{item.FG_MaterialCode}}</td>
+                            <td>{{item.MCA3Axis|default_if_none:""}}</td>
+                            <td>{{item.HMC|default_if_none:""}}</td>
+                            <td>{{item.TMA|default_if_none:""}}</td>
+                            <td>{{item.MCA5Axis|default_if_none:""}}</td>
+                            <td>{{item.CLA|default_if_none:""}}</td>
+                            <td>{{item.BTA|default_if_none:""}}</td>
+                            <td>{{item.IG|default_if_none:""}}</td>
+                            <td>{{item.OG|default_if_none:""}}</td>
+                            <td>{{item.EDA|default_if_none:""}}</td>
+                            <td>{{item.WCA|default_if_none:""}}</td>
+                            <td>{{item.CLN_AS|default_if_none:""}}</td>
+                            <td>{{item.TBL_AS|default_if_none:""}}</td>
+                            <td>{{item.IQC_AS|default_if_none:""}}</td>
+                            <td>{{item.FPI|default_if_none:""}}</td>
+                            <td>{{item.MPI|default_if_none:""}}</td>
+                            <td>{{item.STC|default_if_none:""}}</td>
+                            <td>{{item.STD|default_if_none:""}}</td>
+                            <td>{{item.STM|default_if_none:""}}</td>
+                            <td>{{item.STH|default_if_none:""}}</td>
+                            <td>{{item.IDHEN_OEM|default_if_none:""}}</td>
+                            <td>{{item.MSM_OEM|default_if_none:""}}</td>
+                            <td>{{item.VIB_OEM|default_if_none:""}}</td>
+                            <td>{{item.STR_OEM|default_if_none:""}}</td>
+                            <td>{{item.STR_VIB|default_if_none:""}}</td>
+                            <td>{{item.ASSY_OEM|default_if_none:""}}</td>
+                            <td>{{item.PNT_OEM|default_if_none:""}}</td>
+                            <td>{{item.INK_OEM|default_if_none:""}}</td>
+                            <td>{{item.STP|default_if_none:""}}</td>
+                            <td>{{item.LS_AS|default_if_none:""}}</td>
+                            <td>{{item.FQC_AS|default_if_none:""}}</td>
+                            <td>{{item.PK_AS|default_if_none:""}}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                        <tfooter class="thead-light">
+                          <tr>
+                            <th>FG_MaterialCode</th>
+
+                            <th>MCA 3 Axis</th>
+                            <th>HMC</th>
+                            <th>TMA</th>
+                            <th>5 Axis</th>
+                            <th>CLA</th>
+                            <th>BTA</th>
+                            <th>IG</th>
+                            <th>OG</th>
+                            <th>EDA</th>
+                            <th>WCA</th>
+                            <th>CLN_AS</th>
+                            <th>TBL_AS</th>
+                            <th>IQC_AS</th>
+                            <th>FPI</th>
+                            <th>MPI</th>
+                            <th>STC</th>
+                            <th>STD</th>
+                            <th>STM</th>
+                            <th>STH</th>
+                            <th>IDHEN_OEM</th>
+                            <th>MSM_OEM</th>
+                            <th>VIB_OEM</th>
+                            <th>STR_OEM</th>
+                            <th>STR_VIB</th>
+                            <th>ASSY_OEM</th>
+                            <th>PNT_OEM</th>
+                            <th>INK_OEM</th>
+                            <th>STP</th>
+                            <th>LS_AS</th>
+                            <th>FQC_AS</th>
+                            <th>PK_AS</th>
+                          </tr>
+                        </tfooter>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      $(document).ready(function() {
+        $('#master_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 100,
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+#########################################
+SFR Employee Update Result
+#########################################
+# UPDATE : 2728
+--- Cost Center : 364100 => 364100
+--- Position : SHIFT LEADER => Section Chief
+# UPDATE : 6078
+--- Section : FQC_AS => MCA
+--- Cost Center : 364400 => 364600
+--- Employement Type : Direct => In-Direct (Support)
+--- Position : Operator M => Document Officer
+# UPDATE : 6592
+--- Section : FQC_AS => OEM
+--- Cost Center : 364400 => 369100
+--- Position : OPERATOR M => Operator M
+# UPDATE : 6748
+--- Cost Center : 364600 => 364600
+--- Position :  => CNC Operator
+#########################################
+Data Records : 1552
+New Records : 0
+Update Records : 4
+Error Records : 0
+#########################################

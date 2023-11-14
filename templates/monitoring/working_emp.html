@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+{% load humanize %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Working Operator | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Working Operator ({{workingOperatorList|length}})</li>
+            <!-- Breadcrumb Menu-->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <i class="c-icon c-icon-sm cib-discover text-danger" style="padding-top:5px"></i> Overtime Hours : {{overtimehour}} <i class="c-icon c-icon-sm cib-discover text-warning" style="padding-top:5px"></i> Warning Hours : {{warninghour}}
+                      <hr>
+                      <table class="table table-sm table-outline small" id="working_emp_table" style="table-layout: fixed;">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>EmpID</th>
+                            <th>Name</th>
+                            <th>Section</th>
+                            <th>Status</th>
+                            <th>Prod. Order - Oper. No</th>
+                            <th>FG-MaterialCode</th>
+                            <th>Note</th>
+                            <th>Working On..</th>
+                            <th>Start Date Time</th>
+                            <th>Duration</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for opr in workingOperatorList %}
+                          <tr class="
+                          {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                          {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning{% endif %}"
+                          style="background-color:#f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:8}}f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:9}}f{{opr.StartDateTime|date:'mdH'|add:'0'|modulo:10}}"
+                          >
+                            <td><a href="/emp/{{opr.EmpID}}&NOW">{{opr.EmpID}}</a></td>
+                            <td>{{opr.EmpName}}</td>
+                            <td>{{opr.Section}}</td>
+                            <td>
+                              <strong>
+                              {% if opr.Status == 'WORKING' %}
+                              <span class="
+                              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning
+                              {% else %}text-success{% endif %}"
+                              >
+                                Working {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
+                              </span>
+                              {% elif opr.Status == 'SETUP' %}
+                              <span class="
+                              {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}text-danger
+                              {% elif opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:warninghour %}text-warning
+                              {% else %}text-yellowgreen{% endif %}"
+                              >
+                                Setup {% if opr.Status != 'EXT-WORK' and opr.StartDateTime|hours_ago:overtimehour %}(Overtime){% endif %}
+                              </span>
+                              {% elif opr.Status == 'EXT-WORK' %}<span class="text-plum">External Process</span>
+                              {% else %}{{opr.OOPRStatus}}{% endif %}
+                              </strong>
+                            </td>
+                            <td><a href="/transaction/{{opr.OrderNo}}{{opr.OperationNo}}">{{opr.OrderNo}}-{{opr.OperationNo}}</a></td>
+                            <td>
+                              <a href="/drawing/{%if opr.FG_Drawing == '' %}None{%else%}{{opr.FG_Drawing}}{%endif%}&{%if opr.FG_MaterialCode == ''%}None{%else%}{{opr.FG_MaterialCode}}{%endif%}" target="_blank">
+                              {{opr.FG_MaterialCode|default_if_none:""}}
+                              </a>
+                            </td>
+                            <td>{{opr.Note|default_if_none:""}}</td>
+                            <td><a href="/wc/{{opr.WorkCenterNo}}&NOW">{{opr.WorkCenterNo|default_if_none:""}}</a></td>
+                            <td data-order="{% if opr.Status == 'EXT-WORK' %}1{% else%}0{% endif %}{{opr.StartDateTime|date:"U"}}">{{opr.StartDateTime|date:"d-M-Y, H:i"}}</td>
+                            <td>{{opr.StartDateTime|naturaltime}}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      $(document).ready(function() {
+        $('#working_emp_table').DataTable( {
+            "order": [[ 9, "asc" ]],
+            'iDisplayLength': 100,
+        });
+      });
+    </script>
+  </body>
+</html>

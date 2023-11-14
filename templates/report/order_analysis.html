@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+{% load static %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Order Analysis | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Order Analysis</li>
+            <!-- Breadcrumb Menu-->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+
+                <div class="col-12">
+
+                  <div class="card">
+                    <div class="card-header">
+                      <b>Filter</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row" hidden>
+                          <label class="col-md-2 col-form-label text-right"><strong>Token</strong></label>
+                          <div class="col-md-5">
+                            <input class="form-control" type="text" id="token" name="token" value="{{token}}" readonly>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-2 col-form-label text-right"><strong>Data View</strong></label>
+                          <div class="col-md-8 col-form-label">
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="radio" value="All" name="type_excel_data" id="type_excel_data_all" checked>
+                              <label class="form-check-label" for="type_excel_data_all">All</label>
+                            </div>
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="radio" value="Rej" name="type_excel_data" id="type_excel_data_rej">
+                              <label class="form-check-label" for="type_excel_data_rej">Reject</label>
+                            </div>
+                            <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>* When one of the operation meet the criteria, will also take othere operations detail in the same order.</small> -->
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-2 col-form-label text-right"><strong>FG Material Code</strong></label>
+                          <div class="col-md-5">
+                            <input class="form-control" type="text" id="fg_matcode" name="fg_matcode" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
+                            <small>No need to put an asterisk (*). <u>sample</u> FG-MOOG, FG-TSTL.</small>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-2 col-form-label text-right"><strong>Process Stop from</strong></label>
+                          <div class="col-md-2">
+                            <input class="form-control" type="date" id="start_date" name="start_date">
+                          </div>
+                          <label class="col-md-1 col-form-label text-center"><strong>to</strong></label>
+                          <div class="col-md-2">
+                            <input class="form-control" type="date" id="stop_date" name="stop_date">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-2 col-form-label text-right"><strong>Include Other Operations</strong></label>
+                          <div class="col-md-8 col-form-label">
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="radio" value="true" name="include_other_operation" id="include_other_operation_yes">
+                              <label class="form-check-label" for="include_other_operation_yes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline mr-1">
+                              <input class="form-check-input" type="radio" value="false" name="include_other_operation" id="include_other_operation_no" checked>
+                              <label class="form-check-label" for="include_other_operation_no">No</label>
+                            </div>
+                            <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>* When one of the operation meet the criteria, will also take othere operations detail in the same order.</small> -->
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label class="col-md-2 col-form-label text-right"><strong>Consider Operations</strong></label>
+                          <div class="col-md-8">
+                            <div class="row">
+                              <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-xs-6 mb-3">
+                                <div class="form-check checkbox">
+                                  <input class="form-check-input" type="checkbox" name="consider_operation_all" id="consider_operation_all" value="All"
+                                  onchange="set_toggle_all()" checked>
+                                  <label class="form-check-label" for="consider_operation_all"><b>All</b></label>
+                                </div>
+                              </div>
+                              <div class="col-xl-10 col-lg-9 col-md-9 col-sm-8 col-xs-6 text-center mb-3">
+                                <b>Profit Center :</b>
+                                {% for profit_center in profit_centers %}
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <button type="button" class="btn btn-link m-0 p-0" onclick="set_wcs_of_profit_center('{{profit_center.ProfitCenter}}')"><u>{{profit_center.ProfitCenter}}</u></button>
+                                {% endfor %}
+                              </div>
+                              {% for routing in routings %}
+                              <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                                <div class="form-check checkbox">
+                                  <input class="form-check-input" type="checkbox" name="consider_operation" id="consider_operation_{{forloop.counter0}}" 
+                                  value="{{routing.WorkCenterNo}}" onchange="set_toggle()" checked>
+                                  <label class="form-check-label" for="consider_operation_{{forloop.counter0}}">
+                                    {% if not routing.IsActive %}<span class="text-danger">{{routing.WorkCenterNo}}</span>{% else %}{{routing.WorkCenterNo}}{% endif %}
+                                  </label>
+                                </div>
+                              </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+
+                        
+                        <div class="text-center">
+                          <p class="text-danger" id="invalid_text" hidden>Please select at least 1 Consider Operation.</p>
+                          <button type="button" class="btn btn-success" onclick="generate_order_analysis()" id="upload_button">Generate</button>
+                          <br><small id="invalid_text" class="text-danger"></small>
+                        </div>
+
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+
+      <div class="modal" id="loading_file_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-3 text-center">
+                  <div class="sk-circle">
+                    <div class="sk-circle1 sk-child"></div>
+                    <div class="sk-circle2 sk-child"></div>
+                    <div class="sk-circle3 sk-child"></div>
+                    <div class="sk-circle4 sk-child"></div>
+                    <div class="sk-circle5 sk-child"></div>
+                    <div class="sk-circle6 sk-child"></div>
+                    <div class="sk-circle7 sk-child"></div>
+                    <div class="sk-circle8 sk-child"></div>
+                    <div class="sk-circle9 sk-child"></div>
+                    <div class="sk-circle10 sk-child"></div>
+                    <div class="sk-circle11 sk-child"></div>
+                    <div class="sk-circle12 sk-child"></div>
+                  </div>
+                </div>
+                <div class="col-9">
+                  <h2 class="mb-1">The file is being generated. Please wait.</h2>
+                  <p>Please do not close this page while the file is being generated.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="complete_file_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-3 text-center">
+                  <i class="c-icon cil-check text-success" style="font-size: 64px; margin-right: 40px; margin-top: 20px;"></i>
+                </div>
+                <div class="col-9">
+                  <h2 class="mb-1">File successfully generated.</h2>
+                  <p>Please click the download button below.</p>
+                  <a class="btn btn-success" id="file_path" href="">Download</a>
+                  <button class="btn btn-light" type="button" onclick="close_modal()">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+     <!-- SELECT JS -->
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom JS -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <!-- Sheet JS -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script> -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      var operation_len = {{routings|length}};	
+
+      function set_toggle_all(){
+        var is_check = $('#consider_operation_all').is(':checked');
+        for(var i = 0;i < operation_len;i++){
+          $('#consider_operation_' + i).prop('checked', is_check);
+        }
+      }
+
+      function set_toggle(){
+        var is_check = true;
+        for(var i = 0;i < operation_len;i++){
+          if(!$('#consider_operation_' + i).is(':checked')){
+            is_check = false;
+            break;
+          }
+        }
+        $('#consider_operation_all').prop('checked', is_check);
+      }
+
+      function generate_order_analysis(){
+        $('#invalid_text').prop('hidden', true);
+        var token = $('#token').val();
+        var type_excel_data = $('input[name="type_excel_data"]:checked').val();
+        var fg_matcode = $('#fg_matcode').val();
+        var start_date = $('#start_date').val();
+        var stop_date = $('#stop_date').val();
+        var include_other_operation = $('input[name="include_other_operation"]:checked').val();
+        var is_consider_all = $('#consider_operation_all').is(':checked');
+        var consider_operations = [];
+        if(!is_consider_all){
+          consider_operations = $('[name=consider_operation]:checked').map(function() {
+            return $(this).val();
+          }).get();
+        }
+        if(consider_operations.length == 0 && fg_matcode == ""){
+          $('#invalid_text').prop('hidden', false);
+          return
+        }
+        $('#invalid_text').prop('hidden', true);
+        $('#loading_file_modal').show();	
+        $.ajax({
+            url: '/generate_order_analysis/',
+            data: {
+              'token': token,
+              'type_excel_data': type_excel_data,
+              'fg_matcode': fg_matcode,
+              'start_date': start_date,
+              'stop_date': stop_date,
+              'include_other_operation': include_other_operation,
+              'is_consider_all': is_consider_all,
+              'consider_operations': consider_operations,
+            },
+            dataType: 'json',
+            success: function (data) {
+              $('#token').val(data.new_token);
+              $('#file_path').attr('href', data.file_path);
+              $('#loading_file_modal').hide();
+              $('#complete_file_modal').show();
+            }
+          });
+      }
+
+      function close_modal(){
+        $('#complete_file_modal').hide();
+      }
+
+      function set_wcs_of_profit_center(profit_center){
+        $.ajax({
+            url: '/get_wcs_of_profit_center/',
+            data: {
+              'profit_center': profit_center,
+            },
+            dataType: 'json',
+            success: function (data) {
+              for (var i = 0; i < operation_len; i++) {
+                if (data.wcs.includes($('#consider_operation_' + i).val())) {
+                  $('#consider_operation_' + i).prop('checked', true);
+                } else {
+                  $('#consider_operation_' + i).prop('checked', false);
+                }
+              }
+              set_toggle();
+            }
+        });
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+{% load humanize %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Delay | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Delay ({{delay_list_len}})</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="fwc">
+              <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option>
+              {% for wc in workCenterList %}
+              <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-3">
+
+                        </div>
+                        <div class="col-6">
+                          <input type="text" class="form-control" id="ms_text">
+                          <small>สามารถใช้ ช่องว่าง หรือเครื่องหมายเหล่านี้ , | / \ & ในการคั่นได้เช่น 5000123456,50009999</small>
+                        </div>
+                        <div class="col-3">
+                          <button type="button" class="btn btn-success" onclick="ms()">Multiple Search</button>
+                        </div>
+                      </div>
+                      <small>Request Date: วันที่ Cutomer Request<br>Delay: จำนวนวันนับตั้งแต่วันที่ Request Date<br>Work Actual: จำนวนวันนับตั้งแต่ Process ก่อนหน้า Confirm (สำหรับ Process แรกสุดจะนับตั้งแต่ Release Date)</small>
+                      <table class="table table-sm table-outline small" id="delay_operation_table" style="width: 100%">
+                        <thead class="thead-light">
+                          <tr>
+                            <th>Request Date</th>
+                            <th>Delay (Day)</th>
+                            <th>Work Actual (Day)</th>
+                            <th>Prod. Order - Oper.No</th>
+                            <th>WorkCenter</th>
+                            <th>FG_MaterialCode</th>
+                            <th>SalesOrderNo</th>
+                            <th>DrawingNo</th>
+                            <th>ProcessQty</th>
+                            <th>RemainingQty</th>
+                            <th>OrderNote</th>
+                            <th>OperationNote</th>
+                            <th>Process Start ?</th>
+                            <!-- <th>Registered to SFR</th> -->
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for op in SAPDelayOperationList %}
+                            <tr>
+                              <td>{% if op.RequestDate != '00.00.0000' %}{{op.RequestDate}}{% endif %}</td>
+                              <td>{% if op.DelayFromRequestDate != 9999 %}{{op.DelayFromRequestDate}}{% endif %}</td>
+                              <td data-order="{{op.Actual_Work|default_if_none:'0'}}">{{op.Actual_Work}}</td>
+                              <td><a href="/transaction/{{op.ProductionOrderNo}}{{op.OperationNumber}}">{{op.ProductionOrderNo}}-{{op.OperationNumber}}</a></td>
+                              <td>{{op.WorkCenter}}</td>
+                              <td>
+                                <a href="/drawing/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{op.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
+                              <td>{{op.SalesOrderNo}}</td>
+                              <td>{{op.DrawingNo}}</td>
+                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
+                              <td>{{op.ProductionOrderQuatity|add:"0"}}</td>
+                              <td></td>
+                              <td></td>
+                              <td><b class="text-danger">No</b></td>
+                              <!-- <td><b class="text-danger">No</b></td> -->
+                            </tr>
+                          {% endfor %}
+                          {% for op in SFRDelayOperationList %}
+                            <tr>
+                              <td>{{op.RequestDate|default_if_none:""}}</td>
+                              <td>{{op.DelayFromRequestDate|default_if_none:""}}</td>
+                              <td data-order="{{SFRDelayWorkActualList|index:forloop.counter0}}">
+                                {{SFRDelayWorkActualList|index:forloop.counter0}}
+                              </td>
+                              <td><a href="/transaction/{{op.OrderNo}}{{op.OperationNo}}">{{op.OrderNo}}-{{op.OperationNo}}</a></td>
+                              <td>{{op.WorkCenterNo}}</td>
+                              <td>
+                                <a href="http://129.1.100.188:8080/{%if op.FG_Drawing == '' %}None{%else%}{{op.FG_Drawing}}{%endif%}&{%if op.FG_MaterialCode == ''%}None{%else%}{{op.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{op.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
+                              <td>{{op.SalesOrderNo}}</td>
+                              <td>{{op.DrawingNo}}</td>
+                              <td>{{op.ProcessQty.normalize}}</td>
+                              <td>{{op.RemainingQty.normalize}}</td>
+                              <td>{{op.OrderNote|default_if_none:""}}</td>
+                              <td>{{op.OperationNote|default_if_none:""}}</td>
+                              <td>{% if op.ProcessStart %}<b class="text-success">Yes</b>{% else %}<b class="text-danger">No</b>{% endif %}</td>
+                              <!-- <td><b class="text-success">Yes</b></td> -->
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+      //
+      // $(document).ready(function() {
+      //   $('#delay_operation_table').DataTable( {
+      //       "order": [[ 2, "desc" ]],
+      //       'iDisplayLength': 100,
+      //       "search": {
+      //         regex: true
+      //       }}).column().search(val.join('|'), true, false).draw();
+      //   });
+      // });
+
+      var table = $('#delay_operation_table').DataTable({
+        "iDisplayLength": 100,
+        "order": [[ 2, "desc" ]],
+        "search": {regex: true, smart: false}
+      });
+
+      function ms(){
+        var value = $('#ms_text').val().replaceAll(" ", "|").replaceAll(",", "|").replaceAll("/", "|").replaceAll("\\", "|").replaceAll("&", "|");
+        $('input[type="search"]').val(value);
+        table.search(value).draw();
+      }
+
+      $('#fwc').change(function() {
+        window.location.href = "/monitoring/delay_operation/" + $("#fwc").val();
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+{% load static %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Sale Order | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Sale Order</li>
+            {% if so_no != '0' %}
+            <li class="breadcrumb-item active">
+              {% if soi_no_previous != -1 %}<a href="/sale_order/{{so_no}}{{soi_no_previous}}" class="text-primary pt-1"><i class="c-icon cil-chevron-left"></i></a>&nbsp;{% endif %}
+              <span id="">{{so_no}} - {{soi_no}}</span>
+              {% if soi_no_after != -1 %}&nbsp;<a href="/sale_order/{{so_no}}{{soi_no_after}}" class="text-primary pt-1"><i class="c-icon cil-chevron-right"></i></a>{% endif %}
+            </li>
+            {% endif %}
+            <!-- Breadcrumb Menu-->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <div class="c-subheader-nav mfe-2">
+              <input type="password" hidden> <!-- Prevent Auto fill Password -->
+              &nbsp;&nbsp;<div>Sale Order No</div>
+              &nbsp;&nbsp;<div><input type="text" class="form-control form-control-sm" maxlength="10" id="so_no" autocomplete="off" value="{% if so_no != '0' %}{{so_no}}{% endif %}"></div>
+              &nbsp;&nbsp;<div>-</div>&nbsp;&nbsp;
+              <div style="width:15%"><input type="text" class="form-control form-control-sm" maxlength="4" id="soi_no" autocomplete="off" value="{% if soi_no != '-1' %}{{soi_no}}{% endif %}"></div>
+              &nbsp;&nbsp;<div><button type="button" class="btn btn-sm btn-pill btn-outline-info" onclick="shortcut_search()">Go !</button></div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+
+              <!-- Main Content -->
+              <div class="row">
+
+                <!-- Left Side Content -->
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-body">
+
+                      <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col-6">
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">Sale Order No</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="{{so_no}}" readonly>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-4">
+                          <div class="form-group row">
+                            <label class="col-md-4 col-form-label text-right pt-1">Item</label>
+                            <div class="col-md-8">
+                              <input class="form-control form-control-sm" type="text" value="{{soi_no}}" readonly>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="nav-tabs-boxed">
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li class="nav-item"><a class="nav-link active small" data-toggle="tab" href="#item-list-tab" role="tab">Item List</a></li>
+                          <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#header-detail-tab" role="tab">Header Detail</a></li>
+                          <li class="nav-item"><a class="nav-link small" data-toggle="tab" href="#item-detail-tab" role="tab">Item Detail</a></li>
+                        </ul>
+                      </div>
+                      <div class="tab-content px-1 border">
+                        <!-- Item List Tab -->
+                        <div class="tab-pane active small" id="item-list-tab" role="tabpanel">
+                          <br>
+                          <table class="table table-sm table-responsive-sm table-outline text-center" width="100%">
+                            <thead class="bg-darkslategray">
+                              <tr>
+                                <th>#</th>
+                                <th>Part Name</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              
+                              <tr>
+                                <td>10</td>
+                                <td>PART NAME 1</td>
+                              </tr>
+
+                              <tr>
+                                <td>20</td>
+                                <td>PART NAME 2</td>
+                              </tr>
+                              
+                            </tbody>
+                          </table>
+                        </div>
+                        <!-- Header Detail Tab -->
+                        <div class="tab-pane small" id="header-detail-tab" role="tabpanel">
+                          <br>
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+                          
+                        </div>
+                        <!-- Item Detail Tab -->
+                        <div class="tab-pane small" id="item-detail-tab" role="tabpanel">
+                          <br>
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">SAMPLE</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="VALUE" readonly>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Side Content -->
+                <div class="col-8">
+                  <div class="card">
+                    <div class="card-body">
+                      
+                      <div class="row">
+
+                        <div class="col-6">
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">Sale Item Qty</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="17" readonly>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-6">
+                          <div class="form-group row">
+                            <label class="col-md-5 col-form-label text-right pt-1">Shipped Qty</label>
+                            <div class="col-md-6">
+                              <input class="form-control form-control-sm" type="text" value="10" readonly>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <table class="table table-sm table-responsive-sm table-outline small" id="order_table" width="100%">
+                        <thead class="bg-darkslategray">
+                          <tr>
+                            <th>OrderNo</th>
+                            <th>#</th>
+                            <th>Shipping Qty</th>
+                            <th>Changed Date</th>
+                            <th>Actual Ship Date</th>
+                            <th>Weight</th>
+                            <th>Size</th>
+                            <th width="10%"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          
+                          <tr>
+                            <td>
+                              <b>Prod.</b> <a href="#">5000123456</a>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-primary">Order Qty</b>&nbsp;&nbsp;&nbsp;<b>10</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-danger">Rejected Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-info">In-Process Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-success">Completed Qty</b>&nbsp;&nbsp;&nbsp;<b>10</b>
+                              <div class="float-right"><b class="text-success">100%</b></div>
+                            </td>
+                            <td>1</td>
+                            <td>6</td>
+                            <td>
+                              06-01-2023
+                              <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="All Changed Date"
+                                data-content="
+                                1) 05-01-2023<br>
+                                2) 06-01-2023<br>
+                                ">!
+                              </a>
+                            </td>
+                            <td>07-01-2023</td>
+                            <td>30</td>
+                            <td>3/12</td>
+                            <td></td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <b>Prod.</b> <a href="#">5000123456</a>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-primary">Order Qty</b>&nbsp;&nbsp;&nbsp;<b>10</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-danger">Rejected Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-info">In-Process Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-success">Completed Qty</b>&nbsp;&nbsp;&nbsp;<b>10</b>
+                              <div class="float-right"><b class="text-success">100%</b></div>
+                            </td>
+                            <td>2</td>
+                            <td>4</td>
+                            <td>
+                              18-01-2023
+                              <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="All Changed Date"
+                                data-content="
+                                1) 18-01-2023<br>
+                                ">!
+                              </a>
+                            </td>
+                            <td>-</td>
+                            <td>20</td>
+                            <td>2/8</td>
+                            <td>
+                              <button class="btn btn-sm btn-warning px-1 py-0"><i class="c-icon cil-pencil text-white" title="Change Qautity"></i></button>
+                              <button class="btn btn-sm btn-info px-1 py-0"><i class="c-icon cil-calendar text-white" title="Set Change Date"></i></button>
+                              <button class="btn btn-sm btn-success px-1 py-0"><i class="c-icon cil-truck" title="Set Actual Ship Date"></i></button>
+                              <button class="btn btn-sm btn-danger px-1 py-0"><i class="c-icon cil-trash" title="Delete"></i></button>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <b>Prod.</b> <a href="#">5000123457</a>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-primary">Order Qty</b>&nbsp;&nbsp;&nbsp;<b>7</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-danger">Rejected Qty</b>&nbsp;&nbsp;&nbsp;<b>1</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-info">In-Process Qty</b>&nbsp;&nbsp;&nbsp;<b>6</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-success">Completed Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              <div class="float-right"><b class="text-danger">35%</b></div>
+                            </td>
+                            <td>1</td>
+                            <td>7</td>
+                            <td>
+                              20-01-2023
+                              <a class="badge badge-pill badge-secondary" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-html="true" title="All Changed Date"
+                                data-content="
+                                1) 20-01-2023<br>
+                                ">!
+                              </a>
+                            </td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>
+                              <button class="btn btn-sm btn-warning px-1 py-0"><i class="c-icon cil-pencil text-white" title="Change Qautity"></i></button>
+                              <button class="btn btn-sm btn-info px-1 py-0"><i class="c-icon cil-calendar text-white" title="Set Change Date"></i></button>
+                              <button class="btn btn-sm btn-success px-1 py-0"><i class="c-icon cil-truck" title="Set Actual Ship Date"></i></button>
+                              <button class="btn btn-sm btn-danger px-1 py-0"><i class="c-icon cil-trash" title="Delete"></i></button>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <b>Prod.</b> <a href="#">5000123457</a>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-primary">Order Qty</b>&nbsp;&nbsp;&nbsp;<b>7</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-danger">Rejected Qty</b>&nbsp;&nbsp;&nbsp;<b>1</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-info">In-Process Qty</b>&nbsp;&nbsp;&nbsp;<b>6</b>
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="text-success">Completed Qty</b>&nbsp;&nbsp;&nbsp;<b>0</b>
+                              <div class="float-right"><b class="text-danger">35%</b></div>
+                            </td>
+                            <td><button class="btn btn-sm btn-dark px-1 py-0"><i class="c-icon cil-plus text-white" title="Split Delivery"></i></button></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                          
+                        </tbody>
+                      </table>
+
+                      All Relate Prod. 
+                      {% for prod in prods %}
+                        {{prod.ProductionOrderNo}}
+                      {% endfor %}
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Popover JS -->
+    <script src="{% static "js/popovers.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Custom JS -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      var groupColumn = 0;
+      var table = $('#order_table').DataTable({
+        columnDefs: [{ visible: false, targets: groupColumn }],
+        order: [[groupColumn, 'asc']],
+        "paging": false,
+        "ordering": false,
+        "info": false,
+        bFilter: false,
+        // displayLength: 25,
+        // dom: 'Bfrtip',
+        // buttons: [
+        //     'copy', 'csv', 'excel', 'pdf', 'print'
+        // ],
+        drawCallback: function (settings) {
+          var api = this.api();
+          var rows = api.rows({ page: 'current' }).nodes();
+          var last = null;
+          api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+            if (last !== group) {
+              $(rows).eq(i).before('<tr class="group"><td class="bg-light text-dark" colspan="20">' + group + '</td></tr>');
+              last = group;
+            }
+          });},});
+
+      $("#so_no").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      document.getElementById("so_no").addEventListener("keydown", function (e) {
+        if (e.code === "Enter" || e.code == "NumpadEnter") shortcut_search();
+      });
+
+      function shortcut_search(){
+        var so_no =  $("#so_no").val();
+        var soi_no =  $("#soi_no").val();
+        if(soi_no.length == 0){
+          soi_no = '0'; // first item
+          $("#soi_no").val(soi_no);
+        }
+        (so_no.length < 6)? invalid("so_no"): valid("so_no");
+        if(so_no.length >= 6){
+          remove_valid_many(["so_no","soi_no"]);
+          window.open('/sale_order/' + so_no + '&' + soi_no, '_self');
+        }
+      }
+
+    </script>
+  </body>
+</html>

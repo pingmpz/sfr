@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>AB Graph (Manual) | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <!-- Chart CSS -->
+    <link href="{% static "vendors/@coreui/chartjs/css/coreui-chartjs.css" %}" rel="stylesheet" >
+    <style>
+      .cus-bg-day {
+        background-color: #ffeab3;
+      }
+
+      .cus-bg-night {
+        background-color: #43454f;
+      }
+
+      .cus-day {
+        background-color: #ffeab3;
+        color: #43454f;
+        box-shadow: none !important;
+      }
+
+      .cus-day:hover {
+        background-color: #ffeab3;
+        color: #43454f;
+      }
+
+      .cus-night {
+        background-color: #43454f;
+        color: #ffeab3;
+      }
+
+      .cus-night:hover {
+        background-color: #43454f;
+        color: #ffeab3;
+      }
+
+      .cus-empty {
+        background-color: #ebedef;
+        color: #ebedef;
+      }
+
+      .cus-empty:hover {
+        background-color: #ebedef;
+        color: #ebedef;
+      }
+
+      /* td {
+        padding: 3px !important;
+      } */
+    </style>
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">AB Graph (Manual)</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="frt">
+              {% for rt in onRoutingList %}
+              <option value="{{rt.WorkCenterNo}}" {% if frt == rt.WorkCenterNo %}style="color:blue" selected{% endif %}>{{rt.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>&nbsp;
+            <input type="date" class="form-control" id="fdate" value="{{fdate}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        
+                        <div class="col-12">
+                          <button class="btn cus-day"><i class="cil-sun"></i></button>&nbsp;&nbsp;&nbsp;Day Shift
+                          &nbsp;&nbsp;&nbsp;
+                          <button class="btn cus-night"><i class="cil-moon"></i></button>&nbsp;&nbsp;&nbsp;Night Shift
+                          &nbsp;&nbsp;&nbsp;
+                          <button class="btn btn-danger"><i class="cil-ban"></i></button>&nbsp;&nbsp;&nbsp;Machine Down
+                          &nbsp;&nbsp;&nbsp;
+                          <button class="btn cus-empty"><i class="cil-minus"></i></button>&nbsp;&nbsp;&nbsp;None
+                          &nbsp;&nbsp;&nbsp;
+                          <button class="btn btn-link text-danger" disabled><i class="cil-x"></i></button>&nbsp;&nbsp;&nbsp;Unchangeable
+                          &nbsp;&nbsp;&nbsp;
+                          <div class="float-right">
+                            <a class="btn btn-primary" href="../media/ABGraphManual.pdf"><i class="cil-book"></i> Manual/คู่มือ</a>
+                            {% if is_able_to_edit %}
+                            <button class="btn btn-info" onclick="auto()" id="auto_button"><i class="cil-hand-point-down"></i> Auto Select</button>
+                            <button class="btn btn-success" onclick="save()" id="save_button"><i class="cil-save"></i> Save</button>
+                            {% endif %}
+                          </div>
+                          <br>
+                          <div class="float-right">
+                            {% if is_able_to_edit %}
+                            <small>* Auto Select only work when had data in "Time Diff. Rounding" and all hour selections have only empty space.</small>
+                            {% endif %}
+                          </div>
+                          <br>
+                        </div>
+
+                        <div class="col-12">
+                          <table class="table table-sm table-responsive table-outline small" id="ab_table" width="100%">
+                            <thead class="cus-bg-night text-white">
+                              <tr>
+                                <th rowspan="2">Machine No</th>
+                                <th colspan="2" class="text-center">Time of<br> {{fdate}}</th>
+                                <th colspan="2" class="text-center">Time of<br> {{ndate}}</th>
+                                <th class="text-center">Time Diff.<br> Rounding</th>
+                                <th colspan="24" class="text-center">
+                                  At Hour<br>
+                                  <div class="form-check form-check-inline mr-1">
+                                    <input class="form-check-input" id="is_both_shift" type="checkbox" value="is_both_shift" checked>
+                                    <label class="form-check-label" for="is_both_shift">Both Shift</label>
+                                  </div>
+                                </th>
+                              </tr>
+                              <tr>
+                                <th>Hour</th>
+                                <th>Min</th>
+                                <th>Hour</th>
+                                <th>Min</th>
+                                <th>Hour</th>
+                                <th>00:00</th>
+                                <th>01:00</th>
+                                <th>02:00</th>
+                                <th>03:00</th>
+                                <th>04:00</th>
+                                <th>05:00</th>
+                                <th>06:00</th>
+                                <th>07:00</th>
+                                <th>08:00</th>
+                                <th>09:00</th>
+                                <th>10:00</th>
+                                <th>11:00</th>
+                                <th>12:00</th>
+                                <th>13:00</th>
+                                <th>14:00</th>
+                                <th>15:00</th>
+                                <th>16:00</th>
+                                <th>17:00</th>
+                                <th>18:00</th>
+                                <th>19:00</th>
+                                <th>20:00</th>
+                                <th>21:00</th>
+                                <th>22:00</th>
+                                <th>23:00</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                {% for mc in mcs %}
+                                {% with mc_counter=forloop.counter0 %}
+                                <tr>
+                                  <td>
+                                    {{mc.WorkCenterNo}}
+                                    <input type="hidden" value="{{mc.WorkCenterNo}}" id="mc_{{mc_counter}}">
+                                  </td>
+                                  <td>
+                                    <input type="text" class="form-control" id="hr_{{mc_counter}}" value="{{hrs|index:forloop.counter0}}" style="width: 70px;" {% if not is_able_to_edit %}disabled{% endif %}>
+                                  </td>
+                                  <td>
+                                    <input type="text" class="form-control" id="min_{{mc_counter}}" value="{{mins|index:forloop.counter0}}" style="width: 50px;" {% if not is_able_to_edit %}disabled{% endif %}>
+                                  </td>
+                                  <td>
+                                    <input type="text" class="form-control" value="{{nhrs|index:forloop.counter0}}" style="width: 70px;" disabled>
+                                  </td>
+                                  <td>
+                                    <input type="text" class="form-control" value="{{nmins|index:forloop.counter0}}" style="width: 50px;"disabled>
+                                  </td>
+                                  <td><input type="text" class="form-control" id="rhr_{{mc_counter}}" value="{{rhours|index:forloop.counter0}}" style="width: 50px;"disabled></td>
+                                  {% for state in states|index:forloop.counter0 %}
+                                  <td class="{% if forloop.counter0 >= 8 and forloop.counter0 <= 19 %}cus-bg-day{% else %}cus-bg-night{% endif %}">
+                                    <input type="hidden" value="{{state}}" id="state_{{mc_counter}}_{{forloop.counter0}}"  style="width: 20px;">
+                                    {% if states_changables|index:forloop.counter0 %}
+                                      {% if state == 'A' %}
+                                      <button class="btn athr_btn cus-day" tabindex="-1" onmousedown="change_state_to_next({{mc_counter}},{{forloop.counter0}})" id="btn_{{mc_counter}}_{{forloop.counter0}}" {% if not is_able_to_edit %}disabled{% endif %}><i class="cil-sun"></i></button>
+                                      {% elif state == 'B' %}
+                                      <button class="btn athr_btn cus-night" tabindex="-1" onmousedown="change_state_to_next({{mc_counter}},{{forloop.counter0}})" id="btn_{{mc_counter}}_{{forloop.counter0}}" {% if not is_able_to_edit %}disabled{% endif %}><i class="cil-moon"></i></button>
+                                      {% elif state == 'S' %}
+                                      <button class="btn athr_btn btn-danger" tabindex="-1" onmousedown="change_state_to_next({{mc_counter}},{{forloop.counter0}})" id="btn_{{mc_counter}}_{{forloop.counter0}}" {% if not is_able_to_edit %}disabled{% endif %}><i class="cil-ban"></i></button>
+                                      {% elif state == 'N' %}
+                                        <button class="btn athr_btn cus-empty" tabindex="-1" onmousedown="change_state_to_next({{mc_counter}},{{forloop.counter0}})" id="btn_{{mc_counter}}_{{forloop.counter0}}" {% if not is_able_to_edit %}disabled{% endif %}><i class="cil-minus"></i></button>
+                                      {% endif %}
+                                    {% else %}
+                                    <button class="btn athr_btn btn-link text-danger" tabindex="-1" id="btn_{{mc_counter}}_{{forloop.counter0}}" disabled><i class="cil-x"></i></button>
+                                    {% endif %}
+                                  </td>
+                                  {% endfor %}
+                                </tr>
+                                {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <!-- <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script> -->
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Chart JS -->
+    <!-- <script src="{% static "vendors/@coreui/chartjs/js/coreui-chartjs.bundle.js" %}"></script> -->
+    <!-- <script src="{% static "js/charts.js" %}"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0-rc.1/chartjs-plugin-datalabels.min.js" integrity="sha512-+UYTD5L/bU1sgAfWA0ELK5RlQ811q8wZIocqI7+K0Lhh8yVdIoAMEs96wJAIbgFvzynPm36ZCXtkydxu1cs27w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script> -->
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+
+    <script src="{% static "js/loading-buttons.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      {% for mc in mcs %}
+        $("#hr_{{forloop.counter0}}").on("keypress keyup blur",function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+        $("#min_{{forloop.counter0}}").on("keypress keyup blur",function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+      {% endfor %}
+
+      var table;
+      var mc_size = {{mcs|length}};
+
+      $(document).ready(function() {
+        table = $('#ab_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 10,
+        });
+      });
+
+      $('#frt').change(function() {
+        filter();
+      });
+
+      $('#fdate').change(function() {
+        filter();
+      });
+
+      function filter(){
+        var frt = $("#frt").val();
+        var fdate = $("#fdate").val();
+        window.location.href = "/ab_graph_mn/" + frt + "&" + fdate;
+      }
+
+      var saved_state = 'E';
+
+      $(".athr_btn").mouseenter(function(e) {
+        if(e.buttons == 1 || e.buttons == 3){
+          if(saved_state != 'E'){
+            var tmp = this.id.split("_");
+            var mc_id = tmp[1];
+            var hr = tmp[2];
+            set_to_state(mc_id, hr, saved_state);
+          }
+        }
+      });
+
+      $(".athr_btn").mouseup(function(e) {
+        saved_state = 'E';
+      });
+
+      function change_state_to_next(mc_id, hr){
+        var current_state = get_current_state(mc_id, hr);
+        var next_state = get_next_state(hr, current_state);
+        set_to_state(mc_id, hr, next_state);
+        saved_state = next_state;
+      }
+
+      function get_current_state(mc_id, hr){
+        var state = $('#state_' + mc_id + '_' + hr).val();
+        return state;
+      }
+
+      function get_next_state(hr, current_state){
+        var is_both_shift = ($("#is_both_shift").is(':checked'));
+        // DAY : A > B > S > N > A
+        // NIGHT : B > A > S > N > B
+        var next_state = 'E';
+        var shift = (hr >= 8 && hr <= 19)?'DAY':'NIGHT';
+        if(current_state == 'N' && shift == 'DAY') next_state = 'A';
+        if(current_state == 'A' && shift == 'DAY' && is_both_shift) next_state = 'B';
+        if(current_state == 'A' && shift == 'DAY' && !is_both_shift) next_state = 'S';
+        if(current_state == 'B' && shift == 'DAY') next_state = 'S';
+        if(current_state == 'N' && shift == 'NIGHT') next_state = 'B';
+        if(current_state == 'B' && shift == 'NIGHT' && is_both_shift) next_state = 'A';
+        if(current_state == 'B' && shift == 'NIGHT' && !is_both_shift) next_state = 'S';
+        if(current_state == 'A' && shift == 'NIGHT') next_state = 'S';
+        if(current_state == 'S') next_state = 'N';
+        return next_state;
+      }
+
+      function clear_state(mc_id, hr){
+        var btn = $('#btn_' + mc_id + '_' + hr);
+        btn.removeClass("cus-day");
+        btn.removeClass("cus-night");
+        btn.removeClass("cus-empty");
+        btn.removeClass("btn-danger");
+        btn.html("");
+      }
+
+      function set_to_state(mc_id, hr, next_state){
+        // Clear Button
+        clear_state(mc_id, hr);
+        // Change Button To..
+        var btn = $('#btn_' + mc_id + '_' + hr);
+        if(next_state == 'A'){
+          btn.html("<i class='cil cil-sun'></i>");
+          btn.addClass("cus-day");
+        } else if(next_state == 'B'){
+          btn.html("<i class='cil cil-moon'></i>");
+          btn.addClass("cus-night");
+        } else if(next_state == 'S'){
+          btn.html("<i class='cil cil-ban'></i>");
+          btn.addClass("btn-danger");
+        } else if(next_state == 'N'){
+          btn.html("<i class='cil cil-minus'></i>");
+          btn.addClass("cus-empty");
+        }
+        // Change Value To..
+        $('#state_' + mc_id + '_' + hr).val(next_state);
+      }
+
+      function save(){
+        table.search('').columns().search('').draw();
+        table.page.len( -1 ).draw();
+        $("#save_button").addClass('disabled');
+        $("#auto_button").addClass('disabled');
+        var date = $('#fdate').val();
+        for(var i = 0;i < mc_size;i++){
+          var mc_no = $('#mc_' + i).val();
+          var hr = $('#hr_' + i).val();
+          var min = $('#min_' + i).val();
+          var states = ['N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N'];
+          for(var j = 0; j < states.length;j++){
+            states[j] = $('#state_' + i + '_' + j).val();
+          }
+          $.ajax({
+                url: '/save_abgraph_mn/',
+                data: {
+                  'date': date,
+                  'mc_no': mc_no,
+                  'hr': hr,
+                  'min': min,
+                  'states': states,
+                },
+                dataType: 'json',
+                success: function (data) {
+                }
+          });
+        }
+        var delay = mc_size * 50;
+        setTimeout(function(){
+          location.reload();
+        }, delay);
+      }
+
+      function auto(){
+        var start_on = 8;
+        table.search('').columns().search('').draw();
+        table.page.len( -1 ).draw();
+        for(var i = 0;i < mc_size;i++){
+          var is_time_diff_correct = false;
+          var rhr = $('#rhr_' + i).val();
+          if(rhr != "" && rhr > 0 && rhr < 25){
+            is_time_diff_correct = true;
+          }
+          if(is_time_diff_correct){
+            var all_empty = true;
+            for(var j = 0; j < 24;j++){
+              var state = $('#state_' + i + '_' + j).val();
+              if(state != 'N'){
+                all_empty = false;
+                break;
+              }
+            }
+            if(all_empty){
+              var added_count = 0;
+              var j = start_on;
+              while(added_count != rhr){
+                change_state_to_next(i, j)
+                added_count++;
+                j++;
+                if(j > 23){
+                  j = 0;
+                }
+              }
+            }
+          }
+        }
+      }
+
+    </script>
+  </body>
+</html>

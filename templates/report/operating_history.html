@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+{% load humanize %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Operating History | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Operating History</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2 small">
+            &nbsp;&nbsp;&nbsp;WorkCenter&nbsp;&nbsp;&nbsp;
+            <select class="form-control form-control-sm" id="fwc">
+              <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option>
+              {% for wc in wc_list %}
+              <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>
+            &nbsp;&nbsp;&nbsp;Machine&nbsp;&nbsp;&nbsp;
+            <select class="form-control form-control-sm" id="fmc">
+              <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option>
+              {% for mc in mc_list %}
+              <option value="{{mc.WorkCenterNo}}" {% if fmc == mc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{mc.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>
+            &nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;
+            <select class="form-control form-control-sm" id="ftype">
+              <option value="DAILY" {% if ftype == 'DAILY' %}style="color:blue" selected{% endif %}>Daily</option>
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <option value="RANGE" {% if ftype == 'RANGE' %}style="color:blue" selected{% endif %}>Range</option>
+            </select>&nbsp;
+            <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="date" class="form-control form-control-sm" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
+            <span id="range-to">&nbsp;-&nbsp;</span>
+            <input type="date" class="form-control form-control-sm" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>      
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <table class="table table-sm table-responsive table-outline small" id="con_operation_table" width="100%">
+                        <thead class="thead-light">
+                          <tr>
+                            <th hidden>Time Sorting</th>
+                            <th>WorkCenter</th>
+                            <th>Machine</th>
+                            <th>Prod. - Oper. No</th>
+                            <th>FG_MaterialCode</th>
+                            <th>DrawingNo</th>
+                            <th>Order Qty</th>
+                            <th>Process Qty</th>
+                            <th>Accept Qty</th>
+                            <th>Reject Qty</th>
+                            <th>EmpID</th>
+                            <th>EmpName</th>
+                            <th>Confirm Time</th>
+                            <th>Start Time</th>
+                            <th>Stop Time</th>
+                            <th>Setup</th>
+                            <th>Oper</th>
+                            <th>Labor</th>
+                            <th>Idle</th>
+                            <th>IdleType</th>
+                            <th>Yeild</th>
+                            <th>Scrap</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for con in con_list %}
+                            <tr>
+                              <td data-order="{{con.ConfirmDateTime|date:"U"}}" hidden>{{con.ConfirmDateTime}}</td>
+                              <td>{{con.WorkCenter}}</td>
+                              <td>{{con.Machine}}</td>
+                              <td><a href="/transaction/{{con.OrderNo}}{{con.OperationNo}}">{{con.OrderNo}}-{{con.OperationNo}}</a></td>
+                              <td>
+                                <a href="/drawing/{%if con.FG_Drawing == '' %}None{%else%}{{con.FG_Drawing}}{%endif%}&{%if con.FG_MaterialCode == ''%}None{%else%}{{con.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{con.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
+                              <td>{{con.DrawingNo}}</td>
+                              <td>{{con.ProductionOrderQuatity|floatformat}}</td>
+                              <td>{{con.ProcessQty.normalize}}</td>
+                              <td>{{con.AcceptedAll.normalize}}</td>
+                              <td>{{con.RejectedAll.normalize}}</td>
+                              <td><a href="/emp/{{con.EmpID}}&NOW">{{con.EmpID}}</a></td>
+                              <td>{{con.EmpName|truncatechars:15}}</td>
+                              <td data-order="{{con.ConfirmDateTime|date:"U"}}">{{con.ConfirmDateTime}}</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>{% if con.Yeild != 0.0000 %}{{con.Yeild|floatformat}}{% else %}-{% endif %}</td>
+                              <td>{% if con.Scrap != 0.0000 %}{{con.Scrap|floatformat}}{% else %}-{% endif %}</td>
+                              <!-- 
+                              <td>
+                                {% if con.RejectReason.strip == 'SCRAP FROM PREVIOUS PROCESS' %}
+                                  {% if con.ScrapAt.strip != '' %}
+                                    SCRAP FROM → {{con.ScrapAt}} ({{con.ScrapAtWorkCenter}})
+                                  {% else %}
+                                    {{con.RejectReason.strip}}
+                                  {% endif %}
+                                {% else %}
+                                  {{con.RejectReason}}
+                                {% endif %}
+                              </td>
+                              -->
+                            </tr>
+                          {% endfor %}
+                          {% for opr in opr_list %}
+                            <tr>
+                              <td data-order="{{opr.StopDateTime|date:"U"}}" hidden>{{con.StopDateTime}}</td>
+                              <td>{{opr.WorkCenter}}</td>
+                              <td>{{opr.Machine}}</td>
+                              <td><a href="/transaction/{{opr.OrderNo}}{{opr.OperationNo}}">{{opr.OrderNo}}-{{opr.OperationNo}}</a></td>
+                              <td>
+                                <a href="/drawing/{%if opr.FG_Drawing == '' %}None{%else%}{{opr.FG_Drawing}}{%endif%}&{%if opr.FG_MaterialCode == ''%}None{%else%}{{opr.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{opr.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
+                              <td>{{opr.DrawingNo}}</td>
+                              <td>{{opr.ProductionOrderQuatity|floatformat}}</td>
+                              <td>{{opr.ProcessQty.normalize}}</td>
+                              <td>{{opr.AcceptedQty.normalize}}</td>
+                              <td>{{opr.RejectedQty.normalize}}</td>
+                              <td><a href="/emp/{{opr.EmpID}}&NOW">{{opr.EmpID|default_if_none:""}}</a></td>
+                              <td>{{opr.EmpName|default_if_none:""|truncatechars:15}}</td>
+                              <td>-</td>
+                              <td data-order="{{opr.StartDateTime|date:"U"}}">{{opr.StartDateTime}}</td>
+                              <td data-order="{{opr.StopDateTime|date:"U"}}">{{opr.StopDateTime}}</td>
+                              <td>{% if opr.Setup != 0.0000 %}{{opr.Setup|floatformat}}{% else %}-{% endif %}</td>
+                              <td>{% if opr.Oper != 0.0000 %}{{opr.Oper|floatformat}}{% else %}-{% endif %}</td>
+                              <td>{% if opr.Labor != 0.0000 %}{{opr.Labor|floatformat}}{% else %}-{% endif %}</td>
+                              <td>{% if opr.Idle != 0.0000 %}{{opr.Idle|floatformat}}{% else %}-{% endif %}</td>
+                              <td>{{opr.Description|default_if_none:"-"}}</td>
+                              <td>-</td>
+                              <td>-</td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script src="{% static "customize/datatable/dataTables.buttons.min.js" %}"></script>
+    <script src="{% static "customize/datatable/jszip.min.js" %}"></script>
+    <script src="{% static "customize/datatable/pdfmake.min.js" %}"></script>
+    <script src="{% static "customize/datatable/vfs_fonts.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.html5.min.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.print.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      toggle();
+
+      $(document).ready(function() {
+        $('#con_operation_table').DataTable( {
+            "order": [[ 0, "desc" ]],
+            'iDisplayLength': 100,
+            dom: 'Blfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            initComplete: function () {
+              $('.dt-button').addClass("btn btn-outline-success mb-4");
+            },
+        });
+      });
+
+      function toggle(){
+        if($('#ftype').val() == "DAILY"){
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "MONTHLY"){
+          $("#fmonth").prop("hidden", false);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "RANGE"){
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", false);
+          $("#range-to").prop("hidden", false);
+        }
+      }
+
+      $('#fwc').change(function() {
+        filter();
+      });
+
+      $('#fmc').change(function() {
+        filter();
+      });
+
+      $('#ftype').change(function() {
+        toggle();
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      $('#fstartdate').change(function() {
+        filter();
+      });
+
+      $('#fstopdate').change(function() {
+        filter();
+      });
+
+      function filter(){
+        var fwc = $("#fwc").val();
+        var fmc = $("#fmc").val();
+        var ftype = $("#ftype").val();
+        var fstartdate = $("#fstartdate").val();
+        var fstopdate = $("#fstopdate").val();
+        var fmonth = $("#fmonth").val();
+        window.location.href = "/report/operating_history/" + fwc + "&" + fmc + "&" + ftype + "&" + fstartdate + "&" + fstopdate + "&" + fmonth;
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>AB Graph (WorkCenterGroup) | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <!-- Chart CSS -->
+    <link href="{% static "vendors/@coreui/chartjs/css/coreui-chartjs.css" %}" rel="stylesheet" >
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">AB Graph (By WorkCenterGroup)</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav">
+              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_target_modal" onclick="prepare_set_wc_target()">Set Target</button>
+              <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#set_wc_cap_modal" onclick="prepare_set_wc_cap()">Set Capacity</button>
+          </div>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="fwcg">
+              {% for wcg in workCenterGroupList %}
+              <option value="{{wcg.WorkCenterGroup}}" {% if fwcg == wcg.WorkCenterGroup %}style="color:blue" selected{% endif %}>{{wcg.WorkCenterGroup}}</option>
+              {% endfor %}
+            </select>&nbsp;
+            <select class="form-control" id="ftype" hidden>
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <!-- <option value="YEARLY" {% if ftype == 'YEARLY' %}style="color:blue" selected{% endif %}>Yearly</option> -->
+            </select>&nbsp;
+            <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="number" class="form-control" id="fyear" value="{{fyear}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-9">
+                          <div class="row">
+                            <div class="col-12">
+                              <div class="card border-dard">
+                                <!-- <h5 class="text-danger text-center">Don't close this page while loading !</h5> -->
+                                <div class="card-header">
+                                  {{fwcg}}
+                                </div>
+                                <div class="card-body">
+                                  <canvas id="wcg_monthly_chart" width="400" height="180"></canvas>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-3" style="padding-left: 5px; padding-right: 5px;">
+                          <div class="nav-tabs-boxed">
+                            <ul class="nav nav-tabs" role="tablist">
+                              <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#info-tab" role="tab">Info</a></li>
+                              <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#table-view-tab" role="tab">Table View</a></li>
+                            </ul>
+                            <div class="tab-content" style="padding-left: 5px; padding-right: 5px;">
+                              <!-- Info Tab -->
+                              <div class="tab-pane active" id="info-tab" role="tabpanel">
+                                <br>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">WorkCenterGroup</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{fwcg}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Size of WorkCenter</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{workCenterInGroupList|length}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours in 1 Day</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour_day}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="row"><div class="col-md-4"><hr></div><div class="col-md-4 text-center">Full Month</div><div class="col-md-4"><hr></div></div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Capacity</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_cap_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hours</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_month}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hours (%)</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_month_percent}}%" readonly>
+                                  </div>
+                                </div>
+                                <div class="row"><div class="col-md-4"><hr></div><div class="col-md-4 text-center">Present Day</div><div class="col-md-4"><hr></div></div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Maximum Hours</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{max_hour_present}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hours</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_present}}" readonly>
+                                  </div>
+                                </div>
+                                <div class="form-group row">
+                                  <label class="col-md-6 col-form-label text-right">Working Hours (%)</label>
+                                  <div class="col-md-6">
+                                    <input class="form-control form-control" type="text" value="{{working_hour_present_percent}}%" readonly>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- Table View Tab -->
+                              <div class="tab-pane" id="table-view-tab" role="tabpanel">
+                                <table class="table table-sm table-outline small" id="table_view_table" style="table-layout: fixed;">
+                                  <thead class="thead-light">
+                                    <tr>
+                                      <th>Day</th>
+                                      <th>SetupTime (Hour)</th>
+                                      <th>OperTime (Hour)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for wcg in wcg_oper %}
+                                      <tr>
+                                        <td>{{forloop.counter}}</td>
+                                        <td>{{wcg_setup|index:forloop.counter0}}</td>
+                                        <td>{{wcg_oper|index:forloop.counter0}}</td>
+                                      </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        {% for wc in workCenterInGroupList %}
+                        <div class="col-6">
+                          <div class="card border-dard">
+                            <div class="card-header">
+                              <a href="/wc/{{wc.WorkCenterNo}}&NOW">{{wc.WorkCenterNo}}</a> - {{wc.WorkCenterName}}
+                            </div>
+                            <div class="card-body">
+                              <canvas id="wc_{{forloop.counter0}}_monthly_chart" width="400" height="180"></canvas>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+
+      <div class="modal" id="set_wc_target_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set Target</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="target_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>WorkCenter</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="target_wc_no">
+                    {% for wc in workCenterInGroupList %}
+                    <option value="{{wc.WorkCenterNo}}">{{wc.WorkCenterNo}} | {{wc.WorkCenterName}} (Target: {{wc.Target}})</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Target Hour</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="target_hour" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-info" type="button" id="set_wc_target_button" onclick="set_wc_target()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="set_wc_cap_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"><i class="c-icon cil-pin"></i> Set Capacity</h4>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+              <br>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Password</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm my-password" type="text" id="cap_password" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>WorkCenter</strong></label>
+                <div class="col-md-8">
+                  <select class="form-control form-control-sm" id="cap_wc_no">
+                    {% for wc in workCenterInGroupList %}
+                    <option value="{{wc.WorkCenterNo}}">{{wc.WorkCenterNo}} | {{wc.WorkCenterName}} (Capacity: {{wc.Capacity}})</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-4 col-form-label text-right small"><strong>Capacity Hour</strong></label>
+                <div class="col-md-8">
+                  <input class="form-control form-control-sm" type="text" id="cap_hour" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small>Permission: Section Chief+</small>
+              <button class="btn btn-info" type="button" id="set_wc_cap_button" onclick="set_wc_cap()">Confirm</button>
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <!-- <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script> -->
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Chart JS -->
+    <!-- <script src="{% static "vendors/@coreui/chartjs/js/coreui-chartjs.bundle.js" %}"></script> -->
+    <!-- <script src="{% static "js/charts.js" %}"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0-rc.1/chartjs-plugin-datalabels.min.js" integrity="sha512-+UYTD5L/bU1sgAfWA0ELK5RlQ811q8wZIocqI7+K0Lhh8yVdIoAMEs96wJAIbgFvzynPm36ZCXtkydxu1cs27w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      toggle();
+      $(document).ready(function() {
+
+      });
+
+      $('#fwcg').change(function() {
+        filter();
+      });
+
+      $('#ftype').change(function() {
+        toggle();
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      $('#fyear').change(function() {
+        filter();
+      });
+
+      function toggle(){
+        if($('#ftype').val() == "MONTHLY"){
+          $("#fmonth").prop("hidden", false);
+          $("#fyear").prop("hidden", true);
+        } else if($('#ftype').val() == "YEARLY"){
+          $("#fmonth").prop("hidden", true);
+          $("#fyear").prop("hidden", false);
+        }
+      }
+
+      function filter(){
+        var fwcg = ($("#fwcg").val() != "")?$("#fwcg").val():"FIRST";
+        var ftype = $("#ftype").val();
+        var fmonth = ($("#fmonth").val() != "" && ftype == "MONTHLY")?$("#fmonth").val():"NOW";
+        var fyear = ($("#fyear").val() != "" && ftype == "YEARLY")?$("#fyear").val():"NOW";
+        window.location.href = "/report/graph/ab_graph/ab_graph_wcg/" + fwcg + "&" + ftype + "&" + fmonth + "&" + fyear;
+      }
+    </script>
+    <!-- OTHER FUNCTION -->
+    <script>
+      function getXAxisSize(){
+        var arr = []
+        for(i = 1;i <= parseInt({{x_size}});i++) arr.push(i);
+        return arr;
+      }
+    </script>
+    <!-- GRAPH -->
+    <script>
+      var stroke_colors = [];
+      var stroke_size = [];
+      {% for i in isoweekdays %}
+        {% if i %}
+        stroke_colors.push('rgb(255,0,0, 0.2)');
+        stroke_size.push(8);
+        {% else %}
+        stroke_colors.push('black');
+        stroke_size.push(0);
+        {% endif %}
+      {% endfor %}
+
+      window.onload = function() {
+        // WCG MONTHLY GRAPH
+        var wcg_monthly_ctx = document.getElementById('wcg_monthly_chart').getContext('2d');
+        var wcg_monthly_chart = new Chart(wcg_monthly_ctx, {
+              type: 'bar',
+              data: {
+                  labels: getXAxisSize(),
+                  datasets: [{
+                      label: 'MANUAL',
+                      data: {{wcg_manual}},
+                      type: 'line',
+                      pointBorderWidth: 0,
+                      pointHitRadius: 0,
+                      backgroundColor: 'rgb(247,79,117, 0.2)',
+                      borderColor: 'rgb(247,79,117, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'WORK',
+                      data: {{wcg_oper}},
+                      backgroundColor: 'rgb(46,184,92, 0.2)',
+                      borderColor: 'rgb(46,184,92, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'SETUP',
+                      data: {{wcg_setup}},
+                      backgroundColor: 'rgb(157,208,77, 0.2)',
+                      borderColor: 'rgb(157,208,77, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              plugins: [ChartDataLabels],
+              options: {
+                plugins: {
+                  datalabels: {
+                		formatter: (value, ctx) => {
+                			let datasets = ctx.chart.data.datasets; // Tried `.filter(ds => !ds._meta.hidden);` without success
+                  		if (ctx.datasetIndex == datasets.length - 1) {
+                  			let sum = 0;
+                  			datasets.map(dataset => {
+                  				if(dataset.label != 'MANUAL'){
+                  				  sum += (dataset.data[ctx.dataIndex] > 0)?dataset.data[ctx.dataIndex]:0;
+                          }
+                  			});
+                        if(sum == 0) return "";
+                  			return sum;
+                      }
+                      return "";
+                		},
+                		anchor: 'end',
+                		align: 'end'
+                	}
+                },
+                scales: {
+                  x: {
+                    stacked: true,
+                    ticks: {
+                      textStrokeColor: stroke_colors,
+                      textStrokeWidth: stroke_size,
+                    },
+                    title: {
+                      display: true,
+                      text: 'Day',
+                    }
+                  },
+                  y: {
+                    max: {{y_size}},
+                    min: 0,
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Hour',
+                    },
+                  }
+                }
+              }
+          });
+        // WC MONTHLY GRAPH
+        {% for wc in workCenterInGroupList %}
+        var wc_{{forloop.counter0}}_monthly_ctx = document.getElementById('wc_{{forloop.counter0}}_monthly_chart').getContext('2d');
+        var wc_{{forloop.counter0}}_monthly_chart = new Chart(wc_{{forloop.counter0}}_monthly_ctx, {
+              type: 'bar',
+              data: {
+                  labels: getXAxisSize(),
+                  datasets: [{
+                      label: 'MANUAL',
+                      data: {{wc_manual_list|index:forloop.counter0}},
+                      type: 'line',
+                      pointBorderWidth: 0,
+                      pointHitRadius: 0,
+                      backgroundColor: 'rgb(247,79,117, 0.2)',
+                      borderColor: 'rgb(247,79,117, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'Work',
+                      data: {{wc_oper_list|index:forloop.counter0}},
+                      backgroundColor: 'rgb(46,184,92, 0.2)',
+                      borderColor: 'rgb(46,184,92, 1)',
+                      borderWidth: 1
+                  },{
+                      label: 'Setup',
+                      data: {{wc_setup_list|index:forloop.counter0}},
+                      backgroundColor: 'rgb(157,208,77, 0.2)',
+                      borderColor: 'rgb(157,208,77, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              plugins: [ChartDataLabels],
+              options: {
+                plugins: {
+                  datalabels: {
+                		formatter: (value, ctx) => {
+                			let datasets = ctx.chart.data.datasets; // Tried `.filter(ds => !ds._meta.hidden);` without success
+                  		if (ctx.datasetIndex == datasets.length - 1) {
+                  			let sum = 0;
+                  			datasets.map(dataset => {
+                  				if(dataset.label != 'MANUAL'){
+                  				  sum += (dataset.data[ctx.dataIndex] > 0)?dataset.data[ctx.dataIndex]:0;
+                          }
+                  			});
+                        if(sum == 0) return "";
+                  			return sum;
+                      }
+                      return "";
+                		},
+                		anchor: 'end',
+                		align: 'end'
+                	},
+                  annotation: {
+                      annotations: [{
+                          id: 'target_line',
+                          type: 'line',
+                          mode: 'horizontal',
+                          yMin: {{wc_target_list|index:forloop.counter0}},
+                          yMax: {{wc_target_list|index:forloop.counter0}},
+                          borderColor: 'rgb(0,0,0,0.5)',
+                          borderWidth: 1,
+                          label: {
+                             enabled: true,
+                             position: "end",
+                             content: "Target: {{wc_target_list|index:forloop.counter0}}",
+                          }
+                      },{
+                          id: 'cap_line',
+                          type: 'line',
+                          mode: 'horizontal',
+                          yMin: {{wc_cap_list|index:forloop.counter0}},
+                          yMax: {{wc_cap_list|index:forloop.counter0}},
+                          borderColor: 'rgb(0,0,0,0.5)',
+                          borderWidth: 1,
+                          label: {
+                             enabled: true,
+                             position: "start",
+                             content: "Capacity: {{wc_cap_list|index:forloop.counter0}}",
+                          }
+                      }]
+                  },
+                },
+                scales: {
+                  x: {
+                    stacked: true,
+                    ticks: {
+                      textStrokeColor: stroke_colors,
+                      textStrokeWidth: stroke_size,
+                    },
+                    title: {
+                      display: true,
+                      text: 'Day',
+                    }
+                  },
+                  y: {
+                    max: 24,
+                    min: 0,
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Hour',
+                    },
+                  }
+                }
+              }
+          });
+        {% endfor %}
+      };
+    </script>
+    <!-- MODAL FUNCTION -->
+    <script>
+      $("#set_wc_target_hour").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      $("#set_wc_cap_hour").on("keypress keyup blur",function (event) {
+         $(this).val($(this).val().replace(/[^\d].+/, ""));
+         if((event.which < 48 || event.which > 57)) event.preventDefault();
+      });
+
+      function prepare_set_wc_target(){
+        $("#target_password").val("");
+        $("#target_hour").val("");
+        remove_valid_many(["target_password","target_wc_no","target_hour"]);
+      }
+
+      function prepare_set_wc_cap(){
+        $("#cap_password").val("");
+        $("#cap_hour").val("");
+        remove_valid_many(["cap_password","cap_wc_no","cap_hour"]);
+      }
+
+      function set_wc_target(){
+        if($('#target_hour').val() == "") $('#target_hour').val("0");
+        var password = $("#target_password").val();
+        var wc_no = $("#target_wc_no").val();
+        var target_hour = $("#target_hour").val();
+        remove_valid_many(["target_password","target_wc_no","target_hour"]);
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("target_password");
+          } else {
+            valid("target_password");
+            if(target_hour <= 0){
+              invalid("target_hour");
+            } else {
+              valid("target_hour");
+              $.ajax({
+                url: '/set_wc_target/',
+                data: {
+                  'wc_no': wc_no,
+                  'target_hour': target_hour,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      function set_wc_cap(){
+        if($('#cap_hour').val() == "") $('#cap_hour').val("0");
+        var password = $("#cap_password").val();
+        var wc_no = $("#cap_wc_no").val();
+        var cap_hour = $("#cap_hour").val();
+        remove_valid_many(["cap_password","cap_wc_no","cap_hour"]);
+        validate_section_chief_password(password, function(isCorrect, invalid_text) {
+          if(!isCorrect){
+            invalid("cap_password");
+          } else {
+            valid("cap_password");
+            if(target_hour <= 0){
+              invalid("cap_hour");
+            } else {
+              valid("cap_hour");
+              $.ajax({
+                url: '/set_wc_cap/',
+                data: {
+                  'wc_no': wc_no,
+                  'cap_hour': cap_hour,
+                },
+                dataType: 'json',
+                success: function (data) {
+                  location.reload();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      function validate_section_chief_password(password, _callback){
+        if(password.length == 0) _callback(false, "Please fill Password.");
+        else if(password.length < 4) _callback(false, "Password is not correct.");
+        else {
+          $.ajax({
+            url: '/validate_section_chief_password/',
+            data: {
+              'password': password,
+            },
+            dataType: 'json',
+            success: function (data) {
+              (data.isCorrect)? _callback(true, ""):_callback(false, "Password is not correct.");
+            }
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

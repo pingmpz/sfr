@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Disk Pulse Changed Log Finder</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+
+    <style>
+
+    </style>
+
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** MAIN *** -->
+    <div class="c-wrapper">
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+
+                <div class="col-12">
+                  <div class="card bg-dp">
+                    <div class="card-body">
+                      <h2 class="text-center my-3">Disk Pulse Changed Log Finder</h2>
+                      <form class="navbar-form" action="/diskpulse_search/" method="POST" role="search">
+                        {% csrf_token %}
+                        <div class="form-group row mb-0">
+
+                          <div class="col-2"></div>
+                          <div class="col-md-8 text-center">
+                            <div class="input-group">
+                              <input class="form-control form-control" type="text" name="search_txt" id="search_txt" placeholder="Search.." value="{{search_txt}}">
+                              <span class="input-group-append">
+                                <button class="btn text-white bg-danger" type="submit">
+                                  <!-- <i class="c-icon cil-search"></i> -->
+                                  <h6 class="mb-0">&nbsp;Search&nbsp;</h6>
+                                </button>
+                              </span>
+                            </div>
+
+                            <div class="form-group row mb-0 mt-2">
+                              <div class="col-md-12">
+                                <b>Operation</b>&nbsp;&nbsp;&nbsp;
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_all" type="radio" value="ALL" {% if fopr == 'ALL' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_all">All</label>
+                                </div>
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_0" type="radio" value="0" {% if fopr == '0' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_0"><span class="text-dark">Created</span></label>
+                                </div>
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_1" type="radio" value="1" {% if fopr == '1' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_1"><span class="text-dark">Deleted</span></label>
+                                </div>
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_2" type="radio" value="2" {% if fopr == '2' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_2"><span class="text-dark">Modified</span></label>
+                                </div>
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_3" type="radio" value="3" {% if fopr == '3' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_3"><span class="text-dark">Renamed</span></label>
+                                </div>
+                                <div class="form-check form-check-inline mr-1">
+                                  <input class="form-check-input" name="fopr" id="fopr_4" type="radio" value="4" {% if fopr == '4' %}checked{% endif %}>
+                                  <label class="form-check-label" for="fopr_4"><span class="text-dark">Renamed To</span></label>
+                                </div>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <b>Date</b>&nbsp;&nbsp;&nbsp;
+                                <div class="form-check form-check-inline mr-1">
+                                  <input type="date" class="form-control" name="fdate" id="fdate" value="{{fdate}}"> 
+                                </div>
+                                &nbsp;&nbsp;&nbsp;
+                                <b>Hour</b>&nbsp;&nbsp;&nbsp; 
+                                <div class="form-check form-check-inline mr-1">
+                                  <select name="fhour" id="fhour" class="form-control">
+                                    <option value="" {% if fhour == "" %}selected{% endif %}>No Select</option>
+                                    {% for hour in hours %}
+                                    <option value="{{forloop.counter0}}" {% if fhour == forloop.counter0|floatformat %}selected{% endif %}>{{forloop.counter0}}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div>
+                                &nbsp;&nbsp;&nbsp;
+                                <b>Minute</b>&nbsp;&nbsp;&nbsp; 
+                                <div class="form-check form-check-inline mr-1">
+                                  <select name="fmin" id="fmin" class="form-control">
+                                    <option value="" {% if fmin == "" %}selected{% endif %}>No Select</option>
+                                    {% for min in mins %}
+                                    <option value="{{forloop.counter0}}" {% if fmin == forloop.counter0|floatformat %}selected{% endif %}>{{forloop.counter0}}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div>
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+
+                      <!-- <hr> -->
+
+                      <div class="card-body bg-white">
+                        <table class="table table-sm small" id="dp_table">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>DateTimeStamp</th>
+                              <!-- <th>File Size</th> -->
+                              <th>Operation</th>
+                              <th>Owner</th>
+                              <th>Dir Path</th>
+                              <th>File Name</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for item in list %}
+                            <tr>
+                              <td>{{item.id}}</td>
+                              <td data-order="{{item.dt|date:"U"}}{{item.id}}">{{item.dt}}</td>
+                              <!-- <td>{{item.fsize}}</td> -->
+                              <td>
+                                {% if item.ctype == 0 %}<span class="text-success">Created</span>
+                                {% elif item.ctype == 1 %}<span class="text-danger">Deleted</span>
+                                {% elif item.ctype == 2 %}<span class="text-warning">Modified</span>
+                                {% elif item.ctype == 3 %}<span class="text-info">Renamed</span>
+                                {% elif item.ctype == 4 %}<span class="text-primary">Renamed To</span>
+                                {% else %}{{item.ctype}}{% endif %}
+
+                              </td>
+                              <td>{{item.owner}}</td>
+                              <td>{{fpaths|index:forloop.counter0}}</td>
+                              <td>{{fnames|index:forloop.counter0}}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      $(document).ready(function() {
+        $('#dp_table').DataTable( {
+            "order": [[ 0, "asc" ]],
+            'iDisplayLength': 100,
+        });
+      });
+    </script>
+  </body>
+</html>

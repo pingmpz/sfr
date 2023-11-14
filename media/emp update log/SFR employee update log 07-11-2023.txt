@@ -1,0 +1,296 @@
+#########################################
+SFR Employee Update Result
+#########################################
+# UPDATE : 2621
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 3413
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90003936
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+--- Position :  => Operator M
+# UPDATE : 3943
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 4322
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 4356
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90003482
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 4442
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 90004503
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90004552
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 4568
+--- Position : Document Officer => Assistant Section Chief
+# UPDATE : 90004596
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+--- Position :  => Operator M
+# UPDATE : 90004620
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90004668
+--- Section : FQC_AS => CLN LF
+--- Position : OPERATOR M => Operator M
+# UPDATE : 90004833
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 4908
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 90004934
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90005137
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5145
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90004830
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 368100 => 364300
+# UPDATE : 90005218
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5241
+--- Is Active : True => 0
+# UPDATE : 31894
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 5736
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5750
+--- Is Active : True => 0
+# UPDATE : 5758
+--- Is Active : True => 0
+# UPDATE : 5766
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5781
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 5792
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5796
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 5847
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5851
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5852
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5857
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5884
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5939
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5959
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5960
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 5974
+--- Position : CNC OPERATOR =>
+# UPDATE : 5980
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 5981
+--- Position : CNC OPERATOR =>
+# UPDATE : 5983
+--- Position : CNC OPERATOR =>
+# UPDATE : 6011
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6059
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6123
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6160
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6161
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6162
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6163
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6164
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6166
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6295
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6316
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6317
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6348
+--- Section : FQC_AS => CLN LF
+# UPDATE : 90006361
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 6461
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 6493
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+--- Position :  => Store Operator
+# UPDATE : 6543
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6558
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90006566
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6602
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6603
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6624
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6625
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 6626
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 6627
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6636
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+--- Position :  => Operator M
+# UPDATE : 6734
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+--- Position :  => Operator M
+# UPDATE : 6764
+--- Position : CNC OPERATOR =>
+# UPDATE : 6767
+--- Position : OPERATOR M =>
+# UPDATE : 6790
+--- Position : CNC OPERATOR =>
+# UPDATE : 90006806
+--- Is Active : True => 0
+# UPDATE : 90006834
+--- Is Active : True => 0
+# UPDATE : 90006840
+--- Is Active : True => 0
+# UPDATE : 6885
+--- Section : PMA => MT_AS
+--- Cost Center : 364000 => 364200
+# UPDATE : 6912
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+--- Position :  => Operator M
+# UPDATE : 6913
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+--- Position :  => Operator M
+# UPDATE : 6915
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 6937
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+--- Position :  => Operator M
+# UPDATE : 6938
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+--- Position :  => Operator M
+# UPDATE : 6944
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 90006956
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 90006958
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364300 => 368100
+# UPDATE : 90006975
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90006986
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6995
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 6998
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 90007028
+--- Section : FQC_AS => CLN LF
+--- Cost Center : 364400 => 368100
+# UPDATE : 90007056
+--- Is Active : True => 0
+# UPDATE : 90007076
+--- Is Active : True => 0
+# UPDATE : 90007095
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 90007096
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 7102
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# UPDATE : 7103
+--- Section : FQC_AS => CLN_AS
+--- Cost Center : 364400 => 364300
+# NEW : 7159
+--- Name : MOHAN MARUTI MADAR
+--- Section : OEM
+--- Cost Center : 369100
+--- Profit Center : ASM
+--- Employement Type : Direct
+--- Position : Project Engineer
+--- Job Function :
+--- Is Active : 1
+#########################################
+Data Records : 1553
+New Records : 1
+Update Records : 95
+Error Records : 0
+#########################################

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Rejection Record (By ProfitCenter) | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+    <!-- Chart CSS -->
+    <link href="{% static "vendors/@coreui/chartjs/css/coreui-chartjs.css" %}" rel="stylesheet" >
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Rejection Record (By ProfitCenter)</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2">
+            <select class="form-control" id="fpfc">
+              <!-- <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option> -->
+              {% for pfc in profitCenterList %}
+              <option value="{{pfc.ProfitCenter}}" {% if fpfc == pfc.ProfitCenter %}style="color:blue" selected{% endif %}>{{pfc.ProfitCenter}}</option>
+              {% endfor %}
+            </select>&nbsp;
+            <input type="month" class="form-control" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="row">
+                            <div class="col-12">
+                              <div class="card border-dard">
+                                <div class="card-header">
+                                  {{fpfc}}
+                                </div>
+                                <div class="card-body">
+                                  <div class="row">
+                                    <div class="col-12">
+                                      <table class="table table-sm table-outline small" id="rec_table">
+                                        <thead class="thead-light">
+                                          <tr>
+                                            <th>Reject Date</th>
+                                            <th>WorkCenter</th>
+                                            <th>Prod. - Oper. No</th>
+                                            <th>FG_MaterialCode</th>
+                                            <th>DrawingNo</th>
+                                            <th>Process Qty</th>
+                                            <th>Reject Qty</th>
+                                            <th>Reject Reason</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {% for rec in recs %}
+                                          <tr>
+                                            <td data-order="{{rec.ConfirmDateTime|date:"U"}}">{{rec.ConfirmDateTime}}</td>
+                                            <td>{{rec.WorkCenterNo}}</td>
+                                            <td><a href="/transaction/{{rec.OrderNo}}{{rec.OperationNo}}">{{rec.OrderNo}}-{{rec.OperationNo}}</a></td>
+                                            <td>
+                                              <a href="/drawing/{%if rec.FG_Drawing == '' %}None{%else%}{{rec.FG_Drawing}}{%endif%}&{%if rec.FG_MaterialCode == ''%}None{%else%}{{rec.FG_MaterialCode}}{%endif%}" target="_blank">
+                                              {{rec.FG_MaterialCode|default_if_none:""}}
+                                              </a>
+                                            </td>
+                                            <td>{{rec.DrawingNo}}</td>
+                                            <td>{{rec.ProcessQty.normalize}}</td>
+                                            <td>{{rec.RejectedQty.normalize}}</td>
+                                            <td>{{rec.RejectReason}}</td>
+                                          </tr>
+                                          {% endfor %}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <!-- <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script> -->
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script src="{% static "customize/datatable/dataTables.buttons.min.js" %}"></script>
+    <script src="{% static "customize/datatable/jszip.min.js" %}"></script>
+    <script src="{% static "customize/datatable/pdfmake.min.js" %}"></script>
+    <script src="{% static "customize/datatable/vfs_fonts.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.html5.min.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.print.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      $('#fpfc').change(function() {
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      function filter(){
+        var fpfc = $("#fpfc").val();
+        var fmonth = $("#fmonth").val();
+        window.location.href = "/report/graph/reject_per/reject_rc_pfc/" + fpfc + "&" + fmonth;
+      }
+
+      $(document).ready(function() {
+        $('#rec_table').DataTable( {
+            "order": [[ 0, "desc" ]],
+            'iDisplayLength': 100,
+            dom: 'Blfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            initComplete: function () {
+              $('.dt-button').addClass("btn btn-outline-success mb-4");
+            },
+        });
+      });
+    </script>
+  </body>
+</html>

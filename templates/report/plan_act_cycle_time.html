@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+{% load static %}
+{% load extra %}
+{% load humanize %}
+<!--
+* CoreUI Pro based Bootstrap Admin Template
+* @version v3.2.0
+* @link https://coreui.io/pro/
+* Copyright (c) 2020 creativeLabs Łukasz Holeczek
+* License (https://coreui.io/pro/license)
+-->
+<html lang="en">
+  <head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+    <title>Plan/Actual Cycle Time | Shopfloor Reporting Application</title>
+    <!-- Main styles for this application-->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <!-- Icon CSS -->
+    <link href="{% static "vendors/@coreui/icons/css/free.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/@coreui/icons/css/brand.min.css" %}" rel="stylesheet">
+    <!-- Select CSS -->
+    <link href="{% static "vendors/select2/css/select2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/select2/css/select2-coreui.min.css" %}" rel="stylesheet">
+    <!-- Data Table CSS -->
+    <link href="{% static "vendors/datatables.net-bs4/css/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static "customize/css/decorate.css" %}" rel="stylesheet">
+  </head>
+  <body class="c-app c-no-layout-transition">
+    <!-- *** LEFT SIDE BAR *** -->
+    {% include 'sidebar.html' %}
+    <!-- *** RIGHT SIDE BAR *** -->
+    <div class="c-wrapper">
+      <!-- *** HEADER *** -->
+      <header class="c-header c-header-light c-header-fixed">
+        {% include 'header.html' %}
+        <div class="c-subheader justify-content-between px-3">
+          <!-- Breadcrumb-->
+          <ol class="breadcrumb border-0 m-0 px-0 px-md-3">
+            <li class="breadcrumb-item">Plan/Actual Cycle Time</li>
+            <!-- Breadcrumb Menu-->
+            <!-- <li class="breadcrumb-item active"></li> -->
+          </ol>
+          <div class="c-subheader-nav d-md-down-none mfe-2 small">
+            &nbsp;&nbsp;&nbsp;FG&nbsp;Code&nbsp;&nbsp;&nbsp;
+            <input type="text" class="form-control form-control-sm" id="ffgcode" value="{% if ffgcode != 'NONE' %}{{ffgcode}}{% endif %}" maxlength="18" required style="width: 150%">
+            &nbsp;&nbsp;&nbsp;WorkCenter&nbsp;&nbsp;&nbsp;
+            <select class="form-control form-control-sm" id="fwc">
+              <!-- <option value="ALL" {% if fwc == 'ALL' %}style="color:blue" selected{% endif %}>ALL</option> -->
+              {% for wc in wc_list %}
+              <option value="{{wc.WorkCenterNo}}" {% if fwc == wc.WorkCenterNo %}style="color:blue" selected{% endif %}>{{wc.WorkCenterNo}}</option>
+              {% endfor %}
+            </select>
+            &nbsp;&nbsp;&nbsp;Type&nbsp;&nbsp;&nbsp;
+            <select class="form-control form-control-sm" id="ftype">
+              <option value="DAILY" {% if ftype == 'DAILY' %}style="color:blue" selected{% endif %}>Daily</option>
+              <option value="MONTHLY" {% if ftype == 'MONTHLY' %}style="color:blue" selected{% endif %}>Monthly</option>
+              <option value="RANGE" {% if ftype == 'RANGE' %}style="color:blue" selected{% endif %}>Range</option>
+            </select>&nbsp;
+            <input type="month" class="form-control form-control-sm" id="fmonth" value="{{fmonth}}" onkeydown="return false" required>
+            <input type="date" class="form-control form-control-sm" id="fstartdate" value="{{fstartdate}}" onkeydown="return false" required>
+            <span id="range-to">&nbsp;-&nbsp;</span>
+            <input type="date" class="form-control form-control-sm" id="fstopdate" value="{{fstopdate}}" onkeydown="return false" required>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,0);"><i class="c-icon c-icon-sm cil-chevron-double-up"></i></a>
+            <button type="button" class="btn btn-sm btn-link text-primary" style="padding-top: 3px;" onclick="window.scrollTo(0,document.body.scrollHeight);"><i class="c-icon c-icon-sm cil-chevron-double-down"></i></a>      
+          </div>
+        </div>
+      </header>
+      <!-- *** BODY *** -->
+      <div class="c-body">
+        <main class="c-main">
+          <div class="container-fluid">
+            <div class="fade-in">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="text-center">
+                        <button type="button" class="btn btn-link" onclick="toggle_setup()">Show/Hide Setup</button>
+                    </div>
+                      <table class="table table-sm table-outline small text-center" id="pact_table" width="100%">
+                        <thead class="thead-light">
+                          <tr>
+                            <th rowspan="3">Start Date</th>
+                            <th rowspan="3">Stop Date</th>
+                            <th rowspan="3">FG Matcode</th>
+                            <th rowspan="3">WorkCenter</th>
+                            <th rowspan="3">Prod - Oper No</th>
+                            <th colspan="3">Quantity</th>
+                            <th colspan="4" name="setup" style="border-left: 2px solid #757575;">Setup</th>
+                            <th colspan="7" style="border-left: 2px solid #757575;">Oper</th>
+                            <th colspan="4" style="border-left: 2px solid #757575;">Labor</th>
+                            <th colspan="3" style="border-left: 2px solid #757575;">Idle</th>
+                          </tr>
+                          <tr>
+                            <th rowspan="2" class="text-info">Process</th>
+                            <th rowspan="2" class="text-success">Accepted</th>
+                            <th rowspan="2" class="text-danger">Rejected</th>
+
+                            <th colspan="2" name="setup" style="border-left: 2px solid #757575;">Estimate</th>
+                            <th colspan="2" name="setup" style="border-left: 1px solid #858fa1;">Actual</th>
+
+                            <th colspan="2" style="border-left: 2px solid #757575;">Estimate</th>
+                            <th colspan="2" style="border-left: 1px solid #858fa1;">Target</th>
+                            <th colspan="3" style="border-left: 1px solid #858fa1;">Actual</th>
+
+                            <th colspan="2" style="border-left: 2px solid #757575;">Estimate</th>
+                            <th colspan="2" style="border-left: 1px solid #858fa1;">Actual</th>
+
+                            <th style="border-left: 2px solid #757575;"></th>
+                            <th colspan="2" style="border-left: 1px solid #858fa1;">+ Oper</th>
+                          </tr>
+                          <tr>
+                            <th style="border-left: 2px solid #757575;" name="setup">Per Unit</th>
+                            <th name="setup">Total</th>
+                            <th name="setup" style="border-left: 1px solid #858fa1;">Total</th>
+                            <th name="setup">%</th>
+
+                            <th style="border-left: 2px solid #757575;">Per Unit</th>
+                            <th>Total</th>
+                            <th style="border-left: 1px solid #858fa1;">Per Unit</th>
+                            <th>Total</th>
+                            <th style="border-left: 1px solid #858fa1;">Total</th>
+                            <th>/Est. %</th>
+                            <th>/Tar. %</th>
+
+                            <th style="border-left: 2px solid #757575;">Per Unit</th>
+                            <th>Total</th>
+                            <th style="border-left: 1px solid #858fa1;">Total</th>
+                            <th>%</th>
+
+                            <th style="border-left: 2px solid #757575;">Total</th>
+                            <th style="border-left: 1px solid #858fa1;">Total</th>
+                            <th>%</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in planActualCycleTimeList %}
+                            <tr>
+                              <td data-order="{{item.ProcessStart|date:"U"}}">{{item.ProcessStart}}</td>
+                              <td data-order="{{item.ProcessStop|date:"U"}}">{{item.ProcessStop}}</td>
+                              <td>
+                                <a href="/drawing/{%if item.FG_Drawing == '' %}None{%else%}{{item.FG_Drawing}}{%endif%}&{%if item.FG_MaterialCode == ''%}None{%else%}{{item.FG_MaterialCode}}{%endif%}" target="_blank">
+                                {{item.FG_MaterialCode|default_if_none:""}}
+                                </a>
+                              </td>
+                              <td>{{item.WorkCenterNo}}</td>
+                              <td><a href="/transaction/{{item.OrderNo}}{{item.OperationNo}}">{{item.OrderNo}}-{{item.OperationNo}}</a></td>
+                              <td>{{item.ProcessQty|floatformat}}</td>
+                              <td>{{item.AcceptedQty|floatformat}}</td>
+                              <td>{{item.RejectedQty|floatformat}}</td>
+                              <!-- Setup -->
+                              <td name="setup" style="border-left: 2px solid #757575;">{{item.EstSetup|floatformat}}</td>
+                              <td name="setup">{{item.Est2Setup|floatformat}}</td>
+                              <td name="setup" style="border-left: 1px solid #858fa1;" class="{% if red_setup|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_setup|index:forloop.counter0 %}text-warning font-weight-bold{% else %}text-dark{% endif %}"
+                              >{{item.ActSetup|floatformat}}</td>
+                              <td name="setup">{{per_setups|index:forloop.counter0}}</td>
+                              <!-- Oper -->
+                              <td style="border-left: 2px solid #757575;">{{item.EstOper|floatformat}}</td>
+                              <td>{{item.Est2Oper|floatformat}}</td>
+                              <td style="border-left: 1px solid #858fa1;" class="text-primary"><b>{{item.TargetValue|default_if_none:""}}</b></td>
+                              <td>{{acts|index:forloop.counter0}}</td>
+                              <td style="border-left: 1px solid #858fa1;" class="{% if red_oper|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_oper|index:forloop.counter0 %}text-warning font-weight-bold{% else %}text-dark{% endif %}"
+                              >{{item.ActOper|floatformat}}</td>
+                              <td>{{per_opers|index:forloop.counter0}}</td>
+                              <td>{{per_tars|index:forloop.counter0}}</td>
+                              <!-- Labor -->
+                              <td style="border-left: 2px solid #757575;">{{item.EstLabor|floatformat}}</td>
+                              <td>{{item.Est2Labor|floatformat}}</td>
+                              <td style="border-left: 1px solid #858fa1;" class="{% if red_labor|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_labor|index:forloop.counter0 %}text-warning font-weight-bold{% else %}text-dark{% endif %}"
+                              >{{item.ActLabor|floatformat}}</td>
+                              <td>{{per_labors|index:forloop.counter0}}</td>
+                              <!-- Idle -->
+                              <td style="border-left: 2px solid #757575;">{{item.Idle|default_if_none:"0"|floatformat}}</td>
+                              <td style="border-left: 1px solid #858fa1;" class="{% if red_ai|index:forloop.counter0 %}text-danger font-weight-bold{% elif yellow_ai|index:forloop.counter0 %}text-warning font-weight-bold{% else %}text-dark{% endif %}">{{item.AI|default_if_none:"0"|floatformat}}</td>
+                              <td>{{per_ais|index:forloop.counter0}}</td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- *** FOOTER *** -->
+      {% include 'footer.html' %}
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static "vendors/@coreui/coreui-pro/js/coreui.bundle.min.js" %}"></script>
+    <!--[if IE]><!-->
+    <script src="{% static "vendors/@coreui/icons/js/svgxuse.min.js" %}"></script>
+    <!--<![endif]-->
+    <script src="{% static "vendors/jquery/js/jquery.min.js" %}"></script>
+    <script src="{% static "vendors/select2/js/select2.min.js" %}"></script>
+    <!-- Google Timeline JS -->
+    <script src="{% static "vendors/google-timeline/js/loader.js" %}"></script>
+    <!-- Data Table JS -->
+    <script src="{% static "vendors/datatables.net/js/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script src="{% static "customize/datatable/dataTables.buttons.min.js" %}"></script>
+    <script src="{% static "customize/datatable/jszip.min.js" %}"></script>
+    <script src="{% static "customize/datatable/pdfmake.min.js" %}"></script>
+    <script src="{% static "customize/datatable/vfs_fonts.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.html5.min.js" %}"></script>
+    <script src="{% static "customize/datatable/buttons.print.min.js" %}"></script>
+    <!-- Custom -->
+    <script src="{% static "customize/js/custom-function.js" %}"></script>
+    <script src="{% static "customize/js/clock.js" %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        setTimeout(function() {
+          document.body.classList.remove('c-no-layout-transition')
+        }, 2000);
+      });
+
+      var is_setup_showing = true;
+
+      toggle();
+
+      $(document).ready(function() {
+        table = $('#pact_table').DataTable( {
+            "order": [[ 0, "desc" ]],
+            'iDisplayLength': 100,
+            dom: 'Blfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            initComplete: function () {
+              $('.dt-button').addClass("btn btn-outline-success mb-4");
+            },
+        });
+      });
+
+      function toggle_setup(){
+        console.log(is_setup_showing)
+        if(is_setup_showing){
+          is_setup_showing = false;
+          $('[name="setup"]').hide();
+        } else {
+          is_setup_showing = true;
+          $('[name="setup"]').show();
+        }
+      }
+
+      function toggle(){
+        if($('#ftype').val() == "DAILY"){
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "MONTHLY"){
+          $("#fmonth").prop("hidden", false);
+          $("#fstartdate").prop("hidden", true);
+          $("#fstopdate").prop("hidden", true);
+          $("#range-to").prop("hidden", true);
+        } else if($('#ftype').val() == "RANGE"){
+          $("#fmonth").prop("hidden", true);
+          $("#fstartdate").prop("hidden", false);
+          $("#fstopdate").prop("hidden", false);
+          $("#range-to").prop("hidden", false);
+        }
+      }
+
+      $('#ffgcode').on('keydown', function(event) {
+        if (event.which === 13) {
+          filter();
+        }
+      });
+
+      $('#fwc').change(function() {
+        filter();
+      });
+
+      $('#ftype').change(function() {
+        toggle();
+        filter();
+      });
+
+      $('#fmonth').change(function() {
+        filter();
+      });
+
+      $('#fstartdate').change(function() {
+        filter();
+      });
+
+      $('#fstopdate').change(function() {
+        filter();
+      });
+
+      function filter(){
+        var ffgcode = $("#ffgcode").val();
+        if(ffgcode != ""){
+          var fwc = $("#fwc").val();
+          var ftype = $("#ftype").val();
+          var fstartdate = $("#fstartdate").val();
+          var fstopdate = $("#fstopdate").val();
+          var fmonth = $("#fmonth").val();
+          window.location.href = "/report/plan_act_cycle_time/" + ffgcode + "&" + fwc + "&" + ftype + "&" + fstartdate + "&" + fstopdate + "&" + fmonth;
+        }
+      }
+
+    </script>
+  </body>
+</html>
